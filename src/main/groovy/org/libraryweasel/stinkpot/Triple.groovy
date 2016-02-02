@@ -4,12 +4,11 @@
 
 package org.libraryweasel.stinkpot
 
-public class Stinkpot {
-    Triple parseText(String text) {
-        def result
-        text.eachMatch("<(.*?)>.*<(.*?)>.*<(.*?)>") { a, s, p, o ->
-            result = new Triple(s, p, o)
-        }
-        return result
-    }
+import groovy.transform.Immutable
+
+@Immutable
+public class Triple {
+    String subject
+    String predicate
+    String object
 }
