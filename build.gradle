@@ -1,0 +1,28 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+    }
+    dependencies {
+        classpath 'org.dm.gradle:gradle-bundle-plugin:0.8'
+    }
+}
+
+apply plugin: 'groovy'
+
+group 'org.libraryweasel'
+version '0.1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy-all:2.4.5'
+}
+
+bundle {
+    instruction 'Import-Package', '*'
+    instruction 'Export-Package', '*'
+}
