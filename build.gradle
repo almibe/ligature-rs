@@ -9,6 +9,7 @@ buildscript {
 }
 
 apply plugin: 'groovy'
+apply plugin: 'org.dm.bundle'
 
 group 'org.libraryweasel'
 version '0.1.0-SNAPSHOT'
@@ -20,6 +21,7 @@ repositories {
 
 dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.4.5'
+    testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
 }
 
 bundle {

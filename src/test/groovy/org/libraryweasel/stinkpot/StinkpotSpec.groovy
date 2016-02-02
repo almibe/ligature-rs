@@ -2,8 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.libraryweasel.stinkpot
+package org.libraryweasel.stinkp
 
-public class Stinkpot {
+import spock.lang.Specification
+
+public class StinkpotSpec extends Specification {
 
 }
