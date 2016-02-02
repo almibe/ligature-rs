@@ -1,0 +1,10 @@
+# Top of doc comment
+
+<http://example.org/#spiderman> <http://www.perceive.net/schemas/relationship/enemyOf> <http://example.org/#green-goblin> .
+
+#Middle of doc comment
+ # Middle of doc comment with spaces
+
+<http://example.org/#spiderman> <http://xmlns.com/foaf/0.1/name> "Spiderman" . # end of line comment
+
+# end of doc comment
