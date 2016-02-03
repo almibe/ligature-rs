@@ -63,6 +63,12 @@ public class StinkpotSpec extends Specification {
         when:
         List<Triple> results = stinkpot.parseTriples(this.getClass().getResource('/ntriples/literals.nt').text)
         then:
-        results == expectedResults
+        results[0] == expectedResults[0]
+        results[1] == expectedResults[1]
+        results[2] == expectedResults[2]
+        results[3] == expectedResults[3]
+        results[4] == expectedResults[4]
+        results[5] == expectedResults[5]
+        results[6] == expectedResults[6]
     }
 }
