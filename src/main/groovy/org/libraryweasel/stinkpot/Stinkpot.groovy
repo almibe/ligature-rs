@@ -49,15 +49,15 @@ public class Stinkpot {
 
             if (character == '<') {
                 object = readIRI(it)
+                checkEndOfLine(it)
             } else if (character == '_' && it.hasNext() && it.next() == ':') {
                 object = readBlank(it)
+                checkEndOfLine(it)
             } else if (character == '"') {
-                object = readLiteral(it)
+                object = readLiteralAndCheckEndOfLine(it)
             } else {
                 throw new RuntimeException("Error parsing")
             }
-
-            checkEndOfLine(it) //only does error checking for invalid eol
 
             Triple triple = new Triple(subject, predicate, object)
             handler.call(triple)
@@ -90,17 +90,18 @@ public class Stinkpot {
 
         while(it.hasNext()) {
             Character character = it.next()
-            if (character != ' ' || character != '\t') return character
+            if (character != ' ' && character != '\t') return character
         }
     }
 
-    Literal readLiteral(Iterator<Character> it) { //TODO finish
+    Literal readLiteralAndCheckEndOfLine(Iterator<Character> it) { //TODO finish
         if (!it.hasNext()) throw new RuntimeException("Error parsing")
 
         StringBuilder builder = new StringBuilder('')
         while (it.hasNext()) {
             Character character = it.next()
             //TODO handle invalid characters from spec -- [^#x22#x5C#xA#xD]
+            //TODO check \\u chars when checking escape characters
             if (character == '\\') { //handle escape characters
                 if (!it.hasNext()) throw new RuntimeException("Error parsing")
                 character = it.next()
@@ -116,8 +117,23 @@ public class Stinkpot {
                     default: throw new RuntimeException("Error parsing no such escape character " + character)
                 }
             } else if (character == '"') {
-                //TODO check for lang tag or IRI type
-                return new PlainLiteral(builder.toString())
+                if (!it.hasNext()) throw new RuntimeException("Error parsing")
+                character = it.next()
+                if (character == '^') {
+                    if (it.hasNext() && it.next() == '^' && it.hasNext() && it.next() == '<') {
+                        IRI iri = readIRI(it)
+                        //TODO check end of line
+                        return new TypedLiteral(builder.toString(), iri)
+                    } else {
+                        throw new RuntimeException("Error parsing")
+                    }
+                } else if (character == '@') {
+                    //TODO check end of line
+                    //TODO check for valid lang
+                } else {
+                    //TODO check end of line
+                    return new PlainLiteral(builder.toString())
+                }
             } else {
                 builder.append(character)
             }
