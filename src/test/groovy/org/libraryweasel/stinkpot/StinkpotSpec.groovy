@@ -4,6 +4,8 @@
 
 package org.libraryweasel.stinkpot
 
+import org.libraryweasel.stinkpot.ntriples.IRI
+import org.libraryweasel.stinkpot.ntriples.Triple
 import spock.lang.Specification
 
 public class StinkpotSpec extends Specification {
@@ -11,25 +13,12 @@ public class StinkpotSpec extends Specification {
 
     def 'support basic triple, example 2'() {
         given:
-        def expectedResult = new Triple('http://example.org/#spiderman', 'http://www.perceive.net/schemas/relationship/enemyOf',
-            'http://example.org/#green-goblin')
+        def expectedResult = new Triple(new IRI("http://example.org/#spiderman"),
+            new IRI("http://www.perceive.net/schemas/relationship/enemyOf"), new IRI("http://example.org/#green-goblin"))
         when:
-        Triple result = stinkpot.parseText(this.getClass().getResource('/example2.ttl').text)
+        List<Triple> results = stinkpot.parseTriples(this.getClass().getResource('/ntriples/specificationExamples/example2.ttl').text)
         then:
-        result == expectedResult
-    }
-
-    def 'allow multiple triples one per line, example 4'() {
-        given:
-        def expectedResult = [
-            new Triple('http://example.org/#spiderman', 'http://www.perceive.net/schemas/relationship/enemyOf',
-                'http://example.org/#green-goblin'),
-            new Triple('http://example.org/#spiderman', 'http://xmlns.com/foaf/0.1/name',
-                    'Spiderman')
-        ]
-        when:
-        List<Triple> result = stinkpot.parseText(this.getClass().getResource('/example2.ttl').text)
-        then:
-        result == expectedResult
+        results.size() == 1
+        results.first() == expectedResult
     }
 }
