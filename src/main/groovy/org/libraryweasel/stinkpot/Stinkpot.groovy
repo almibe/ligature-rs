@@ -17,7 +17,7 @@ public class Stinkpot {
 
     void parseTriples(String text, Closure<Triple> handler) {
         text.eachLine { line ->
-            Iterator<Integer> it = text.chars().iterator()
+            Iterator<Integer> it = line.chars().iterator()
 
             if (!it.hasNext()) return;
 
