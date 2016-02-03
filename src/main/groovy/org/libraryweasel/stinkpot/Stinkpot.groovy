@@ -4,11 +4,9 @@
 
 package org.libraryweasel.stinkpot
 
-import org.libraryweasel.stinkpot.ntriples.BlankNode
-import org.libraryweasel.stinkpot.ntriples.IRI
-import org.libraryweasel.stinkpot.ntriples.Predicate
-import org.libraryweasel.stinkpot.ntriples.Subject
-import org.libraryweasel.stinkpot.ntriples.Triple
+import org.libraryweasel.stinkpot.ntriples.*
+
+import java.lang.Object
 
 public class Stinkpot {
     List<Triple> parseTriples(String text) {
@@ -39,7 +37,7 @@ public class Stinkpot {
                 throw new RuntimeException("Error parsing")
             }
 
-            ignoreWhitespace(it)
+            character = ignoreWhitespace(it)
 
             if (character == '<') {
                 predicate = readIRI(it)
@@ -47,7 +45,7 @@ public class Stinkpot {
                 throw new RuntimeException("Error parsing")
             }
 
-            ignoreWhitespace(it)
+            character = ignoreWhitespace(it)
 
             if (character == '<') {
                 object = readIRI(it)
@@ -59,7 +57,7 @@ public class Stinkpot {
                 throw new RuntimeException("Error parsing")
             }
 
-            readEndOfLine(it)
+            checkEndOfLine(it) //only does error checking for invalid eol
 
             Triple triple = new Triple(subject, predicate, object)
             handler.call(triple)
@@ -67,18 +65,38 @@ public class Stinkpot {
     }
 
     IRI readIRI(Iterator<Character> it) {
+        if (!it.hasNext()) throw new RuntimeException("Error parsing")
 
+        StringBuilder builder = new StringBuilder()
+        while(it.hasNext()) {
+            Character character = it.next()
+            if (character == ">") {
+                break
+            } else {
+                builder.append(character)
+            }
+        }
+        return new IRI(builder.toString())
     }
 
-    BlankNode readBlank() {
-
+    BlankNode readBlank(Iterator<Character> it) {
+        if (!it.hasNext()) throw new RuntimeException("Error parsing")
     }
 
     Character ignoreWhitespace(Iterator<Character> it) {
+        if (!it.hasNext()) throw new RuntimeException("Error parsing")
 
+        while(it.hasNext()) {
+            Character character = it.next()
+            if (character != ' ') return character
+        }
     }
 
-    def readEndOfLine(Iterator<Character> it) {
+    Literal readLiteral(Iterator<Character> it) {
+        if (!it.hasNext()) throw new RuntimeException("Error parsing")
+    }
 
+    def checkEndOfLine(Iterator<Character> it) {
+        if (!it.hasNext()) throw new RuntimeException("Error parsing")
     }
 }
