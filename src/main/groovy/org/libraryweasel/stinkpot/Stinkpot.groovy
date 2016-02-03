@@ -67,7 +67,7 @@ public class Stinkpot {
     IRI readIRI(Iterator<Character> it) {
         if (!it.hasNext()) throw new RuntimeException("Error parsing")
 
-        StringBuilder builder = new StringBuilder()
+        StringBuilder builder = new StringBuilder('')
         while(it.hasNext()) {
             Character character = it.next()
             if (character == ">") {
@@ -81,6 +81,8 @@ public class Stinkpot {
 
     BlankNode readBlank(Iterator<Character> it) {
         if (!it.hasNext()) throw new RuntimeException("Error parsing")
+
+        //TODO finish
     }
 
     Character ignoreWhitespace(Iterator<Character> it) {
@@ -88,15 +90,43 @@ public class Stinkpot {
 
         while(it.hasNext()) {
             Character character = it.next()
-            if (character != ' ') return character
+            if (character != ' ' || character != '\t') return character
         }
     }
 
-    Literal readLiteral(Iterator<Character> it) {
+    Literal readLiteral(Iterator<Character> it) { //TODO finish
         if (!it.hasNext()) throw new RuntimeException("Error parsing")
+
+        StringBuilder builder = new StringBuilder('')
+        while (it.hasNext()) {
+            Character character = it.next()
+            //TODO handle invalid characters from spec -- [^#x22#x5C#xA#xD]
+            if (character == '\\') { //handle escape characters
+                if (!it.hasNext()) throw new RuntimeException("Error parsing")
+                character = it.next()
+                switch (character) {
+                    case 't': builder.append('\t'); break
+                    case 'b': builder.append('\b'); break
+                    case 'n': builder.append('\n'); break
+                    case 'r': builder.append('\r'); break
+                    case 'f': builder.append('\f'); break
+                    case '"': builder.append('\"'); break
+                    case '\'': builder.append('\''); break
+                    case '\\': builder.append('\\'); break
+                    default: throw new RuntimeException("Error parsing no such escape character " + character)
+                }
+            } else if (character == '"') {
+                //TODO check for lang tag or IRI type
+                return new PlainLiteral(builder.toString())
+            } else {
+                builder.append(character)
+            }
+        }
+        throw new RuntimeException("Error parsing")
     }
 
     def checkEndOfLine(Iterator<Character> it) {
         if (!it.hasNext()) throw new RuntimeException("Error parsing")
+        //TODO finish
     }
 }
