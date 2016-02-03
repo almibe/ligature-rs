@@ -7,6 +7,7 @@ package org.libraryweasel.stinkpot.ntriples
 import groovy.transform.Immutable
 
 @Immutable
-class TypedLiteral implements Literal{
+class TypedLiteral implements Literal {
+    String value
     IRI datatypeIRI
 }

@@ -8,4 +8,5 @@ import groovy.transform.Immutable;
 
 @Immutable
 class PlainLiteral implements Literal {
+    String value
 }

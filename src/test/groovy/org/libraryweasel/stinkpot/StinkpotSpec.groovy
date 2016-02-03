@@ -53,13 +53,13 @@ public class StinkpotSpec extends Specification {
     def 'support literals with languages and types'() {
         given:
         def expectedResults = []
-        expectedResults.add(new Triple(new IRI("http://example.org/show/218"), new IRI("http://www.w3.org/2000/01/rdf-schema#label"), new TypedLiteral("That Seventies Show", "http://www.w3.org/2001/XMLSchema#string")))
+        expectedResults.add(new Triple(new IRI("http://example.org/show/218"), new IRI("http://www.w3.org/2000/01/rdf-schema#label"), new TypedLiteral("That Seventies Show", new IRI("http://www.w3.org/2001/XMLSchema#string"))))
         expectedResults.add(new Triple(new IRI("http://example.org/show/218"), new IRI("http://www.w3.org/2000/01/rdf-schema#label"), new PlainLiteral("That Seventies Show")))
         expectedResults.add(new Triple(new IRI("http://example.org/show/218"), new IRI("http://example.org/show/localName"), new LangLiteral("That Seventies Show", "en")))
         expectedResults.add(new Triple(new IRI("http://example.org/show/218"), new IRI("http://example.org/show/localName"), new LangLiteral("Cette Série des Années Septante", "fr-be")))
         expectedResults.add(new Triple(new IRI("http://example.org/#spiderman"), new IRI("http://example.org/text"), new PlainLiteral("This is a multi-line\\nliteral with many quotes (\"\"\"\"\")\nand two apostrophes ('').")))
-        expectedResults.add(new Triple(new IRI("http://en.wikipedia.org/wiki/Helium"), new IRI("http://example.org/elements/atomicNumber"), new TypedLiteral("2", "http://www.w3.org/2001/XMLSchema#integer")))
-        expectedResults.add(new Triple(new IRI("http://en.wikipedia.org/wiki/Helium"), new IRI("http://example.org/elements/specificGravity"), new TypedLiteral("1.663E-4", "http://www.w3.org/2001/XMLSchema#double")))
+        expectedResults.add(new Triple(new IRI("http://en.wikipedia.org/wiki/Helium"), new IRI("http://example.org/elements/atomicNumber"), new TypedLiteral("2", new IRI("http://www.w3.org/2001/XMLSchema#integer"))))
+        expectedResults.add(new Triple(new IRI("http://en.wikipedia.org/wiki/Helium"), new IRI("http://example.org/elements/specificGravity"), new TypedLiteral("1.663E-4", new IRI("http://www.w3.org/2001/XMLSchema#double"))))
         when:
         List<Triple> results = stinkpot.parseTriples(this.getClass().getResource('/ntriples/literals.nt').text)
         then:

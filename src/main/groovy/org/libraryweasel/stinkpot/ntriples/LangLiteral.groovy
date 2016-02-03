@@ -8,5 +8,6 @@ import groovy.transform.Immutable
 
 @Immutable
 class LangLiteral implements Literal {
+    String value
     String langTag
 }
