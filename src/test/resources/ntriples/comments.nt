@@ -1,0 +1,3 @@
+#comment 1
+<http://example.org/#spiderman> <http://www.perceive.net/schemas/relationship/enemyOf> <http://example.org/#green-goblin> . #comment 2
+#comment 3

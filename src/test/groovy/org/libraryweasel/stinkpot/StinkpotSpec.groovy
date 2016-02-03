@@ -35,4 +35,15 @@ public class StinkpotSpec extends Specification {
         results.first() == expectedResult1
         results.last() == expectedResult2
     }
+
+    def 'support begging of line and end of line comments'() {
+        given:
+        def expectedResult = new Triple(new IRI("http://example.org/#spiderman"),
+                new IRI("http://www.perceive.net/schemas/relationship/enemyOf"), new IRI("http://example.org/#green-goblin"))
+        when:
+        List<Triple> results = stinkpot.parseTriples(this.getClass().getResource('/ntriples/comments.nt').text)
+        then:
+        results.size() == 1
+        results.first() == expectedResult
+    }
 }
