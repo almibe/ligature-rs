@@ -59,12 +59,18 @@ public class StinkpotSpec extends Specification {
         when:
         List<Triple> results = stinkpot.parseTriples(this.getClass().getResource('/ntriples/literals.nt').text)
         then:
-        results[0] == expectedResults[0]
-        results[1] == expectedResults[1]
-        results[2] == expectedResults[2]
-        results[3] == expectedResults[3]
-        results[4] == expectedResults[4]
-        results[5] == expectedResults[5]
-        results[6] == expectedResults[6]
+        results == expectedResults
+    }
+
+    def 'support blank nodes'() {
+        given:
+        def expectedResult1 = new Triple(new BlankNode('alice'), new IRI('http://xmlns.com/foaf/0.1/knows'), new BlankNode('bob'))
+        def expectedResult2 = new Triple(new BlankNode('bob'), new IRI('http://xmlns.com/foaf/0.1/knows'), new BlankNode('alice'))
+        when:
+        List<Triple> results = stinkpot.parseTriples(this.getClass().getResource('/ntriples/blankNodes.nt').text)
+        then:
+        results.size() == 2
+        results.first() == expectedResult1
+        results.last() == expectedResult2
     }
 }
