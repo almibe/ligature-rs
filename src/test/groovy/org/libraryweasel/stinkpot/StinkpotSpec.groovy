@@ -4,11 +4,7 @@
 
 package org.libraryweasel.stinkpot
 
-import org.libraryweasel.stinkpot.ntriples.IRI
-import org.libraryweasel.stinkpot.ntriples.LangLiteral
-import org.libraryweasel.stinkpot.ntriples.PlainLiteral
-import org.libraryweasel.stinkpot.ntriples.Triple
-import org.libraryweasel.stinkpot.ntriples.TypedLiteral
+import org.libraryweasel.stinkpot.ntriples.model.*
 import spock.lang.Specification
 
 public class StinkpotSpec extends Specification {

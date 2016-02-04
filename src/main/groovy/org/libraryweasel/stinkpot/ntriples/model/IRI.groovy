@@ -2,11 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.libraryweasel.stinkpot.ntriples
+package org.libraryweasel.stinkpot.ntriples.model
 
 import groovy.transform.Immutable
 
 @Immutable
-class BlankNode implements Subject, Object {
-    String label
+class IRI implements Subject, Predicate, Object {
+    String value;
 }
