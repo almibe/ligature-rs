@@ -18,7 +18,8 @@ class NTriplesLexer extends Lexer {
                 case '#': comment(); continue;
                 case ' ': case '\t': case '\n': case '\r': ws(); continue;
                 case '<': return iri();
-                case '@': return landTag();
+                case '@': return langTag();
+                case '^': return typeTag();
                 case '"': return stringLiteralQuote();
                 case '.': return period();
                 default: throw new RuntimeException("Error Parsing Found - $c")
@@ -48,7 +49,7 @@ class NTriplesLexer extends Lexer {
         return new Token(NTriplesTokenType.IRIREF, stringBuilder.toString())
     }
 
-    Token landTag() {
+    Token langTag() {
         StringBuilder stringBuilder = new StringBuilder()
         consume() //ignore @
         while ( c != ' ') {
@@ -58,11 +59,23 @@ class NTriplesLexer extends Lexer {
         return new Token(NTriplesTokenType.LANGTAG, stringBuilder.toString())
     }
 
+    Token typeTag() {
+        StringBuilder stringBuilder = new StringBuilder()
+        consume() //ignore ^
+        if (c != "^") throw new RuntimeException("Error parsing expecting ^^ after literal.")
+        consume() //ignore ^
+        return iri()
+    }
+
     Token stringLiteralQuote() {
         StringBuilder stringBuilder = new StringBuilder()
         consume() //ignore "
         while ( c != '"') {
             stringBuilder.append(c)
+            if (c == '\\') { //TODO handle escaped characters better
+                consume()
+                stringBuilder.append(c)
+            }
             consume()
         }
         consume() //ignore "

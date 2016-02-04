@@ -41,11 +41,29 @@ class NTriplesParser extends Parser {
     }
 
     Object object() {
-        Token token = match(NTriplesTokenType.IRIREF)
-        return new IRI(token.text)
+        switch (lookAhead.tokenType) {
+            case NTriplesTokenType.IRIREF:
+                Token token = match(NTriplesTokenType.IRIREF)
+                return new IRI(token.text)
+            case NTriplesTokenType.STRING_LITERAL_QUOTE:
+                return literal()
+            default:
+                throw new RuntimeException("Error parsing object -- must be IRI or literal")
+        }
+
     }
 
-    void literal() {
-
+    Literal literal() {
+        Token token = match(NTriplesTokenType.STRING_LITERAL_QUOTE)
+        switch (lookAhead.tokenType) {
+            case NTriplesTokenType.PERIOD:
+                return new PlainLiteral(token.text)
+            case NTriplesTokenType.LANGTAG:
+                Token lang = match(NTriplesTokenType.LANGTAG)
+                return new LangLiteral(token.text, lang.text)
+            case NTriplesTokenType.IRIREF:
+                Token iri = match(NTriplesTokenType.IRIREF)
+                return new TypedLiteral(token.text, new IRI(iri.text))
+        }
     }
 }
