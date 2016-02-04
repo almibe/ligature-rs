@@ -1,6 +1,6 @@
 # Stinkpot
 
-Stinkpot is a minimalist library that supports N-Triples and Turtle, the Terse RDF Triple Language.
+Stinkpot is a minimalist library that supports parsing N-Triples and Turtle into an immutable object model for processing with JVM applications.
 
 The goals of this project are as follows:
 * Support the N-Triples (http://www.w3.org/TR/n-triples/) and Turtle (https://www.w3.org/TR/turtle/) specifications
