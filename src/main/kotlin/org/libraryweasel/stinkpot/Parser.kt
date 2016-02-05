@@ -2,16 +2,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.libraryweasel.stinkpot.ntriples
+package org.libraryweasel.stinkpot
 
-abstract class Parser(val lexer: Lexer) {
-    var lookAhead: Token = Token(NTriplesTokenType.BLANK_NODE_LABEL, "test")
+abstract class Parser<T : TokenType>(val lexer: Lexer<T>) {
+    var lookAhead: Token<T>
 
     init {
-        consume()
+        lookAhead = lexer.nextToken() //duplicated from method consume so var can be a null-safe type
     }
 
-    fun match(tokenType: NTriplesTokenType) : Token {
+    fun match(tokenType: TokenType) : Token<T> {
         val token = lookAhead
         if (lookAhead.tokenType == tokenType) consume()
         else throw RuntimeException("Error Parsing - Expected [$tokenType] Found [${lookAhead.tokenType}]")

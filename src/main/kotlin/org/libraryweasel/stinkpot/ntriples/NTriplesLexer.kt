@@ -4,13 +4,17 @@
 
 package org.libraryweasel.stinkpot.ntriples
 
-class NTriplesLexer(input: String) : Lexer(input) {
+import org.libraryweasel.stinkpot.Lexer
+import org.libraryweasel.stinkpot.Token
 
-    override fun nextToken(): Token {
+class NTriplesLexer(input: String) : Lexer<NTriplesTokenType>(input) {
+
+    override fun nextToken(): Token<NTriplesTokenType> {
         loop@ while (c != EOF) {
             return when (c) {
                 '#'-> {comment(); continue@loop}
                 ' ','\t','\n','\r'-> {ws(); continue@loop}
+                '_'-> return blankNode();
                 '<'-> return iri();
                 '@'-> return langTag();
                 '^'-> return typeTag();
@@ -32,7 +36,19 @@ class NTriplesLexer(input: String) : Lexer(input) {
         }
     }
 
-    fun iri() : Token {
+    fun blankNode() : Token<NTriplesTokenType> {
+        val stringBuilder = StringBuilder()
+        consume() //ignore _
+        if (c != ':' && c != null) throw RuntimeException("Error parsing expecting _ after : for blank nodes.")
+        consume() //ignore :
+        while ( c != ' ') {
+            stringBuilder.append(c)
+            consume()
+        }
+        return Token(NTriplesTokenType.BLANK_NODE_LABEL, stringBuilder.toString())
+    }
+
+    fun iri() : Token<NTriplesTokenType> {
         val stringBuilder = StringBuilder()
         consume() //ignore <
         while ( c != '>') {
@@ -43,7 +59,7 @@ class NTriplesLexer(input: String) : Lexer(input) {
         return Token(NTriplesTokenType.IRIREF, stringBuilder.toString())
     }
 
-    fun langTag() : Token {
+    fun langTag() : Token<NTriplesTokenType> {
         val stringBuilder = StringBuilder()
         consume() //ignore @
         while ( c != ' ') {
@@ -53,7 +69,7 @@ class NTriplesLexer(input: String) : Lexer(input) {
         return Token(NTriplesTokenType.LANGTAG, stringBuilder.toString())
     }
 
-    fun typeTag() : Token {
+    fun typeTag() : Token<NTriplesTokenType> {
         val stringBuilder = StringBuilder()
         consume() //ignore ^
         if (c != '^') throw RuntimeException("Error parsing expecting ^^ after literal.")
@@ -61,7 +77,7 @@ class NTriplesLexer(input: String) : Lexer(input) {
         return iri()
     }
 
-    fun stringLiteralQuote() : Token {
+    fun stringLiteralQuote() : Token<NTriplesTokenType> {
         val stringBuilder = StringBuilder()
         consume() //ignore "
         while ( c != '"') {
@@ -76,7 +92,7 @@ class NTriplesLexer(input: String) : Lexer(input) {
         return Token(NTriplesTokenType.STRING_LITERAL_QUOTE, stringBuilder.toString())
     }
 
-    fun period() : Token {
+    fun period() : Token<NTriplesTokenType> {
         consume() //ignore .
         return Token(NTriplesTokenType.PERIOD, ".")
     }

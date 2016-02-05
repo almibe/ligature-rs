@@ -4,9 +4,9 @@
 
 package org.libraryweasel.stinkpot.ntriples
 
-data class Token (val tokenType: NTriplesTokenType, val text:String)
+import org.libraryweasel.stinkpot.TokenType
 
-enum class NTriplesTokenType {
+enum class NTriplesTokenType : TokenType {
     LANGTAG,
     EOL,
     IRIREF,

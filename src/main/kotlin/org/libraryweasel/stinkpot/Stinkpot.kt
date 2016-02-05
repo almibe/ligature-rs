@@ -7,9 +7,7 @@ package org.libraryweasel.stinkpot
 import org.libraryweasel.stinkpot.ntriples.NTriplesLexer
 import org.libraryweasel.stinkpot.ntriples.NTriplesParser
 import org.libraryweasel.stinkpot.ntriples.Triple
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*
 
 class Stinkpot {
     fun parseTriples(text: String) : ArrayList<Triple>  {
@@ -18,7 +16,7 @@ class Stinkpot {
         return triples
     }
 
-    fun parseTriples(text: String, handler: (Triple) -> Unit) {
+    fun parseTriples(text: String, handler: (Triple) -> Unit) { //TODO this should accept a stream not a String
         val lexer = NTriplesLexer(text)
         val parser = NTriplesParser(lexer, handler)
         parser.start()

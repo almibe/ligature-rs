@@ -4,7 +4,9 @@
 
 package org.libraryweasel.stinkpot.ntriples
 
-class NTriplesParser(lexer: NTriplesLexer, val handler: (Triple) -> Unit) : Parser(lexer) {
+import org.libraryweasel.stinkpot.Parser
+
+class NTriplesParser(lexer: NTriplesLexer, val handler: (Triple) -> Unit) : Parser<NTriplesTokenType>(lexer) {
 
 
     fun start() : Unit {
@@ -22,8 +24,17 @@ class NTriplesParser(lexer: NTriplesLexer, val handler: (Triple) -> Unit) : Pars
     }
 
     fun subject() : Subject {
-        val token = match(NTriplesTokenType.IRIREF)
-        return IRI(token.text)
+        when (lookAhead.tokenType) {
+            NTriplesTokenType.IRIREF -> {
+                val token = match(NTriplesTokenType.IRIREF)
+                return IRI(token.text)
+            }
+            NTriplesTokenType.BLANK_NODE_LABEL -> {
+                val token = match(NTriplesTokenType.BLANK_NODE_LABEL)
+                return BlankNode(token.text)
+            }
+            else -> throw RuntimeException("Error Parsing Subject -- must be IRI or Blank Node")
+        }
     }
 
     fun predicate() : Predicate {
@@ -37,10 +48,14 @@ class NTriplesParser(lexer: NTriplesLexer, val handler: (Triple) -> Unit) : Pars
                 val token = match(NTriplesTokenType.IRIREF)
                 return IRI(token.text)
             }
+            NTriplesTokenType.BLANK_NODE_LABEL -> {
+                val token = match(NTriplesTokenType.BLANK_NODE_LABEL)
+                return BlankNode(token.text)
+            }
             NTriplesTokenType.STRING_LITERAL_QUOTE -> {
                 return literal()
             }
-            else -> throw RuntimeException("Error parsing object -- must be IRI or literal")
+            else -> throw RuntimeException("Error Parsing Object -- must be IRI, Blank Node, or Literal")
         }
 
     }

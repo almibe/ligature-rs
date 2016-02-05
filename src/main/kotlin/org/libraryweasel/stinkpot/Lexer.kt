@@ -2,9 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.libraryweasel.stinkpot.ntriples
+package org.libraryweasel.stinkpot
 
-abstract class Lexer(val input:String) {
+abstract class Lexer<T : TokenType>(val input:String) {
     var pos: Int = 0
     var c: Char?
     val EOF: Char? = null
@@ -24,5 +24,5 @@ abstract class Lexer(val input:String) {
         else c = input[pos]
     }
 
-    abstract fun nextToken(): Token
+    abstract fun nextToken(): Token<T>
 }

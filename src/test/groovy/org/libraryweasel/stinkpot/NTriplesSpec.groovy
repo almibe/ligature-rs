@@ -12,7 +12,7 @@ import org.libraryweasel.stinkpot.ntriples.Triple
 import org.libraryweasel.stinkpot.ntriples.TypedLiteral
 import spock.lang.Specification
 
-public class StinkpotSpec extends Specification {
+public class NTriplesSpec extends Specification {
     Stinkpot stinkpot = new Stinkpot()
 
     def 'support basic IRI triple'() {
