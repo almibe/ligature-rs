@@ -4,8 +4,6 @@
 
 package org.libraryweasel.stinkpot.ntriples
 
-import org.libraryweasel.stinkpot.NTriplesTokenType
-
 abstract class Parser(val lexer: Lexer) {
     var lookAhead: Token = Token(NTriplesTokenType.BLANK_NODE_LABEL, "test")
 

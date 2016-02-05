@@ -4,8 +4,6 @@
 
 package org.libraryweasel.stinkpot.ntriples
 
-import org.libraryweasel.stinkpot.NTriplesTokenType
-
 class NTriplesParser(lexer: NTriplesLexer, val handler: (Triple) -> Unit) : Parser(lexer) {
 
 

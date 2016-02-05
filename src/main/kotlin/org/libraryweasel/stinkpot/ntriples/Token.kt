@@ -4,6 +4,20 @@
 
 package org.libraryweasel.stinkpot.ntriples
 
-import org.libraryweasel.stinkpot.NTriplesTokenType
-
 data class Token (val tokenType: NTriplesTokenType, val text:String)
+
+enum class NTriplesTokenType {
+    LANGTAG,
+    EOL,
+    IRIREF,
+    STRING_LITERAL_QUOTE,
+    BLANK_NODE_LABEL,
+    UCHAR,
+    ECHAR,
+    PN_CHARS_BASE,
+    PN_CHARS_U,
+    PN_CHARS,
+    HEX,
+    EOF,
+    PERIOD
+}
