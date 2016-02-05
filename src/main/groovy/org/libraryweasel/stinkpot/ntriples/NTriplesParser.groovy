@@ -4,7 +4,7 @@
 
 package org.libraryweasel.stinkpot.ntriples
 
-import org.libraryweasel.stinkpot.*
+import org.libraryweasel.stinkpot.NTriplesTokenType
 
 class NTriplesParser extends Parser {
     final Callback<Triple> handler
