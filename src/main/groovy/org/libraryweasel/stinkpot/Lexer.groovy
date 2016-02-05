@@ -4,6 +4,8 @@
 
 package org.libraryweasel.stinkpot
 
+import org.libraryweasel.stinkpot.ntriples.Token
+
 //TODO add a match method to this class to clean up Lexer and make error handling work better
 abstract class Lexer {
     String input

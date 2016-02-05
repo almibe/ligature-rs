@@ -4,7 +4,7 @@
 
 package org.libraryweasel.stinkpot
 
-import org.libraryweasel.stinkpot.ntriples.NTriplesTokenType
+import org.libraryweasel.stinkpot.ntriples.Token
 
 abstract class Parser {
     final Lexer lexer

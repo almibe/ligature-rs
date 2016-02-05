@@ -2,13 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.libraryweasel.stinkpot
+package org.libraryweasel.stinkpot.ntriples
 
-import groovy.transform.Immutable
-import org.libraryweasel.stinkpot.ntriples.NTriplesTokenType;
+import org.libraryweasel.stinkpot.NTriplesTokenType
 
-@Immutable
-class Token {
-    NTriplesTokenType tokenType
-    String text
-}
+data class Token (val tokenType: NTriplesTokenType, val text:String)

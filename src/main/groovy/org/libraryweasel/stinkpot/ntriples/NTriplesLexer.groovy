@@ -5,7 +5,7 @@
 package org.libraryweasel.stinkpot.ntriples
 
 import org.libraryweasel.stinkpot.Lexer
-import org.libraryweasel.stinkpot.Token
+import org.libraryweasel.stinkpot.NTriplesTokenType
 
 class NTriplesLexer extends Lexer {
     NTriplesLexer(String input) {
