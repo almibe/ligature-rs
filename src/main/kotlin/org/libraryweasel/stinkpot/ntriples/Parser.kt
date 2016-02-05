@@ -8,16 +8,16 @@ import org.libraryweasel.stinkpot.Lexer
 import org.libraryweasel.stinkpot.NTriplesTokenType
 
 abstract class Parser(val lexer: Lexer) {
-    var lookAhead: Token? = null
+    var lookAhead: Token = Token(NTriplesTokenType.BLANK_NODE_LABEL, "test")
 
     init {
         consume()
     }
 
-    fun match(tokenType: NTriplesTokenType) : Token? {
-        var token = lookAhead
-        if (lookAhead?.tokenType == tokenType) consume()
-        else throw RuntimeException("Error Parsing - Expected [$tokenType] Found [${lookAhead?.tokenType}]")
+    fun match(tokenType: NTriplesTokenType) : Token {
+        val token = lookAhead
+        if (lookAhead.tokenType == tokenType) consume()
+        else throw RuntimeException("Error Parsing - Expected [$tokenType] Found [${lookAhead.tokenType}]")
         return token
     }
 

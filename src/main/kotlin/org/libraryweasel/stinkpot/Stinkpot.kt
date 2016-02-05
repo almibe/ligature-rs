@@ -9,16 +9,19 @@ import org.libraryweasel.stinkpot.ntriples.NTriplesLexer
 import org.libraryweasel.stinkpot.ntriples.NTriplesParser
 import org.libraryweasel.stinkpot.ntriples.Triple
 
-public class Stinkpot {
-    List<Triple> parseTriples(String text) {
-        def triples = []
+import java.util.ArrayList;
+import java.util.List;
+
+class Stinkpot {
+    fun parseTriples(text: String) : ArrayList<Triple>  {
+        val triples : ArrayList<Triple> = ArrayList()
         parseTriples(text) { triples.add(it) }
         return triples
     }
 
-    void parseTriples(String text, Callback<Triple> handler) {
-        NTriplesLexer lexer = new NTriplesLexer(text)
-        NTriplesParser parser = new NTriplesParser(lexer, handler)
+    fun parseTriples(text: String, handler: (Triple) -> Unit) {
+        val lexer = NTriplesLexer(text)
+        val parser = NTriplesParser(lexer, handler)
         parser.start()
     }
 }
