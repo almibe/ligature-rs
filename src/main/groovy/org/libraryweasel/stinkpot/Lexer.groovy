@@ -16,6 +16,11 @@ abstract class Lexer {
         c = input[pos]
     }
 
+    void match(char c) {
+        if (this.c == c) consume()
+        else throw new RuntimeException("Error Parsing - Expected '$c' Found '${this.c}'")
+    }
+
     void consume() {
         pos++
         if (pos >= input.length()) c = EOF

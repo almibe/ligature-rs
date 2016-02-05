@@ -18,7 +18,7 @@ abstract class Parser {
     Token match(NTriplesTokenType tokenType) {
         Token token = lookAhead
         if (lookAhead.tokenType == tokenType) consume()
-        else throw new RuntimeException("expecting $tokenType found $lookAhead")
+        else throw new RuntimeException("Error Parsing - Expected [$tokenType] Found [${lookAhead.tokenType}]")
         return token
     }
 

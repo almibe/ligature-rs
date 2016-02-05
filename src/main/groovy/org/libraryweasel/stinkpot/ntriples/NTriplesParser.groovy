@@ -4,9 +4,7 @@
 
 package org.libraryweasel.stinkpot.ntriples
 
-import org.libraryweasel.stinkpot.Parser
-import org.libraryweasel.stinkpot.Token
-import org.libraryweasel.stinkpot.ntriples.model.*
+import org.libraryweasel.stinkpot.*
 
 class NTriplesParser extends Parser {
     final Closure<Triple> handler

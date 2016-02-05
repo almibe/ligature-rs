@@ -6,7 +6,7 @@ package org.libraryweasel.stinkpot
 
 import org.libraryweasel.stinkpot.ntriples.NTriplesLexer
 import org.libraryweasel.stinkpot.ntriples.NTriplesParser
-import org.libraryweasel.stinkpot.ntriples.model.Triple
+import org.libraryweasel.stinkpot.ntriples.Triple
 
 public class Stinkpot {
     List<Triple> parseTriples(String text) {
