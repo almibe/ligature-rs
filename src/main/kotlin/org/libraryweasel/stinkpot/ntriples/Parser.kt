@@ -4,7 +4,6 @@
 
 package org.libraryweasel.stinkpot.ntriples
 
-import org.libraryweasel.stinkpot.Lexer
 import org.libraryweasel.stinkpot.NTriplesTokenType
 
 abstract class Parser(val lexer: Lexer) {

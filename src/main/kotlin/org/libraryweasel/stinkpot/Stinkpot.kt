@@ -4,7 +4,6 @@
 
 package org.libraryweasel.stinkpot
 
-import org.libraryweasel.stinkpot.ntriples.Callback
 import org.libraryweasel.stinkpot.ntriples.NTriplesLexer
 import org.libraryweasel.stinkpot.ntriples.NTriplesParser
 import org.libraryweasel.stinkpot.ntriples.Triple

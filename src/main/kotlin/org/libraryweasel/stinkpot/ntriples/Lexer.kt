@@ -2,9 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.libraryweasel.stinkpot
-
-import org.libraryweasel.stinkpot.ntriples.Token
+package org.libraryweasel.stinkpot.ntriples
 
 abstract class Lexer(val input:String) {
     var pos: Int = 0
