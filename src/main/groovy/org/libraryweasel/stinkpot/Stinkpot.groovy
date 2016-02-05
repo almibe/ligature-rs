@@ -4,6 +4,7 @@
 
 package org.libraryweasel.stinkpot
 
+import org.libraryweasel.stinkpot.ntriples.Callback
 import org.libraryweasel.stinkpot.ntriples.NTriplesLexer
 import org.libraryweasel.stinkpot.ntriples.NTriplesParser
 import org.libraryweasel.stinkpot.ntriples.Triple
@@ -15,7 +16,7 @@ public class Stinkpot {
         return triples
     }
 
-    void parseTriples(String text, Closure<Triple> handler) {
+    void parseTriples(String text, Callback<Triple> handler) {
         NTriplesLexer lexer = new NTriplesLexer(text)
         NTriplesParser parser = new NTriplesParser(lexer, handler)
         parser.start()

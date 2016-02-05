@@ -7,9 +7,9 @@ package org.libraryweasel.stinkpot.ntriples
 import org.libraryweasel.stinkpot.*
 
 class NTriplesParser extends Parser {
-    final Closure<Triple> handler
+    final Callback<Triple> handler
 
-    public NTriplesParser(NTriplesLexer lexer, Closure<Triple> handler) {
+    public NTriplesParser(NTriplesLexer lexer, Callback<Triple> handler) {
         super(lexer)
         this.handler = handler
     }
@@ -25,7 +25,7 @@ class NTriplesParser extends Parser {
         Predicate predicate = predicate()
         Object object = object()
         match(NTriplesTokenType.PERIOD)
-        handler(new Triple(subject, predicate, object))
+        handler.callback(new Triple(subject, predicate, object))
     }
 
     Subject subject() {
