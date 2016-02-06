@@ -1,0 +1,32 @@
+@prefix lemon: <http://lemon-model.net/lemon#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix wordnet-ontology: <http://wordnet-rdf.princeton.edu/ontology#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<> a lemon:LexicalEntry ;
+    lemon:canonicalForm <#CanonicalForm> ;
+    lemon:otherForm <#Form-1> ;
+    lemon:sense <#1-n> ;
+    wordnet-ontology:part_of_speech wordnet-ontology:noun .
+
+<#1-n> a lemon:LexicalSense ;
+    lemon:reference <http://wordnet-rdf.princeton.edu/wn31/114416566-n> ;
+    wordnet-ontology:derivation <http://wordnet-rdf.princeton.edu/wn31/neurotic-a#1-a>,
+        <http://wordnet-rdf.princeton.edu/wn31/neurotic-a#2-a> ;
+    wordnet-ontology:gloss "a mental or personality disturbance not attributable to any known neurological or organic dysfunction"@eng ;
+    wordnet-ontology:lex_id 0 ;
+    wordnet-ontology:old_sense_key "neurosis%1:26:00::" ;
+    wordnet-ontology:sense_number 1 ;
+    wordnet-ontology:tag_count 8 ;
+    owl:sameAs <http://lemon-model.net/lexica/uby/wn/WN_Sense_81988>,
+        <http://www.lexvo.org/page/wordnet/30/noun/neurosis_1_26_00> .
+
+<#CanonicalForm> a lemon:Form ;
+    lemon:writtenRep "neurosis"@eng .
+
+<#Form-1> a lemon:Form ;
+    lemon:writtenRep "neuroses"@eng .
+
