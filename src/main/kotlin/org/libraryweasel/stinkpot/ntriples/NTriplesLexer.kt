@@ -38,9 +38,8 @@ class NTriplesLexer(input: String) : Lexer<NTriplesTokenType>(input) {
 
     fun blankNode() : Token<NTriplesTokenType> {
         val stringBuilder = StringBuilder()
-        consume() //ignore _
-        if (c != ':' && c != null) throw RuntimeException("Error parsing expecting _ after : for blank nodes.")
-        consume() //ignore :
+        match('_')
+        match(':')
         while ( c != ' ') {
             stringBuilder.append(c)
             consume()
@@ -50,18 +49,18 @@ class NTriplesLexer(input: String) : Lexer<NTriplesTokenType>(input) {
 
     fun iri() : Token<NTriplesTokenType> {
         val stringBuilder = StringBuilder()
-        consume() //ignore <
+        match('<')
         while ( c != '>') {
             stringBuilder.append(c)
             consume()
         }
-        consume() //ignore >
+        match('>')
         return Token(NTriplesTokenType.IRIREF, stringBuilder.toString())
     }
 
     fun langTag() : Token<NTriplesTokenType> {
         val stringBuilder = StringBuilder()
-        consume() //ignore @
+        match('@')
         while ( c != ' ') {
             stringBuilder.append(c);
             consume();
@@ -71,15 +70,14 @@ class NTriplesLexer(input: String) : Lexer<NTriplesTokenType>(input) {
 
     fun typeTag() : Token<NTriplesTokenType> {
         val stringBuilder = StringBuilder()
-        consume() //ignore ^
-        if (c != '^') throw RuntimeException("Error parsing expecting ^^ after literal.")
-        consume() //ignore ^
+        match('^')
+        match('^')
         return iri()
     }
 
     fun stringLiteralQuote() : Token<NTriplesTokenType> {
         val stringBuilder = StringBuilder()
-        consume() //ignore "
+        match('"')
         while ( c != '"') {
             stringBuilder.append(c)
             if (c == '\\') { //TODO handle escaped characters better
@@ -88,12 +86,12 @@ class NTriplesLexer(input: String) : Lexer<NTriplesTokenType>(input) {
             }
             consume()
         }
-        consume() //ignore "
+        match('"')
         return Token(NTriplesTokenType.STRING_LITERAL_QUOTE, stringBuilder.toString())
     }
 
     fun period() : Token<NTriplesTokenType> {
-        consume() //ignore .
+        match('.')
         return Token(NTriplesTokenType.PERIOD, ".")
     }
 }
