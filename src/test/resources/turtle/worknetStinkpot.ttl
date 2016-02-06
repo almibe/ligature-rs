@@ -1,0 +1,21 @@
+@prefix lemon: <http://lemon-model.net/lemon#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix wordnet-ontology: <http://wordnet-rdf.princeton.edu/ontology#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://wordnet-rdf.princeton.edu/wn31/101670073-n> a wordnet-ontology:Synset ;
+    rdfs:label "musk turtle"@eng,
+        "stinkpot"@eng ;
+    wordnet-ontology:gloss "small freshwater turtle having a strong musky odor"@eng ;
+    wordnet-ontology:hypernym <http://wordnet-rdf.princeton.edu/wn31/101669755-n> ;
+    wordnet-ontology:lexical_domain wordnet-ontology:noun.animal ;
+    wordnet-ontology:member_meronym <http://wordnet-rdf.princeton.edu/wn31/101669943-n> ;
+    wordnet-ontology:part_of_speech wordnet-ontology:noun ;
+    wordnet-ontology:synset_member <http://wordnet-rdf.princeton.edu/wn31/musk+turtle-n>,
+        <http://wordnet-rdf.princeton.edu/wn31/stinkpot-n> ;
+    wordnet-ontology:translation "myskikilpikonna"@fin ;
+    owl:sameAs <http://lemon-model.net/lexica/uby/wn/WN_Synset_8517>,
+        <http://www.w3.org/2006/03/wn/wn20/instances/synset-musk_turtle-noun-1> .
