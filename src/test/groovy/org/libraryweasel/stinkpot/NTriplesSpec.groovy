@@ -4,13 +4,10 @@
 
 package org.libraryweasel.stinkpot
 
-import org.libraryweasel.stinkpot.ntriples.BlankNode
-import org.libraryweasel.stinkpot.ntriples.IRI
-import org.libraryweasel.stinkpot.ntriples.LangLiteral
-import org.libraryweasel.stinkpot.ntriples.PlainLiteral
-import org.libraryweasel.stinkpot.ntriples.Triple
-import org.libraryweasel.stinkpot.ntriples.TypedLiteral
+import org.libraryweasel.stinkpot.ntriples.*
 import spock.lang.Specification
+
+import java.nio.file.Paths
 
 public class NTriplesSpec extends Specification {
     Stinkpot stinkpot = new Stinkpot()
@@ -63,6 +60,22 @@ public class NTriplesSpec extends Specification {
         expectedResults.add(new Triple(new IRI("http://en.wikipedia.org/wiki/Helium"), new IRI("http://example.org/elements/specificGravity"), new TypedLiteral("1.663E-4", new IRI("http://www.w3.org/2001/XMLSchema#double"))))
         when:
         List<Triple> results = stinkpot.parseTriples(this.getClass().getResource('/ntriples/literals.nt').text)
+        then:
+        results == expectedResults
+    }
+
+    def 'support literals with languages and types passing a path instead of a String'() {
+        given:
+        def expectedResults = []
+        expectedResults.add(new Triple(new IRI("http://example.org/show/218"), new IRI("http://www.w3.org/2000/01/rdf-schema#label"), new TypedLiteral("That Seventies Show", new IRI("http://www.w3.org/2001/XMLSchema#string"))))
+        expectedResults.add(new Triple(new IRI("http://example.org/show/218"), new IRI("http://www.w3.org/2000/01/rdf-schema#label"), new PlainLiteral("That Seventies Show")))
+        expectedResults.add(new Triple(new IRI("http://example.org/show/218"), new IRI("http://example.org/show/localName"), new LangLiteral("That Seventies Show", "en")))
+        expectedResults.add(new Triple(new IRI("http://example.org/show/218"), new IRI("http://example.org/show/localName"), new LangLiteral("Cette Série des Années Septante", "fr-be")))
+        expectedResults.add(new Triple(new IRI("http://example.org/#spiderman"), new IRI("http://example.org/text"), new PlainLiteral("This is a multi-line\\nliteral with many quotes (\\\"\\\"\\\"\\\"\\\")\\nand two apostrophes ('').")))
+        expectedResults.add(new Triple(new IRI("http://en.wikipedia.org/wiki/Helium"), new IRI("http://example.org/elements/atomicNumber"), new TypedLiteral("2", new IRI("http://www.w3.org/2001/XMLSchema#integer"))))
+        expectedResults.add(new Triple(new IRI("http://en.wikipedia.org/wiki/Helium"), new IRI("http://example.org/elements/specificGravity"), new TypedLiteral("1.663E-4", new IRI("http://www.w3.org/2001/XMLSchema#double"))))
+        when:
+        List<Triple> results = stinkpot.parseTriples(Paths.get(this.getClass().getResource('/ntriples/literals.nt').toURI()))
         then:
         results == expectedResults
     }

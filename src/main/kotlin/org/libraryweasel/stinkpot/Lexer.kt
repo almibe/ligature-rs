@@ -4,13 +4,20 @@
 
 package org.libraryweasel.stinkpot
 
-abstract class Lexer<T : TokenType>(val input:String) {
+import java.util.stream.Stream
+
+abstract class Lexer<T : TokenType>(val inputStream: Stream<String>) {
+    var currentLine: String
+    val iterator: Iterator<String>
     var pos: Int = 0
     var c: Char?
     val EOF: Char? = null
 
     init {
-        c = input[pos]
+        iterator = inputStream.iterator()
+        currentLine = iterator.next()
+        c = currentLine[pos]
+        System.out.println(currentLine)
     }
 
     fun match(c: Char) {
@@ -20,8 +27,19 @@ abstract class Lexer<T : TokenType>(val input:String) {
 
     fun consume() {
         pos++
-        if (pos >= input.length) c = EOF
-        else c = input[pos]
+        if (pos >= currentLine.length) nextLine()
+        else c = currentLine[pos]
+    }
+
+    fun nextLine() {
+        if (iterator.hasNext()) {
+            currentLine = iterator.next()
+            pos = 0
+            c = currentLine[pos]
+        } else {
+            inputStream.close()
+            c = EOF
+        }
     }
 
     abstract fun nextToken(): Token<T>

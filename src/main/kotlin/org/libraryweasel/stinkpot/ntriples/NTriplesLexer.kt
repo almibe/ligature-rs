@@ -6,8 +6,9 @@ package org.libraryweasel.stinkpot.ntriples
 
 import org.libraryweasel.stinkpot.Lexer
 import org.libraryweasel.stinkpot.Token
+import java.util.stream.Stream
 
-class NTriplesLexer(input: String) : Lexer<NTriplesTokenType>(input) {
+class NTriplesLexer(input: Stream<String>) : Lexer<NTriplesTokenType>(input) {
 
     override fun nextToken(): Token<NTriplesTokenType> {
         loop@ while (c != EOF) {
@@ -31,9 +32,7 @@ class NTriplesLexer(input: String) : Lexer<NTriplesTokenType>(input) {
     }
 
     fun comment() : Unit {
-        while (c != '\n' && c != EOF) {
-            consume()
-        }
+        nextLine()
     }
 
     fun blankNode() : Token<NTriplesTokenType> {
