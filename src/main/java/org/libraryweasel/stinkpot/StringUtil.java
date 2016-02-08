@@ -13,6 +13,6 @@ import java.util.stream.Stream;
  */
 public class StringUtil {
     public static Stream<String> createStringStream(String text) {
-        return Arrays.asList(text).stream();
+        return Arrays.stream(text.split("\\r?\\n"));
     }
 }
