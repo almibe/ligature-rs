@@ -17,7 +17,7 @@ public class NTriplesSpec extends Specification {
         def expectedResult = new Triple(new IRI("http://example.org/#spiderman"),
             new IRI("http://www.perceive.net/schemas/relationship/enemyOf"), new IRI("http://example.org/#green-goblin"))
         when:
-        List<Triple> results = stinkpot.parseTriples(this.getClass().getResource('/ntriples/basicTriple.nt').text)
+        List<Triple> results = stinkpot.parseNTriples(this.getClass().getResource('/ntriples/basicTriple.nt').text)
         then:
         results.size() == 1
         results.first() == expectedResult
@@ -30,7 +30,7 @@ public class NTriplesSpec extends Specification {
         def expectedResult2 = new Triple(new IRI("http://example.org/#spiderman"),
                     new IRI("http://www.perceive.net/schemas/relationship/enemyOf"), new IRI("http://example.org/#black-cat"))
         when:
-        List<Triple> results = stinkpot.parseTriples(this.getClass().getResource('/ntriples/multipleIRITriples.nt').text)
+        List<Triple> results = stinkpot.parseNTriples(this.getClass().getResource('/ntriples/multipleIRITriples.nt').text)
         then:
         results.size() == 2
         results.first() == expectedResult1
@@ -42,7 +42,7 @@ public class NTriplesSpec extends Specification {
         def expectedResult = new Triple(new IRI("http://example.org/#spiderman"),
                 new IRI("http://www.perceive.net/schemas/relationship/enemyOf"), new IRI("http://example.org/#green-goblin"))
         when:
-        List<Triple> results = stinkpot.parseTriples(this.getClass().getResource('/ntriples/comments.nt').text)
+        List<Triple> results = stinkpot.parseNTriples(this.getClass().getResource('/ntriples/comments.nt').text)
         then:
         results.size() == 1
         results.first() == expectedResult
@@ -59,7 +59,7 @@ public class NTriplesSpec extends Specification {
         expectedResults.add(new Triple(new IRI("http://en.wikipedia.org/wiki/Helium"), new IRI("http://example.org/elements/atomicNumber"), new TypedLiteral("2", new IRI("http://www.w3.org/2001/XMLSchema#integer"))))
         expectedResults.add(new Triple(new IRI("http://en.wikipedia.org/wiki/Helium"), new IRI("http://example.org/elements/specificGravity"), new TypedLiteral("1.663E-4", new IRI("http://www.w3.org/2001/XMLSchema#double"))))
         when:
-        List<Triple> results = stinkpot.parseTriples(this.getClass().getResource('/ntriples/literals.nt').text)
+        List<Triple> results = stinkpot.parseNTriples(this.getClass().getResource('/ntriples/literals.nt').text)
         then:
         results == expectedResults
     }
@@ -75,7 +75,7 @@ public class NTriplesSpec extends Specification {
         expectedResults.add(new Triple(new IRI("http://en.wikipedia.org/wiki/Helium"), new IRI("http://example.org/elements/atomicNumber"), new TypedLiteral("2", new IRI("http://www.w3.org/2001/XMLSchema#integer"))))
         expectedResults.add(new Triple(new IRI("http://en.wikipedia.org/wiki/Helium"), new IRI("http://example.org/elements/specificGravity"), new TypedLiteral("1.663E-4", new IRI("http://www.w3.org/2001/XMLSchema#double"))))
         when:
-        List<Triple> results = stinkpot.parseTriples(Paths.get(this.getClass().getResource('/ntriples/literals.nt').toURI()))
+        List<Triple> results = stinkpot.parseNTriples(Paths.get(this.getClass().getResource('/ntriples/literals.nt').toURI()))
         then:
         results == expectedResults
     }
@@ -85,7 +85,7 @@ public class NTriplesSpec extends Specification {
         def expectedResult1 = new Triple(new BlankNode('alice'), new IRI('http://xmlns.com/foaf/0.1/knows'), new BlankNode('bob'))
         def expectedResult2 = new Triple(new BlankNode('bob'), new IRI('http://xmlns.com/foaf/0.1/knows'), new BlankNode('alice'))
         when:
-        List<Triple> results = stinkpot.parseTriples(this.getClass().getResource('/ntriples/blankNodes.nt').text)
+        List<Triple> results = stinkpot.parseNTriples(this.getClass().getResource('/ntriples/blankNodes.nt').text)
         then:
         results.size() == 2
         results.first() == expectedResult1
