@@ -3,3 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 package org.libraryweasel.stinkpot.turtle
+
+import org.libraryweasel.stinkpot.Parser
+import org.libraryweasel.stinkpot.Triple
+
+class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<TurtleTokenType>(lexer) {
+
+}

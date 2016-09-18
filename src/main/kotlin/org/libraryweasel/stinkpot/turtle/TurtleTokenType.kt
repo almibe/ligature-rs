@@ -3,3 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 package org.libraryweasel.stinkpot.turtle
+
+import org.libraryweasel.stinkpot.TokenType
+
+enum class TurtleTokenType : TokenType {
+}

@@ -4,3 +4,12 @@
 
 package org.libraryweasel.stinkpot.turtle
 
+import org.libraryweasel.stinkpot.Lexer
+import org.libraryweasel.stinkpot.Token
+import java.util.stream.Stream
+
+class TurtleLexer(input: Stream<String>) : Lexer<TurtleTokenType>(input) {
+    override fun nextToken(): Token<TurtleTokenType> {
+        throw UnsupportedOperationException("not implemented")
+    }
+}
