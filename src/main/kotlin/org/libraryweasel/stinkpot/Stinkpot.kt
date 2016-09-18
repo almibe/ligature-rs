@@ -6,7 +6,7 @@ package org.libraryweasel.stinkpot
 
 import org.libraryweasel.stinkpot.ntriples.NTriplesLexer
 import org.libraryweasel.stinkpot.ntriples.NTriplesParser
-import org.libraryweasel.stinkpot.ntriples.Triple
+import org.libraryweasel.stinkpot.Triple
 import java.io.BufferedReader
 import java.io.StringReader
 import java.nio.file.Files

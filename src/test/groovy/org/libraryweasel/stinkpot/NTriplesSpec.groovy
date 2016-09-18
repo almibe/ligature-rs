@@ -4,7 +4,6 @@
 
 package org.libraryweasel.stinkpot
 
-import org.libraryweasel.stinkpot.ntriples.*
 import spock.lang.Specification
 
 import java.nio.file.Paths
