@@ -6,11 +6,12 @@ package org.libraryweasel.stinkpot.ntriples
 
 import org.libraryweasel.stinkpot.Lexer
 import org.libraryweasel.stinkpot.Token
+import org.libraryweasel.stinkpot.turtle.TurtleTokenType
 import java.util.stream.Stream
 
-class NTriplesLexer(input: Stream<String>) : Lexer<NTriplesTokenType>(input) {
+class NTriplesLexer(input: Stream<String>) : Lexer<TurtleTokenType>(input) {
 
-    override fun nextToken(): Token<NTriplesTokenType> {
+    override fun nextToken(): Token<TurtleTokenType> {
         loop@ while (c != EOF) {
             return when (c) {
                 '#'-> {comment(); continue@loop}
@@ -24,7 +25,7 @@ class NTriplesLexer(input: Stream<String>) : Lexer<NTriplesTokenType>(input) {
                 else-> throw RuntimeException("Error Parsing Found - $c")
             }
         }
-        return Token(NTriplesTokenType.EOF, "<EOF>")
+        return Token(TurtleTokenType.EOF, "<EOF>")
     }
 
     fun ws() : Unit {
@@ -35,7 +36,7 @@ class NTriplesLexer(input: Stream<String>) : Lexer<NTriplesTokenType>(input) {
         nextLine()
     }
 
-    fun blankNode() : Token<NTriplesTokenType> {
+    fun blankNode() : Token<TurtleTokenType> {
         val stringBuilder = StringBuilder()
         match('_')
         match(':')
@@ -43,10 +44,10 @@ class NTriplesLexer(input: Stream<String>) : Lexer<NTriplesTokenType>(input) {
             stringBuilder.append(c)
             consume()
         }
-        return Token(NTriplesTokenType.BLANK_NODE_LABEL, stringBuilder.toString())
+        return Token(TurtleTokenType.BLANK_NODE_LABEL, stringBuilder.toString())
     }
 
-    fun iri() : Token<NTriplesTokenType> {
+    fun iri() : Token<TurtleTokenType> {
         val stringBuilder = StringBuilder()
         match('<')
         while ( c != '>') {
@@ -54,27 +55,27 @@ class NTriplesLexer(input: Stream<String>) : Lexer<NTriplesTokenType>(input) {
             consume()
         }
         match('>')
-        return Token(NTriplesTokenType.IRIREF, stringBuilder.toString())
+        return Token(TurtleTokenType.IRIREF, stringBuilder.toString())
     }
 
-    fun langTag() : Token<NTriplesTokenType> {
+    fun langTag() : Token<TurtleTokenType> {
         val stringBuilder = StringBuilder()
         match('@')
         while ( c != ' ') {
             stringBuilder.append(c);
             consume();
         }
-        return Token(NTriplesTokenType.LANGTAG, stringBuilder.toString())
+        return Token(TurtleTokenType.LANGTAG, stringBuilder.toString())
     }
 
-    fun typeTag() : Token<NTriplesTokenType> {
+    fun typeTag() : Token<TurtleTokenType> {
         val stringBuilder = StringBuilder()
         match('^')
         match('^')
         return iri()
     }
 
-    fun stringLiteralQuote() : Token<NTriplesTokenType> {
+    fun stringLiteralQuote() : Token<TurtleTokenType> {
         val stringBuilder = StringBuilder()
         match('"')
         while ( c != '"') {
@@ -86,11 +87,11 @@ class NTriplesLexer(input: Stream<String>) : Lexer<NTriplesTokenType>(input) {
             consume()
         }
         match('"')
-        return Token(NTriplesTokenType.STRING_LITERAL_QUOTE, stringBuilder.toString())
+        return Token(TurtleTokenType.STRING_LITERAL_QUOTE, stringBuilder.toString())
     }
 
-    fun period() : Token<NTriplesTokenType> {
+    fun period() : Token<TurtleTokenType> {
         match('.')
-        return Token(NTriplesTokenType.PERIOD, ".")
+        return Token(TurtleTokenType.PERIOD, ".")
     }
 }

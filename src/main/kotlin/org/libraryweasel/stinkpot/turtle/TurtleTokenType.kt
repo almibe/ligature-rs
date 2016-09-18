@@ -7,4 +7,17 @@ package org.libraryweasel.stinkpot.turtle
 import org.libraryweasel.stinkpot.TokenType
 
 enum class TurtleTokenType : TokenType {
+    LANGTAG,
+    EOL,
+    IRIREF,
+    STRING_LITERAL_QUOTE,
+    BLANK_NODE_LABEL,
+    UCHAR,
+    ECHAR,
+    PN_CHARS_BASE,
+    PN_CHARS_U,
+    PN_CHARS,
+    HEX,
+    EOF,
+    PERIOD
 }

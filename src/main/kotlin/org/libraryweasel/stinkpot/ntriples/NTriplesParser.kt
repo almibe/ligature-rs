@@ -5,12 +5,13 @@
 package org.libraryweasel.stinkpot.ntriples
 
 import org.libraryweasel.stinkpot.*
+import org.libraryweasel.stinkpot.turtle.TurtleTokenType
 
-class NTriplesParser(lexer: NTriplesLexer, val handler: (Triple) -> Unit) : Parser<NTriplesTokenType>(lexer) {
+class NTriplesParser(lexer: NTriplesLexer, val handler: (Triple) -> Unit) : Parser<TurtleTokenType>(lexer) {
 
 
     fun start() : Unit {
-        while (lookAhead.tokenType != NTriplesTokenType.EOF) {
+        while (lookAhead.tokenType != TurtleTokenType.EOF) {
             triple()
         }
     }
@@ -19,18 +20,18 @@ class NTriplesParser(lexer: NTriplesLexer, val handler: (Triple) -> Unit) : Pars
         val subject = subject()
         val predicate = predicate()
         val `object` = `object`()
-        match(NTriplesTokenType.PERIOD)
+        match(TurtleTokenType.PERIOD)
         handler(Triple(subject, predicate, `object`))
     }
 
     fun subject() : Subject {
         when (lookAhead.tokenType) {
-            NTriplesTokenType.IRIREF -> {
-                val token = match(NTriplesTokenType.IRIREF)
+            TurtleTokenType.IRIREF -> {
+                val token = match(TurtleTokenType.IRIREF)
                 return IRI(token.text)
             }
-            NTriplesTokenType.BLANK_NODE_LABEL -> {
-                val token = match(NTriplesTokenType.BLANK_NODE_LABEL)
+            TurtleTokenType.BLANK_NODE_LABEL -> {
+                val token = match(TurtleTokenType.BLANK_NODE_LABEL)
                 return BlankNode(token.text)
             }
             else -> throw RuntimeException("Error Parsing Subject -- must be IRI or Blank Node")
@@ -38,21 +39,21 @@ class NTriplesParser(lexer: NTriplesLexer, val handler: (Triple) -> Unit) : Pars
     }
 
     fun predicate() : Predicate {
-        val token = match(NTriplesTokenType.IRIREF)
+        val token = match(TurtleTokenType.IRIREF)
         return IRI(token.text)
     }
 
     fun `object`() : Object {
         when (lookAhead.tokenType) {
-            NTriplesTokenType.IRIREF -> {
-                val token = match(NTriplesTokenType.IRIREF)
+            TurtleTokenType.IRIREF -> {
+                val token = match(TurtleTokenType.IRIREF)
                 return IRI(token.text)
             }
-            NTriplesTokenType.BLANK_NODE_LABEL -> {
-                val token = match(NTriplesTokenType.BLANK_NODE_LABEL)
+            TurtleTokenType.BLANK_NODE_LABEL -> {
+                val token = match(TurtleTokenType.BLANK_NODE_LABEL)
                 return BlankNode(token.text)
             }
-            NTriplesTokenType.STRING_LITERAL_QUOTE -> {
+            TurtleTokenType.STRING_LITERAL_QUOTE -> {
                 return literal()
             }
             else -> throw RuntimeException("Error Parsing Object -- must be IRI, Blank Node, or Literal")
@@ -61,15 +62,15 @@ class NTriplesParser(lexer: NTriplesLexer, val handler: (Triple) -> Unit) : Pars
     }
 
     fun literal() : Literal {
-        val token = match(NTriplesTokenType.STRING_LITERAL_QUOTE)
+        val token = match(TurtleTokenType.STRING_LITERAL_QUOTE)
         when (lookAhead.tokenType) {
-            NTriplesTokenType.PERIOD -> return PlainLiteral(token.text)
-            NTriplesTokenType.LANGTAG -> {
-                val lang = match(NTriplesTokenType.LANGTAG)
+            TurtleTokenType.PERIOD -> return PlainLiteral(token.text)
+            TurtleTokenType.LANGTAG -> {
+                val lang = match(TurtleTokenType.LANGTAG)
                 return LangLiteral(token.text, lang.text)
             }
-            NTriplesTokenType.IRIREF -> {
-                val iri = match(NTriplesTokenType.IRIREF)
+            TurtleTokenType.IRIREF -> {
+                val iri = match(TurtleTokenType.IRIREF)
                 return TypedLiteral(token.text, IRI(iri.text))
             }
             else -> throw RuntimeException("Error Parsing")
