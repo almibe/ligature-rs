@@ -8,8 +8,6 @@ import org.libraryweasel.stinkpot.*
 import org.libraryweasel.stinkpot.turtle.TurtleTokenType
 
 class NTriplesParser(lexer: NTriplesLexer, val handler: (Triple) -> Unit) : Parser<TurtleTokenType>(lexer) {
-
-
     fun start() : Unit {
         while (lookAhead.tokenType != TurtleTokenType.EOF) {
             triple()

@@ -10,6 +10,19 @@ import java.util.stream.Stream
 
 class TurtleLexer(input: Stream<String>) : Lexer<TurtleTokenType>(input) {
     override fun nextToken(): Token<TurtleTokenType> {
-        throw UnsupportedOperationException("not implemented")
+        loop@ while (c != EOF) {
+            return when (c) {
+                '#'-> {comment(); continue@loop}
+                ' ','\t','\n','\r'-> {ws(); continue@loop}
+                '_'-> return blankNode()
+                '<'-> return iri()
+                '@'-> return langTag()
+                '^'-> return typeTag()
+                '"'-> return stringLiteralQuote()
+                '.'-> return period()
+                else-> throw RuntimeException("Error Parsing Found - $c")
+            }
+        }
+        return Token(TurtleTokenType.EOF, "<EOF>")
     }
 }
