@@ -6,7 +6,8 @@ package org.libraryweasel.stinkpot
 
 import org.libraryweasel.stinkpot.ntriples.NTriplesLexer
 import org.libraryweasel.stinkpot.ntriples.NTriplesParser
-import org.libraryweasel.stinkpot.Triple
+import org.libraryweasel.stinkpot.turtle.TurtleLexer
+import org.libraryweasel.stinkpot.turtle.TurtleParser
 import java.io.BufferedReader
 import java.io.StringReader
 import java.nio.file.Files
@@ -36,6 +37,30 @@ class Stinkpot {
     fun parseNTriples(path: Path, handler: (Triple) -> Unit) {
         val lexer = NTriplesLexer(Files.lines(path))
         val parser = NTriplesParser(lexer, handler)
+        parser.start()
+    }
+
+    fun parseTurtle(text: String) : List<Triple>  {
+        val triples : ArrayList<Triple> = ArrayList()
+        parseTurtle(text) { triples.add(it) }
+        return triples
+    }
+
+    fun parseTurtle(text: String, handler: (Triple) -> Unit) {
+        val lexer = TurtleLexer(createStream(text))
+        val parser = TurtleParser(lexer, handler)
+        parser.start()
+    }
+
+    fun parseTurtle(path: Path) : List<Triple> {
+        val triples : ArrayList<Triple> = ArrayList()
+        parseTurtle(path) { triples.add(it) }
+        return triples
+    }
+
+    fun parseTurtle(path: Path, handler: (Triple) -> Unit) {
+        val lexer = TurtleLexer(Files.lines(path))
+        val parser = TurtleParser(lexer, handler)
         parser.start()
     }
 

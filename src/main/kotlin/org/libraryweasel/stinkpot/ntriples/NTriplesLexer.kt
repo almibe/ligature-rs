@@ -12,7 +12,7 @@ import java.util.stream.Stream
 class NTriplesLexer(input: Stream<String>) : Lexer<TurtleTokenType>(input) {
     override fun nextToken(): Token<TurtleTokenType> {
         loop@ while (c != EOF) {
-            return when (c) {
+            when (c) {
                 '#'-> {comment(); continue@loop}
                 ' ','\t','\n','\r'-> {ws(); continue@loop}
                 '_'-> return blankNode()
