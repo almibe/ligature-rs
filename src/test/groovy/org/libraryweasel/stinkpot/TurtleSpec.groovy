@@ -83,7 +83,7 @@ class TurtleSpec  extends Specification {
             new Triple(new IRI("${base2}subject2"), new IRI("${base2}predicate2"), new IRI("${base2}object2")),
             new Triple(new IRI("${baseTwo}subject3"), new IRI("${baseTwo}predicate3"), new IRI("${baseTwo}object3")),
             new Triple(new IRI("${baseTwo2}subject3"), new IRI("${baseTwo2}predicate3"), new IRI("${baseTwo2}object3")),
-            new Triple(new IRI("${baseTwo2}path/subject4"), new IRI("${baseTwo2}path/predicate4"), new IRI("${baseTwo2}path/object4")),
+            new Triple(new IRI("${base2}path/subject4"), new IRI("${base2}path/predicate4"), new IRI("${base2}path/object4")),
             new Triple(new IRI("${base3}subject5"), new IRI("${base3}predicate5"), new IRI("${base3}object5")),
             new Triple(new IRI("${base3}subject6"), new IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), new IRI("${base3}subject7")),
             new Triple(new IRI("http://伝言.example/?user=أكرم&amp;channel=R%26D"), new IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), new IRI("${base3}subject8"))
