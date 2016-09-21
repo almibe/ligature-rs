@@ -33,14 +33,16 @@ abstract class Lexer<out T: TokenType>(val inputStream: Stream<String>) {
     }
 
     fun nextLine() {
-        if (iterator.hasNext()) {
+        while (iterator.hasNext()) {
             currentLine = iterator.next()
-            pos = 0
-            c = currentLine[pos]
-        } else {
-            inputStream.close()
-            c = EOF
+            if (currentLine.length > 0) {
+                pos = 0
+                c = currentLine[pos]
+                return
+            }
         }
+        inputStream.close()
+        c = EOF
     }
 
     abstract fun nextToken(): Token<T>
