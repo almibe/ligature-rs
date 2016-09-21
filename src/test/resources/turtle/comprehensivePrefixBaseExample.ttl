@@ -4,13 +4,13 @@
 @base <http://one.example/> .
 <subject2> <predicate2> <object2> .     # relative IRIs, e.g. http://one.example/subject2
 
-BASE <http://one.example/>
+BASE <http://one.example2/>
 <subject2> <predicate2> <object2> .     # relative IRIs, e.g. http://one.example/subject2
 
 @prefix p: <http://two.example/> .
 p:subject3 p:predicate3 p:object3 .     # prefixed name, e.g. http://two.example/subject3
 
-PREFIX p: <http://two.example/>
+PREFIX p: <http://two.example2/>
 p:subject3 p:predicate3 p:object3 .     # prefixed name, e.g. http://two.example/subject3
 
 @prefix p: <path/> .                    # prefix p: now stands for http://one.example/path/
