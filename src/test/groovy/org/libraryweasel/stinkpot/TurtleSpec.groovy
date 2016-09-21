@@ -48,6 +48,18 @@ class TurtleSpec  extends Specification {
         results == expectedResults
     }
 
+    def 'support comments'() {
+        given:
+        def expectedResults = [spidermanEnemy, spidermanName]
+        when:
+        List<Triple> results = stinkpot.parseTurtle(this.getClass().getResource('/turtle/comments.ttl').text)
+        then:
+        results.size() == 2
+        results == expectedResults
+    }
+
+    //TODO check multi line triples
+
     def base = "http://one.example/"
     def base2 = "http://one.example2/"
     def base3 = "http://another.example/"

@@ -58,12 +58,14 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
                 match(TurtleTokenType.BASE)
                 val iriToken = match(TurtleTokenType.IRIREF)
                 prefixes.put(":", iriToken.text)
+                match(TurtleTokenType.PERIOD)
             }
             TurtleTokenType.PREFIX -> {
                 match(TurtleTokenType.PREFIX)
                 val nameToken = match(TurtleTokenType.CHARACTER_TOKEN)
                 val iriToken = match(TurtleTokenType.IRIREF)
                 prefixes.put(nameToken.text, iriToken.text)
+                match(TurtleTokenType.PERIOD)
             }
             else -> {
                 val tokenType = match(TurtleTokenType.CHARACTER_TOKEN).text
