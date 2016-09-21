@@ -102,4 +102,14 @@ class TurtleSpec  extends Specification {
         results[7] == expectedResults[7]
         results[8] == expectedResults[8]
     }
+
+    //TODO test literals
+
+    //TODO test blank nodes
+
+    //TODO Nesting Unlabeled Blank Nodes in Turtle
+
+    //TODO Collections
+
+    //TODO examples 19-26
 }

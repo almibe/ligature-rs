@@ -18,7 +18,6 @@ abstract class Lexer<out T: TokenType>(val inputStream: Stream<String>) {
         iterator = inputStream.iterator()
         currentLine = iterator.next()
         c = currentLine[pos]
-        System.out.println(currentLine)
     }
 
     fun match(c: Char) {

@@ -160,14 +160,11 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
     }
 
     fun handlePrefix(text: String) : String {
-        println(prefixes)
-        println("!!" + text)
         val parts = text.split(':')
         assert(parts.size == 2 && prefixes.containsKey(parts[0] + ":")) {
             "Error Handling Prefix -- $text"
         }
         val prefix = prefixes[parts[0] + ":"]
-        println("!!!" + prefix + parts[1])
         return prefix + parts[1]
     }
 
