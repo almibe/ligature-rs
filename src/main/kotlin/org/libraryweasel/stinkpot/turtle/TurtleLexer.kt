@@ -47,8 +47,8 @@ class TurtleLexer(input: Stream<String>) : Lexer<TurtleTokenType>(input) {
         }
         val result = stringBuilder.toString()
         return when(result) {
-            "@prefix" -> Token(TurtleTokenType.PREFIX, result)
-            "@base" -> Token(TurtleTokenType.BASE, result)
+            "prefix" -> Token(TurtleTokenType.PREFIX, result)
+            "base" -> Token(TurtleTokenType.BASE, result)
             else -> Token(TurtleTokenType.LANGTAG, result)
         }
     }

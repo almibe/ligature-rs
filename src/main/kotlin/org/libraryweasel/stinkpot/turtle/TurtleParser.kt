@@ -91,13 +91,26 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
                 val token = match(TurtleTokenType.BLANK_NODE_LABEL)
                 return BlankNode(token.text)
             }
-            else -> throw RuntimeException("Error Parsing Subject -- must be IRI or Blank Node")
+            TurtleTokenType.CHARACTER_TOKEN -> {
+                val token = match(TurtleTokenType.CHARACTER_TOKEN)
+                return IRI(handlePrefix(token.text))
+            }
+            else -> throw RuntimeException("Error Parsing Subject -- must be IRI or Blank Node not ${lookAhead.tokenType} -- ${lookAhead.text}")
         }
     }
 
     fun predicate() : Predicate {
-        val token = match(TurtleTokenType.IRIREF)
-        return IRI(token.text)
+        when (lookAhead.tokenType) {
+            TurtleTokenType.IRIREF -> {
+                val token = match(TurtleTokenType.IRIREF)
+                return IRI(token.text)
+            }
+            TurtleTokenType.CHARACTER_TOKEN -> {
+                val token = match(TurtleTokenType.CHARACTER_TOKEN)
+                return IRI(handlePrefix(token.text))
+            }
+            else -> throw RuntimeException("Error Parsing Subject -- must be IRI not ${lookAhead.tokenType} -- ${lookAhead.text}")
+        }
     }
 
     fun `object`() : Object {
@@ -113,8 +126,21 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
             TurtleTokenType.STRING_LITERAL_QUOTE -> {
                 return literal()
             }
+            TurtleTokenType.CHARACTER_TOKEN -> {
+                val token = match(TurtleTokenType.CHARACTER_TOKEN)
+                return IRI(handlePrefix(token.text))
+            }
             else -> throw RuntimeException("Error Parsing Object -- must be IRI, Blank Node, or Literal not ${lookAhead.tokenType}")
         }
+    }
+
+    fun handlePrefix(text: String) : String {
+        val parts = text.split(':')
+        assert(parts.size == 2) {
+            "Error Parsing Subject -- must be IRI or Blank Node not ${lookAhead.tokenType} -- ${lookAhead.text}"
+        }
+        val prefix = prefixes[parts[0] + ":"]
+        return prefix + parts[1]
     }
 
     fun literal() : Literal {
