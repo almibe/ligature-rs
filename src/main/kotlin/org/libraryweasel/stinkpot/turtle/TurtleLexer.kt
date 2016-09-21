@@ -16,7 +16,7 @@ class TurtleLexer(input: Stream<String>) : Lexer<TurtleTokenType>(input) {
                 ' ','\t','\n','\r'-> {ws(); continue@loop}
                 '_'-> return blankNode()
                 '<'-> return iri()
-                '@'-> return langTag()
+                '@'-> return langTagPrefixBase()
                 '^'-> return typeTag()
                 '"', '\''-> return stringLiteralQuote() //TODO support ' for strings and also """ and ''' for multiline strings
                 ';' -> return semicolon()
@@ -32,10 +32,34 @@ class TurtleLexer(input: Stream<String>) : Lexer<TurtleTokenType>(input) {
                 //TODO support @prefix or PREFIX
                 //TODO support : for prefixed names
                 '.'-> return period()
-                else-> throw RuntimeException("Error Parsing Found - $c")
+                else-> return characterToken() //A catch all for now.  There might be a better way to handle this.
             }
         }
         return Token(TurtleTokenType.EOF, "<EOF>")
+    }
+
+    fun langTagPrefixBase() : Token<TurtleTokenType> {
+        val stringBuilder = StringBuilder()
+        match('@')
+        while ( c != ' ') {
+            stringBuilder.append(c)
+            consume()
+        }
+        val result = stringBuilder.toString()
+        return when(result) {
+            "@prefix" -> Token(TurtleTokenType.PREFIX, result)
+            "@base" -> Token(TurtleTokenType.BASE, result)
+            else -> Token(TurtleTokenType.LANGTAG, result)
+        }
+    }
+
+    fun characterToken() : Token<TurtleTokenType> {
+        val stringBuilder = StringBuilder()
+        while ( c != ' ') {
+            stringBuilder.append(c)
+            consume()
+        }
+        return Token(TurtleTokenType.CHARACTER_TOKEN, stringBuilder.toString())
     }
 
     fun semicolon() : Token<TurtleTokenType> {

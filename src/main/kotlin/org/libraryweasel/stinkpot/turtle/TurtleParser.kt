@@ -7,13 +7,28 @@ package org.libraryweasel.stinkpot.turtle
 import org.libraryweasel.stinkpot.*
 
 class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<TurtleTokenType>(lexer) {
+    val prefixes = mutableMapOf<String, String>()
+
     fun start() : Unit {
         while (lookAhead.tokenType != TurtleTokenType.EOF) {
-            triple()
+            statement()
         }
     }
 
-    fun triple() : Unit {
+    fun statement() : Unit {
+        if (isDirective(lookAhead)) {
+            checkForDirectives()
+        } else {
+            triples()
+        }
+    }
+
+    fun isDirective(token: Token<TurtleTokenType>): Boolean =
+            (token.tokenType == TurtleTokenType.BASE || token.tokenType == TurtleTokenType.PREFIX
+                    || (token.tokenType == TurtleTokenType.CHARACTER_TOKEN && token.text.toLowerCase() == "base")
+                    || (token.tokenType == TurtleTokenType.CHARACTER_TOKEN && token.text.toLowerCase() == "prefix"))
+
+    fun triples() {
         val subject = subject()
         var predicate = predicate()
         var `object` = `object`()
@@ -35,6 +50,33 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
         }
         match(TurtleTokenType.PERIOD)
         handler(Triple(subject, predicate, `object`))
+    }
+
+    fun checkForDirectives() {
+        when (lookAhead.tokenType) {
+            TurtleTokenType.BASE -> {
+                match(TurtleTokenType.BASE)
+                val iriToken = match(TurtleTokenType.IRIREF)
+                prefixes.put(":", iriToken.text)
+            }
+            TurtleTokenType.PREFIX -> {
+                match(TurtleTokenType.PREFIX)
+                val nameToken = match(TurtleTokenType.CHARACTER_TOKEN)
+                val iriToken = match(TurtleTokenType.IRIREF)
+                prefixes.put(nameToken.text, iriToken.text)
+            }
+            else -> {
+                val tokenType = match(TurtleTokenType.CHARACTER_TOKEN).text
+                if (tokenType.toLowerCase() == "base") {
+                    val iriToken = match(TurtleTokenType.IRIREF)
+                    prefixes.put(":", iriToken.text)
+                } else { //we can safely assume this is a prefix
+                    val nameToken = match(TurtleTokenType.CHARACTER_TOKEN)
+                    val iriToken = match(TurtleTokenType.IRIREF)
+                    prefixes.put(nameToken.text, iriToken.text)
+                }
+            }
+        }
     }
 
     fun subject() : Subject {

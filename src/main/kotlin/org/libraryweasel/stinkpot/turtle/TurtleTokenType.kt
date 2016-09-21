@@ -24,5 +24,8 @@ enum class TurtleTokenType : TokenType {
 
     //Below are tokens only used by turtle
     SEMICOLON,
-    COMMA
+    COMMA,
+    PREFIX,
+    BASE,
+    CHARACTER_TOKEN;
 }
