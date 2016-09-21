@@ -7,6 +7,7 @@ package org.libraryweasel.stinkpot.turtle
 import org.libraryweasel.stinkpot.TokenType
 
 enum class TurtleTokenType : TokenType {
+    //Below are tokens used for ntriples and turtle
     LANGTAG,
     EOL,
     IRIREF,
@@ -19,5 +20,8 @@ enum class TurtleTokenType : TokenType {
     PN_CHARS,
     HEX,
     EOF,
-    PERIOD
+    PERIOD,
+
+    //Below are tokens only used by turtle
+    SEMICOLON
 }

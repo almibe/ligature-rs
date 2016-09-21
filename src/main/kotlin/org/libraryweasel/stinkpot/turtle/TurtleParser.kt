@@ -15,8 +15,14 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
 
     fun triple() : Unit {
         val subject = subject()
-        val predicate = predicate()
-        val `object` = `object`()
+        var predicate = predicate()
+        var `object` = `object`()
+        while (lookAhead.tokenType == TurtleTokenType.SEMICOLON) {
+            match(TurtleTokenType.SEMICOLON)
+            handler(Triple(subject, predicate, `object`))
+            predicate = predicate()
+            `object` = `object`()
+        }
         match(TurtleTokenType.PERIOD)
         handler(Triple(subject, predicate, `object`))
     }
