@@ -58,7 +58,15 @@ class TurtleSpec  extends Specification {
         results == expectedResults
     }
 
-    //TODO check multi line triples
+    def 'support multi-line triples'() {
+        given:
+        def expectedResults = [spidermanEnemy]
+        when:
+        List<Triple> results = stinkpot.parseTurtle(this.getClass().getResource('/turtle/multilineTriple.ttl').text)
+        then:
+        results.size() == 1
+        results == expectedResults
+    }
 
     def base = "http://one.example/"
     def base2 = "http://one.example2/"
