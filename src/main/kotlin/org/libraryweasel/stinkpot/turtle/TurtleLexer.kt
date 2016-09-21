@@ -38,6 +38,22 @@ class TurtleLexer(input: Stream<String>) : Lexer<TurtleTokenType>(input) {
         return Token(TurtleTokenType.EOF, "<EOF>")
     }
 
+    override fun iri() : Token<TurtleTokenType> { //override from base iri method so relative iris can be handled
+        val stringBuilder = StringBuilder()
+        match('<')
+        while ( c != '>') {
+            stringBuilder.append(c)
+            consume()
+        }
+        match('>')
+        val result = stringBuilder.toString()
+        return if (result.startsWith("http")) { //TODO this only handles IRI that start with http
+            Token(TurtleTokenType.IRIREF, stringBuilder.toString())
+        } else {
+            Token(TurtleTokenType.RELATIVE_IRI, stringBuilder.toString())
+        }
+    }
+
     fun langTagPrefixBase() : Token<TurtleTokenType> {
         val stringBuilder = StringBuilder()
         match('@')

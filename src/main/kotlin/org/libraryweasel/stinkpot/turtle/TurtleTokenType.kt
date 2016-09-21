@@ -27,5 +27,6 @@ enum class TurtleTokenType : TokenType {
     COMMA,
     PREFIX,
     BASE,
+    RELATIVE_IRI,
     CHARACTER_TOKEN;
 }

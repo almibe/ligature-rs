@@ -70,25 +70,36 @@ class TurtleSpec  extends Specification {
 
     def base = "http://one.example/"
     def base2 = "http://one.example2/"
+    def baseTwo = "http://two.example/"
+    def baseTwo2 = "http://two.example2/"
+
     def base3 = "http://another.example/"
 
     def 'turtle iri parsing'() {
         given:
         def expectedResults = [
             new Triple(new IRI("http://one.example/subject1"), new IRI("http://one.example/predicate1"), new IRI("http://one.example/object1")),
-            new Triple(new IRI("$base/subject2"), new IRI("$base/predicate2"), new IRI("$base/object2")),
-            new Triple(new IRI("$base2/subject2"), new IRI("$base2/predicate2"), new IRI("$base2/object2")),
-            new Triple(new IRI("$base/subject3"), new IRI("$base/predicate3"), new IRI("$base/object3")),
-            new Triple(new IRI("$base2/subject3"), new IRI("$base2/predicate3"), new IRI("$base2/object3")),
-            new Triple(new IRI("$base/path/subject4"), new IRI("$base/path/predicate4"), new IRI("$base/path/object4")),
-            new Triple(new IRI("$base3/subject5"), new IRI("$base3/predicate5"), new IRI("$base3/object5")),
-            new Triple(new IRI("$base3/subject6"), new IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), new IRI("$base3/subject7")),
-            new Triple(new IRI("http://伝言.example/?user=أكرم&amp;channel=R%26D"), new IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), new IRI("$base3/subject8"))
+            new Triple(new IRI("${base}subject2"), new IRI("${base}predicate2"), new IRI("${base}object2")),
+            new Triple(new IRI("${base2}subject2"), new IRI("${base2}predicate2"), new IRI("${base2}object2")),
+            new Triple(new IRI("${baseTwo}subject3"), new IRI("${baseTwo}predicate3"), new IRI("${baseTwo}object3")),
+            new Triple(new IRI("${baseTwo2}subject3"), new IRI("${baseTwo2}predicate3"), new IRI("${baseTwo2}object3")),
+            new Triple(new IRI("${baseTwo2}path/subject4"), new IRI("${baseTwo2}path/predicate4"), new IRI("${baseTwo2}path/object4")),
+            new Triple(new IRI("${base3}subject5"), new IRI("${base3}predicate5"), new IRI("${base3}object5")),
+            new Triple(new IRI("${base3}subject6"), new IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), new IRI("${base3}subject7")),
+            new Triple(new IRI("http://伝言.example/?user=أكرم&amp;channel=R%26D"), new IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), new IRI("${base3}subject8"))
         ]
         when:
         List<Triple> results = stinkpot.parseTurtle(this.getClass().getResource('/turtle/comprehensivePrefixBaseExample.ttl').text)
         then:
-        results.size() == 2
-        results == expectedResults
+        results.size() == 9
+        results[0] == expectedResults[0]
+        results[1] == expectedResults[1]
+        results[2] == expectedResults[2]
+        results[3] == expectedResults[3]
+        results[4] == expectedResults[4]
+        results[5] == expectedResults[5]
+        results[6] == expectedResults[6]
+        results[7] == expectedResults[7]
+        results[8] == expectedResults[8]
     }
 }

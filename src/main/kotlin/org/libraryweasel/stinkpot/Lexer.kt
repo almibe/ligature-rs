@@ -67,7 +67,7 @@ abstract class Lexer<out T: TokenType>(val inputStream: Stream<String>) {
         return Token(TurtleTokenType.BLANK_NODE_LABEL, stringBuilder.toString())
     }
 
-    fun iri() : Token<TurtleTokenType> {
+    open fun iri() : Token<TurtleTokenType> {
         val stringBuilder = StringBuilder()
         match('<')
         while ( c != '>') {

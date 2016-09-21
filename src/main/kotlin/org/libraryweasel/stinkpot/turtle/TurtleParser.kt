@@ -8,6 +8,7 @@ import org.libraryweasel.stinkpot.*
 
 class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<TurtleTokenType>(lexer) {
     val prefixes = mutableMapOf<String, String>()
+    var base = ""
 
     fun start() : Unit {
         while (lookAhead.tokenType != TurtleTokenType.EOF) {
@@ -57,21 +58,29 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
             TurtleTokenType.BASE -> {
                 match(TurtleTokenType.BASE)
                 val iriToken = match(TurtleTokenType.IRIREF)
-                prefixes.put(":", iriToken.text)
+                base = iriToken.text
                 match(TurtleTokenType.PERIOD)
             }
             TurtleTokenType.PREFIX -> {
                 match(TurtleTokenType.PREFIX)
                 val nameToken = match(TurtleTokenType.CHARACTER_TOKEN)
-                val iriToken = match(TurtleTokenType.IRIREF)
-                prefixes.put(nameToken.text, iriToken.text)
+                when (lookAhead.tokenType) {
+                    TurtleTokenType.IRIREF -> {
+                        val iriToken = match(TurtleTokenType.IRIREF)
+                        prefixes.put(nameToken.text, iriToken.text)
+                    }
+                    TurtleTokenType.RELATIVE_IRI -> {
+                        val iriToken = match(TurtleTokenType.RELATIVE_IRI)
+                        prefixes.put(nameToken.text, base + iriToken.text)
+                    }
+                }
                 match(TurtleTokenType.PERIOD)
             }
             else -> {
                 val tokenType = match(TurtleTokenType.CHARACTER_TOKEN).text
                 if (tokenType.toLowerCase() == "base") {
                     val iriToken = match(TurtleTokenType.IRIREF)
-                    prefixes.put(":", iriToken.text)
+                    base = iriToken.text
                 } else { //we can safely assume this is a prefix
                     val nameToken = match(TurtleTokenType.CHARACTER_TOKEN)
                     val iriToken = match(TurtleTokenType.IRIREF)
@@ -86,6 +95,10 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
             TurtleTokenType.IRIREF -> {
                 val token = match(TurtleTokenType.IRIREF)
                 return IRI(token.text)
+            }
+            TurtleTokenType.RELATIVE_IRI -> {
+                val token = match(TurtleTokenType.RELATIVE_IRI)
+                return IRI(base + token.text)
             }
             TurtleTokenType.BLANK_NODE_LABEL -> {
                 val token = match(TurtleTokenType.BLANK_NODE_LABEL)
@@ -105,9 +118,17 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
                 val token = match(TurtleTokenType.IRIREF)
                 return IRI(token.text)
             }
+            TurtleTokenType.RELATIVE_IRI -> {
+                val token = match(TurtleTokenType.RELATIVE_IRI)
+                return IRI(base + token.text)
+            }
             TurtleTokenType.CHARACTER_TOKEN -> {
                 val token = match(TurtleTokenType.CHARACTER_TOKEN)
-                return IRI(handlePrefix(token.text))
+                if (token.text == "a") {
+                    return IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+                } else {
+                    return IRI(handlePrefix(token.text))
+                }
             }
             else -> throw RuntimeException("Error Parsing Subject -- must be IRI not ${lookAhead.tokenType} -- ${lookAhead.text}")
         }
@@ -118,6 +139,10 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
             TurtleTokenType.IRIREF -> {
                 val token = match(TurtleTokenType.IRIREF)
                 return IRI(token.text)
+            }
+            TurtleTokenType.RELATIVE_IRI -> {
+                val token = match(TurtleTokenType.RELATIVE_IRI)
+                return IRI(base + token.text)
             }
             TurtleTokenType.BLANK_NODE_LABEL -> {
                 val token = match(TurtleTokenType.BLANK_NODE_LABEL)
@@ -135,11 +160,14 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
     }
 
     fun handlePrefix(text: String) : String {
+        println(prefixes)
+        println("!!" + text)
         val parts = text.split(':')
-        assert(parts.size == 2) {
-            "Error Parsing Subject -- must be IRI or Blank Node not ${lookAhead.tokenType} -- ${lookAhead.text}"
+        assert(parts.size == 2 && prefixes.containsKey(parts[0] + ":")) {
+            "Error Handling Prefix -- $text"
         }
         val prefix = prefixes[parts[0] + ":"]
+        println("!!!" + prefix + parts[1])
         return prefix + parts[1]
     }
 
