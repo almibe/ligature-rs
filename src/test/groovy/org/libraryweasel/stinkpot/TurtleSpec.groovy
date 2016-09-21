@@ -15,6 +15,9 @@ class TurtleSpec  extends Specification {
     def spidermanName = new Triple(new IRI("http://example.org/#spiderman"),
             new IRI("http://xmlns.com/foaf/0.1/name"), new PlainLiteral("Spiderman"))
 
+    def spidermanNameRu = new Triple(new IRI("http://example.org/#spiderman"),
+            new IRI("http://xmlns.com/foaf/0.1/name"), new LangLiteral("Человек-паук", "ru"))
+
     def 'support basic IRI triple'() {
         given:
         def expectedResult = spidermanEnemy
@@ -30,6 +33,16 @@ class TurtleSpec  extends Specification {
         def expectedResults = [spidermanEnemy, spidermanName]
         when:
         List<Triple> results = stinkpot.parseTurtle(this.getClass().getResource('/turtle/predicateList.ttl').text)
+        then:
+        results.size() == 2
+        results == expectedResults
+    }
+
+    def 'support object lists'() {
+        given:
+        def expectedResults = [spidermanName, spidermanNameRu]
+        when:
+        List<Triple> results = stinkpot.parseTurtle(this.getClass().getResource('/turtle/objectList.ttl').text)
         then:
         results.size() == 2
         results == expectedResults

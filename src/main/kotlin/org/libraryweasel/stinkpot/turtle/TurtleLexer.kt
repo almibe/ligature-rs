@@ -20,6 +20,7 @@ class TurtleLexer(input: Stream<String>) : Lexer<TurtleTokenType>(input) {
                 '^'-> return typeTag()
                 '"', '\''-> return stringLiteralQuote() //TODO support ' for strings and also """ and ''' for multiline strings
                 ';' -> return semicolon()
+                ',' -> return comma()
                 //'t', 'f' -> //TODO support boolean values
                 //TODO support parsing numbers integers, decimal, double
                 //TODO support checking ; for predicate list
@@ -42,4 +43,8 @@ class TurtleLexer(input: Stream<String>) : Lexer<TurtleTokenType>(input) {
         return Token(TurtleTokenType.SEMICOLON, ";")
     }
 
+    fun comma() : Token<TurtleTokenType> {
+        match(',')
+        return Token(TurtleTokenType.COMMA, ",")
+    }
 }

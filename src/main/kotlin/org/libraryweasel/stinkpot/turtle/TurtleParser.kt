@@ -17,11 +17,21 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
         val subject = subject()
         var predicate = predicate()
         var `object` = `object`()
+        while (lookAhead.tokenType == TurtleTokenType.COMMA) {
+            match(TurtleTokenType.COMMA)
+            handler(Triple(subject, predicate, `object`))
+            `object` = `object`()
+        }
         while (lookAhead.tokenType == TurtleTokenType.SEMICOLON) {
             match(TurtleTokenType.SEMICOLON)
             handler(Triple(subject, predicate, `object`))
             predicate = predicate()
             `object` = `object`()
+            while (lookAhead.tokenType == TurtleTokenType.COMMA) {
+                match(TurtleTokenType.COMMA)
+                handler(Triple(subject, predicate, `object`))
+                `object` = `object`()
+            }
         }
         match(TurtleTokenType.PERIOD)
         handler(Triple(subject, predicate, `object`))
@@ -59,15 +69,14 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
             TurtleTokenType.STRING_LITERAL_QUOTE -> {
                 return literal()
             }
-            else -> throw RuntimeException("Error Parsing Object -- must be IRI, Blank Node, or Literal")
+            else -> throw RuntimeException("Error Parsing Object -- must be IRI, Blank Node, or Literal not ${lookAhead.tokenType}")
         }
-
     }
 
     fun literal() : Literal {
         val token = match(TurtleTokenType.STRING_LITERAL_QUOTE)
         when (lookAhead.tokenType) {
-            TurtleTokenType.PERIOD -> return PlainLiteral(token.text)
+            TurtleTokenType.PERIOD, TurtleTokenType.COMMA -> return PlainLiteral(token.text)
             TurtleTokenType.LANGTAG -> {
                 val lang = match(TurtleTokenType.LANGTAG)
                 return LangLiteral(token.text, lang.text)
@@ -76,7 +85,7 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
                 val iri = match(TurtleTokenType.IRIREF)
                 return TypedLiteral(token.text, IRI(iri.text))
             }
-            else -> throw RuntimeException("Error Parsing")
+            else -> throw RuntimeException("Error Parsing Literal -- must be PERIOD, COMMA, LANGTAG, or IRIREF not ${lookAhead.tokenType}")
         }
     }
 }

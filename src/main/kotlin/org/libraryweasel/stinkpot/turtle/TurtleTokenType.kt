@@ -23,5 +23,6 @@ enum class TurtleTokenType : TokenType {
     PERIOD,
 
     //Below are tokens only used by turtle
-    SEMICOLON
+    SEMICOLON,
+    COMMA
 }
