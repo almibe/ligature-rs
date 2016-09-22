@@ -15,7 +15,7 @@ apply plugin: 'kotlin'
 apply plugin: 'groovy'
 apply plugin: 'org.dm.bundle'
 
-group 'org.almibe'
+group 'org.libraryweasel'
 version '0.1.0-SNAPSHOT'
 
 repositories {
