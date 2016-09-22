@@ -104,8 +104,41 @@ class TurtleSpec  extends Specification {
     }
 
     //TODO test literals
-    //TODO literalWithLanguage.ttl
-    //TODO quotedLiterals.ttl
+    def 'support language literals'() {
+        given:
+        def expectedResults = [spidermanNameRu]
+        when:
+        List<Triple> results = stinkpot.parseTurtle(this.getClass().getResource('/turtle/literalWithLanguage.ttl').text)
+        then:
+        results.size() == 1
+        results == expectedResults
+    }
+
+    def 'support quoted literals'() {
+        given:
+        def show = iri("http://example.org/vocab/show/218")
+        def label = iri("http://www.w3.org/2000/01/rdf-schema#label")
+        def localName = iri("http://example.org/vocab/show/localName")
+        def blurb = iri("http://example.org/vocab/show/blurb")
+        def multilineText = '''This is a multi-line
+literal with many quotes (""""")
+and up to two sequential apostrophes ('').'''
+        def expectedResults = [
+            triple(show, label, new PlainLiteral("That Seventies Show")),
+            triple(show, label, new PlainLiteral("That Seventies Show")),
+            triple(show, label, new PlainLiteral("That Seventies Show")),
+            triple(show, localName, new LangLiteral("That Seventies Show", "en")),
+            triple(show, localName, new LangLiteral("Cette Série des Années Soixante-dix", "fr")),
+            triple(show, localName, new LangLiteral("Cette Série des Années Septante", "fr-be")),
+            triple(show, blurb, new PlainLiteral(multilineText))
+        ]
+        when:
+        List<Triple> results = stinkpot.parseTurtle(this.getClass().getResource('/turtle/quotedLiterals.ttl').text)
+        then:
+        results.size() == 7
+        results == expectedResults
+    }
+
     //TODO numbers.ttl
     //TODO booleans.ttl
 
@@ -120,4 +153,7 @@ class TurtleSpec  extends Specification {
     //TODO collections.ttl
 
     //TODO examples 19-26 and wordnetStinkpot.ttl
+
+    def triple = {s, o, p -> return new Triple(s, o, p)}
+    def iri = {url -> return new IRI(url)}
 }
