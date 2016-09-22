@@ -104,12 +104,20 @@ class TurtleSpec  extends Specification {
     }
 
     //TODO test literals
+    //TODO literalWithLanguage.ttl
+    //TODO quotedLiterals.ttl
+    //TODO numbers.ttl
+    //TODO booleans.ttl
 
     //TODO test blank nodes
+    //TODO blankNodes.ttl
 
     //TODO Nesting Unlabeled Blank Nodes in Turtle
+    //TODO nestedUnlabeledBlankNodes.ttl
+    //TODO complexUnlabeledBlankNodes.ttl
 
     //TODO Collections
+    //TODO collections.ttl
 
-    //TODO examples 19-26
+    //TODO examples 19-26 and wordnetStinkpot.ttl
 }
