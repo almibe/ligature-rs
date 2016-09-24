@@ -13,6 +13,6 @@ data class BlankNode(val label: String) : Subject, Object
 data class Triple(val subject: Subject, val predicate: Predicate, val `object`: Object)
 
 interface Literal : Object { val value: String}
-data class PlainLiteral (override val value: String) : Literal
 data class LangLiteral(override val value: String, val langTag: String) : Literal
-data class TypedLiteral(override val value: String, val datatypeIRI: IRI) : Literal
+data class TypedLiteral(override val value: String,
+                        val datatypeIRI: IRI = IRI("http://www.w3.org/2001/XMLSchema#string")) : Literal

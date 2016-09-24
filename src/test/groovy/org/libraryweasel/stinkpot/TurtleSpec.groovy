@@ -13,7 +13,7 @@ class TurtleSpec  extends Specification {
             new IRI("http://www.perceive.net/schemas/relationship/enemyOf"), new IRI("http://example.org/#green-goblin"))
 
     def spidermanName = new Triple(new IRI("http://example.org/#spiderman"),
-            new IRI("http://xmlns.com/foaf/0.1/name"), new PlainLiteral("Spiderman"))
+            new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Spiderman", new IRI("http://www.w3.org/2001/XMLSchema#string")))
 
     def spidermanNameRu = new Triple(new IRI("http://example.org/#spiderman"),
             new IRI("http://xmlns.com/foaf/0.1/name"), new LangLiteral("Человек-паук", "ru"))

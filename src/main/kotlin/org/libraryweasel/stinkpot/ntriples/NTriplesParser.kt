@@ -62,7 +62,7 @@ class NTriplesParser(lexer: NTriplesLexer, val handler: (Triple) -> Unit) : Pars
     fun literal() : Literal {
         val token = match(TurtleTokenType.STRING_LITERAL_QUOTE)
         when (lookAhead.tokenType) {
-            TurtleTokenType.PERIOD -> return PlainLiteral(token.text)
+            TurtleTokenType.PERIOD -> return TypedLiteral(token.text)
             TurtleTokenType.LANGTAG -> {
                 val lang = match(TurtleTokenType.LANGTAG)
                 return LangLiteral(token.text, lang.text)

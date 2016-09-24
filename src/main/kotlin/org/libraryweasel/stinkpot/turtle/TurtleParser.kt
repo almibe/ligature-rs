@@ -171,7 +171,7 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
     fun literal() : Literal {
         val token = match(TurtleTokenType.STRING_LITERAL_QUOTE)
         when (lookAhead.tokenType) {
-            TurtleTokenType.PERIOD, TurtleTokenType.COMMA -> return PlainLiteral(token.text)
+            TurtleTokenType.PERIOD, TurtleTokenType.COMMA -> return TypedLiteral(token.text)
             TurtleTokenType.LANGTAG -> {
                 val lang = match(TurtleTokenType.LANGTAG)
                 return LangLiteral(token.text, lang.text)
