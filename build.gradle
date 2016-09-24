@@ -26,9 +26,14 @@ repositories {
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+    testCompile 'org.testng:testng:6.9.13.6'
 }
 
 bundle {
     instruction 'Import-Package', '*'
     instruction 'Export-Package', 'org.libraryweasel.stinkpot.*'
+}
+
+test {
+    useTestNG()
 }
