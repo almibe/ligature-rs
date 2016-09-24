@@ -18,7 +18,7 @@ class NTriplesTests {
                  IRI("http://www.perceive.net/schemas/relationship/enemyOf"),  IRI("http://example.org/#green-goblin"))
         val results = stinkpot.parseNTriples(this.javaClass.getResource("/ntriples/basicTriple.nt").readText())
         results.size == 1
-        Assert.assertEquals(results, expectedResult)
+        Assert.assertEquals(results, listOf(expectedResult))
     }
 
     @Test fun supportMultipleIRITriples() {
@@ -44,7 +44,7 @@ class NTriplesTests {
         expectedResults.add( Triple( IRI("http://example.org/show/218"),  IRI("http://www.w3.org/2000/01/rdf-schema#label"),  TypedLiteral("That Seventies Show", stringIRI)))
         expectedResults.add( Triple( IRI("http://example.org/show/218"),  IRI("http://example.org/show/localName"),  LangLiteral("That Seventies Show", "en")))
         expectedResults.add( Triple( IRI("http://example.org/show/218"),  IRI("http://example.org/show/localName"),  LangLiteral("Cette Série des Années Septante", "fr-be")))
-        expectedResults.add( Triple( IRI("http://example.org/#spiderman"),  IRI("http://example.org/readText"),  TypedLiteral("This is a multi-line\\nliteral with many quotes (\\\"\\\"\\\"\\\"\\\")\\nand two apostrophes (\"\").", stringIRI)))
+        expectedResults.add( Triple( IRI("http://example.org/#spiderman"),  IRI("http://example.org/text"),  TypedLiteral("This is a multi-line\\nliteral with many quotes (\\\"\\\"\\\"\\\"\\\")\\nand two apostrophes ('').", stringIRI)))
         expectedResults.add( Triple( IRI("http://en.wikipedia.org/wiki/Helium"),  IRI("http://example.org/elements/atomicNumber"),  TypedLiteral("2",  IRI("http://www.w3.org/2001/XMLSchema#integer"))))
         expectedResults.add( Triple( IRI("http://en.wikipedia.org/wiki/Helium"),  IRI("http://example.org/elements/specificGravity"),  TypedLiteral("1.663E-4",  IRI("http://www.w3.org/2001/XMLSchema#double"))))
         val results = stinkpot.parseNTriples(this.javaClass.getResource("/ntriples/literals.nt").readText())
@@ -57,7 +57,7 @@ class NTriplesTests {
         expectedResults.add( Triple( IRI("http://example.org/show/218"),  IRI("http://www.w3.org/2000/01/rdf-schema#label"),  TypedLiteral("That Seventies Show", stringIRI)))
         expectedResults.add( Triple( IRI("http://example.org/show/218"),  IRI("http://example.org/show/localName"),  LangLiteral("That Seventies Show", "en")))
         expectedResults.add( Triple( IRI("http://example.org/show/218"),  IRI("http://example.org/show/localName"),  LangLiteral("Cette Série des Années Septante", "fr-be")))
-        expectedResults.add( Triple( IRI("http://example.org/#spiderman"),  IRI("http://example.org/readText"),  TypedLiteral("This is a multi-line\\nliteral with many quotes (\\\"\\\"\\\"\\\"\\\")\\nand two apostrophes (\"\").", stringIRI)))
+        expectedResults.add( Triple( IRI("http://example.org/#spiderman"),  IRI("http://example.org/text"),  TypedLiteral("This is a multi-line\\nliteral with many quotes (\\\"\\\"\\\"\\\"\\\")\\nand two apostrophes ('').", stringIRI)))
         expectedResults.add( Triple( IRI("http://en.wikipedia.org/wiki/Helium"),  IRI("http://example.org/elements/atomicNumber"),  TypedLiteral("2",  IRI("http://www.w3.org/2001/XMLSchema#integer"))))
         expectedResults.add( Triple( IRI("http://en.wikipedia.org/wiki/Helium"),  IRI("http://example.org/elements/specificGravity"),  TypedLiteral("1.663E-4",  IRI("http://www.w3.org/2001/XMLSchema#double"))))
         val results = stinkpot.parseNTriples(Paths.get(this.javaClass.getResource("/ntriples/literals.nt").toURI()))
