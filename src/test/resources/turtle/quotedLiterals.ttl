@@ -15,4 +15,4 @@ show:218 show:blurb '''This is a multi-line
 literal with many quotes (""""")
 and up to two sequential apostrophes ('').''' .
 show:219 show:blurb """Another
-multiline string with a custom datatype"""^^<string>.
+multiline string with' 'a' \"custom datatype\""""^^<long-string>.

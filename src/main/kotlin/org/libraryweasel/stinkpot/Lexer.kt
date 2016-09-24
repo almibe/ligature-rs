@@ -90,10 +90,10 @@ abstract class Lexer<out T: TokenType>(val inputStream: Stream<String>) {
     fun typeTag() : Token<TurtleTokenType> {
         match('^')
         match('^')
-        return iri()
+        return Token(TurtleTokenType.TYPE_TAG, "^^")
     }
 
-    fun stringLiteralQuote() : Token<TurtleTokenType> {
+    open fun stringLiteralQuote() : Token<TurtleTokenType> {
         val stringBuilder = StringBuilder()
         match('"')
         while ( c != '"') {

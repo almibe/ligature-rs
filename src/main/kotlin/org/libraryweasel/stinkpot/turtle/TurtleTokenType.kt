@@ -21,6 +21,7 @@ enum class TurtleTokenType : TokenType {
     HEX,
     EOF,
     PERIOD,
+    TYPE_TAG,
 
     //Below are tokens only used by turtle
     SEMICOLON,

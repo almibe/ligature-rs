@@ -87,4 +87,50 @@ class TurtleLexer(input: Stream<String>) : Lexer<TurtleTokenType>(input) {
         match(',')
         return Token(TurtleTokenType.COMMA, ",")
     }
+
+    override fun stringLiteralQuote() : Token<TurtleTokenType> {
+        val quotationCharacter = c!!
+        match(quotationCharacter)
+        val quotationString = if ( c == quotationCharacter) {
+            match(quotationCharacter)
+            match(quotationCharacter)
+            "$quotationCharacter$quotationCharacter$quotationCharacter"
+        } else  {
+            quotationCharacter.toString()
+        }
+
+        return if (quotationString.length == 1) {
+            stringLiteralSingleQuote(quotationCharacter)
+        } else {
+            stringLiteralTripleQuote(quotationCharacter)
+        }
+    }
+
+    fun stringLiteralSingleQuote(quotationCharacter: Char) : Token<TurtleTokenType> {
+        val stringBuilder = StringBuilder()
+        while ( c != quotationCharacter) {
+            stringBuilder.append(c)
+            if (c == '\\') { //TODO handle escaped characters better
+                consume()
+                stringBuilder.append(c ?: ' ')
+            }
+            consume()
+        }
+        match(quotationCharacter)
+        return Token(TurtleTokenType.STRING_LITERAL_QUOTE, stringBuilder.toString())
+    }
+
+    fun stringLiteralTripleQuote(quotationCharacter: Char) : Token<TurtleTokenType> { //TODO finish
+        val stringBuilder = StringBuilder()
+        while ( c != quotationCharacter) {
+            stringBuilder.append(c)
+            if (c == '\\') { //TODO handle escaped characters better
+                consume()
+                stringBuilder.append(c ?: ' ')
+            }
+            consume()
+        }
+        match('"')
+        return Token(TurtleTokenType.STRING_LITERAL_QUOTE, stringBuilder.toString())
+    }
 }
