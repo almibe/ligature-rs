@@ -67,7 +67,8 @@ class NTriplesParser(lexer: NTriplesLexer, val handler: (Triple) -> Unit) : Pars
                 val lang = match(TurtleTokenType.LANGTAG)
                 return LangLiteral(token.text, lang.text)
             }
-            TurtleTokenType.IRIREF -> {
+            TurtleTokenType.TYPE_TAG -> {
+                consume()
                 val iri = match(TurtleTokenType.IRIREF)
                 return TypedLiteral(token.text, IRI(iri.text))
             }
