@@ -91,18 +91,15 @@ class TurtleLexer(input: Stream<String>) : Lexer<TurtleTokenType>(input) {
     override fun stringLiteralQuote() : Token<TurtleTokenType> {
         val quotationCharacter = c!!
         match(quotationCharacter)
-        if ( c == quotationCharacter) {
+        if ( c == quotationCharacter) { //two quotationCharacters in a row
             match(quotationCharacter)
-        }
-        val triple = (c == quotationCharacter)
-        if (c == quotationCharacter) {
-            match(quotationCharacter)
-        }
-
-        return if (triple) {
-            stringLiteralTripleQuote(quotationCharacter)
+            if (c == quotationCharacter) { //three quotationCharacters in a row
+                match(quotationCharacter)
+                return stringLiteralTripleQuote(quotationCharacter) //handle triple quote
+            }
+            return Token(TurtleTokenType.STRING_LITERAL_QUOTE, "") //return empty string
         } else {
-            stringLiteralSingleQuote(quotationCharacter)
+            return stringLiteralSingleQuote(quotationCharacter) //handle single quote
         }
     }
 

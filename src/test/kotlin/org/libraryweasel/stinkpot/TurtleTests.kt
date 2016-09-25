@@ -105,7 +105,9 @@ class TurtleTests {
             Triple(show, localName, LangLiteral("Cette Série des Années Soixante-dix", "fr")),
             Triple(show, localName, LangLiteral("Cette Série des Années Septante", "fr-be")),
             Triple(show, blurb, TypedLiteral(multilineText)),
-            Triple(show219, blurb, TypedLiteral(multilineText2, IRI("${base}long-string")))
+            Triple(show219, blurb, TypedLiteral(multilineText2, IRI("${base}long-string"))),
+            Triple(show219, blurb, TypedLiteral("")),
+            Triple(show219, blurb, TypedLiteral(""))
         )
         val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/quotedLiterals.ttl").readText())
         Assert.assertEquals(results, expectedResults)
