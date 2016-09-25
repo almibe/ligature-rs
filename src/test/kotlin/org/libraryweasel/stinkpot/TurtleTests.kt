@@ -10,6 +10,7 @@ import org.testng.annotations.Test
 class TurtleTests {
     val stinkpot = Stinkpot()
     val xsd = "http://www.w3.org/2001/XMLSchema#"
+    val foafKnows = IRI("http://xmlns.com/foaf/0.1/knows")
 
     val spidermanEnemy = Triple(IRI("http://example.org/#spiderman"),
     IRI("http://www.perceive.net/schemas/relationship/enemyOf"), IRI("http://example.org/#green-goblin"))
@@ -146,9 +147,12 @@ class TurtleTests {
 
     @Test fun unlabeledBlankNodes() {
         val expectedResults = listOf(
-            Triple(BlankNode("ANON0"),IRI("http://xmlns.com/foaf/0.1/knows"),BlankNode("ANON1"))
+            Triple(IRI("http://example.com/person/bob"), foafKnows, IRI("http://example.com/person/george")),
+            Triple(BlankNode("ANON0"), foafKnows, IRI("http://example.com/person/george")),
+            Triple(IRI("http://example.com/person/bob"), foafKnows, BlankNode("ANON1")),
+            Triple(BlankNode("ANON2"),IRI("http://xmlns.com/foaf/0.1/knows"),BlankNode("ANON3"))
         )
-        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/nestedUnlabeledBlankNodes.ttl").readText())
+        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/unlabeledBlankNodes.ttl").readText())
         Assert.assertEquals(results, expectedResults)
     }
 

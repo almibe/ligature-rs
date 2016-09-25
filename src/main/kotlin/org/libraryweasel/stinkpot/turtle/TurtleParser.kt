@@ -9,6 +9,7 @@ import org.libraryweasel.stinkpot.*
 class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<TurtleTokenType>(lexer) {
     val prefixes = mutableMapOf<String, String>()
     var base = ""
+    var unlabeledBlankNodeCount = 0
 
     fun start() : Unit {
         while (lookAhead.tokenType != TurtleTokenType.EOF) {
@@ -104,6 +105,15 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
                 val token = match(TurtleTokenType.BLANK_NODE_LABEL)
                 return BlankNode(token.text)
             }
+            TurtleTokenType.UNLABELED_BLANK_NODE_OPEN -> {
+                consume()
+                if (lookAhead.tokenType == TurtleTokenType.UNLABELED_BLANK_NODE_CLOSE) {
+                    consume()
+                    return BlankNode("ANON${unlabeledBlankNodeCount++}")
+                } else {
+                    throw RuntimeException("Case not handled yet")
+                }
+            }
             TurtleTokenType.CHARACTER_TOKEN -> {
                 val token = match(TurtleTokenType.CHARACTER_TOKEN)
                 return handlePrefix(token.text)
@@ -147,6 +157,15 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
             TurtleTokenType.BLANK_NODE_LABEL -> {
                 val token = match(TurtleTokenType.BLANK_NODE_LABEL)
                 return BlankNode(token.text)
+            }
+            TurtleTokenType.UNLABELED_BLANK_NODE_OPEN -> {
+                consume()
+                if (lookAhead.tokenType == TurtleTokenType.UNLABELED_BLANK_NODE_CLOSE) {
+                    consume()
+                    return BlankNode("ANON${unlabeledBlankNodeCount++}")
+                } else {
+                    throw RuntimeException("Case not handled yet")
+                }
             }
             TurtleTokenType.STRING_LITERAL_QUOTE -> {
                 return literal()
