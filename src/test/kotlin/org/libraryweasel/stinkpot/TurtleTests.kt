@@ -205,4 +205,13 @@ class TurtleTests {
 //        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/wordnetStinkpot.ttl").readText())
 //        Assert.assertEquals(results, expectedResults)
 //    }
+
+    @Test fun malformedQuotedLiterals() {
+        try {
+            val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/malformed/quotedLiterals.ttl").readText())
+        } catch (exception: RuntimeException) {
+            return
+        }
+        throw RuntimeException("Test failed")
+    }
 }

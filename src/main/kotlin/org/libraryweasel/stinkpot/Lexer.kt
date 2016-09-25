@@ -26,6 +26,7 @@ abstract class Lexer<out T: TokenType>(val inputStream: Stream<String>) {
     }
 
     fun consume() {
+        if (c == null) throw RuntimeException("End of stream.")
         pos++
         if (pos == currentLine.length) c = '\n'
         else if (pos > currentLine.length) nextLine()
