@@ -14,7 +14,7 @@ abstract class Parser<T : TokenType>(val lexer: Lexer<T>) {
     fun match(tokenType: TokenType) : Token<T> {
         val token = lookAhead
         if (lookAhead.tokenType == tokenType) consume()
-        else throw RuntimeException("Error Parsing - Expected [$tokenType] Found [${lookAhead.tokenType}]")
+        else throw RuntimeException("Error Parsing - Expected [$tokenType] Found [${lookAhead.tokenType}] - ${lookAhead.text}")
         return token
     }
 

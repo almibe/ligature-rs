@@ -9,28 +9,23 @@ import org.libraryweasel.stinkpot.Token
 import java.util.stream.Stream
 
 class TurtleLexer(input: Stream<String>) : Lexer<TurtleTokenType>(input) {
+    var unlabeledBlankNodeCount = 0
+
     override fun nextToken(): Token<TurtleTokenType> {
-        loop@ while (c != EOF) {
+        while (c != EOF) {
             when (c) {
-                '#'-> {comment(); continue@loop}
-                ' ','\t','\n','\r'-> {ws(); continue@loop}
+                '#'-> {comment()}
+                ' ','\t','\n','\r'-> {ws()}
+                ']' -> { match(']') }
                 '_'-> return blankNode()
                 '<'-> return iri()
                 '@'-> return langTagPrefixBase()
                 '^'-> return typeTag()
-                '"', '\''-> return stringLiteralQuote() //TODO support ' for strings and also """ and ''' for multiline strings
+                '"', '\''-> return stringLiteralQuote()
                 ';' -> return semicolon()
                 ',' -> return comma()
-                //'t', 'f' -> //TODO support boolean values
-                //TODO support parsing numbers integers, decimal, double
-                //TODO support checking ; for predicate list
-                //TODO support checking , for object list
+                '[' -> return unlabeledBlankNode()
                 //TODO support checking ( for collections
-                //TODO support checking [ for unlabeled blank nodes
-                //TODO support checking a for type predicate
-                //TODO support @base or BASE
-                //TODO support @prefix or PREFIX
-                //TODO support : for prefixed names
                 '.'-> return period()
                 else-> return characterToken() //A catch all for now.  There might be a better way to handle this.
             }
@@ -117,7 +112,7 @@ class TurtleLexer(input: Stream<String>) : Lexer<TurtleTokenType>(input) {
         return Token(TurtleTokenType.STRING_LITERAL_QUOTE, stringBuilder.toString())
     }
 
-    fun stringLiteralTripleQuote(quotationCharacter: Char) : Token<TurtleTokenType> { //TODO finish
+    fun stringLiteralTripleQuote(quotationCharacter: Char) : Token<TurtleTokenType> {
         val stringBuilder = StringBuilder()
         var quotationCharacterCount = 0
         while (quotationCharacterCount < 3) {
@@ -141,5 +136,10 @@ class TurtleLexer(input: Stream<String>) : Lexer<TurtleTokenType>(input) {
             consume()
         }
         return Token(TurtleTokenType.STRING_LITERAL_QUOTE, stringBuilder.toString())
+    }
+
+    fun unlabeledBlankNode() : Token<TurtleTokenType> {
+        match('[')
+        return Token(TurtleTokenType.BLANK_NODE_LABEL, "ANON${unlabeledBlankNodeCount++}")
     }
 }
