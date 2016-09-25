@@ -87,12 +87,15 @@ class TurtleTests {
     @Test fun supportQuotedLiterals() {
         val base = "http://www.libraryweasel.org/fake/madeup#"
         val show = IRI("http://example.org/vocab/show/218")
+        val show219 = IRI("http://example.org/vocab/show/219")
         val label = IRI("http://www.w3.org/2000/01/rdf-schema#label")
         val localName = IRI("http://example.org/vocab/show/localName")
         val blurb = IRI("http://example.org/vocab/show/blurb")
-        val multilineText = """This is a multi-line
-        literal with many quotes (\"\"\"\"\")
-and up to two sequential apostrophes ('')."""
+        val multilineText = "This is a multi-line\n" +
+            "literal with many quotes (\"\"\"\"\")\n" +
+            "and up to two sequential apostrophes ('')."
+        val multilineText2 = "Another\n" +
+            "multiline string with' 'a' \"custom datatype\"\\\"."
         val expectedResults = listOf(
             Triple(show, label, TypedLiteral("That Seventies Show")),
             Triple(show, label, TypedLiteral("That Seventies Show")),
@@ -101,9 +104,8 @@ and up to two sequential apostrophes ('')."""
             Triple(show, localName, LangLiteral("That Seventies Show", "en")),
             Triple(show, localName, LangLiteral("Cette Série des Années Soixante-dix", "fr")),
             Triple(show, localName, LangLiteral("Cette Série des Années Septante", "fr-be")),
-            Triple(show, blurb, TypedLiteral(multilineText))
-            //Triple(show, blurb, TypedLiteral(multilineText)),
-            //Triple(show, blurb, TypedLiteral(multilineText))
+            Triple(show, blurb, TypedLiteral(multilineText)),
+            Triple(show219, blurb, TypedLiteral(multilineText2, IRI("${base}long-string")))
         )
         val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/quotedLiterals.ttl").readText())
         Assert.assertEquals(results, expectedResults)

@@ -91,18 +91,18 @@ class TurtleLexer(input: Stream<String>) : Lexer<TurtleTokenType>(input) {
     override fun stringLiteralQuote() : Token<TurtleTokenType> {
         val quotationCharacter = c!!
         match(quotationCharacter)
-        val quotationString = if ( c == quotationCharacter) {
+        if ( c == quotationCharacter) {
             match(quotationCharacter)
+        }
+        val triple = (c == quotationCharacter)
+        if (c == quotationCharacter) {
             match(quotationCharacter)
-            "$quotationCharacter$quotationCharacter$quotationCharacter"
-        } else  {
-            quotationCharacter.toString()
         }
 
-        return if (quotationString.length == 1) {
-            stringLiteralSingleQuote(quotationCharacter)
-        } else {
+        return if (triple) {
             stringLiteralTripleQuote(quotationCharacter)
+        } else {
+            stringLiteralSingleQuote(quotationCharacter)
         }
     }
 
@@ -122,15 +122,27 @@ class TurtleLexer(input: Stream<String>) : Lexer<TurtleTokenType>(input) {
 
     fun stringLiteralTripleQuote(quotationCharacter: Char) : Token<TurtleTokenType> { //TODO finish
         val stringBuilder = StringBuilder()
-        while ( c != quotationCharacter) {
-            stringBuilder.append(c)
-            if (c == '\\') { //TODO handle escaped characters better
-                consume()
-                stringBuilder.append(c ?: ' ')
+        var quotationCharacterCount = 0
+        while (quotationCharacterCount < 3) {
+            if (c == quotationCharacter) {
+                quotationCharacterCount++
+            } else {
+                if (quotationCharacterCount == 1) {
+                    stringBuilder.append(quotationCharacter)
+                }
+                if (quotationCharacterCount == 2) {
+                    stringBuilder.append(quotationCharacter)
+                    stringBuilder.append(quotationCharacter)
+                }
+                quotationCharacterCount = 0
+                stringBuilder.append(c)
+                if (c == '\\') { //TODO handle escaped characters better
+                    consume()
+                    stringBuilder.append(c ?: ' ')
+                }
             }
             consume()
         }
-        match('"')
         return Token(TurtleTokenType.STRING_LITERAL_QUOTE, stringBuilder.toString())
     }
 }
