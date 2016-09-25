@@ -107,12 +107,7 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
             }
             TurtleTokenType.UNLABELED_BLANK_NODE_OPEN -> {
                 consume()
-                if (lookAhead.tokenType == TurtleTokenType.UNLABELED_BLANK_NODE_CLOSE) {
-                    consume()
-                    return BlankNode("ANON${unlabeledBlankNodeCount++}")
-                } else {
-                    throw RuntimeException("Case not handled yet")
-                }
+                return handleUnlabeledBlankNode()
             }
             TurtleTokenType.CHARACTER_TOKEN -> {
                 val token = match(TurtleTokenType.CHARACTER_TOKEN)
@@ -160,12 +155,7 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
             }
             TurtleTokenType.UNLABELED_BLANK_NODE_OPEN -> {
                 consume()
-                if (lookAhead.tokenType == TurtleTokenType.UNLABELED_BLANK_NODE_CLOSE) {
-                    consume()
-                    return BlankNode("ANON${unlabeledBlankNodeCount++}")
-                } else {
-                    throw RuntimeException("Case not handled yet")
-                }
+                return handleUnlabeledBlankNode()
             }
             TurtleTokenType.STRING_LITERAL_QUOTE -> {
                 return literal()
@@ -175,6 +165,37 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
                 return handleCharacterToken(token.text)
             }
             else -> throw RuntimeException("Error Parsing Object -- must be IRI, Blank Node, or Literal not ${lookAhead.tokenType}")
+        }
+    }
+
+    fun handleUnlabeledBlankNode(): BlankNode {
+        if (lookAhead.tokenType == TurtleTokenType.UNLABELED_BLANK_NODE_CLOSE) {
+            consume()
+            return BlankNode("ANON${unlabeledBlankNodeCount++}")
+        } else {
+            val subject = BlankNode("ANON${unlabeledBlankNodeCount++}")
+            //TODO create inner triples
+            var predicate = predicate()
+            var `object` = `object`()
+            while (lookAhead.tokenType == TurtleTokenType.COMMA) {
+                match(TurtleTokenType.COMMA)
+                handler(Triple(subject, predicate, `object`))
+                `object` = `object`()
+            }
+            while (lookAhead.tokenType == TurtleTokenType.SEMICOLON) {
+                match(TurtleTokenType.SEMICOLON)
+                handler(Triple(subject, predicate, `object`))
+                predicate = predicate()
+                `object` = `object`()
+                while (lookAhead.tokenType == TurtleTokenType.COMMA) {
+                    match(TurtleTokenType.COMMA)
+                    handler(Triple(subject, predicate, `object`))
+                    `object` = `object`()
+                }
+            }
+            match(TurtleTokenType.UNLABELED_BLANK_NODE_CLOSE)
+            handler(Triple(subject, predicate, `object`))
+            return subject
         }
     }
 
@@ -235,7 +256,7 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
     fun literal() : Literal {
         val token = match(TurtleTokenType.STRING_LITERAL_QUOTE)
         when (lookAhead.tokenType) {
-            TurtleTokenType.PERIOD, TurtleTokenType.COMMA -> return TypedLiteral(token.text)
+            TurtleTokenType.PERIOD, TurtleTokenType.SEMICOLON, TurtleTokenType.COMMA, TurtleTokenType.UNLABELED_BLANK_NODE_CLOSE -> return TypedLiteral(token.text)
             TurtleTokenType.LANGTAG -> {
                 val lang = match(TurtleTokenType.LANGTAG)
                 return LangLiteral(token.text, lang.text)
@@ -255,10 +276,10 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
                         val iri = match(TurtleTokenType.CHARACTER_TOKEN)
                         return TypedLiteral(token.text, handlePrefix(iri.text))
                     }
-                    else -> throw RuntimeException("Error Parsing Typed Literal -- must be IRIREF, CHARACTER_TOKEN, or CHARACTER_TOKEN not ${lookAhead.tokenType}")
+                    else -> throw RuntimeException("Error Parsing Typed Literal -- must be IRIREF, RELATIVE_IRI, or CHARACTER_TOKEN not ${lookAhead.tokenType}")
                 }
             }
-            else -> throw RuntimeException("Error Parsing Literal -- must be PERIOD, COMMA, LANGTAG, or TYPE_TAG not ${lookAhead.tokenType}")
+            else -> throw RuntimeException("Error Parsing Literal -- must be PERIOD, COMMA, SEMICOLON, UNLABELED_BLANK_NODE_CLOSE, LANGTAG, or TYPE_TAG not ${lookAhead.tokenType}")
         }
     }
 }
