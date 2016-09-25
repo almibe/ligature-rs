@@ -9,14 +9,12 @@ import org.libraryweasel.stinkpot.Token
 import java.util.stream.Stream
 
 class TurtleLexer(input: Stream<String>) : Lexer<TurtleTokenType>(input) {
-    var unlabeledBlankNodeCount = 0
 
     override fun nextToken(): Token<TurtleTokenType> {
         while (c != EOF) {
             when (c) {
                 '#'-> {comment()}
                 ' ','\t','\n','\r'-> {ws()}
-                ']' -> { match(']') }
                 '_'-> return blankNode()
                 '<'-> return iri()
                 '@'-> return langTagPrefixBase()
@@ -24,7 +22,8 @@ class TurtleLexer(input: Stream<String>) : Lexer<TurtleTokenType>(input) {
                 '"', '\''-> return stringLiteralQuote()
                 ';' -> return semicolon()
                 ',' -> return comma()
-                '[' -> return unlabeledBlankNode()
+                '[' -> return unlabeledBlankNodeOpen()
+                ']' -> return unlabeledBlankNodeClose()
                 //TODO support checking ( for collections
                 '.'-> return period()
                 else-> return characterToken() //A catch all for now.  There might be a better way to handle this.
@@ -138,8 +137,13 @@ class TurtleLexer(input: Stream<String>) : Lexer<TurtleTokenType>(input) {
         return Token(TurtleTokenType.STRING_LITERAL_QUOTE, stringBuilder.toString())
     }
 
-    fun unlabeledBlankNode() : Token<TurtleTokenType> {
+    fun unlabeledBlankNodeOpen() : Token<TurtleTokenType> {
         match('[')
-        return Token(TurtleTokenType.BLANK_NODE_LABEL, "ANON${unlabeledBlankNodeCount++}")
+        return Token(TurtleTokenType.UNLABELED_BLANK_NODE_OPEN, "[")
+    }
+
+    fun unlabeledBlankNodeClose() : Token<TurtleTokenType> {
+        match(']')
+        return Token(TurtleTokenType.UNLABELED_BLANK_NODE_CLOSE, "]")
     }
 }

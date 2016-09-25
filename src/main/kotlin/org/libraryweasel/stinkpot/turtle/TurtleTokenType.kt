@@ -29,5 +29,7 @@ enum class TurtleTokenType : TokenType {
     PREFIX,
     BASE,
     RELATIVE_IRI,
-    CHARACTER_TOKEN;
+    CHARACTER_TOKEN,
+    UNLABELED_BLANK_NODE_OPEN,
+    UNLABELED_BLANK_NODE_CLOSE;
 }
