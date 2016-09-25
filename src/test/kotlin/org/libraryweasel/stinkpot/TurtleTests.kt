@@ -107,6 +107,7 @@ class TurtleTests {
             Triple(show, blurb, TypedLiteral(multilineText)),
             Triple(show219, blurb, TypedLiteral(multilineText2, IRI("${base}long-string"))),
             Triple(show219, blurb, TypedLiteral("")),
+            Triple(show219, blurb, TypedLiteral("")),
             Triple(show219, blurb, TypedLiteral(""))
         )
         val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/quotedLiterals.ttl").readText())

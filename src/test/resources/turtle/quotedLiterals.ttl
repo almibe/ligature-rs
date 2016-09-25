@@ -18,3 +18,4 @@ show:219 show:blurb """Another
 multiline string with' 'a' "custom datatype"\"."""^^<long-string>.
 show:219 show:blurb ''.
 show:219 show:blurb "".
+show:219 show:blurb """""".
