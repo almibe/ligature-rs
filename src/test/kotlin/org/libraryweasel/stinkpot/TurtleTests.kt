@@ -185,11 +185,11 @@ class TurtleTests {
         val expectedResults = listOf(
                 Triple(IRI("http://example.org/foo/subject"),IRI("http://example.org/foo/predicate"),BlankNode("ANON0")),
                 Triple(BlankNode("ANON0"),IRI("${rdf}first"),IRI("http://example.org/foo/a")),
-                Triple(BlankNode("ANON0"),IRI("${rdf}rest"),IRI("http://example.org/foo/b")),
-                Triple(BlankNode("ANON0"),IRI("${rdf}first"),IRI("http://example.org/foo/b")),
-                Triple(BlankNode("ANON0"),IRI("${rdf}rest"),IRI("http://example.org/foo/c")),
-                Triple(BlankNode("ANON0"),IRI("${rdf}first"),IRI("http://example.org/foo/c")),
-                Triple(BlankNode("ANON0"),IRI("${rdf}rest"),IRI("${rdf}nil")),
+                Triple(BlankNode("ANON0"),IRI("${rdf}rest"),BlankNode("ANON1")),
+                Triple(BlankNode("ANON1"),IRI("${rdf}first"),IRI("http://example.org/foo/b")),
+                Triple(BlankNode("ANON1"),IRI("${rdf}rest"),BlankNode("ANON2")),
+                Triple(BlankNode("ANON2"),IRI("${rdf}first"),IRI("http://example.org/foo/c")),
+                Triple(BlankNode("ANON2"),IRI("${rdf}rest"),IRI("${rdf}nil")),
                 Triple(IRI("http://example.org/foo/subject"),IRI("http://example.org/foo/predicate2"),IRI("${rdf}nil"))
         )
         val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/collections.ttl").readText())

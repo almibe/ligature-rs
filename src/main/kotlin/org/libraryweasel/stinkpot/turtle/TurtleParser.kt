@@ -209,7 +209,23 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
             consume()
             return IRI("${rdf}nil")
         } else {
-            throw RuntimeException("Not supported yet")
+            var last: BlankNode? = null
+            var first: BlankNode? = null
+            while (lookAhead.tokenType != TurtleTokenType.COLLECTION_CLOSE) {
+                val node = `object`()
+                val blankNode = BlankNode("ANON${unlabeledBlankNodeCount++}")
+                handler(Triple(blankNode, IRI("${rdf}first"), node))
+                if (first == null) {
+                    first = blankNode
+                }
+                if (last != null) {
+                    handler(Triple(last, IRI("${rdf}rest"), blankNode))
+                }
+                last = blankNode
+            }
+            consume()
+            handler(Triple(last!!, IRI("${rdf}rest"), IRI("${rdf}nil")))
+            return first!!
         }
     }
 
