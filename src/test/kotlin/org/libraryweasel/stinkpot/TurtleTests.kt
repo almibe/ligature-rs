@@ -115,17 +115,60 @@ class TurtleTests {
     }
 
     //TODO numbers.ttl
+    @Test fun supportNumbers() {
+        val expectedResults = listOf(
+            Triple(IRI(""),IRI(""),IRI(""))
+        )
+        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/numbers.ttl").readText())
+        Assert.assertEquals(results, expectedResults)
+    }
+
     //TODO booleans.ttl
+    @Test fun supportBooleans() {
+        val expectedResults = listOf(
+            Triple(IRI(""),IRI(""),IRI(""))
+        )
+        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/booleans.ttl").readText())
+        Assert.assertEquals(results, expectedResults)
+    }
 
     //TODO test blank nodes
     //TODO blankNodes.ttl
+    @Test fun supportBlankNodes() {
+        val expectedResults = listOf(
+            Triple(IRI(""),IRI(""),IRI(""))
+        )
+        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/blankNodes.ttl").readText())
+        Assert.assertEquals(results, expectedResults)
+    }
 
     //TODO Nesting Unlabeled Blank Nodes in Turtle
     //TODO nestedUnlabeledBlankNodes.ttl
+    @Test fun nestedUnlabeledBlankNodes() {
+        val expectedResults = listOf(
+                Triple(IRI(""),IRI(""),IRI(""))
+        )
+        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/nestedUnlabeledBlankNodes.ttl").readText())
+        Assert.assertEquals(results, expectedResults)
+    }
     //TODO complexUnlabeledBlankNodes.ttl
+    @Test fun complexUnlabeledBlankNodes() {
+        val expectedResults = listOf(
+                Triple(IRI(""),IRI(""),IRI(""))
+        )
+        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/complexUnlabeledBlankNodes.ttl").readText())
+        Assert.assertEquals(results, expectedResults)
+    }
 
     //TODO Collections
     //TODO collections.ttl
+    @Test fun supportCollections() {
+        val expectedResults = listOf(
+                Triple(IRI(""),IRI(""),IRI(""))
+        )
+        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/collections.ttl").readText())
+        Assert.assertEquals(results, expectedResults)
+    }
 
     //TODO examples 19-26 and wordnetStinkpot.ttl
 }
