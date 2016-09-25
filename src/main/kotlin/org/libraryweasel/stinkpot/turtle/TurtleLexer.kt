@@ -24,7 +24,8 @@ class TurtleLexer(input: Stream<String>) : Lexer<TurtleTokenType>(input) {
                 ',' -> return comma()
                 '[' -> return unlabeledBlankNodeOpen()
                 ']' -> return unlabeledBlankNodeClose()
-                //TODO support checking ( for collections
+                '(' -> return collectionOpen()
+                ')' -> return collectionClose()
                 '.'-> return period()
                 else-> return characterToken() //A catch all for now.  There might be a better way to handle this.
             }
@@ -146,4 +147,15 @@ class TurtleLexer(input: Stream<String>) : Lexer<TurtleTokenType>(input) {
         match(']')
         return Token(TurtleTokenType.UNLABELED_BLANK_NODE_CLOSE, "]")
     }
+
+    fun collectionOpen() : Token<TurtleTokenType> {
+        match('(')
+        return Token(TurtleTokenType.COLLECTION_OPEN, "(")
+    }
+
+    fun collectionClose() : Token<TurtleTokenType> {
+        match(')')
+        return Token(TurtleTokenType.COLLECTION_CLOSE, ")")
+    }
+
 }

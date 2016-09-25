@@ -12,6 +12,7 @@ class TurtleTests {
     val stinkpot = Stinkpot()
     val xsd = "http://www.w3.org/2001/XMLSchema#"
     val foafKnows = IRI("http://xmlns.com/foaf/0.1/knows")
+    val rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 
     val spidermanEnemy = Triple(IRI("http://example.org/#spiderman"),
     IRI("http://www.perceive.net/schemas/relationship/enemyOf"), IRI("http://example.org/#green-goblin"))
@@ -166,7 +167,6 @@ class TurtleTests {
         Assert.assertEquals(results, expectedResults)
     }
 
-    //TODO complexUnlabeledBlankNodes.ttl
     @Test fun complexUnlabeledBlankNodes() {
         val expectedResults = listOf(
             Triple(BlankNode("ANON0"),IRI("http://xmlns.com/foaf/0.1/name"),TypedLiteral("Alice")),
@@ -180,16 +180,22 @@ class TurtleTests {
         val c = Comparator<Triple> { f, s -> f.toString().compareTo(s.toString()) }
         Assert.assertEquals(results.sortedWith(c), expectedResults.sortedWith(c))
     }
-//
-//    //TODO Collections
-//    //TODO collections.ttl
-//    @Test fun supportCollections() {
-//        val expectedResults = listOf(
-//                Triple(IRI(""),IRI(""),IRI(""))
-//        )
-//        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/collections.ttl").readText())
-//        Assert.assertEquals(results, expectedResults)
-//    }
+
+    @Test fun supportCollections() {
+        val expectedResults = listOf(
+                Triple(IRI("http://example.org/foo/subject"),IRI("http://example.org/foo/predicate"),BlankNode("ANON0")),
+                Triple(BlankNode("ANON0"),IRI("${rdf}first"),IRI("http://example.org/foo/a")),
+                Triple(BlankNode("ANON0"),IRI("${rdf}rest"),IRI("http://example.org/foo/b")),
+                Triple(BlankNode("ANON0"),IRI("${rdf}first"),IRI("http://example.org/foo/b")),
+                Triple(BlankNode("ANON0"),IRI("${rdf}rest"),IRI("http://example.org/foo/c")),
+                Triple(BlankNode("ANON0"),IRI("${rdf}first"),IRI("http://example.org/foo/c")),
+                Triple(BlankNode("ANON0"),IRI("${rdf}rest"),IRI("${rdf}nil")),
+                Triple(IRI("http://example.org/foo/subject"),IRI("http://example.org/foo/predicate2"),IRI("${rdf}nil"))
+        )
+        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/collections.ttl").readText())
+        val c = Comparator<Triple> { f, s -> f.toString().compareTo(s.toString()) }
+        Assert.assertEquals(results.sortedWith(c), expectedResults.sortedWith(c))
+    }
 //
 //    //TODO examples 19-26 and wordnetStinkpot.ttl
 //    @Test fun wordnetTest() {

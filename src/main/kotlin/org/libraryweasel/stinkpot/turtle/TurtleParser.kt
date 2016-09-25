@@ -10,6 +10,7 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
     val prefixes = mutableMapOf<String, String>()
     var base = ""
     var unlabeledBlankNodeCount = 0
+    val rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 
     fun start() : Unit {
         while (lookAhead.tokenType != TurtleTokenType.EOF) {
@@ -164,6 +165,10 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
                 val token = match(TurtleTokenType.CHARACTER_TOKEN)
                 return handleCharacterToken(token.text)
             }
+            TurtleTokenType.COLLECTION_OPEN -> {
+                consume()
+                return handleCollection()
+            }
             else -> throw RuntimeException("Error Parsing Object -- must be IRI, Blank Node, or Literal not ${lookAhead.tokenType}")
         }
     }
@@ -196,6 +201,15 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
             match(TurtleTokenType.UNLABELED_BLANK_NODE_CLOSE)
             handler(Triple(subject, predicate, `object`))
             return subject
+        }
+    }
+
+    fun handleCollection(): Object {
+        if (lookAhead.tokenType == TurtleTokenType.COLLECTION_CLOSE) {
+            consume()
+            return IRI("${rdf}nil")
+        } else {
+            throw RuntimeException("Not supported yet")
         }
     }
 
