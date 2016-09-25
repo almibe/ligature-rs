@@ -165,6 +165,8 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
             handlePrefix(text)
         } else if (numberType != null) {
             TypedLiteral(text, IRI(numberType.url))
+        } else if (listOf("true", "false").contains(text.toLowerCase())) {
+            TypedLiteral(text.toLowerCase(), IRI("http://www.w3.org/2001/XMLSchema#boolean"))
         } else {
             throw RuntimeException("Could not parse character token -- ${text}")
         }

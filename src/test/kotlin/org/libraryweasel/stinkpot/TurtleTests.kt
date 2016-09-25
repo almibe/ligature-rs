@@ -9,6 +9,7 @@ import org.testng.annotations.Test
 
 class TurtleTests {
     val stinkpot = Stinkpot()
+    val xsd = "http://www.w3.org/2001/XMLSchema#"
 
     val spidermanEnemy = Triple(IRI("http://example.org/#spiderman"),
     IRI("http://www.perceive.net/schemas/relationship/enemyOf"), IRI("http://example.org/#green-goblin"))
@@ -117,7 +118,6 @@ class TurtleTests {
     @Test fun supportNumbers() {
         val helium = "http://en.wikipedia.org/wiki/Helium"
         val prefix = "http://example.org/elements"
-        val xsd = "http://www.w3.org/2001/XMLSchema#"
         val expectedResults = listOf(
             Triple(IRI(helium),IRI("${prefix}atomicNumber"), TypedLiteral("2", IRI("${xsd}integer"))),
             Triple(IRI(helium),IRI("${prefix}atomicMass"), TypedLiteral("4.002602", IRI("${xsd}float"))),
@@ -127,14 +127,15 @@ class TurtleTests {
         Assert.assertEquals(results, expectedResults)
     }
 
-//    //TODO booleans.ttl
-//    @Test fun supportBooleans() {
-//        val expectedResults = listOf(
-//            Triple(IRI(""),IRI(""),IRI(""))
-//        )
-//        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/booleans.ttl").readText())
-//        Assert.assertEquals(results, expectedResults)
-//    }
+    //TODO booleans.ttl
+    @Test fun supportBooleans() {
+        val expectedResults = listOf(
+            Triple(IRI("http://somecountry.example/census2007"),IRI("http://example.org/stats/isLandlocked"),
+                    TypedLiteral("false", IRI("${xsd}boolean")))
+        )
+        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/booleans.ttl").readText())
+        Assert.assertEquals(results, expectedResults)
+    }
 //
 //    //TODO test blank nodes
 //    //TODO blankNodes.ttl
