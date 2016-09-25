@@ -106,7 +106,7 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
             }
             TurtleTokenType.CHARACTER_TOKEN -> {
                 val token = match(TurtleTokenType.CHARACTER_TOKEN)
-                return IRI(handlePrefix(token.text))
+                return handlePrefix(token.text)
             }
             else -> throw RuntimeException("Error Parsing Subject -- must be IRI or Blank Node not ${lookAhead.tokenType} -- ${lookAhead.text}")
         }
@@ -127,7 +127,7 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
                 if (token.text == "a") {
                     return IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
                 } else {
-                    return IRI(handlePrefix(token.text))
+                    return handlePrefix(token.text)
                 }
             }
             else -> throw RuntimeException("Error Parsing Subject -- must be IRI not ${lookAhead.tokenType} -- ${lookAhead.text}")
@@ -153,19 +153,62 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
             }
             TurtleTokenType.CHARACTER_TOKEN -> {
                 val token = match(TurtleTokenType.CHARACTER_TOKEN)
-                return IRI(handlePrefix(token.text))
+                return handleCharacterToken(token.text)
             }
             else -> throw RuntimeException("Error Parsing Object -- must be IRI, Blank Node, or Literal not ${lookAhead.tokenType}")
         }
     }
 
-    fun handlePrefix(text: String) : String {
+    fun handleCharacterToken(text: String) : Object {
+        val numberType = isNumberType(text)
+        return if (text.split(':').size == 2) {
+            handlePrefix(text)
+        } else if (numberType != null) {
+            TypedLiteral(text, IRI(numberType.url))
+        } else {
+            throw RuntimeException("Could not parse character token -- ${text}")
+        }
+    }
+
+    fun handlePrefix(text: String) : IRI {
         val parts = text.split(':')
         assert(parts.size == 2 && prefixes.containsKey(parts[0] + ":")) {
             "Error Handling Prefix -- $text"
         }
         val prefix = prefixes[parts[0] + ":"]
-        return prefix + parts[1]
+        return IRI(prefix + parts[1])
+    }
+
+    enum class NumberType(val url: String) {
+        integer(url = "http://www.w3.org/2001/XMLSchema#integer"),
+        double(url = "http://www.w3.org/2001/XMLSchema#double"),
+        float(url = "http://www.w3.org/2001/XMLSchema#float")
+    }
+
+    fun isNumberType(str: String?): NumberType? {
+        var numberType = NumberType.integer
+        if (str == null) return null
+        val data = str.toCharArray()
+        if (data.size <= 0) return null
+        var index = 0
+        if (data[0] == '-' && data.size > 1) index = 1
+        while (index < data.size) {
+            if (data[index] == '.') {
+                if (numberType == NumberType.float || numberType == NumberType.double) return null
+                else numberType = NumberType.float
+            } else if (data[index] == 'e' || data[index] == 'E') {
+                if (numberType == NumberType.double) return null
+                else {
+                    index++
+                    if (data[index] == '-' && data.size > (index + 1)) index++
+                    numberType = NumberType.double
+                }
+            } else if (!Character.isDigit(data[index])) {
+                return null
+            }
+            index++
+        }
+        return numberType
     }
 
     fun literal() : Literal {
@@ -189,7 +232,7 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
                     }
                     TurtleTokenType.CHARACTER_TOKEN -> {
                         val iri = match(TurtleTokenType.CHARACTER_TOKEN)
-                        return TypedLiteral(token.text, IRI(handlePrefix(iri.text)))
+                        return TypedLiteral(token.text, handlePrefix(iri.text))
                     }
                     else -> throw RuntimeException("Error Parsing Typed Literal -- must be IRIREF, CHARACTER_TOKEN, or CHARACTER_TOKEN not ${lookAhead.tokenType}")
                 }

@@ -77,7 +77,6 @@ class TurtleTests {
         Assert.assertEquals(results, expectedResults)
     }
 
-    //TODO test literals
     @Test fun supportLanguageLiterals() {
         val expectedResults = listOf(spidermanNameRu)
         val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/literalWithLanguage.ttl").readText())
@@ -116,59 +115,71 @@ class TurtleTests {
 
     //TODO numbers.ttl
     @Test fun supportNumbers() {
+        val helium = "http://en.wikipedia.org/wiki/Helium"
+        val prefix = "http://example.org/elements"
+        val xsd = "http://www.w3.org/2001/XMLSchema#"
         val expectedResults = listOf(
-            Triple(IRI(""),IRI(""),IRI(""))
+            Triple(IRI(helium),IRI("${prefix}atomicNumber"), TypedLiteral("2", IRI("${xsd}integer"))),
+            Triple(IRI(helium),IRI("${prefix}atomicMass"), TypedLiteral("4.002602", IRI("${xsd}float"))),
+            Triple(IRI(helium),IRI("${prefix}specificGravity"), TypedLiteral("1.663E-4", IRI("${xsd}double")))
         )
         val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/numbers.ttl").readText())
         Assert.assertEquals(results, expectedResults)
     }
 
-    //TODO booleans.ttl
-    @Test fun supportBooleans() {
-        val expectedResults = listOf(
-            Triple(IRI(""),IRI(""),IRI(""))
-        )
-        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/booleans.ttl").readText())
-        Assert.assertEquals(results, expectedResults)
-    }
-
-    //TODO test blank nodes
-    //TODO blankNodes.ttl
-    @Test fun supportBlankNodes() {
-        val expectedResults = listOf(
-            Triple(IRI(""),IRI(""),IRI(""))
-        )
-        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/blankNodes.ttl").readText())
-        Assert.assertEquals(results, expectedResults)
-    }
-
-    //TODO Nesting Unlabeled Blank Nodes in Turtle
-    //TODO nestedUnlabeledBlankNodes.ttl
-    @Test fun nestedUnlabeledBlankNodes() {
-        val expectedResults = listOf(
-                Triple(IRI(""),IRI(""),IRI(""))
-        )
-        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/nestedUnlabeledBlankNodes.ttl").readText())
-        Assert.assertEquals(results, expectedResults)
-    }
-    //TODO complexUnlabeledBlankNodes.ttl
-    @Test fun complexUnlabeledBlankNodes() {
-        val expectedResults = listOf(
-                Triple(IRI(""),IRI(""),IRI(""))
-        )
-        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/complexUnlabeledBlankNodes.ttl").readText())
-        Assert.assertEquals(results, expectedResults)
-    }
-
-    //TODO Collections
-    //TODO collections.ttl
-    @Test fun supportCollections() {
-        val expectedResults = listOf(
-                Triple(IRI(""),IRI(""),IRI(""))
-        )
-        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/collections.ttl").readText())
-        Assert.assertEquals(results, expectedResults)
-    }
-
-    //TODO examples 19-26 and wordnetStinkpot.ttl
+//    //TODO booleans.ttl
+//    @Test fun supportBooleans() {
+//        val expectedResults = listOf(
+//            Triple(IRI(""),IRI(""),IRI(""))
+//        )
+//        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/booleans.ttl").readText())
+//        Assert.assertEquals(results, expectedResults)
+//    }
+//
+//    //TODO test blank nodes
+//    //TODO blankNodes.ttl
+//    @Test fun supportBlankNodes() {
+//        val expectedResults = listOf(
+//            Triple(IRI(""),IRI(""),IRI(""))
+//        )
+//        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/blankNodes.ttl").readText())
+//        Assert.assertEquals(results, expectedResults)
+//    }
+//
+//    //TODO Nesting Unlabeled Blank Nodes in Turtle
+//    //TODO nestedUnlabeledBlankNodes.ttl
+//    @Test fun nestedUnlabeledBlankNodes() {
+//        val expectedResults = listOf(
+//                Triple(IRI(""),IRI(""),IRI(""))
+//        )
+//        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/nestedUnlabeledBlankNodes.ttl").readText())
+//        Assert.assertEquals(results, expectedResults)
+//    }
+//    //TODO complexUnlabeledBlankNodes.ttl
+//    @Test fun complexUnlabeledBlankNodes() {
+//        val expectedResults = listOf(
+//                Triple(IRI(""),IRI(""),IRI(""))
+//        )
+//        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/complexUnlabeledBlankNodes.ttl").readText())
+//        Assert.assertEquals(results, expectedResults)
+//    }
+//
+//    //TODO Collections
+//    //TODO collections.ttl
+//    @Test fun supportCollections() {
+//        val expectedResults = listOf(
+//                Triple(IRI(""),IRI(""),IRI(""))
+//        )
+//        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/collections.ttl").readText())
+//        Assert.assertEquals(results, expectedResults)
+//    }
+//
+//    //TODO examples 19-26 and wordnetStinkpot.ttl
+//    @Test fun wordnetTest() {
+//        val expectedResults = listOf(
+//                Triple(IRI(""),IRI(""),IRI(""))
+//        )
+//        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/wordnetStinkpot.ttl").readText())
+//        Assert.assertEquals(results, expectedResults)
+//    }
 }
