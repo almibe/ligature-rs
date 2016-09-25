@@ -183,11 +183,15 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
                         val iri = match(TurtleTokenType.IRIREF)
                         return TypedLiteral(token.text, IRI(iri.text))
                     }
+                    TurtleTokenType.RELATIVE_IRI -> {
+                        val iri = match(TurtleTokenType.RELATIVE_IRI)
+                        return TypedLiteral(token.text, IRI("$base${iri.text}"))
+                    }
                     TurtleTokenType.CHARACTER_TOKEN -> {
                         val iri = match(TurtleTokenType.CHARACTER_TOKEN)
                         return TypedLiteral(token.text, IRI(handlePrefix(iri.text)))
                     }
-                    else -> throw RuntimeException("Error Parsing Typed Literal -- must be IRIREF or CHARACTER_TOKEN not ${lookAhead.tokenType}")
+                    else -> throw RuntimeException("Error Parsing Typed Literal -- must be IRIREF, CHARACTER_TOKEN, or CHARACTER_TOKEN not ${lookAhead.tokenType}")
                 }
             }
             else -> throw RuntimeException("Error Parsing Literal -- must be PERIOD, COMMA, LANGTAG, or TYPE_TAG not ${lookAhead.tokenType}")

@@ -63,7 +63,7 @@ class TurtleTests {
 
     @Test fun turtleIRIParsing() {
         val expectedResults = listOf(
-                Triple(IRI("http://one.example/subject1"), IRI("http://one.example/predicate1"), IRI("http://one.example/object1")),
+        Triple(IRI("http://one.example/subject1"), IRI("http://one.example/predicate1"), IRI("http://one.example/object1")),
         Triple(IRI("${base}subject2"), IRI("${base}predicate2"), IRI("${base}object2")),
         Triple(IRI("${base2}subject2"), IRI("${base2}predicate2"), IRI("${base2}object2")),
         Triple(IRI("${baseTwo}subject3"), IRI("${baseTwo}predicate3"), IRI("${baseTwo}object3")),
@@ -85,6 +85,7 @@ class TurtleTests {
     }
 
     @Test fun supportQuotedLiterals() {
+        val base = "http://www.libraryweasel.org/fake/madeup#"
         val show = IRI("http://example.org/vocab/show/218")
         val label = IRI("http://www.w3.org/2000/01/rdf-schema#label")
         val localName = IRI("http://example.org/vocab/show/localName")
@@ -93,13 +94,16 @@ class TurtleTests {
         literal with many quotes (\"\"\"\"\")
 and up to two sequential apostrophes ('')."""
         val expectedResults = listOf(
-            Triple(show, label, TypedLiteral("That Seventies Show", IRI("http://www.w3.org/2001/XMLSchema#string")))
-//            triple(show, label, PlainLiteral("That Seventies Show")),
-//            triple(show, label, PlainLiteral("That Seventies Show")),
-//            triple(show, localName, LangLiteral("That Seventies Show", "en")),
-//            triple(show, localName, LangLiteral("Cette Série des Années Soixante-dix", "fr")),
-//            triple(show, localName, LangLiteral("Cette Série des Années Septante", "fr-be")),
-//            triple(show, blurb, PlainLiteral(multilineText))
+            Triple(show, label, TypedLiteral("That Seventies Show")),
+            Triple(show, label, TypedLiteral("That Seventies Show")),
+            Triple(show, label, TypedLiteral("That Seventies Show")),
+            Triple(show, IRI("${base}pred"), TypedLiteral("That Seventies Show", IRI("${base}string"))),
+            Triple(show, localName, LangLiteral("That Seventies Show", "en")),
+            Triple(show, localName, LangLiteral("Cette Série des Années Soixante-dix", "fr")),
+            Triple(show, localName, LangLiteral("Cette Série des Années Septante", "fr-be")),
+            Triple(show, blurb, TypedLiteral(multilineText))
+            //Triple(show, blurb, TypedLiteral(multilineText)),
+            //Triple(show, blurb, TypedLiteral(multilineText))
         )
         val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/quotedLiterals.ttl").readText())
         Assert.assertEquals(results, expectedResults)
