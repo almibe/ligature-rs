@@ -114,7 +114,6 @@ class TurtleTests {
         Assert.assertEquals(results, expectedResults)
     }
 
-    //TODO numbers.ttl
     @Test fun supportNumbers() {
         val helium = "http://en.wikipedia.org/wiki/Helium"
         val prefix = "http://example.org/elements"
@@ -127,7 +126,6 @@ class TurtleTests {
         Assert.assertEquals(results, expectedResults)
     }
 
-    //TODO booleans.ttl
     @Test fun supportBooleans() {
         val expectedResults = listOf(
             Triple(IRI("http://somecountry.example/census2007"),IRI("http://example.org/stats/isLandlocked"),
@@ -136,26 +134,25 @@ class TurtleTests {
         val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/booleans.ttl").readText())
         Assert.assertEquals(results, expectedResults)
     }
-//
-//    //TODO test blank nodes
-//    //TODO blankNodes.ttl
-//    @Test fun supportBlankNodes() {
-//        val expectedResults = listOf(
-//            Triple(IRI(""),IRI(""),IRI(""))
-//        )
-//        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/blankNodes.ttl").readText())
-//        Assert.assertEquals(results, expectedResults)
-//    }
-//
-//    //TODO Nesting Unlabeled Blank Nodes in Turtle
-//    //TODO nestedUnlabeledBlankNodes.ttl
-//    @Test fun nestedUnlabeledBlankNodes() {
-//        val expectedResults = listOf(
-//                Triple(IRI(""),IRI(""),IRI(""))
-//        )
-//        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/nestedUnlabeledBlankNodes.ttl").readText())
-//        Assert.assertEquals(results, expectedResults)
-//    }
+
+    @Test fun supportBlankNodes() {
+        val expectedResults = listOf(
+            Triple(BlankNode("alice"),IRI("http://xmlns.com/foaf/0.1/knows"),BlankNode("bob")),
+            Triple(BlankNode("bob"),IRI("http://xmlns.com/foaf/0.1/knows"),BlankNode("alice"))
+        )
+        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/blankNodes.ttl").readText())
+        Assert.assertEquals(results, expectedResults)
+    }
+
+    @Test fun nestedUnlabeledBlankNodes() {
+        val expectedResults = listOf(
+            Triple(BlankNode("ANON1"),IRI("http://xmlns.com/foaf/0.1/knows"),BlankNode("ANON2")),
+            Triple(BlankNode("ANON2"),IRI("http://xmlns.com/foaf/0.1/name"),TypedLiteral("Bob"))
+        )
+        val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/nestedUnlabeledBlankNodes.ttl").readText())
+        Assert.assertEquals(results, expectedResults)
+    }
+
 //    //TODO complexUnlabeledBlankNodes.ttl
 //    @Test fun complexUnlabeledBlankNodes() {
 //        val expectedResults = listOf(
