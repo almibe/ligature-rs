@@ -4,9 +4,10 @@
 
 package org.libraryweasel.stinkpot
 
-interface Subject {}
+interface Node {}
+interface Subject: Node {}
 interface Object {}
-interface Predicate {}
+interface Predicate: Node {}
 
 data class IRI(val value: String) : Subject, Predicate, Object
 data class BlankNode(val label: String) : Subject, Object
