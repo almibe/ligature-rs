@@ -24,6 +24,7 @@ repositories {
 }
 
 dependencies {
+    compile 'org.jparsec:jparsec:3.0-SNAPSHOT'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     testCompile 'org.testng:testng:6.9.13.6'
 }
