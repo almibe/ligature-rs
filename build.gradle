@@ -1,7 +1,7 @@
 buildscript {
-    ext.kotlin_version = '1.0.3'
+    ext.kotlin_version = '1.0.6'
     repositories {
-        mavenCentral()
+        jcenter()
         mavenLocal()
     }
     dependencies {
@@ -19,12 +19,11 @@ group 'org.libraryweasel'
 version '0.1.0-SNAPSHOT'
 
 repositories {
-    mavenCentral()
+    jcenter()
     mavenLocal()
 }
 
 dependencies {
-    compile 'org.jparsec:jparsec:3.0-SNAPSHOT'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     testCompile 'org.testng:testng:6.9.13.6'
 }
