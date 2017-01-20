@@ -2,11 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.libraryweasel.ligature
+package org.almibe.ligature
 
-import org.libraryweasel.ligature.ntriples.NTriplesLexer
-import org.libraryweasel.ligature.ntriples.NTriplesParser
-import org.libraryweasel.ligature.turtle.TurtleLexer
+import org.almibe.ligature.ntriples.NTriplesLexer
+import org.almibe.ligature.ntriples.NTriplesParser
+import org.almibe.ligature.turtle.TurtleLexer
 import org.libraryweasel.ligature.turtle.TurtleParser
 import java.io.BufferedReader
 import java.io.StringReader

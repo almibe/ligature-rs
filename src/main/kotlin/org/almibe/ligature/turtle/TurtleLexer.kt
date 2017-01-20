@@ -2,9 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.libraryweasel.ligature.turtle
+package org.almibe.ligature.turtle
 
-import org.libraryweasel.ligature.Lexer
+import org.almibe.ligature.Lexer
 import org.libraryweasel.ligature.Token
 import java.util.stream.Stream
 

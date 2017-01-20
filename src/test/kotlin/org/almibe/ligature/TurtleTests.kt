@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.libraryweasel.ligature
+package org.almibe.ligature
 
 import org.testng.Assert
 import org.testng.annotations.Test
@@ -121,9 +121,9 @@ class TurtleTests {
         val helium = "http://en.wikipedia.org/wiki/Helium"
         val prefix = "http://example.org/elements"
         val expectedResults = listOf(
-            Triple(IRI(helium),IRI("${prefix}atomicNumber"), TypedLiteral("2", IRI("${xsd}integer"))),
-            Triple(IRI(helium),IRI("${prefix}atomicMass"), TypedLiteral("4.002602", IRI("${xsd}float"))),
-            Triple(IRI(helium),IRI("${prefix}specificGravity"), TypedLiteral("1.663E-4", IRI("${xsd}double")))
+            Triple(IRI(helium), IRI("${prefix}atomicNumber"), TypedLiteral("2", IRI("${xsd}integer"))),
+            Triple(IRI(helium), IRI("${prefix}atomicMass"), TypedLiteral("4.002602", IRI("${xsd}float"))),
+            Triple(IRI(helium), IRI("${prefix}specificGravity"), TypedLiteral("1.663E-4", IRI("${xsd}double")))
         )
         val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/numbers.ttl").readText())
         Assert.assertEquals(results, expectedResults)
@@ -131,7 +131,7 @@ class TurtleTests {
 
     @Test fun supportBooleans() {
         val expectedResults = listOf(
-            Triple(IRI("http://somecountry.example/census2007"),IRI("http://example.org/stats/isLandlocked"),
+            Triple(IRI("http://somecountry.example/census2007"), IRI("http://example.org/stats/isLandlocked"),
                     TypedLiteral("false", IRI("${xsd}boolean")))
         )
         val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/booleans.ttl").readText())
@@ -140,8 +140,8 @@ class TurtleTests {
 
     @Test fun supportBlankNodes() {
         val expectedResults = listOf(
-            Triple(BlankNode("alice"),IRI("http://xmlns.com/foaf/0.1/knows"),BlankNode("bob")),
-            Triple(BlankNode("bob"),IRI("http://xmlns.com/foaf/0.1/knows"),BlankNode("alice"))
+            Triple(BlankNode("alice"), IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("bob")),
+            Triple(BlankNode("bob"), IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("alice"))
         )
         val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/blankNodes.ttl").readText())
         Assert.assertEquals(results, expectedResults)
@@ -152,7 +152,7 @@ class TurtleTests {
             Triple(IRI("http://example.com/person/bob"), foafKnows, IRI("http://example.com/person/george")),
             Triple(BlankNode("ANON0"), foafKnows, IRI("http://example.com/person/george")),
             Triple(IRI("http://example.com/person/bob"), foafKnows, BlankNode("ANON1")),
-            Triple(BlankNode("ANON2"),IRI("http://xmlns.com/foaf/0.1/knows"),BlankNode("ANON3"))
+            Triple(BlankNode("ANON2"), IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("ANON3"))
         )
         val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/unlabeledBlankNodes.ttl").readText())
         Assert.assertEquals(results, expectedResults)
@@ -160,8 +160,8 @@ class TurtleTests {
 
     @Test fun nestedUnlabeledBlankNodes() {
         val expectedResults = listOf(
-            Triple(BlankNode("ANON1"),IRI("http://xmlns.com/foaf/0.1/name"),TypedLiteral("Bob")),
-            Triple(BlankNode("ANON0"),IRI("http://xmlns.com/foaf/0.1/knows"),BlankNode("ANON1"))
+            Triple(BlankNode("ANON1"), IRI("http://xmlns.com/foaf/0.1/name"), TypedLiteral("Bob")),
+            Triple(BlankNode("ANON0"), IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("ANON1"))
         )
         val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/nestedUnlabeledBlankNodes.ttl").readText())
         Assert.assertEquals(results, expectedResults)
@@ -169,12 +169,12 @@ class TurtleTests {
 
     @Test fun complexUnlabeledBlankNodes() {
         val expectedResults = listOf(
-            Triple(BlankNode("ANON0"),IRI("http://xmlns.com/foaf/0.1/name"),TypedLiteral("Alice")),
-            Triple(BlankNode("ANON1"),IRI("http://xmlns.com/foaf/0.1/name"),TypedLiteral("Bob")),
-            Triple(BlankNode("ANON0"),IRI("http://xmlns.com/foaf/0.1/knows"),BlankNode("ANON1")),
-            Triple(BlankNode("ANON2"),IRI("http://xmlns.com/foaf/0.1/name"),TypedLiteral("Eve")),
-            Triple(BlankNode("ANON1"),IRI("http://xmlns.com/foaf/0.1/knows"),BlankNode("ANON2")),
-            Triple(BlankNode("ANON1"),IRI("http://xmlns.com/foaf/0.1/mbox"),IRI("http://bob@example.com"))
+            Triple(BlankNode("ANON0"), IRI("http://xmlns.com/foaf/0.1/name"), TypedLiteral("Alice")),
+            Triple(BlankNode("ANON1"), IRI("http://xmlns.com/foaf/0.1/name"), TypedLiteral("Bob")),
+            Triple(BlankNode("ANON0"), IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("ANON1")),
+            Triple(BlankNode("ANON2"), IRI("http://xmlns.com/foaf/0.1/name"), TypedLiteral("Eve")),
+            Triple(BlankNode("ANON1"), IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("ANON2")),
+            Triple(BlankNode("ANON1"), IRI("http://xmlns.com/foaf/0.1/mbox"), IRI("http://bob@example.com"))
         )
         val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/complexUnlabeledBlankNodes.ttl").readText())
         val c = Comparator<Triple> { f, s -> f.toString().compareTo(s.toString()) }
@@ -183,14 +183,14 @@ class TurtleTests {
 
     @Test fun supportCollections() {
         val expectedResults = listOf(
-                Triple(IRI("http://example.org/foo/subject"),IRI("http://example.org/foo/predicate"),BlankNode("ANON0")),
-                Triple(BlankNode("ANON0"),IRI("${rdf}first"),IRI("http://example.org/foo/a")),
-                Triple(BlankNode("ANON0"),IRI("${rdf}rest"),BlankNode("ANON1")),
-                Triple(BlankNode("ANON1"),IRI("${rdf}first"),IRI("http://example.org/foo/b")),
-                Triple(BlankNode("ANON1"),IRI("${rdf}rest"),BlankNode("ANON2")),
-                Triple(BlankNode("ANON2"),IRI("${rdf}first"),IRI("http://example.org/foo/c")),
-                Triple(BlankNode("ANON2"),IRI("${rdf}rest"),IRI("${rdf}nil")),
-                Triple(IRI("http://example.org/foo/subject"),IRI("http://example.org/foo/predicate2"),IRI("${rdf}nil"))
+                Triple(IRI("http://example.org/foo/subject"), IRI("http://example.org/foo/predicate"), BlankNode("ANON0")),
+                Triple(BlankNode("ANON0"), IRI("${rdf}first"), IRI("http://example.org/foo/a")),
+                Triple(BlankNode("ANON0"), IRI("${rdf}rest"), BlankNode("ANON1")),
+                Triple(BlankNode("ANON1"), IRI("${rdf}first"), IRI("http://example.org/foo/b")),
+                Triple(BlankNode("ANON1"), IRI("${rdf}rest"), BlankNode("ANON2")),
+                Triple(BlankNode("ANON2"), IRI("${rdf}first"), IRI("http://example.org/foo/c")),
+                Triple(BlankNode("ANON2"), IRI("${rdf}rest"), IRI("${rdf}nil")),
+                Triple(IRI("http://example.org/foo/subject"), IRI("http://example.org/foo/predicate2"), IRI("${rdf}nil"))
         )
         val results = stinkpot.parseTurtle(this.javaClass.getResource("/turtle/collections.ttl").readText())
         val c = Comparator<Triple> { f, s -> f.toString().compareTo(s.toString()) }
