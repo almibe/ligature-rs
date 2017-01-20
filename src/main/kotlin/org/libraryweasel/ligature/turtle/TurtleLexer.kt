@@ -2,10 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.libraryweasel.stinkpot.turtle
+package org.libraryweasel.ligature.turtle
 
-import org.libraryweasel.stinkpot.Lexer
-import org.libraryweasel.stinkpot.Token
+import org.libraryweasel.ligature.Lexer
+import org.libraryweasel.ligature.Token
 import java.util.stream.Stream
 
 class TurtleLexer(input: Stream<String>) : Lexer<TurtleTokenType>(input) {

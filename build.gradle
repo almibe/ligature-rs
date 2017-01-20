@@ -30,7 +30,7 @@ dependencies {
 
 bundle {
     instruction 'Import-Package', '*'
-    instruction 'Export-Package', 'org.libraryweasel.stinkpot.*'
+    instruction 'Export-Package', 'org.libraryweasel.ligature.*'
 }
 
 test {

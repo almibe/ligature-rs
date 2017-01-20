@@ -2,12 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.libraryweasel.stinkpot
+package org.libraryweasel.ligature
 
-import org.libraryweasel.stinkpot.ntriples.NTriplesLexer
-import org.libraryweasel.stinkpot.ntriples.NTriplesParser
-import org.libraryweasel.stinkpot.turtle.TurtleLexer
-import org.libraryweasel.stinkpot.turtle.TurtleParser
+import org.libraryweasel.ligature.ntriples.NTriplesLexer
+import org.libraryweasel.ligature.ntriples.NTriplesParser
+import org.libraryweasel.ligature.turtle.TurtleLexer
+import org.libraryweasel.ligature.turtle.TurtleParser
 import java.io.BufferedReader
 import java.io.StringReader
 import java.nio.file.Files
