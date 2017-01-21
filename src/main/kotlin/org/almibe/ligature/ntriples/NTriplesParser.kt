@@ -5,7 +5,7 @@
 package org.almibe.ligature.ntriples
 
 import org.almibe.ligature.*
-import org.libraryweasel.ligature.*
+import org.almibe.ligature.*
 import org.almibe.ligature.turtle.TurtleTokenType
 
 class NTriplesParser(lexer: NTriplesLexer, val handler: (Triple) -> Unit) : Parser<TurtleTokenType>(lexer) {

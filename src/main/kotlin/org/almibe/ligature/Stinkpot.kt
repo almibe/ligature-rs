@@ -7,7 +7,7 @@ package org.almibe.ligature
 import org.almibe.ligature.ntriples.NTriplesLexer
 import org.almibe.ligature.ntriples.NTriplesParser
 import org.almibe.ligature.turtle.TurtleLexer
-import org.libraryweasel.ligature.turtle.TurtleParser
+import org.almibe.ligature.turtle.TurtleParser
 import java.io.BufferedReader
 import java.io.StringReader
 import java.nio.file.Files

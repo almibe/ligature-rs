@@ -5,7 +5,6 @@
 package org.almibe.ligature.turtle
 
 import org.almibe.ligature.*
-import org.libraryweasel.ligature.*
 
 class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<TurtleTokenType>(lexer) {
     val prefixes = mutableMapOf<String, String>()

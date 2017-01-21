@@ -4,7 +4,7 @@
 
 package org.almibe.ligature
 
-import org.libraryweasel.ligature.turtle.TurtleTokenType
+import org.almibe.ligature.turtle.TurtleTokenType
 import java.util.stream.Stream
 
 abstract class Lexer<out T: TokenType>(val inputStream: Stream<String>) {

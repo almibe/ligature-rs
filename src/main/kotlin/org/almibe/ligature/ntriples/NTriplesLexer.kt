@@ -5,7 +5,7 @@
 package org.almibe.ligature.ntriples
 
 import org.almibe.ligature.Lexer
-import org.libraryweasel.ligature.Token
+import org.almibe.ligature.Token
 import org.almibe.ligature.turtle.TurtleTokenType
 import java.util.stream.Stream
 

@@ -4,7 +4,7 @@
 
 package org.almibe.ligature.turtle
 
-import org.libraryweasel.ligature.TokenType
+import org.almibe.ligature.TokenType
 
 enum class TurtleTokenType : TokenType {
     //Below are tokens used for ntriples and turtle

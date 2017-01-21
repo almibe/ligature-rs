@@ -5,7 +5,7 @@
 package org.almibe.ligature.turtle
 
 import org.almibe.ligature.Lexer
-import org.libraryweasel.ligature.Token
+import org.almibe.ligature.Token
 import java.util.stream.Stream
 
 class TurtleLexer(input: Stream<String>) : Lexer<TurtleTokenType>(input) {

@@ -12,8 +12,8 @@ buildscript {
 
 apply plugin: 'maven'
 apply plugin: 'kotlin'
-apply plugin: 'groovy'
 apply plugin: 'org.dm.bundle'
+apply plugin: 'antlr'
 
 group 'org.libraryweasel'
 version '0.1.0-SNAPSHOT'
@@ -24,6 +24,7 @@ repositories {
 }
 
 dependencies {
+    antlr 'org.antlr:antlr4:4.5'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     testCompile 'org.testng:testng:6.9.13.6'
 }
