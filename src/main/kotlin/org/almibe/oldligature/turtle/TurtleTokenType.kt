@@ -2,9 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.almibe.ligature.turtle
+package org.almibe.oldligature.turtle
 
-import org.almibe.ligature.TokenType
+import org.almibe.oldligature.TokenType
 
 enum class TurtleTokenType : TokenType {
     //Below are tokens used for ntriples and turtle

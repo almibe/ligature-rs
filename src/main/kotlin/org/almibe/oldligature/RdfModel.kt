@@ -2,12 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.almibe.ligature
+package org.almibe.oldligature
 
-interface Node {}
-interface Subject: Node {}
-interface Object {}
-interface Predicate: Node {}
+interface Node
+interface Subject: Node
+interface Object
+interface Predicate: Node
 
 data class IRI(val value: String) : Subject, Predicate, Object
 data class BlankNode(val label: String) : Subject, Object

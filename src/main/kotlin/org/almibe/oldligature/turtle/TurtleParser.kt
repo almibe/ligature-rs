@@ -2,9 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.almibe.ligature.turtle
+package org.almibe.oldligature.turtle
 
-import org.almibe.ligature.*
+import org.almibe.oldligature.*
 
 class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<TurtleTokenType>(lexer) {
     val prefixes = mutableMapOf<String, String>()
@@ -219,7 +219,7 @@ class TurtleParser(lexer: TurtleLexer, val handler: (Triple) -> Unit) : Parser<T
                     first = blankNode
                 }
                 if (last != null) {
-                    handler(org.almibe.ligature.Triple(last, IRI("${rdf}rest"), blankNode))
+                    handler(org.almibe.oldligature.Triple(last, IRI("${rdf}rest"), blankNode))
                 }
                 last = blankNode
             }
