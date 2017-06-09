@@ -2,11 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.almibe.oldligature.ntriples
+package org.almibe.stinkpot.ntriples
 
-import org.almibe.oldligature.Lexer
-import org.almibe.oldligature.Token
-import org.almibe.oldligature.turtle.TurtleTokenType
+import org.almibe.stinkpot.Lexer
+import org.almibe.stinkpot.Token
+import org.almibe.stinkpot.turtle.TurtleTokenType
 import java.util.stream.Stream
 
 class NTriplesLexer(input: Stream<String>) : Lexer<TurtleTokenType>(input) {

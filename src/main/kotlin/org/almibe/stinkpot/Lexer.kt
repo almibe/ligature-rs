@@ -2,9 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.almibe.oldligature
+package org.almibe.stinkpot
 
-import org.almibe.oldligature.turtle.TurtleTokenType
+import org.almibe.stinkpot.turtle.TurtleTokenType
 import java.util.stream.Stream
 
 abstract class Lexer<out T: TokenType>(val inputStream: Stream<String>) {

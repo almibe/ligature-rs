@@ -2,12 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.almibe.oldligature
+package org.almibe.stinkpot
 
-import org.almibe.oldligature.ntriples.NTriplesLexer
-import org.almibe.oldligature.ntriples.NTriplesParser
-import org.almibe.oldligature.turtle.TurtleLexer
-import org.almibe.oldligature.turtle.TurtleParser
+import org.almibe.ligature.Triple
+import org.almibe.stinkpot.ntriples.NTriplesLexer
+import org.almibe.stinkpot.ntriples.NTriplesParser
+import org.almibe.stinkpot.turtle.TurtleLexer
+import org.almibe.stinkpot.turtle.TurtleParser
 import java.io.BufferedReader
 import java.io.StringReader
 import java.nio.file.Files

@@ -2,10 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.almibe.oldligature.ntriples
+package org.almibe.stinkpot.ntriples
 
-import org.almibe.oldligature.*
-import org.almibe.oldligature.turtle.TurtleTokenType
+import org.almibe.ligature.*
+import org.almibe.stinkpot.*
+import org.almibe.stinkpot.turtle.TurtleTokenType
 
 class NTriplesParser(lexer: NTriplesLexer, val handler: (Triple) -> Unit) : Parser<TurtleTokenType>(lexer) {
     fun start() : Unit {
