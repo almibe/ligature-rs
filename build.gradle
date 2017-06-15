@@ -1,17 +1,18 @@
 buildscript {
-    ext.kotlin_version = '1.0.6'
+    ext.kotlin_version = '1.1.2-5'
     repositories {
         jcenter()
         mavenLocal()
     }
     dependencies {
-        classpath 'org.dm.gradle:gradle-bundle-plugin:0.8'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'org.dm.gradle:gradle-bundle-plugin:0.10.0'
     }
 }
 
 apply plugin: 'maven'
 apply plugin: 'kotlin'
+apply plugin: 'antlr'
 apply plugin: 'org.dm.bundle'
 
 group 'org.libraryweasel'
@@ -23,6 +24,7 @@ repositories {
 }
 
 dependencies {
+    antlr 'org.antlr:antlr4:4.7'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     testCompile 'org.testng:testng:6.9.13.6'
 }
