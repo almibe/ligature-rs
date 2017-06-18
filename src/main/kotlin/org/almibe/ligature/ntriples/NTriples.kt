@@ -4,7 +4,7 @@
 
 package org.almibe.ligature.ntriples
 
-import org.almibe.ligature.Triple
+import org.almibe.ligature.*
 import org.almibe.ligature.parser.NTriplesBaseVisitor
 import org.almibe.ligature.parser.NTriplesLexer
 import org.almibe.ligature.parser.NTriplesParser
@@ -21,7 +21,55 @@ class DocumentVisitor : NTriplesBaseVisitor<List<Triple>>() {
 }
 
 class TripleVisitor : NTriplesBaseVisitor<Triple>() {
-    override fun visitTriple(ctx: NTriplesParser.TripleContext?): Triple {
+    override fun visitTriple(ctx: NTriplesParser.TripleContext): Triple {
+        TODO()
+    }
+}
+
+class SubjectVisitor : NTriplesBaseVisitor<Subject>() {
+    override fun visitSubject(ctx: NTriplesParser.SubjectContext?): Subject {
+        TODO()
+    }
+}
+
+class PredicateVisitor : NTriplesBaseVisitor<Predicate>() {
+    override fun visitPredicate(ctx: NTriplesParser.PredicateContext?): Predicate {
+        TODO()
+    }
+}
+
+class ObjectVisitor : NTriplesBaseVisitor<Object>() {
+    override fun visitObject(ctx: NTriplesParser.ObjectContext?): Object {
+        TODO()
+    }
+}
+
+class IRIVisitor : NTriplesBaseVisitor<IRI>() {
+    override fun visitObject(ctx: NTriplesParser.ObjectContext?): IRI {
+        TODO()
+    }
+}
+
+class BlankNodeVisitor : NTriplesBaseVisitor<BlankNode>() {
+    override fun visitObject(ctx: NTriplesParser.ObjectContext?): BlankNode {
+        TODO()
+    }
+}
+
+class LiteralVisitor : NTriplesBaseVisitor<Literal>() {
+    override fun visitObject(ctx: NTriplesParser.ObjectContext?): Literal {
+        TODO()
+    }
+}
+
+class TypedLiteralVisitor : NTriplesBaseVisitor<TypedLiteral>() {
+    override fun visitObject(ctx: NTriplesParser.ObjectContext?): TypedLiteral {
+        TODO()
+    }
+}
+
+class LangLiteralVisitor : NTriplesBaseVisitor<LangLiteral>() {
+    override fun visitObject(ctx: NTriplesParser.ObjectContext?): LangLiteral {
         TODO()
     }
 }
