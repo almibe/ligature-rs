@@ -53,36 +53,48 @@ class PredicateVisitor : NTriplesBaseVisitor<Predicate>() {
 
 class ObjectVisitor : NTriplesBaseVisitor<Object>() {
     override fun visitObject(ctx: NTriplesParser.ObjectContext): Object {
-        TODO()
+        if (ctx.iri() != null) {
+            return IRIVisitor().visitIri(ctx.iri())
+        } else if (ctx.blankNode() != null) {
+            return BlankNodeVisitor().visitBlankNode(ctx.blankNode())
+        } else if (ctx.literal() != null) {
+            return LiteralVisitor().visitLiteral(ctx.literal())
+        } else if (ctx.langLiteral() != null) {
+            return LangLiteralVisitor().visitLangLiteral(ctx.langLiteral())
+        } else if (ctx.typedLiteral() != null) {
+            return TypedLiteralVisitor().visitTypedLiteral(ctx.typedLiteral())
+        } else {
+            throw RuntimeException("Unexpected Object Type")
+        }
     }
 }
 
 class IRIVisitor : NTriplesBaseVisitor<IRI>() {
-    override fun visitObject(ctx: NTriplesParser.ObjectContext?): IRI {
+    override fun visitIri(ctx: NTriplesParser.IriContext): IRI {
         TODO()
     }
 }
 
 class BlankNodeVisitor : NTriplesBaseVisitor<BlankNode>() {
-    override fun visitObject(ctx: NTriplesParser.ObjectContext?): BlankNode {
+    override fun visitBlankNode(ctx: NTriplesParser.BlankNodeContext): BlankNode {
         TODO()
     }
 }
 
 class LiteralVisitor : NTriplesBaseVisitor<Literal>() {
-    override fun visitObject(ctx: NTriplesParser.ObjectContext?): Literal {
+    override fun visitLiteral(ctx: NTriplesParser.LiteralContext): Literal {
         TODO()
     }
 }
 
 class TypedLiteralVisitor : NTriplesBaseVisitor<TypedLiteral>() {
-    override fun visitObject(ctx: NTriplesParser.ObjectContext?): TypedLiteral {
+    override fun visitTypedLiteral(ctx: NTriplesParser.TypedLiteralContext): TypedLiteral {
         TODO()
     }
 }
 
 class LangLiteralVisitor : NTriplesBaseVisitor<LangLiteral>() {
-    override fun visitObject(ctx: NTriplesParser.ObjectContext?): LangLiteral {
+    override fun visitLangLiteral(ctx: NTriplesParser.LangLiteralContext): LangLiteral {
         TODO()
     }
 }
