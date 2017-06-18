@@ -22,24 +22,37 @@ class DocumentVisitor : NTriplesBaseVisitor<List<Triple>>() {
 
 class TripleVisitor : NTriplesBaseVisitor<Triple>() {
     override fun visitTriple(ctx: NTriplesParser.TripleContext): Triple {
-        TODO()
+        val subject = SubjectVisitor().visitSubject(ctx.subject())
+        val predicate = PredicateVisitor().visitPredicate(ctx.predicate())
+        val `object` = ObjectVisitor().visitObject(ctx.`object`())
+        return Triple(subject, predicate, `object`)
     }
 }
 
 class SubjectVisitor : NTriplesBaseVisitor<Subject>() {
-    override fun visitSubject(ctx: NTriplesParser.SubjectContext?): Subject {
-        TODO()
+    override fun visitSubject(ctx: NTriplesParser.SubjectContext): Subject {
+        if (ctx.iri() != null) {
+            return IRIVisitor().visitIri(ctx.iri())
+        } else if (ctx.blankNode() != null) {
+            return BlankNodeVisitor().visitBlankNode(ctx.blankNode())
+        } else {
+            throw RuntimeException("Unexpected Subject Type")
+        }
     }
 }
 
 class PredicateVisitor : NTriplesBaseVisitor<Predicate>() {
-    override fun visitPredicate(ctx: NTriplesParser.PredicateContext?): Predicate {
-        TODO()
+    override fun visitPredicate(ctx: NTriplesParser.PredicateContext): Predicate {
+        if (ctx.iri() != null) {
+            return IRIVisitor().visitIri(ctx.iri())
+        } else {
+            throw RuntimeException("Unexpected Predicate Type")
+        }
     }
 }
 
 class ObjectVisitor : NTriplesBaseVisitor<Object>() {
-    override fun visitObject(ctx: NTriplesParser.ObjectContext?): Object {
+    override fun visitObject(ctx: NTriplesParser.ObjectContext): Object {
         TODO()
     }
 }
