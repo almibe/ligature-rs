@@ -7,7 +7,6 @@ package org.almibe.ligature.ntriples
 import org.almibe.ligature.*
 import org.testng.Assert
 import org.testng.annotations.Test
-import java.nio.file.Paths
 
 class NTriplesTests {
     val ligature = NTriples()
@@ -61,7 +60,7 @@ class NTriplesTests {
         expectedResults.add( Triple( IRI("http://example.org/#spiderman"),  IRI("http://example.org/text"),  TypedLiteral("This is a multi-line\\nliteral with many quotes (\\\"\\\"\\\"\\\"\\\")\\nand two apostrophes ('').", stringIRI)))
         expectedResults.add( Triple( IRI("http://en.wikipedia.org/wiki/Helium"),  IRI("http://example.org/elements/atomicNumber"),  TypedLiteral("2",  IRI("http://www.w3.org/2001/XMLSchema#integer"))))
         expectedResults.add( Triple( IRI("http://en.wikipedia.org/wiki/Helium"),  IRI("http://example.org/elements/specificGravity"),  TypedLiteral("1.663E-4",  IRI("http://www.w3.org/2001/XMLSchema#double"))))
-        val results = ligature.parseNTriples(Paths.get(this.javaClass.getResource("/ntriples/literals.nt").toURI()))
+        val results = ligature.parseNTriples(this.javaClass.getResource("/ntriples/literals.nt").readText())
         Assert.assertEquals(results, expectedResults)
     }
 
