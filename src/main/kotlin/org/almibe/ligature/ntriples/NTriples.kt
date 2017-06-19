@@ -63,7 +63,7 @@ class ObjectVisitor : NTriplesBaseVisitor<Object>() {
 
 class IRIVisitor : NTriplesBaseVisitor<IRI>() {
     override fun visitIri(ctx: NTriplesParser.IriContext): IRI {
-        TODO()
+        TODO(ctx.text)
     }
 }
 
@@ -100,5 +100,23 @@ class NTriples {
 
         val documentVisitor = DocumentVisitor()
         return documentVisitor.visit(parser.document())
+    }
+
+    fun parseSubject(text: String) : Subject {
+        val stream = CharStreams.fromString(text)
+        val lexer = NTriplesLexer(stream)
+        val tokens = CommonTokenStream(lexer)
+        val parser = NTriplesParser(tokens)
+
+        val documentVisitor = SubjectVisitor()
+        return documentVisitor.visit(parser.subject())
+    }
+
+    fun parsePredicate(text: String) : Predicate {
+        TODO()
+    }
+
+    fun parseObject(text: String) : Object {
+        TODO()
     }
 }

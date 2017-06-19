@@ -13,6 +13,20 @@ class NTriplesTests {
 
     val stringIRI = IRI("http://www.w3.org/2001/XMLSchema#string")
 
+    @Test fun parseSubjects() {
+        val result = ligature.parseSubject("<http://www.w3.org/2001/XMLSchema#string>")
+        val expectedResult = IRI("http://www.w3.org/2001/XMLSchema#string")
+        Assert.assertEquals(result, expectedResult)
+    }
+
+    @Test fun parsePredicates() {
+        //TODO("Add tests for each case for parsing Predicates")
+    }
+
+    @Test fun parseObjects() {
+        //TODO("Add tests for each case for parsing Objects")
+    }
+
     @Test fun supportBasicIRITriple() {
         val expectedResult = Triple(IRI("http://example.org/#spiderman"),
                  IRI("http://www.perceive.net/schemas/relationship/enemyOf"),  IRI("http://example.org/#green-goblin"))
