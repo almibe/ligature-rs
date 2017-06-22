@@ -26,6 +26,7 @@ dependencies {
     compile 'org.antlr:antlr4-runtime:4.7'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile 'org.almibe:ligature-grammar:0.1.0-SNAPSHOT'
+    testCompile 'org.antlr:antlr4:4.7'
     testCompile 'org.testng:testng:6.9.13.6'
 }
 
