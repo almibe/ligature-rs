@@ -32,8 +32,8 @@ class TripleVisitor : NTriplesBaseVisitor<Triple>() {
 class SubjectVisitor : NTriplesBaseVisitor<Subject>() {
     override fun visitSubject(ctx: NTriplesParser.SubjectContext): Subject {
         return when {
-            ctx.IRIREF() != null -> IRI(handleIRI(ctx.IRIREF().text))
-            ctx.BLANK_NODE_LABEL() != null -> BlankNode(ctx.BLANK_NODE_LABEL().text)
+            ctx.IRIREF() != null -> handleIRI(ctx.IRIREF().text)
+            ctx.BLANK_NODE_LABEL() != null -> handleBlankNode(ctx.BLANK_NODE_LABEL().text)
             else -> throw RuntimeException("Unexpected Subject Type")
         }
     }
@@ -42,7 +42,7 @@ class SubjectVisitor : NTriplesBaseVisitor<Subject>() {
 class PredicateVisitor : NTriplesBaseVisitor<Predicate>() {
     override fun visitPredicate(ctx: NTriplesParser.PredicateContext): Predicate {
         return when {
-            ctx.IRIREF() != null -> IRI(handleIRI(ctx.IRIREF().text))
+            ctx.IRIREF() != null -> handleIRI(ctx.IRIREF().text)
             else -> throw RuntimeException("Unexpected Predicate Type")
         }
     }
@@ -51,11 +51,9 @@ class PredicateVisitor : NTriplesBaseVisitor<Predicate>() {
 class ObjectVisitor : NTriplesBaseVisitor<Object>() {
     override fun visitObject(ctx: NTriplesParser.ObjectContext): Object {
         return when {
-            ctx.IRIREF() != null -> IRI(handleIRI(ctx.IRIREF().text))
-            ctx.BLANK_NODE_LABEL() != null -> BlankNode(ctx.BLANK_NODE_LABEL().text)
+            ctx.IRIREF() != null -> handleIRI(ctx.IRIREF().text)
+            ctx.BLANK_NODE_LABEL() != null -> handleBlankNode(ctx.BLANK_NODE_LABEL().text)
             ctx.literal() != null -> LiteralVisitor().visitLiteral(ctx.literal())
-//            ctx.langLiteral() != null -> LangLiteralVisitor().visitLangLiteral(ctx.langLiteral())
-//            ctx.typedLiteral() != null -> TypedLiteralVisitor().visitTypedLiteral(ctx.typedLiteral())
             else -> throw RuntimeException("Unexpected Object Type")
         }
     }
@@ -63,7 +61,10 @@ class ObjectVisitor : NTriplesBaseVisitor<Object>() {
 
 class LiteralVisitor : NTriplesBaseVisitor<Literal>() {
     override fun visitLiteral(ctx: NTriplesParser.LiteralContext): Literal {
-        TODO()
+        return when {
+            ctx.STRING_LITERAL_QUOTE() != null -> handleLiteral(ctx)
+            else -> throw RuntimeException("Unexpected Literal Type")
+        }
     }
 }
 
@@ -79,10 +80,28 @@ class NTriples {
     }
 }
 
-fun handleIRI(iriRef: String): String {
+fun handleIRI(iriRef: String): IRI {
     if (iriRef.length > 2) {
-        return iriRef.substring(1, (iriRef.length-1))
+        return IRI(iriRef.substring(1, (iriRef.length-1)))
     } else {
         throw RuntimeException("Invalid iriRef - $iriRef")
+    }
+}
+
+fun handleBlankNode(blankNode: String): BlankNode {
+    if (blankNode.length > 2) {
+        return BlankNode(blankNode.substring(2))
+    } else {
+        throw RuntimeException("Invalid blank node label - $blankNode")
+    }
+}
+
+fun handleLiteral(literal: NTriplesParser.LiteralContext): Literal {
+    val value = literal.STRING_LITERAL_QUOTE().text
+
+    return when {
+        literal.LANGTAG() != null -> LangLiteral(value, literal.LANGTAG().text)
+        literal.IRIREF() != null -> TypedLiteral(value, handleIRI(literal.IRIREF().text))
+        else -> TypedLiteral(value)
     }
 }

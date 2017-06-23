@@ -47,7 +47,7 @@ class NTriplesTests {
 
     val stringIRI = IRI("http://www.w3.org/2001/XMLSchema#string")
 
-    @Test fun parseSubjects() {
+    @Test fun testParsingSubjects() {
         val resultIRI = parseSubject("<http://www.w3.org/2001/XMLSchema#string>")
         val expectedResultIRI = IRI("http://www.w3.org/2001/XMLSchema#string")
 
@@ -58,12 +58,34 @@ class NTriplesTests {
         Assert.assertEquals(resultBlankNode, expectedResultBlankNode)
     }
 
-    @Test fun parsePredicates() {
-        TODO("Add tests for each case for parsing Predicates")
+    @Test fun testParsingPredicates() {
+        val resultIRI = parsePredicate("<http://www.w3.org/2001/XMLSchema#string>")
+        val expectedResultIRI = IRI("http://www.w3.org/2001/XMLSchema#string")
+
+        Assert.assertEquals(resultIRI, expectedResultIRI)
     }
 
-    @Test fun parseObjects() {
-        TODO("Add tests for each case for parsing Objects")
+    @Test fun testParsingObjects() {
+        val resultIRI = parseObject("<http://www.w3.org/2001/XMLSchema#string>")
+        val expectedResultIRI = IRI("http://www.w3.org/2001/XMLSchema#string")
+
+        val resultBlankNode = parseObject("_:ludo")
+        val expectedResultBlankNode = BlankNode("ludo")
+
+        val resultLiteral = parseObject("\"Test\"")
+        val expectedResultLiteral = TypedLiteral("Test")
+
+        val resultTypedLiteral = parseObject("\"Test\"^^<Type>")
+        val expectedResultTypedLiteral = TypedLiteral("Test", IRI("Type"))
+
+        val resultLangLiteral = parseObject("\"Test\"@EN")
+        val expectedResultLangLiteral = LangLiteral("Test", "EN")
+
+        Assert.assertEquals(resultIRI, expectedResultIRI)
+        Assert.assertEquals(resultBlankNode, expectedResultBlankNode)
+        Assert.assertEquals(resultLiteral, expectedResultLiteral)
+        Assert.assertEquals(resultTypedLiteral, expectedResultTypedLiteral)
+        Assert.assertEquals(resultLangLiteral, expectedResultLangLiteral)
     }
 
     @Test fun supportBasicIRITriple() {
