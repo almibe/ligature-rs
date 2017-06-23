@@ -97,10 +97,14 @@ fun handleBlankNode(blankNode: String): BlankNode {
 }
 
 fun handleLiteral(literal: NTriplesParser.LiteralContext): Literal {
-    val value = literal.STRING_LITERAL_QUOTE().text
+    val value = if (literal.STRING_LITERAL_QUOTE().text.length >= 2) {
+        literal.STRING_LITERAL_QUOTE().text.substring(1, literal.STRING_LITERAL_QUOTE().text.length-1)
+    } else {
+        throw RuntimeException("Invalid literal.")
+    }
 
     return when {
-        literal.LANGTAG() != null -> LangLiteral(value, literal.LANGTAG().text)
+        literal.LANGTAG() != null -> LangLiteral(value, literal.LANGTAG().text.substring(1))
         literal.IRIREF() != null -> TypedLiteral(value, handleIRI(literal.IRIREF().text))
         else -> TypedLiteral(value)
     }

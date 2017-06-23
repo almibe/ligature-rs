@@ -29,7 +29,7 @@ fun parsePredicate(text: String) : Predicate {
     val parser = NTriplesParser(tokens)
 
     val predicateVisitor = PredicateVisitor()
-    return predicateVisitor.visit(parser.subject())
+    return predicateVisitor.visit(parser.predicate())
 }
 
 fun parseObject(text: String) : Object {
@@ -39,7 +39,7 @@ fun parseObject(text: String) : Object {
     val parser = NTriplesParser(tokens)
 
     val objectVisitor = ObjectVisitor()
-    return objectVisitor.visit(parser.subject())
+    return objectVisitor.visit(parser.`object`())
 }
 
 class NTriplesTests {
