@@ -11,63 +11,6 @@ import org.almibe.ligature.parser.NTriplesParser
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 
-class DocumentVisitor : NTriplesBaseVisitor<List<Triple>>() {
-    override fun visitNtriplesDoc(ctx: NTriplesParser.NtriplesDocContext): List<Triple> {
-        val tripleVisitor = TripleVisitor()
-        return ctx.triple().map {
-            it.accept(tripleVisitor)
-        }
-    }
-}
-
-class TripleVisitor : NTriplesBaseVisitor<Triple>() {
-    override fun visitTriple(ctx: NTriplesParser.TripleContext): Triple {
-        val subject = SubjectVisitor().visitSubject(ctx.subject())
-        val predicate = PredicateVisitor().visitPredicate(ctx.predicate())
-        val `object` = ObjectVisitor().visitObject(ctx.`object`())
-        return Triple(subject, predicate, `object`)
-    }
-}
-
-class SubjectVisitor : NTriplesBaseVisitor<Subject>() {
-    override fun visitSubject(ctx: NTriplesParser.SubjectContext): Subject {
-        return when {
-            ctx.IRIREF() != null -> handleIRI(ctx.IRIREF().text)
-            ctx.BLANK_NODE_LABEL() != null -> handleBlankNode(ctx.BLANK_NODE_LABEL().text)
-            else -> throw RuntimeException("Unexpected Subject Type")
-        }
-    }
-}
-
-class PredicateVisitor : NTriplesBaseVisitor<Predicate>() {
-    override fun visitPredicate(ctx: NTriplesParser.PredicateContext): Predicate {
-        return when {
-            ctx.IRIREF() != null -> handleIRI(ctx.IRIREF().text)
-            else -> throw RuntimeException("Unexpected Predicate Type")
-        }
-    }
-}
-
-class ObjectVisitor : NTriplesBaseVisitor<Object>() {
-    override fun visitObject(ctx: NTriplesParser.ObjectContext): Object {
-        return when {
-            ctx.IRIREF() != null -> handleIRI(ctx.IRIREF().text)
-            ctx.BLANK_NODE_LABEL() != null -> handleBlankNode(ctx.BLANK_NODE_LABEL().text)
-            ctx.literal() != null -> LiteralVisitor().visitLiteral(ctx.literal())
-            else -> throw RuntimeException("Unexpected Object Type")
-        }
-    }
-}
-
-class LiteralVisitor : NTriplesBaseVisitor<Literal>() {
-    override fun visitLiteral(ctx: NTriplesParser.LiteralContext): Literal {
-        return when {
-            ctx.STRING_LITERAL_QUOTE() != null -> handleLiteral(ctx)
-            else -> throw RuntimeException("Unexpected Literal Type")
-        }
-    }
-}
-
 class NTriples {
     fun parseNTriples(text: String) : List<Triple>  {
         val stream = CharStreams.fromString(text)
@@ -80,7 +23,64 @@ class NTriples {
     }
 }
 
-fun handleIRI(iriRef: String): IRI {
+internal class DocumentVisitor : NTriplesBaseVisitor<List<Triple>>() {
+    override fun visitNtriplesDoc(ctx: NTriplesParser.NtriplesDocContext): List<Triple> {
+        val tripleVisitor = TripleVisitor()
+        return ctx.triple().map {
+            it.accept(tripleVisitor)
+        }
+    }
+}
+
+internal class TripleVisitor : NTriplesBaseVisitor<Triple>() {
+    override fun visitTriple(ctx: NTriplesParser.TripleContext): Triple {
+        val subject = SubjectVisitor().visitSubject(ctx.subject())
+        val predicate = PredicateVisitor().visitPredicate(ctx.predicate())
+        val `object` = ObjectVisitor().visitObject(ctx.`object`())
+        return Triple(subject, predicate, `object`)
+    }
+}
+
+internal class SubjectVisitor : NTriplesBaseVisitor<Subject>() {
+    override fun visitSubject(ctx: NTriplesParser.SubjectContext): Subject {
+        return when {
+            ctx.IRIREF() != null -> handleIRI(ctx.IRIREF().text)
+            ctx.BLANK_NODE_LABEL() != null -> handleBlankNode(ctx.BLANK_NODE_LABEL().text)
+            else -> throw RuntimeException("Unexpected Subject Type")
+        }
+    }
+}
+
+internal class PredicateVisitor : NTriplesBaseVisitor<Predicate>() {
+    override fun visitPredicate(ctx: NTriplesParser.PredicateContext): Predicate {
+        return when {
+            ctx.IRIREF() != null -> handleIRI(ctx.IRIREF().text)
+            else -> throw RuntimeException("Unexpected Predicate Type")
+        }
+    }
+}
+
+internal class ObjectVisitor : NTriplesBaseVisitor<Object>() {
+    override fun visitObject(ctx: NTriplesParser.ObjectContext): Object {
+        return when {
+            ctx.IRIREF() != null -> handleIRI(ctx.IRIREF().text)
+            ctx.BLANK_NODE_LABEL() != null -> handleBlankNode(ctx.BLANK_NODE_LABEL().text)
+            ctx.literal() != null -> LiteralVisitor().visitLiteral(ctx.literal())
+            else -> throw RuntimeException("Unexpected Object Type")
+        }
+    }
+}
+
+internal class LiteralVisitor : NTriplesBaseVisitor<Literal>() {
+    override fun visitLiteral(ctx: NTriplesParser.LiteralContext): Literal {
+        return when {
+            ctx.STRING_LITERAL_QUOTE() != null -> handleLiteral(ctx)
+            else -> throw RuntimeException("Unexpected Literal Type")
+        }
+    }
+}
+
+internal fun handleIRI(iriRef: String): IRI {
     if (iriRef.length > 2) {
         return IRI(iriRef.substring(1, (iriRef.length-1)))
     } else {
@@ -88,7 +88,7 @@ fun handleIRI(iriRef: String): IRI {
     }
 }
 
-fun handleBlankNode(blankNode: String): BlankNode {
+internal fun handleBlankNode(blankNode: String): BlankNode {
     if (blankNode.length > 2) {
         return BlankNode(blankNode.substring(2))
     } else {
@@ -96,7 +96,7 @@ fun handleBlankNode(blankNode: String): BlankNode {
     }
 }
 
-fun handleLiteral(literal: NTriplesParser.LiteralContext): Literal {
+internal fun handleLiteral(literal: NTriplesParser.LiteralContext): Literal {
     val value = if (literal.STRING_LITERAL_QUOTE().text.length >= 2) {
         literal.STRING_LITERAL_QUOTE().text.substring(1, literal.STRING_LITERAL_QUOTE().text.length-1)
     } else {
