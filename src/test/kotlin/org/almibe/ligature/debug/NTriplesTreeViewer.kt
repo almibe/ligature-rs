@@ -19,7 +19,7 @@ fun main(args : Array<String>) {
     val lexer = NTriplesLexer(stream)
     val tokenStream = CommonTokenStream(lexer)
     val parser = NTriplesParser(tokenStream)
-    val tree: Tree = parser.document()
+    val tree: Tree = parser.triple()
 
     val frame = JFrame("NTriples TreeViewer")
     val panel = JPanel()

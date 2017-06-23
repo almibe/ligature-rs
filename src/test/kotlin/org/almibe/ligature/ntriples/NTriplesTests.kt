@@ -5,8 +5,42 @@
 package org.almibe.ligature.ntriples
 
 import org.almibe.ligature.*
+import org.almibe.ligature.parser.NTriplesLexer
+import org.almibe.ligature.parser.NTriplesParser
+import org.antlr.v4.runtime.CharStreams
+import org.antlr.v4.runtime.CommonTokenStream
 import org.testng.Assert
 import org.testng.annotations.Test
+
+fun parseSubject(text: String) : Subject {
+    val stream = CharStreams.fromString(text)
+    val lexer = NTriplesLexer(stream)
+    val tokens = CommonTokenStream(lexer)
+    val parser = NTriplesParser(tokens)
+
+    val subjectVisitor = SubjectVisitor()
+    return subjectVisitor.visit(parser.subject())
+}
+
+fun parsePredicate(text: String) : Predicate {
+    val stream = CharStreams.fromString(text)
+    val lexer = NTriplesLexer(stream)
+    val tokens = CommonTokenStream(lexer)
+    val parser = NTriplesParser(tokens)
+
+    val predicateVisitor = PredicateVisitor()
+    return predicateVisitor.visit(parser.subject())
+}
+
+fun parseObject(text: String) : Object {
+    val stream = CharStreams.fromString(text)
+    val lexer = NTriplesLexer(stream)
+    val tokens = CommonTokenStream(lexer)
+    val parser = NTriplesParser(tokens)
+
+    val objectVisitor = ObjectVisitor()
+    return objectVisitor.visit(parser.subject())
+}
 
 class NTriplesTests {
     val ligature = NTriples()
@@ -14,17 +48,22 @@ class NTriplesTests {
     val stringIRI = IRI("http://www.w3.org/2001/XMLSchema#string")
 
     @Test fun parseSubjects() {
-        val result = ligature.parseSubject("<http://www.w3.org/2001/XMLSchema#string>")
-        val expectedResult = IRI("http://www.w3.org/2001/XMLSchema#string")
-        Assert.assertEquals(result, expectedResult)
+        val resultIRI = parseSubject("<http://www.w3.org/2001/XMLSchema#string>")
+        val expectedResultIRI = IRI("http://www.w3.org/2001/XMLSchema#string")
+
+        val resultBlankNode = parseSubject("_:ludo")
+        val expectedResultBlankNode = BlankNode("ludo")
+
+        Assert.assertEquals(resultIRI, expectedResultIRI)
+        Assert.assertEquals(resultBlankNode, expectedResultBlankNode)
     }
 
     @Test fun parsePredicates() {
-        //TODO("Add tests for each case for parsing Predicates")
+        TODO("Add tests for each case for parsing Predicates")
     }
 
     @Test fun parseObjects() {
-        //TODO("Add tests for each case for parsing Objects")
+        TODO("Add tests for each case for parsing Objects")
     }
 
     @Test fun supportBasicIRITriple() {
