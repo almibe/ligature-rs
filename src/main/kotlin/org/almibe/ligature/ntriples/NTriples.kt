@@ -32,8 +32,8 @@ class TripleVisitor : NTriplesBaseVisitor<Triple>() {
 class SubjectVisitor : NTriplesBaseVisitor<Subject>() {
     override fun visitSubject(ctx: NTriplesParser.SubjectContext): Subject {
         return when {
-            ctx.IRIREF() != null -> IRI(ctx.IRIREF().getChild(1).text) //TODO move to own function
-            //ctx.BLANK_NODE_LABEL() != null -> BlankNodeVisitor().visitBlankNode(ctx.BLANK_NODE_LABEL())
+            ctx.IRIREF() != null -> IRI(handleIRI(ctx.IRIREF().text))
+            ctx.BLANK_NODE_LABEL() != null -> BlankNode(ctx.BLANK_NODE_LABEL().text)
             else -> throw RuntimeException("Unexpected Subject Type")
         }
     }
@@ -42,7 +42,7 @@ class SubjectVisitor : NTriplesBaseVisitor<Subject>() {
 class PredicateVisitor : NTriplesBaseVisitor<Predicate>() {
     override fun visitPredicate(ctx: NTriplesParser.PredicateContext): Predicate {
         return when {
-            ctx.IRIREF() != null -> IRI(ctx.IRIREF().getChild(1).text)//TODO move to own function
+            ctx.IRIREF() != null -> IRI(handleIRI(ctx.IRIREF().text))
             else -> throw RuntimeException("Unexpected Predicate Type")
         }
     }
@@ -51,11 +51,11 @@ class PredicateVisitor : NTriplesBaseVisitor<Predicate>() {
 class ObjectVisitor : NTriplesBaseVisitor<Object>() {
     override fun visitObject(ctx: NTriplesParser.ObjectContext): Object {
         return when {
-            ctx.IRIREF() != null -> IRI(ctx.IRIREF().getChild(1).text)//TODO move to own function
-            //ctx.blankNode() != null -> BlankNodeVisitor().visitBlankNode(ctx.blankNode())
+            ctx.IRIREF() != null -> IRI(handleIRI(ctx.IRIREF().text))
+            ctx.BLANK_NODE_LABEL() != null -> BlankNode(ctx.BLANK_NODE_LABEL().text)
             ctx.literal() != null -> LiteralVisitor().visitLiteral(ctx.literal())
-            //ctx.langLiteral() != null -> LangLiteralVisitor().visitLangLiteral(ctx.langLiteral())
-            //ctx.typedLiteral() != null -> TypedLiteralVisitor().visitTypedLiteral(ctx.typedLiteral())
+//            ctx.langLiteral() != null -> LangLiteralVisitor().visitLangLiteral(ctx.langLiteral())
+//            ctx.typedLiteral() != null -> TypedLiteralVisitor().visitTypedLiteral(ctx.typedLiteral())
             else -> throw RuntimeException("Unexpected Object Type")
         }
     }
@@ -94,5 +94,13 @@ class NTriples {
 
     fun parseObject(text: String) : Object {
         TODO()
+    }
+}
+
+fun handleIRI(iriRef: String): String {
+    if (iriRef.length > 2) {
+        return iriRef.substring(1, (iriRef.length-1))
+    } else {
+        throw RuntimeException("Invalid iriRef - $iriRef")
     }
 }
