@@ -126,19 +126,6 @@ class NTriplesTests {
         Assert.assertEquals(results, expectedResults)
     }
 
-    @Test fun supportLiteralsWithLanguagesAndTypesPassingAPathInsteadOfAString() {
-        val expectedResults = mutableListOf<Triple>()
-        expectedResults.add( Triple( IRI("http://example.org/show/218"),  IRI("http://www.w3.org/2000/01/rdf-schema#label"),  TypedLiteral("That Seventies Show", stringIRI)))
-        expectedResults.add( Triple( IRI("http://example.org/show/218"),  IRI("http://www.w3.org/2000/01/rdf-schema#label"),  TypedLiteral("That Seventies Show", stringIRI)))
-        expectedResults.add( Triple( IRI("http://example.org/show/218"),  IRI("http://example.org/show/localName"),  LangLiteral("That Seventies Show", "en")))
-        expectedResults.add( Triple( IRI("http://example.org/show/218"),  IRI("http://example.org/show/localName"),  LangLiteral("Cette Série des Années Septante", "fr-be")))
-        expectedResults.add( Triple( IRI("http://example.org/#spiderman"),  IRI("http://example.org/text"),  TypedLiteral("This is a multi-line\\nliteral with many quotes (\\\"\\\"\\\"\\\"\\\")\\nand two apostrophes ('').", stringIRI)))
-        expectedResults.add( Triple( IRI("http://en.wikipedia.org/wiki/Helium"),  IRI("http://example.org/elements/atomicNumber"),  TypedLiteral("2",  IRI("http://www.w3.org/2001/XMLSchema#integer"))))
-        expectedResults.add( Triple( IRI("http://en.wikipedia.org/wiki/Helium"),  IRI("http://example.org/elements/specificGravity"),  TypedLiteral("1.663E-4",  IRI("http://www.w3.org/2001/XMLSchema#double"))))
-        val results = ligature.parseNTriples(this.javaClass.getResource("/ntriples/literals.nt").readText())
-        Assert.assertEquals(results, expectedResults)
-    }
-
     @Test fun supportBlankNodes() {
         val expectedResult1 =  Triple( BlankNode("alice"),  IRI("http://xmlns.com/foaf/0.1/knows"),  BlankNode("bob"))
         val expectedResult2 =  Triple( BlankNode("bob"),  IRI("http://xmlns.com/foaf/0.1/knows"),  BlankNode("alice"))
