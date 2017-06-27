@@ -22,6 +22,7 @@ class Turtle {
 private class TurtleParserInstance {
     private var base: String = ""
     private val prefixes: Map<String, String> = mutableMapOf()
+    private val triples: MutableList<Triple> = mutableListOf()
 
     fun parseTurtle(text: String) : List<Triple>  {
         val stream = CharStreams.fromString(text)
@@ -33,19 +34,44 @@ private class TurtleParserInstance {
         return turtleDocVisitor.visit(parser.turtleDoc())
     }
 
-
     inner class TurtleDocVisitor : TurtleBaseVisitor<List<Triple>>() {
         override fun visitTurtleDoc(ctx: TurtleParser.TurtleDocContext): List<Triple> {
-            val statementVisitor = StatementVisitor()
-            return ctx.statement().map {
-                it.accept(statementVisitor)
+            ctx.statement().forEach { statementContext ->
+                if (statementContext.directive() != null) {
+                    val directiveVisitor = DirectiveVisitor()
+                    directiveVisitor.visit(statementContext.directive())
+                } else if (statementContext.triples() != null) {
+                    val triplesVisitor = TriplesVisitor()
+                    val resultTriples = triplesVisitor.visit(statementContext.triples())
+                    triples.addAll(resultTriples)
+                } else {
+                    throw RuntimeException("Unexpected statement type.")
+                }
             }
+            return triples
         }
     }
 
-    inner class StatementVisitor : TurtleBaseVisitor<Triple>() {
-        override fun visitStatement(ctx: TurtleParser.StatementContext): Triple {
-            return Triple(IRI(""), IRI(""), IRI(""))
+    inner class DirectiveVisitor : TurtleBaseVisitor<Any?>() {
+        override fun visitDirective(ctx: TurtleParser.DirectiveContext): Any? {
+            if (ctx.base() != null) {
+                TODO("Complete")
+            } else if (ctx.prefixID() != null) {
+                TODO("Complete")
+            } else if (ctx.sparqlBase() != null) {
+                TODO("Complete")
+            } else if (ctx.sparqlPrefix() != null) {
+                TODO("Complete")
+            } else {
+                throw RuntimeException("Unexpected directive type.")
+            }
+            return null //directives just manipulate parser state so they return null
+        }
+    }
+
+    inner class TriplesVisitor : TurtleBaseVisitor<List<Triple>>() {
+        override fun visitStatement(ctx: TurtleParser.StatementContext): List<Triple> {
+            return listOf(Triple(IRI(""), IRI(""), IRI("")))
 //        val subject = SubjectVisitor().visitSubject(ctx.subject())
 //        val predicate = PredicateVisitor().visitPredicate(ctx.predicate())
 //        val `object` = ObjectVisitor().visitObject(ctx.`object`())
