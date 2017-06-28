@@ -21,7 +21,7 @@ class Turtle {
 
 private class TurtleParserInstance {
     private var base: String = ""
-    private val prefixes: Map<String, String> = mutableMapOf()
+    private val prefixes: MutableMap<String, String> = mutableMapOf()
     private val triples: MutableList<Triple> = mutableListOf()
 
     fun parseTurtle(text: String) : List<Triple>  {
@@ -38,8 +38,7 @@ private class TurtleParserInstance {
         override fun visitTurtleDoc(ctx: TurtleParser.TurtleDocContext): List<Triple> {
             ctx.statement().forEach { statementContext ->
                 if (statementContext.directive() != null) {
-                    val directiveVisitor = DirectiveVisitor()
-                    directiveVisitor.visit(statementContext.directive())
+                    handleDirective(statementContext.directive())//directives mutate state so they don't need a visitor
                 } else if (statementContext.triples() != null) {
                     val triplesVisitor = TriplesVisitor()
                     val resultTriples = triplesVisitor.visit(statementContext.triples())
@@ -52,20 +51,17 @@ private class TurtleParserInstance {
         }
     }
 
-    inner class DirectiveVisitor : TurtleBaseVisitor<Any?>() {
-        override fun visitDirective(ctx: TurtleParser.DirectiveContext): Any? {
-            if (ctx.base() != null) {
-                TODO("Complete")
-            } else if (ctx.prefixID() != null) {
-                TODO("Complete")
-            } else if (ctx.sparqlBase() != null) {
-                TODO("Complete")
-            } else if (ctx.sparqlPrefix() != null) {
-                TODO("Complete")
-            } else {
-                throw RuntimeException("Unexpected directive type.")
-            }
-            return null //directives just manipulate parser state so they return null
+    fun handleDirective(ctx: TurtleParser.DirectiveContext) {
+        if (ctx.base() != null) {
+            this.base = ctx.base().IRIREF().text
+        } else if (ctx.prefixID() != null) {
+            this.prefixes[ctx.prefixID().PNAME_NS().text] = ctx.prefixID().IRIREF().text
+        } else if (ctx.sparqlBase() != null) {
+            this.base = ctx.sparqlBase().IRIREF().text
+        } else if (ctx.sparqlPrefix() != null) {
+            this.prefixes[ctx.sparqlPrefix().PNAME_NS().text] = ctx.sparqlPrefix().IRIREF().text
+        } else {
+            throw RuntimeException("Unexpected directive type.")
         }
     }
 
