@@ -5,6 +5,7 @@
 package org.almibe.ligature.turtle
 
 import org.almibe.ligature.IRI
+import org.almibe.ligature.Subject
 import org.almibe.ligature.Triple
 import org.almibe.ligature.parser.TurtleBaseVisitor
 import org.almibe.ligature.parser.TurtleLexer
@@ -51,7 +52,7 @@ private class TurtleParserInstance {
         }
     }
 
-    fun handleDirective(ctx: TurtleParser.DirectiveContext) {
+    private fun handleDirective(ctx: TurtleParser.DirectiveContext) {
         if (ctx.base() != null) {
             this.base = ctx.base().IRIREF().text
         } else if (ctx.prefixID() != null) {
@@ -66,12 +67,26 @@ private class TurtleParserInstance {
     }
 
     inner class TriplesVisitor : TurtleBaseVisitor<List<Triple>>() {
-        override fun visitStatement(ctx: TurtleParser.StatementContext): List<Triple> {
-            return listOf(Triple(IRI(""), IRI(""), IRI("")))
-//        val subject = SubjectVisitor().visitSubject(ctx.subject())
-//        val predicate = PredicateVisitor().visitPredicate(ctx.predicate())
-//        val `object` = ObjectVisitor().visitObject(ctx.`object`())
-//        return Triple(subject, predicate, `object`)
+        override fun visitTriples(ctx: TurtleParser.TriplesContext): List<Triple> {
+            val dummyIRI = IRI("") //TODO delete me
+            val subject = SubjectVisitor().visitSubject(ctx.subject())
+//            val predicate = PredicateVisitor().visitPredicate(ctx.predicate())
+//            val `object` = ObjectVisitor().visitObject(ctx.`object`())
+            return listOf(Triple(subject, dummyIRI, dummyIRI))
+        }
+    }
+
+    inner class SubjectVisitor : TurtleBaseVisitor<Subject>() {
+        override fun visitSubject(ctx: TurtleParser.SubjectContext): Subject {
+            if (ctx.blankNode() != null) {
+                TODO("finish")
+            } else if (ctx.collection() != null) {
+                TODO("finish")
+            } else if (ctx.iri() != null) {
+                TODO("finish")
+            } else {
+                throw RuntimeException("Uncexpected subject type.")
+            }
         }
     }
 }
