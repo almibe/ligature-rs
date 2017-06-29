@@ -5,88 +5,13 @@
 package org.almibe.ligature.ntriples
 
 import org.almibe.ligature.*
-import org.almibe.ligature.parser.NTriplesLexer
-import org.almibe.ligature.parser.NTriplesParser
-import org.antlr.v4.runtime.CharStreams
-import org.antlr.v4.runtime.CommonTokenStream
 import org.testng.Assert
 import org.testng.annotations.Test
-
-fun parseSubject(text: String) : Subject {
-    val stream = CharStreams.fromString(text)
-    val lexer = NTriplesLexer(stream)
-    val tokens = CommonTokenStream(lexer)
-    val parser = NTriplesParser(tokens)
-
-    val subjectVisitor = SubjectVisitor()
-    return subjectVisitor.visit(parser.subject())
-}
-
-fun parsePredicate(text: String) : Predicate {
-    val stream = CharStreams.fromString(text)
-    val lexer = NTriplesLexer(stream)
-    val tokens = CommonTokenStream(lexer)
-    val parser = NTriplesParser(tokens)
-
-    val predicateVisitor = PredicateVisitor()
-    return predicateVisitor.visit(parser.predicate())
-}
-
-fun parseObject(text: String) : Object {
-    val stream = CharStreams.fromString(text)
-    val lexer = NTriplesLexer(stream)
-    val tokens = CommonTokenStream(lexer)
-    val parser = NTriplesParser(tokens)
-
-    val objectVisitor = ObjectVisitor()
-    return objectVisitor.visit(parser.`object`())
-}
 
 class NTriplesTests {
     val ligature = NTriples()
 
     val stringIRI = IRI("http://www.w3.org/2001/XMLSchema#string")
-
-    @Test fun testParsingSubjects() {
-        val resultIRI = parseSubject("<http://www.w3.org/2001/XMLSchema#string>")
-        val expectedResultIRI = IRI("http://www.w3.org/2001/XMLSchema#string")
-
-        val resultBlankNode = parseSubject("_:ludo")
-        val expectedResultBlankNode = BlankNode("ludo")
-
-        Assert.assertEquals(resultIRI, expectedResultIRI)
-        Assert.assertEquals(resultBlankNode, expectedResultBlankNode)
-    }
-
-    @Test fun testParsingPredicates() {
-        val resultIRI = parsePredicate("<http://www.w3.org/2001/XMLSchema#string>")
-        val expectedResultIRI = IRI("http://www.w3.org/2001/XMLSchema#string")
-
-        Assert.assertEquals(resultIRI, expectedResultIRI)
-    }
-
-    @Test fun testParsingObjects() {
-        val resultIRI = parseObject("<http://www.w3.org/2001/XMLSchema#string>")
-        val expectedResultIRI = IRI("http://www.w3.org/2001/XMLSchema#string")
-
-        val resultBlankNode = parseObject("_:ludo")
-        val expectedResultBlankNode = BlankNode("ludo")
-
-        val resultLiteral = parseObject("\"Test\"")
-        val expectedResultLiteral = TypedLiteral("Test")
-
-        val resultTypedLiteral = parseObject("\"Test\"^^<Type>")
-        val expectedResultTypedLiteral = TypedLiteral("Test", IRI("Type"))
-
-        val resultLangLiteral = parseObject("\"Test\"@EN")
-        val expectedResultLangLiteral = LangLiteral("Test", "EN")
-
-        Assert.assertEquals(resultIRI, expectedResultIRI)
-        Assert.assertEquals(resultBlankNode, expectedResultBlankNode)
-        Assert.assertEquals(resultLiteral, expectedResultLiteral)
-        Assert.assertEquals(resultTypedLiteral, expectedResultTypedLiteral)
-        Assert.assertEquals(resultLangLiteral, expectedResultLangLiteral)
-    }
 
     @Test fun supportBasicIRITriple() {
         val expectedResult = Triple(IRI("http://example.org/#spiderman"),
