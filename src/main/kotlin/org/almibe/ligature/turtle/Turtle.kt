@@ -25,10 +25,6 @@ class Turtle {
 }
 
 private class TurtleParserInstance {
-    private var base: String = ""
-    private val prefixes: MutableMap<String, String> = mutableMapOf()
-    private val triples: MutableList<Triple> = mutableListOf()
-
     fun parseTurtle(text: String): List<Triple> {
         val stream = CharStreams.fromString(text)
         val lexer = TurtleLexer(stream)
