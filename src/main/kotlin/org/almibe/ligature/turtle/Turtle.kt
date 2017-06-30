@@ -4,10 +4,9 @@
 
 package org.almibe.ligature.turtle
 
-import org.almibe.ligature.IRI
 import org.almibe.ligature.Subject
 import org.almibe.ligature.Triple
-import org.almibe.ligature.parser.TurtleBaseVisitor
+import org.almibe.ligature.ntriples.TempTriple
 import org.almibe.ligature.parser.TurtleLexer
 import org.almibe.ligature.parser.TurtleListener
 import org.almibe.ligature.parser.TurtleParser
@@ -30,7 +29,7 @@ private class TurtleParserInstance {
     private val prefixes: MutableMap<String, String> = mutableMapOf()
     private val triples: MutableList<Triple> = mutableListOf()
 
-    fun parseTurtle(text: String) : List<Triple>  {
+    fun parseTurtle(text: String): List<Triple> {
         val stream = CharStreams.fromString(text)
         val lexer = TurtleLexer(stream)
         val tokens = CommonTokenStream(lexer)
@@ -41,76 +40,24 @@ private class TurtleParserInstance {
         walker.walk(listener, parser.turtleDoc())
         return listener.triples
     }
-
-    inner class TurtleDocVisitor : TurtleBaseVisitor<List<Triple>>() {
-        override fun visitTurtleDoc(ctx: TurtleParser.TurtleDocContext): List<Triple> {
-            ctx.statement().forEach { statementContext ->
-                if (statementContext.directive() != null) {
-                    handleDirective(statementContext.directive())//directives mutate state so they don't need a visitor
-                } else if (statementContext.triples() != null) {
-                    val triplesVisitor = TriplesVisitor()
-                    val resultTriples = triplesVisitor.visit(statementContext.triples())
-                    triples.addAll(resultTriples)
-                } else {
-                    throw RuntimeException("Unexpected statement type.")
-                }
-            }
-            return triples
-        }
-    }
-
-    private fun handleDirective(ctx: TurtleParser.DirectiveContext) {
-        if (ctx.base() != null) {
-            this.base = ctx.base().IRIREF().text
-        } else if (ctx.prefixID() != null) {
-            this.prefixes[ctx.prefixID().PNAME_NS().text] = ctx.prefixID().IRIREF().text
-        } else if (ctx.sparqlBase() != null) {
-            this.base = ctx.sparqlBase().IRIREF().text
-        } else if (ctx.sparqlPrefix() != null) {
-            this.prefixes[ctx.sparqlPrefix().PNAME_NS().text] = ctx.sparqlPrefix().IRIREF().text
-        } else {
-            throw RuntimeException("Unexpected directive type.")
-        }
-    }
-
-    inner class TriplesVisitor : TurtleBaseVisitor<List<Triple>>() {
-        override fun visitTriples(ctx: TurtleParser.TriplesContext): List<Triple> {
-            val dummyIRI = IRI("") //TODO delete me
-            val subject = SubjectVisitor().visitSubject(ctx.subject())
-            if (ctx.predicateObjectList() != null) {
-
-            } else if (ctx.blankNodePropertyList() != null) {
-
-            } else {
-                throw RuntimeException("Unexpected triple content.")
-            }
-            return listOf(Triple(subject, dummyIRI, dummyIRI))
-        }
-    }
-
-    inner class SubjectVisitor : TurtleBaseVisitor<Subject>() {
-        override fun visitSubject(ctx: TurtleParser.SubjectContext): Subject {
-            if (ctx.blankNode() != null) {
-                TODO("finish")
-            } else if (ctx.collection() != null) {
-                TODO("finish")
-            } else if (ctx.iri() != null) {
-                TODO("finish")
-            } else {
-                throw RuntimeException("Unexpected subject type.")
-            }
-        }
-    }
 }
 
 private class TriplesTurtleListener : TurtleListener {
     val triples = mutableListOf<Triple>()
-    
+    val prefixes: MutableMap<String, String> = mutableMapOf()
+    lateinit var base: String
+    lateinit var currentTriple: TempTriple
+    lateinit var currentSubject: Subject
+
     override fun enterTurtleDoc(ctx: TurtleParser.TurtleDocContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        //do nothing
     }
 
     override fun exitNumericLiteral(ctx: TurtleParser.NumericLiteralContext) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun exitSubject(ctx: TurtleParser.SubjectContext) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
@@ -123,10 +70,6 @@ private class TriplesTurtleListener : TurtleListener {
     }
 
     override fun exitCollection(ctx: TurtleParser.CollectionContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun enterPredicate(ctx: TurtleParser.PredicateContext) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
@@ -251,7 +194,18 @@ private class TriplesTurtleListener : TurtleListener {
     }
 
     override fun exitDirective(ctx: TurtleParser.DirectiveContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        //TODO rewrite this to use individual exit methods instead of having an if check here
+        if (ctx.base() != null) {
+            this.base = ctx.base().IRIREF().text
+        } else if (ctx.prefixID() != null) {
+            this.prefixes[ctx.prefixID().PNAME_NS().text] = ctx.prefixID().IRIREF().text
+        } else if (ctx.sparqlBase() != null) {
+            this.base = ctx.sparqlBase().IRIREF().text
+        } else if (ctx.sparqlPrefix() != null) {
+            this.prefixes[ctx.sparqlPrefix().PNAME_NS().text] = ctx.sparqlPrefix().IRIREF().text
+        } else {
+            throw RuntimeException("Unexpected directive type.")
+        }
     }
 
     override fun enterDirective(ctx: TurtleParser.DirectiveContext) {
@@ -302,15 +256,15 @@ private class TriplesTurtleListener : TurtleListener {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun exitSubject(ctx: TurtleParser.SubjectContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
     override fun enterVerb(ctx: TurtleParser.VerbContext) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun enterSparqlPrefix(ctx: TurtleParser.SparqlPrefixContext) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun enterPredicate(ctx: TurtleParser.PredicateContext) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

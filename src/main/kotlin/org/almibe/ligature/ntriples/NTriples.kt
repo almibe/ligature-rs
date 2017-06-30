@@ -27,14 +27,8 @@ class NTriples {
     }
 }
 
-class TriplesNTripleListener : NTriplesBaseListener() {
+private class TriplesNTripleListener : NTriplesBaseListener() {
     val triples: MutableList<Triple> = mutableListOf()
-
-    class TempTriple {
-        lateinit var subject: Subject
-        lateinit var predicate: Predicate
-        lateinit var `object`: Object
-    }
 
     lateinit var currentTriple: TempTriple
 
@@ -76,6 +70,12 @@ class TriplesNTripleListener : NTriplesBaseListener() {
     override fun visitErrorNode(node: ErrorNode) {
         throw RuntimeException(node.toString()) //TODO do I need this or will ANTLR throw its own RTE?
     }
+}
+
+internal class TempTriple {
+    lateinit var subject: Subject
+    lateinit var predicate: Predicate
+    lateinit var `object`: Object
 }
 
 internal fun handleIRI(iriRef: String): IRI {
