@@ -4,6 +4,7 @@
 
 package org.almibe.ligature.parsers
 
+import org.almibe.ligature.IRI
 import org.almibe.ligature.Predicate
 import org.almibe.ligature.Subject
 import org.almibe.ligature.Triple
@@ -44,90 +45,96 @@ private class TriplesTurtleListener : TurtleListener {
     lateinit var base: String
     lateinit var currentTriple: TempTriple
     var currentSubject: Subject? = null
-    var currentPedicate: Predicate? = null
+    var currentPredicate: Predicate? = null
 
     override fun exitNumericLiteral(ctx: TurtleParser.NumericLiteralContext) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun exitSubject(ctx: TurtleParser.SubjectContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun enterSubject(ctx: TurtleParser.SubjectContext) {
+        currentSubject = null
     }
 
-    override fun exitBlankNode(ctx: TurtleParser.BlankNodeContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun exitLiteral(ctx: TurtleParser.LiteralContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun exitCollection(ctx: TurtleParser.CollectionContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun exitPredicate(ctx: TurtleParser.PredicateContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun exitSparqlBase(ctx: TurtleParser.SparqlBaseContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun exitPrefixID(ctx: TurtleParser.PrefixIDContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun exitSparqlPrefix(ctx: TurtleParser.SparqlPrefixContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun exitBase(ctx: TurtleParser.BaseContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun exitPredicateObjectList(ctx: TurtleParser.PredicateObjectListContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun visitErrorNode(node: ErrorNode?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun exitVerb(ctx: TurtleParser.VerbContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun enterPredicate(ctx: TurtleParser.PredicateContext) {
+        currentPredicate = null
     }
 
     override fun exitIri(ctx: TurtleParser.IriContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        if (currentSubject == null) {
+            currentSubject = handleIRI(ctx.text)
+        } else if (currentPredicate == null) {
+            currentPredicate = handleIRI(ctx.text)
+        } else {
+            triples.add(Triple(currentSubject!!, currentPredicate!!, handleIRI(ctx.text))) //TODO will need rewritten for later tests
+        }
+    }
+
+    override fun exitBlankNode(ctx: TurtleParser.BlankNodeContext) {
+        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun exitLiteral(ctx: TurtleParser.LiteralContext) {
+        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun exitCollection(ctx: TurtleParser.CollectionContext) {
+        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun exitSparqlBase(ctx: TurtleParser.SparqlBaseContext) {
+        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun exitPrefixID(ctx: TurtleParser.PrefixIDContext) {
+        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun exitSparqlPrefix(ctx: TurtleParser.SparqlPrefixContext) {
+        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun exitBase(ctx: TurtleParser.BaseContext) {
+        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun exitPredicateObjectList(ctx: TurtleParser.PredicateObjectListContext) {
+        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun visitErrorNode(node: ErrorNode?) {
+        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun exitVerb(ctx: TurtleParser.VerbContext) {
+        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun exitBooleanLiteral(ctx: TurtleParser.BooleanLiteralContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun exitObject(ctx: TurtleParser.ObjectContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun exitBlankNodePropertyList(ctx: TurtleParser.BlankNodePropertyListContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun exitEveryRule(ctx: ParserRuleContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun exitTurtleDoc(ctx: TurtleParser.TurtleDocContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun exitRdfLiteral(ctx: TurtleParser.RdfLiteralContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun exitString(ctx: TurtleParser.StringContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun enterStatement(ctx: TurtleParser.StatementContext) {
@@ -136,7 +143,7 @@ private class TriplesTurtleListener : TurtleListener {
     }
 
     override fun exitStatement(ctx: TurtleParser.StatementContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun exitDirective(ctx: TurtleParser.DirectiveContext) {
@@ -160,24 +167,24 @@ private class TriplesTurtleListener : TurtleListener {
     }
 
     override fun exitTriples(ctx: TurtleParser.TriplesContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun exitObjectList(ctx: TurtleParser.ObjectListContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun exitPrefixedName(ctx: TurtleParser.PrefixedNameContext) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun visitTerminal(node: TerminalNode?) { /* do nothing */ }
-    override fun enterSubject(ctx: TurtleParser.SubjectContext) { /* do nothing */ }
     override fun enterString(ctx: TurtleParser.StringContext) { /* do nothing */ }
+    override fun exitPredicate(ctx: TurtleParser.PredicateContext) { /* do nothing */ }
+    override fun exitSubject(ctx: TurtleParser.SubjectContext) { /* do nothing */ }
     override fun enterObjectList(ctx: TurtleParser.ObjectListContext) { /* do nothing */ }
     override fun enterVerb(ctx: TurtleParser.VerbContext) { /* do nothing */ }
     override fun enterSparqlPrefix(ctx: TurtleParser.SparqlPrefixContext) { /* do nothing */ }
-    override fun enterPredicate(ctx: TurtleParser.PredicateContext) { /* do nothing */ }
     override fun enterBlankNode(ctx: TurtleParser.BlankNodeContext) { /* do nothing */ }
     override fun enterBooleanLiteral(ctx: TurtleParser.BooleanLiteralContext) { /* do nothing */ }
     override fun enterBlankNodePropertyList(ctx: TurtleParser.BlankNodePropertyListContext) { /* do nothing */ }
