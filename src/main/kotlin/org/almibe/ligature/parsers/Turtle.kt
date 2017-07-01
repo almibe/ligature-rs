@@ -2,11 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.almibe.ligature.turtle
+package org.almibe.ligature.parsers
 
+import org.almibe.ligature.Predicate
 import org.almibe.ligature.Subject
 import org.almibe.ligature.Triple
-import org.almibe.ligature.ntriples.TempTriple
 import org.almibe.ligature.parser.TurtleLexer
 import org.almibe.ligature.parser.TurtleListener
 import org.almibe.ligature.parser.TurtleParser
@@ -44,6 +44,7 @@ private class TriplesTurtleListener : TurtleListener {
     lateinit var base: String
     lateinit var currentTriple: TempTriple
     var currentSubject: Subject? = null
+    var currentPedicate: Predicate? = null
 
     override fun exitNumericLiteral(ctx: TurtleParser.NumericLiteralContext) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.

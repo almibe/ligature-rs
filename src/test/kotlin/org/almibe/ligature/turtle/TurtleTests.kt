@@ -9,6 +9,7 @@ import org.almibe.ligature.IRI
 import org.almibe.ligature.LangLiteral
 import org.almibe.ligature.Triple
 import org.almibe.ligature.TypedLiteral
+import org.almibe.ligature.parsers.Turtle
 import org.testng.Assert
 import org.testng.annotations.Test
 import java.util.*

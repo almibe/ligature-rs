@@ -5,6 +5,7 @@
 package org.almibe.ligature.ntriples
 
 import org.almibe.ligature.*
+import org.almibe.ligature.parsers.NTriples
 import org.testng.Assert
 import org.testng.annotations.Test
 
