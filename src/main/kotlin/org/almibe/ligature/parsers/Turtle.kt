@@ -60,7 +60,7 @@ private class TriplesTurtleListener : TurtleListener {
     override fun exitSubject(ctx: TurtleParser.SubjectContext) {
         //TODO handle all subject logic here
         if (ctx.iri() != null) {
-            currentStatement.subjects.add(handleIRI(ctx.iri().text))
+            currentStatement.subjects.add(handleTurtleIRI(ctx.iri()))
         } else if (ctx.collection() != null) {
 
         } else if (ctx.blankNode() != null) {
@@ -71,10 +71,11 @@ private class TriplesTurtleListener : TurtleListener {
     }
 
     override fun exitVerbObjectList(ctx: TurtleParser.VerbObjectListContext) {
-        //TODO add verb object list pair to currentStatement
         val iri = handleIRI(ctx.verb().text)
-        val `object`: Object = handleObject(ctx.objectList().`object`().first())
-        currentStatement.predicateObjectList.add(Pair(iri, mutableListOf(`object`)))
+        ctx.objectList().`object`().forEach {
+            val `object`: Object = handleObject(it)
+            currentStatement.predicateObjectList.add(Pair(iri, mutableListOf(`object`)))
+        }
     }
 
     override fun exitBlankNodePropertyList(ctx: TurtleParser.BlankNodePropertyListContext) {
@@ -248,4 +249,9 @@ internal fun handleRdfLiteral(ctx: TurtleParser.RdfLiteralContext): Literal {
         ctx.iri() != null -> TypedLiteral(value, handleIRI(ctx.iri().text))
         else -> TypedLiteral(value)
     }
+}
+
+fun handleTurtleIRI(ctx: TurtleParser.IriContext): IRI {
+    //TODO support prefixed names
+    return handleIRI(ctx.text)
 }
