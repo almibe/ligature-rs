@@ -5,6 +5,7 @@
 package org.almibe.ligature.parsers
 
 import org.almibe.ligature.IRI
+import org.almibe.ligature.Object
 import org.almibe.ligature.Predicate
 import org.almibe.ligature.Subject
 import org.almibe.ligature.Triple
@@ -39,34 +40,81 @@ private class TurtleParserInstance {
     }
 }
 
+private class TurtleStatement {
+    val subjects = mutableListOf<Subject>()
+    val blankNodePropertyList = mutableListOf<Pair<IRI, MutableList<Object>>>()
+    val predicateObjectList = mutableListOf<Pair<IRI, MutableList<Object>>>()
+
+    fun computeTriples(): List<Triple> {
+        if (subjects.size == 1) {
+            return predicateObjectList.map { Triple(subjects.first(), it.first, it.second.first()) }
+        } else {
+            TODO("finish")
+        }
+    }
+}
+
 private class TriplesTurtleListener : TurtleListener {
     val triples = mutableListOf<Triple>()
     val prefixes: MutableMap<String, String> = mutableMapOf()
     lateinit var base: String
-    lateinit var currentTriple: TempTriple
+    lateinit var currentStatement: TurtleStatement
     var currentSubject: Subject? = null
     var currentPredicate: Predicate? = null
+    var currentTriple: TempTriple? = null
 
     override fun exitNumericLiteral(ctx: TurtleParser.NumericLiteralContext) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun enterSubject(ctx: TurtleParser.SubjectContext) {
-        currentSubject = null
+        //currentSubject = null
+    }
+
+    override fun exitSubject(ctx: TurtleParser.SubjectContext) {
+        //TODO handle all subject logic here
+        if (ctx.iri() != null) {
+
+        } else if (ctx.collection() != null) {
+
+        } else if (ctx.blankNode() != null) {
+
+        } else {
+            throw RuntimeException("Unexpected subject.")
+        }
+    }
+
+    override fun exitPredicateObjectList(ctx: TurtleParser.PredicateObjectListContext) {
+        //TODO handle all pedicateObjectList logic here for both types of triples statements
+
+    }
+
+    override fun exitVerbObjectList(ctx: TurtleParser.VerbObjectListContext?) {
+        //TODO add verb object list pair to currentStatement
+    }
+
+    override fun exitBlankNodePropertyList(ctx: TurtleParser.BlankNodePropertyListContext) {
+        //TODO handle all blankNodePropertyList logic here
+
+    }
+
+    override fun exitTriples(ctx: TurtleParser.TriplesContext) {
+        triples.addAll(currentStatement.computeTriples())
     }
 
     override fun enterPredicate(ctx: TurtleParser.PredicateContext) {
-        currentPredicate = null
+        //currentPredicate = null
     }
 
     override fun exitIri(ctx: TurtleParser.IriContext) {
-        if (currentSubject == null) {
-            currentSubject = handleIRI(ctx.text)
-        } else if (currentPredicate == null) {
-            currentPredicate = handleIRI(ctx.text)
-        } else {
-            triples.add(Triple(currentSubject!!, currentPredicate!!, handleIRI(ctx.text))) //TODO will need rewritten for later tests
-        }
+        //TODO old code can probably be deleted
+//        if (currentStatement.subjects.isEmpty()) {
+//            currentStatement.subjects.add(handleIRI(ctx.text))
+//        } else if (currentPredicate == null) {
+//            currentPredicate = handleIRI(ctx.text)
+//        } else {
+//            triples.add(Triple(currentSubject!!, currentPredicate!!, handleIRI(ctx.text))) //TODO will need rewritten for later tests
+//        }
     }
 
     override fun exitBlankNode(ctx: TurtleParser.BlankNodeContext) {
@@ -97,10 +145,6 @@ private class TriplesTurtleListener : TurtleListener {
         //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun exitPredicateObjectList(ctx: TurtleParser.PredicateObjectListContext) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
     override fun visitErrorNode(node: ErrorNode?) {
         //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
@@ -114,10 +158,6 @@ private class TriplesTurtleListener : TurtleListener {
     }
 
     override fun exitObject(ctx: TurtleParser.ObjectContext) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun exitBlankNodePropertyList(ctx: TurtleParser.BlankNodePropertyListContext) {
         //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
@@ -166,10 +206,6 @@ private class TriplesTurtleListener : TurtleListener {
         currentSubject = null
     }
 
-    override fun exitTriples(ctx: TurtleParser.TriplesContext) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
     override fun exitObjectList(ctx: TurtleParser.ObjectListContext) {
         //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
@@ -181,8 +217,8 @@ private class TriplesTurtleListener : TurtleListener {
     override fun visitTerminal(node: TerminalNode?) { /* do nothing */ }
     override fun enterString(ctx: TurtleParser.StringContext) { /* do nothing */ }
     override fun exitPredicate(ctx: TurtleParser.PredicateContext) { /* do nothing */ }
-    override fun exitSubject(ctx: TurtleParser.SubjectContext) { /* do nothing */ }
     override fun enterObjectList(ctx: TurtleParser.ObjectListContext) { /* do nothing */ }
+    override fun enterVerbObjectList(ctx: TurtleParser.VerbObjectListContext) { /* do nothing */}
     override fun enterVerb(ctx: TurtleParser.VerbContext) { /* do nothing */ }
     override fun enterSparqlPrefix(ctx: TurtleParser.SparqlPrefixContext) { /* do nothing */ }
     override fun enterBlankNode(ctx: TurtleParser.BlankNodeContext) { /* do nothing */ }
