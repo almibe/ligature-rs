@@ -4,11 +4,8 @@
 
 package org.almibe.ligature.parsers
 
-import org.almibe.ligature.IRI
-import org.almibe.ligature.Object
-import org.almibe.ligature.Predicate
-import org.almibe.ligature.Subject
-import org.almibe.ligature.Triple
+import org.almibe.ligature.*
+import org.almibe.ligature.parser.NTriplesParser
 import org.almibe.ligature.parser.TurtleLexer
 import org.almibe.ligature.parser.TurtleListener
 import org.almibe.ligature.parser.TurtleParser
@@ -59,10 +56,6 @@ private class TriplesTurtleListener : TurtleListener {
     val prefixes: MutableMap<String, String> = mutableMapOf()
     lateinit var base: String
     var currentStatement: TurtleStatement = TurtleStatement()
-    var currentPredicate: Predicate? = null
-    var currentTriple: TempTriple? = null
-
-    override fun enterSubject(ctx: TurtleParser.SubjectContext) { /* do nothing */ }
 
     override fun exitSubject(ctx: TurtleParser.SubjectContext) {
         //TODO handle all subject logic here
@@ -80,7 +73,7 @@ private class TriplesTurtleListener : TurtleListener {
     override fun exitVerbObjectList(ctx: TurtleParser.VerbObjectListContext) {
         //TODO add verb object list pair to currentStatement
         val iri = handleIRI(ctx.verb().text)
-        val `object`: Object = handleIRI(ctx.objectList().`object`().first().text)
+        val `object`: Object = handleObject(ctx.objectList().`object`().first())
         currentStatement.predicateObjectList.add(Pair(iri, mutableListOf(`object`)))
     }
 
@@ -157,16 +150,11 @@ private class TriplesTurtleListener : TurtleListener {
         //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun enterStatement(ctx: TurtleParser.StatementContext) {
-        currentTriple = TempTriple()
-    }
-
-    override fun exitStatement(ctx: TurtleParser.StatementContext) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun enterTriples(ctx: TurtleParser.TriplesContext) {
+        currentStatement = TurtleStatement()
     }
 
     override fun exitDirective(ctx: TurtleParser.DirectiveContext) {
-        //TODO rewrite this to use individual exit methods instead of having an if check here
         if (ctx.base() != null) {
             this.base = ctx.base().IRIREF().text
         } else if (ctx.prefixID() != null) {
@@ -180,10 +168,6 @@ private class TriplesTurtleListener : TurtleListener {
         }
     }
 
-    override fun enterDirective(ctx: TurtleParser.DirectiveContext) {
-        currentTriple = TempTriple()
-    }
-
     override fun exitObjectList(ctx: TurtleParser.ObjectListContext) {
         //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
@@ -195,6 +179,7 @@ private class TriplesTurtleListener : TurtleListener {
     override fun visitTerminal(node: TerminalNode?) { /* do nothing */ }
     override fun enterString(ctx: TurtleParser.StringContext) { /* do nothing */ }
     override fun exitPredicate(ctx: TurtleParser.PredicateContext) { /* do nothing */ }
+    override fun enterDirective(ctx: TurtleParser.DirectiveContext) { /* do nothing */ }
     override fun exitPredicateObjectList(ctx: TurtleParser.PredicateObjectListContext) { /* do nothing */ }
     override fun enterPredicate(ctx: TurtleParser.PredicateContext) { /* do nothing */ }
     override fun exitIri(ctx: TurtleParser.IriContext) { /* do nothing */ }
@@ -217,6 +202,50 @@ private class TriplesTurtleListener : TurtleListener {
     override fun enterBase(ctx: TurtleParser.BaseContext) { /* do nothing */ }
     override fun enterNumericLiteral(ctx: TurtleParser.NumericLiteralContext) { /* do nothing */ }
     override fun enterTurtleDoc(ctx: TurtleParser.TurtleDocContext) { /* do nothing */ }
-    override fun enterTriples(ctx: TurtleParser.TriplesContext) { /* do nothing */ }
     override fun enterIri(ctx: TurtleParser.IriContext) { /* do nothing */ }
+    override fun enterSubject(ctx: TurtleParser.SubjectContext) { /* do nothing */ }
+    override fun enterStatement(ctx: TurtleParser.StatementContext) { /* do nothing */ }
+    override fun exitStatement(ctx: TurtleParser.StatementContext) { /* do nothing */ }
+}
+
+internal fun handleObject(ctx: TurtleParser.ObjectContext): Object {
+    return when {
+        ctx.literal() != null -> handleTurtleLiteral(ctx.literal())
+        ctx.blankNode() != null -> handleBlankNode(ctx.blankNode().text)
+        ctx.iri() != null -> handleIRI(ctx.iri().text)
+        ctx.blankNodePropertyList() != null -> TODO()
+        ctx.collection() != null -> TODO()
+        else -> throw RuntimeException("Unexpected object")
+    }
+}
+
+internal fun handleTurtleLiteral(ctx: TurtleParser.LiteralContext): Literal {
+    return when {
+        ctx.booleanLiteral() != null -> handleBooleanLiteral(ctx.booleanLiteral())
+        ctx.numericLiteral() != null  -> handleNumericLiteral(ctx.numericLiteral())
+        ctx.rdfLiteral() != null  -> handleRdfLiteral(ctx.rdfLiteral())
+        else -> throw RuntimeException("Unexpected literal")
+    }
+}
+
+fun  handleBooleanLiteral(ctx: TurtleParser.BooleanLiteralContext): Literal {
+    TODO()
+}
+
+fun  handleNumericLiteral(ctx: TurtleParser.NumericLiteralContext): Literal {
+    TODO()
+}
+
+internal fun handleRdfLiteral(ctx: TurtleParser.RdfLiteralContext): Literal {
+    val value = if (ctx.string().text.length >= 2) {
+        ctx.string().text.substring(1, ctx.string().text.length-1)
+    } else {
+        throw RuntimeException("Invalid literal.")
+    }
+
+    return when {
+        ctx.LANGTAG() != null -> LangLiteral(value, ctx.LANGTAG().text.substring(1))
+        ctx.iri() != null -> TypedLiteral(value, handleIRI(ctx.iri().text))
+        else -> TypedLiteral(value)
+    }
 }
