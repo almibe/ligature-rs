@@ -62,9 +62,9 @@ private class TriplesTurtleListener : TurtleListener {
         if (ctx.iri() != null) {
             currentStatement.subjects.add(handleTurtleIRI(ctx.iri()))
         } else if (ctx.collection() != null) {
-
+            TODO()
         } else if (ctx.blankNode() != null) {
-
+            TODO()
         } else {
             throw RuntimeException("Unexpected subject.")
         }
@@ -80,7 +80,6 @@ private class TriplesTurtleListener : TurtleListener {
 
     override fun exitBlankNodePropertyList(ctx: TurtleParser.BlankNodePropertyListContext) {
         //TODO handle all blankNodePropertyList logic here
-
     }
 
     override fun exitTriples(ctx: TurtleParser.TriplesContext) {
@@ -96,26 +95,6 @@ private class TriplesTurtleListener : TurtleListener {
     }
 
     override fun exitCollection(ctx: TurtleParser.CollectionContext) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun exitSparqlBase(ctx: TurtleParser.SparqlBaseContext) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun exitPrefixID(ctx: TurtleParser.PrefixIDContext) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun exitNumericLiteral(ctx: TurtleParser.NumericLiteralContext) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun exitSparqlPrefix(ctx: TurtleParser.SparqlPrefixContext) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun exitBase(ctx: TurtleParser.BaseContext) {
         //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
@@ -135,19 +114,11 @@ private class TriplesTurtleListener : TurtleListener {
         //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun exitEveryRule(ctx: ParserRuleContext) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
     override fun exitTurtleDoc(ctx: TurtleParser.TurtleDocContext) {
         //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun exitRdfLiteral(ctx: TurtleParser.RdfLiteralContext) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun exitString(ctx: TurtleParser.StringContext) {
         //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
@@ -167,14 +138,6 @@ private class TriplesTurtleListener : TurtleListener {
         } else {
             throw RuntimeException("Unexpected directive type.")
         }
-    }
-
-    override fun exitObjectList(ctx: TurtleParser.ObjectListContext) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun exitPrefixedName(ctx: TurtleParser.PrefixedNameContext) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun visitTerminal(node: TerminalNode?) { /* do nothing */ }
@@ -207,6 +170,15 @@ private class TriplesTurtleListener : TurtleListener {
     override fun enterSubject(ctx: TurtleParser.SubjectContext) { /* do nothing */ }
     override fun enterStatement(ctx: TurtleParser.StatementContext) { /* do nothing */ }
     override fun exitStatement(ctx: TurtleParser.StatementContext) { /* do nothing */ }
+    override fun exitSparqlPrefix(ctx: TurtleParser.SparqlPrefixContext) { /* do nothing */ }
+    override fun exitBase(ctx: TurtleParser.BaseContext) { /* do nothing */ }
+    override fun exitString(ctx: TurtleParser.StringContext) { /* do nothing */ }
+    override fun exitObjectList(ctx: TurtleParser.ObjectListContext) { /* do nothing */ }
+    override fun exitPrefixedName(ctx: TurtleParser.PrefixedNameContext) { /* do nothing */ }
+    override fun exitSparqlBase(ctx: TurtleParser.SparqlBaseContext) { /* do nothing */ }
+    override fun exitPrefixID(ctx: TurtleParser.PrefixIDContext) { /* do nothing */ }
+    override fun exitNumericLiteral(ctx: TurtleParser.NumericLiteralContext) { /* do nothing */ }
+    override fun exitEveryRule(ctx: ParserRuleContext) { /* do nothing */ }
 }
 
 internal fun handleObject(ctx: TurtleParser.ObjectContext): Object {
@@ -252,6 +224,17 @@ internal fun handleRdfLiteral(ctx: TurtleParser.RdfLiteralContext): Literal {
 }
 
 fun handleTurtleIRI(ctx: TurtleParser.IriContext): IRI {
-    //TODO support prefixed names
-    return handleIRI(ctx.text)
+    if (ctx.prefixedName() != null) {
+        if (ctx.prefixedName().PNAME_LN() != null) {
+            TODO()
+        } else if (ctx.prefixedName().PNAME_NS() != null) {
+            TODO()
+        }
+    } else {
+        val iri =  handleIRI(ctx.text)
+        //TODO check if iri's val is a url
+        //TODO if true return it
+        //TODO if not add base to current iri value and return new iri
+    }
+    TODO()
 }
