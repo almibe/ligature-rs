@@ -125,22 +125,28 @@ private class TriplesTurtleListener : TurtleListener {
         currentStatement = TurtleStatement()
     }
 
-    override fun exitDirective(ctx: TurtleParser.DirectiveContext) {
-        if (ctx.base() != null) {
-            this.base = ctx.base().iriRef().text
-        } else if (ctx.prefixID() != null) {
-            if (ctx.prefixID().PNAME_NS() != null)  {
-                this.prefixes[ctx.prefixID().PNAME_NS().text] = ctx.prefixID().iriRef().text
-            } else {
-                this.prefixes[""] = ctx.prefixID().iriRef().text
-            }
-        } else if (ctx.sparqlBase() != null) {
-            this.base = ctx.sparqlBase().iriRef().text
-        } else if (ctx.sparqlPrefix() != null) {
-            this.prefixes[ctx.sparqlPrefix().PNAME_NS().text] = ctx.sparqlPrefix().iriRef().text
+    override fun exitBase(ctx: TurtleParser.BaseContext) {
+        this.base = ctx.iriRef().text
+    }
+
+    override fun exitPrefixID(ctx: TurtleParser.PrefixIDContext) {
+        if (ctx.PNAME_NS() != null)  {
+            this.prefixes[ctx.PNAME_NS().text] = ctx.iriRef().text
         } else {
-            throw RuntimeException("Unexpected directive type.")
+            if (ctx.iriRef() != null) {
+                this.prefixes[""] = ctx.iriRef().text
+            } else {
+                //TODO("not sure what to do here yet")
+            }
         }
+    }
+
+    override fun exitSparqlBase(ctx: TurtleParser.SparqlBaseContext) {
+        this.base = ctx.iriRef().text
+    }
+
+    override fun exitSparqlPrefix(ctx: TurtleParser.SparqlPrefixContext) {
+        this.prefixes[ctx.PNAME_NS().text] = ctx.iriRef().text
     }
 
     fun handleTurtleIRI(ctx: TurtleParser.IriContext): IRI {
@@ -195,17 +201,14 @@ private class TriplesTurtleListener : TurtleListener {
     override fun enterSubject(ctx: TurtleParser.SubjectContext) { /* do nothing */ }
     override fun enterStatement(ctx: TurtleParser.StatementContext) { /* do nothing */ }
     override fun exitStatement(ctx: TurtleParser.StatementContext) { /* do nothing */ }
-    override fun exitSparqlPrefix(ctx: TurtleParser.SparqlPrefixContext) { /* do nothing */ }
-    override fun exitBase(ctx: TurtleParser.BaseContext) { /* do nothing */ }
     override fun exitString(ctx: TurtleParser.StringContext) { /* do nothing */ }
     override fun exitObjectList(ctx: TurtleParser.ObjectListContext) { /* do nothing */ }
     override fun exitPrefixedName(ctx: TurtleParser.PrefixedNameContext) { /* do nothing */ }
-    override fun exitSparqlBase(ctx: TurtleParser.SparqlBaseContext) { /* do nothing */ }
-    override fun exitPrefixID(ctx: TurtleParser.PrefixIDContext) { /* do nothing */ }
     override fun exitNumericLiteral(ctx: TurtleParser.NumericLiteralContext) { /* do nothing */ }
     override fun exitEveryRule(ctx: ParserRuleContext) { /* do nothing */ }
     override fun exitIriRef(p0: TurtleParser.IriRefContext?) { /* do nothing */ }
     override fun enterIriRef(p0: TurtleParser.IriRefContext?) { /* do nothing */ }
+    override fun exitDirective(ctx: TurtleParser.DirectiveContext) { /* do nothing */ }
 }
 
 internal fun handleObject(ctx: TurtleParser.ObjectContext): Object {
