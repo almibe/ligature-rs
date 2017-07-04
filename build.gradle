@@ -28,7 +28,6 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile 'org.almibe:ligature-grammar:0.1.0-SNAPSHOT'
     testCompile 'org.antlr:antlr4:4.7'
-    testCompile 'org.testng:testng:6.9.13.6'
     testCompile "org.codehaus.groovy:groovy-all:2.4.10"
     testCompile "org.spockframework:spock-core:1.1-groovy-2.4"
 }
@@ -36,8 +35,4 @@ dependencies {
 bundle {
     instruction 'Import-Package', '*'
     instruction 'Export-Package', 'org.almibe.ligature.*'
-}
-
-test {
-    useTestNG()
 }
