@@ -5,7 +5,6 @@
 package org.almibe.ligature.parsers
 
 import org.almibe.ligature.*
-import org.almibe.ligature.parser.NTriplesParser
 import org.almibe.ligature.parser.TurtleLexer
 import org.almibe.ligature.parser.TurtleListener
 import org.almibe.ligature.parser.TurtleParser
@@ -128,15 +127,41 @@ private class TriplesTurtleListener : TurtleListener {
 
     override fun exitDirective(ctx: TurtleParser.DirectiveContext) {
         if (ctx.base() != null) {
-            this.base = ctx.base().IRIREF().text
+            this.base = ctx.base().iriRef().text
         } else if (ctx.prefixID() != null) {
-            this.prefixes[ctx.prefixID().PNAME_NS().text] = ctx.prefixID().IRIREF().text
+            if (ctx.prefixID().PNAME_NS() != null)  {
+                this.prefixes[ctx.prefixID().PNAME_NS().text] = ctx.prefixID().iriRef().text
+            } else {
+                this.prefixes[""] = ctx.prefixID().iriRef().text
+            }
         } else if (ctx.sparqlBase() != null) {
-            this.base = ctx.sparqlBase().IRIREF().text
+            this.base = ctx.sparqlBase().iriRef().text
         } else if (ctx.sparqlPrefix() != null) {
-            this.prefixes[ctx.sparqlPrefix().PNAME_NS().text] = ctx.sparqlPrefix().IRIREF().text
+            this.prefixes[ctx.sparqlPrefix().PNAME_NS().text] = ctx.sparqlPrefix().iriRef().text
         } else {
             throw RuntimeException("Unexpected directive type.")
+        }
+    }
+
+    fun handleTurtleIRI(ctx: TurtleParser.IriContext): IRI {
+        return if (ctx.prefixedName() != null) {
+            if (ctx.prefixedName().PNAME_LN() != null) {
+                TODO()
+            } else if (ctx.prefixedName().PNAME_NS() != null) {
+                TODO()
+            } else {
+                throw RuntimeException("Unexpected IRI type")
+            }
+        } else if (ctx.iriRef() != null) {
+            if (ctx.iriRef().ABSOLUTE_IRI() != null) {
+                IRI(ctx.iriRef().ABSOLUTE_IRI().text)
+            } else if (ctx.iriRef().RELATIVE_IRI() != null) {
+                IRI(base + ctx.iriRef().RELATIVE_IRI().text)
+            } else {
+                throw RuntimeException("Unexpected IRI type")
+            }
+        } else {
+            throw RuntimeException("Unexpected IRI type")
         }
     }
 
@@ -179,6 +204,8 @@ private class TriplesTurtleListener : TurtleListener {
     override fun exitPrefixID(ctx: TurtleParser.PrefixIDContext) { /* do nothing */ }
     override fun exitNumericLiteral(ctx: TurtleParser.NumericLiteralContext) { /* do nothing */ }
     override fun exitEveryRule(ctx: ParserRuleContext) { /* do nothing */ }
+    override fun exitIriRef(p0: TurtleParser.IriRefContext?) { /* do nothing */ }
+    override fun enterIriRef(p0: TurtleParser.IriRefContext?) { /* do nothing */ }
 }
 
 internal fun handleObject(ctx: TurtleParser.ObjectContext): Object {
@@ -221,20 +248,4 @@ internal fun handleRdfLiteral(ctx: TurtleParser.RdfLiteralContext): Literal {
         ctx.iri() != null -> TypedLiteral(value, handleIRI(ctx.iri().text))
         else -> TypedLiteral(value)
     }
-}
-
-fun handleTurtleIRI(ctx: TurtleParser.IriContext): IRI {
-    if (ctx.prefixedName() != null) {
-        if (ctx.prefixedName().PNAME_LN() != null) {
-            TODO()
-        } else if (ctx.prefixedName().PNAME_NS() != null) {
-            TODO()
-        }
-    } else {
-        val iri =  handleIRI(ctx.text)
-        //TODO check if iri's val is a url
-        //TODO if true return it
-        //TODO if not add base to current iri value and return new iri
-    }
-    TODO()
 }
