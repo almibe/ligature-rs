@@ -16,8 +16,8 @@ class NTriplesSpec extends Specification {
         given:
         def expectedResult = new Triple( new IRI("http://example.org/#spiderman"),
                 new IRI("http://www.perceive.net/schemas/relationship/enemyOf"),  new IRI("http://example.org/#green-goblin"))
-        def results = ligature.parseNTriples(this.class.getResource("/ntriples/basicTriple.nt").toString())
-        then:
+        def results = ligature.parseNTriples(this.class.getResource("/ntriples/basicTriple.nt").text)
+        expect:
         results.size() == 1
         results == [expectedResult]
     }
@@ -28,8 +28,8 @@ class NTriplesSpec extends Specification {
                 new IRI("http://www.perceive.net/schemas/relationship/enemyOf"),  new IRI("http://example.org/#green-goblin"))
         def expectedResult2 =  new Triple(new IRI("http://example.org/#spiderman"),
                 new IRI("http://www.perceive.net/schemas/relationship/enemyOf"), new IRI("http://example.org/#black-cat"))
-        def results = ligature.parseNTriples(this.getClass().getResource("/ntriples/multipleIRITriples.nt").toString())
-        then:
+        def results = ligature.parseNTriples(this.class.getResource("/ntriples/multipleIRITriples.nt").text)
+        expect:
         results == [expectedResult1, expectedResult2]
     }
 
@@ -37,8 +37,8 @@ class NTriplesSpec extends Specification {
         given:
         def expectedResult =  new Triple(new IRI("http://example.org/#spiderman"),
                 new IRI("http://www.perceive.net/schemas/relationship/enemyOf"),  new IRI("http://example.org/#green-goblin"))
-        def results = ligature.parseNTriples(this.class.getResource("/ntriples/comments.nt").toString())
-        then:
+        def results = ligature.parseNTriples(this.class.getResource("/ntriples/comments.nt").text)
+        expect:
         results.size() == 1
         results.first() == expectedResult
     }
@@ -51,20 +51,20 @@ class NTriplesSpec extends Specification {
             (new Triple(new IRI("http://example.org/show/218"), new IRI("http://example.org/show/localName"), new LangLiteral("That Seventies Show", "en"))),
             (new Triple(new IRI("http://example.org/show/218"), new IRI("http://example.org/show/localName"), new LangLiteral("Cette Série des Années Septante", "fr-be"))),
             (new Triple(new IRI("http://example.org/#spiderman"), new IRI("http://example.org/text"), new TypedLiteral("This is a multi-line\\nliteral with many quotes (\\\"\\\"\\\"\\\"\\\")\\nand two apostrophes ('').", stringIRI))),
-            (new Triple(new IRI("http://en.wikipedia.org/wiki/Helium"), new IRI("http://example.org/elements/atomicNumber"), new TypedLiteral("2",  IRI("http://www.w3.org/2001/XMLSchema#integer")))),
-            (new Triple(new IRI("http://en.wikipedia.org/wiki/Helium"), new IRI("http://example.org/elements/specificGravity"), new TypedLiteral("1.663E-4",  IRI("http://www.w3.org/2001/XMLSchema#double"))))
+            (new Triple(new IRI("http://en.wikipedia.org/wiki/Helium"), new IRI("http://example.org/elements/atomicNumber"), new TypedLiteral("2", new IRI("http://www.w3.org/2001/XMLSchema#integer")))),
+            (new Triple(new IRI("http://en.wikipedia.org/wiki/Helium"), new IRI("http://example.org/elements/specificGravity"), new TypedLiteral("1.663E-4", new IRI("http://www.w3.org/2001/XMLSchema#double"))))
         ]
-        def results = ligature.parseNTriples(this.class.getResource("/ntriples/literals.nt").toString())
-        then:
+        def results = ligature.parseNTriples(this.class.getResource("/ntriples/literals.nt").text)
+        expect:
         results == expectedResults
     }
 
     def "support blank nodes"() {
         given:
-        def expectedResult1 =  Triple( BlankNode("alice"),  IRI("http://xmlns.com/foaf/0.1/knows"),  BlankNode("bob"))
-        def expectedResult2 =  Triple( BlankNode("bob"),  IRI("http://xmlns.com/foaf/0.1/knows"),  BlankNode("alice"))
-        def results = ligature.parseNTriples(this.class.getResource("/ntriples/blankNodes.nt").toString())
-        then:
+        def expectedResult1 = new Triple(new BlankNode("alice"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("bob"))
+        def expectedResult2 = new Triple(new BlankNode("bob"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("alice"))
+        def results = ligature.parseNTriples(this.class.getResource("/ntriples/blankNodes.nt").text)
+        expect:
         results == [expectedResult1, expectedResult2]
     }
 }
