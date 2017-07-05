@@ -16,7 +16,7 @@ class NTriplesSpec extends Specification {
         given:
         def expectedResult = new Triple( new IRI("http://example.org/#spiderman"),
                 new IRI("http://www.perceive.net/schemas/relationship/enemyOf"),  new IRI("http://example.org/#green-goblin"))
-        def results = ligature.parseNTriples(this.class.getResource("/ntriples/basicTriple.nt").text)
+        def results = ligature.parseNTriples(this.class.getResource("/ntriples/01-basicTriple.nt").text)
         expect:
         results.size() == 1
         results == [expectedResult]
@@ -28,7 +28,7 @@ class NTriplesSpec extends Specification {
                 new IRI("http://www.perceive.net/schemas/relationship/enemyOf"),  new IRI("http://example.org/#green-goblin"))
         def expectedResult2 =  new Triple(new IRI("http://example.org/#spiderman"),
                 new IRI("http://www.perceive.net/schemas/relationship/enemyOf"), new IRI("http://example.org/#black-cat"))
-        def results = ligature.parseNTriples(this.class.getResource("/ntriples/multipleIRITriples.nt").text)
+        def results = ligature.parseNTriples(this.class.getResource("/ntriples/02-multipleIRITriples.nt").text)
         expect:
         results == [expectedResult1, expectedResult2]
     }
@@ -37,7 +37,7 @@ class NTriplesSpec extends Specification {
         given:
         def expectedResult =  new Triple(new IRI("http://example.org/#spiderman"),
                 new IRI("http://www.perceive.net/schemas/relationship/enemyOf"),  new IRI("http://example.org/#green-goblin"))
-        def results = ligature.parseNTriples(this.class.getResource("/ntriples/comments.nt").text)
+        def results = ligature.parseNTriples(this.class.getResource("/ntriples/03-comments.nt").text)
         expect:
         results.size() == 1
         results.first() == expectedResult
@@ -54,7 +54,7 @@ class NTriplesSpec extends Specification {
             (new Triple(new IRI("http://en.wikipedia.org/wiki/Helium"), new IRI("http://example.org/elements/atomicNumber"), new TypedLiteral("2", new IRI("http://www.w3.org/2001/XMLSchema#integer")))),
             (new Triple(new IRI("http://en.wikipedia.org/wiki/Helium"), new IRI("http://example.org/elements/specificGravity"), new TypedLiteral("1.663E-4", new IRI("http://www.w3.org/2001/XMLSchema#double"))))
         ]
-        def results = ligature.parseNTriples(this.class.getResource("/ntriples/literals.nt").text)
+        def results = ligature.parseNTriples(this.class.getResource("/ntriples/04-literals.nt").text)
         expect:
         results == expectedResults
     }
@@ -63,7 +63,7 @@ class NTriplesSpec extends Specification {
         given:
         def expectedResult1 = new Triple(new BlankNode("alice"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("bob"))
         def expectedResult2 = new Triple(new BlankNode("bob"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("alice"))
-        def results = ligature.parseNTriples(this.class.getResource("/ntriples/blankNodes.nt").text)
+        def results = ligature.parseNTriples(this.class.getResource("/ntriples/05-blankNodes.nt").text)
         expect:
         results == [expectedResult1, expectedResult2]
     }
