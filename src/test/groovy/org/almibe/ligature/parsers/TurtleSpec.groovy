@@ -1,80 +1,80 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 package org.almibe.ligature.parsers
 
-class TurtleSpec {
+import org.almibe.ligature.IRI
+import org.almibe.ligature.LangLiteral
+import org.almibe.ligature.Triple
+import org.almibe.ligature.TypedLiteral
+import spock.lang.Specification
+
+class TurtleSpec extends Specification {
+    final def turtle = new Turtle()
+    final def xsd = "http://www.w3.org/2001/XMLSchema#"
+    final def foafKnows = new IRI("http://xmlns.com/foaf/0.1/knows")
+    final def rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+
+    final def spidermanEnemy = new Triple(new IRI("http://example.org/#spiderman"),
+        new IRI("http://www.perceive.net/schemas/relationship/enemyOf"), new IRI("http://example.org/#green-goblin"))
+
+    final def spidermanName = new Triple(new IRI("http://example.org/#spiderman"),
+        new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Spiderman", new IRI("http://www.w3.org/2001/XMLSchema#string")))
+
+    final def spidermanNameRu = new Triple(new IRI("http://example.org/#spiderman"),
+        new IRI("http://xmlns.com/foaf/0.1/name"), new LangLiteral("Человек-паук", "ru"))
+
+    final def "support basic IRI triple"() {
+        given:
+        final def expectedResult = spidermanEnemy
+        final def results = turtle.parseTurtle(this.class.getResource("/turtle/01-basicTriple.ttl").text)
+        expect:
+        results.size() == 1
+        results.first() == expectedResult
+    }
+
+    final def "support predicate lists"() {
+        given:
+        final def expectedResults = [spidermanEnemy, spidermanName]
+        final def results = turtle.parseTurtle(this.class.getResource("/turtle/predicateList.ttl").text)
+        expect:
+        results.size() == 2
+        results == expectedResults
+    }
 }
 
-///* This Source Code Form is subject to the terms of the Mozilla Public
-// * License, v. 2.0. If a copy of the MPL was not distributed with this
-// * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 //
-//package org.almibe.ligature.parsers
-//
-//import org.almibe.ligature.IRI
-//import org.almibe.ligature.LangLiteral
-//import org.almibe.ligature.Triple
-//import org.almibe.ligature.TypedLiteral
-//import org.testng.Assert
-//import org.testng.annotations.Test
-//
-//class TurtleTests {
-//    val turtle = Turtle()
-//    val xsd = "http://www.w3.org/2001/XMLSchema#"
-//    val foafKnows = IRI("http://xmlns.com/foaf/0.1/knows")
-//    val rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-//
-//    val spidermanEnemy = Triple(IRI("http://example.org/#spiderman"),
-//        IRI("http://www.perceive.net/schemas/relationship/enemyOf"), IRI("http://example.org/#green-goblin"))
-//
-//    val spidermanName = Triple(IRI("http://example.org/#spiderman"),
-//        IRI("http://xmlns.com/foaf/0.1/name"), TypedLiteral("Spiderman", IRI("http://www.w3.org/2001/XMLSchema#string")))
-//
-//    val spidermanNameRu = Triple(IRI("http://example.org/#spiderman"),
-//        IRI("http://xmlns.com/foaf/0.1/name"), LangLiteral("Человек-паук", "ru"))
-//
-//    @Test fun supportBasicIRITriple() {
-//        val expectedResult = spidermanEnemy
-//        val results = turtle.parseTurtle(this.javaClass.getResource("/turtle/basicTriple.ttl").readText())
-//        Assert.assertEquals(results.size, 1)
-//        Assert.assertEquals(results.first(), expectedResult)
+//    final def supportObjectLists() {
+//        final def expectedResults = listOf(spidermanName, spidermanNameRu)
+//        final def results = turtle.parseTurtle(this.javaClass.getResource("/turtle/objectList.ttl").readText())
+//        results.size, 2)
+//        results, expectedResults)
 //    }
 //
-//    @Test fun supportPredicateLists() {
-//        val expectedResults = listOf(spidermanEnemy, spidermanName)
-//        val results = turtle.parseTurtle(this.javaClass.getResource("/turtle/predicateList.ttl").readText())
-//        Assert.assertEquals(results.size, 2)
-//        Assert.assertEquals(results, expectedResults)
+//    final def supportComments() {
+//        final def expectedResults = listOf(spidermanEnemy, spidermanName)
+//        final def results = turtle.parseTurtle(this.javaClass.getResource("/turtle/comments.ttl").readText())
+//        results.size, 2)
+//        results, expectedResults)
 //    }
 //
-//    @Test fun supportObjectLists() {
-//        val expectedResults = listOf(spidermanName, spidermanNameRu)
-//        val results = turtle.parseTurtle(this.javaClass.getResource("/turtle/objectList.ttl").readText())
-//        Assert.assertEquals(results.size, 2)
-//        Assert.assertEquals(results, expectedResults)
-//    }
-//
-//    @Test fun supportComments() {
-//        val expectedResults = listOf(spidermanEnemy, spidermanName)
-//        val results = turtle.parseTurtle(this.javaClass.getResource("/turtle/comments.ttl").readText())
-//        Assert.assertEquals(results.size, 2)
-//        Assert.assertEquals(results, expectedResults)
-//    }
-//
-//    @Test fun supportMultilineTriples() {
-//        val expectedResults = listOf(spidermanEnemy)
-//        val results = turtle.parseTurtle(this.javaClass.getResource("/turtle/multilineTriple.ttl").readText())
-//        Assert.assertEquals(results.size, 1)
-//        Assert.assertEquals(results, expectedResults)
+//    final def supportMultilineTriples() {
+//        final def expectedResults = listOf(spidermanEnemy)
+//        final def results = turtle.parseTurtle(this.javaClass.getResource("/turtle/multilineTriple.ttl").readText())
+//        results.size, 1)
+//        results, expectedResults)
 //    }
 ////
-////    val base = "http://one.example/"
-////    val base2 = "http://one.example2/"
-////    val baseTwo = "http://two.example/"
-////    val baseTwo2 = "http://two.example2/"
+////    final def base = "http://one.example/"
+////    final def base2 = "http://one.example2/"
+////    final def baseTwo = "http://two.example/"
+////    final def baseTwo2 = "http://two.example2/"
 ////
-////    val base3 = "http://another.example/"
+////    final def base3 = "http://another.example/"
 ////
-////    @Test fun turtleIRIParsing() {
-////        val expectedResults = listOf(
+////    final def turtleIRIParsing() {
+////        final def expectedResults = listOf(
 ////        Triple(IRI("http://one.example/subject1"), IRI("http://one.example/predicate1"), IRI("http://one.example/object1")),
 ////        Triple(IRI("${base}subject2"), IRI("${base}predicate2"), IRI("${base}object2")),
 ////        Triple(IRI("${base2}subject2"), IRI("${base2}predicate2"), IRI("${base2}object2")),
@@ -85,29 +85,29 @@ class TurtleSpec {
 ////        Triple(IRI("${base3}subject6"), IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), IRI("${base3}subject7")),
 ////        Triple(IRI("http://伝言.example/?user=أكرم&amp;channel=R%26D"), IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), IRI("${base3}subject8"))
 ////        )
-////        val results = turtle.parseTurtle(this.javaClass.getResource("/turtle/comprehensivePrefixBaseExample.ttl").readText())
-////        Assert.assertEquals(results, expectedResults)
+////        final def results = turtle.parseTurtle(this.javaClass.getResource("/turtle/comprehensivePrefixBaseExample.ttl").readText())
+////        results, expectedResults)
 ////    }
 ////
-////    @Test fun supportLanguageLiterals() {
-////        val expectedResults = listOf(spidermanNameRu)
-////        val results = turtle.parseTurtle(this.javaClass.getResource("/turtle/literalWithLanguage.ttl").readText())
-////        Assert.assertEquals(results, expectedResults)
+////    final def supportLanguageLiterals() {
+////        final def expectedResults = listOf(spidermanNameRu)
+////        final def results = turtle.parseTurtle(this.javaClass.getResource("/turtle/literalWithLanguage.ttl").readText())
+////        results, expectedResults)
 ////    }
 ////
-////    @Test fun supportQuotedLiterals() {
-////        val base = "http://www.libraryweasel.org/fake/madeup#"
-////        val show = IRI("http://example.org/vocab/show/218")
-////        val show219 = IRI("http://example.org/vocab/show/219")
-////        val label = IRI("http://www.w3.org/2000/01/rdf-schema#label")
-////        val localName = IRI("http://example.org/vocab/show/localName")
-////        val blurb = IRI("http://example.org/vocab/show/blurb")
-////        val multilineText = "This is a multi-line\n" +
+////    final def supportQuotedLiterals() {
+////        final def base = "http://www.libraryweasel.org/fake/madeup#"
+////        final def show = IRI("http://example.org/vocab/show/218")
+////        final def show219 = IRI("http://example.org/vocab/show/219")
+////        final def label = IRI("http://www.w3.org/2000/01/rdf-schema#label")
+////        final def localName = IRI("http://example.org/vocab/show/localName")
+////        final def blurb = IRI("http://example.org/vocab/show/blurb")
+////        final def multilineText = "This is a multi-line\n" +
 ////            "literal with many quotes (\"\"\"\"\")\n" +
 ////            "and up to two sequential apostrophes ('')."
-////        val multilineText2 = "Another\n" +
+////        final def multilineText2 = "Another\n" +
 ////            "multiline string with' 'a' \"custom datatype\"\\\"."
-////        val expectedResults = listOf(
+////        final def expectedResults = listOf(
 ////            Triple(show, label, TypedLiteral("That Seventies Show")),
 ////            Triple(show, label, TypedLiteral("That Seventies Show")),
 ////            Triple(show, label, TypedLiteral("That Seventies Show")),
@@ -121,62 +121,62 @@ class TurtleSpec {
 ////            Triple(show219, blurb, TypedLiteral("")),
 ////            Triple(show219, blurb, TypedLiteral(""))
 ////        )
-////        val results = turtle.parseTurtle(this.javaClass.getResource("/turtle/quotedLiterals.ttl").readText())
-////        Assert.assertEquals(results, expectedResults)
+////        final def results = turtle.parseTurtle(this.javaClass.getResource("/turtle/quotedLiterals.ttl").readText())
+////        results, expectedResults)
 ////    }
 ////
-////    @Test fun supportNumbers() {
-////        val helium = "http://en.wikipedia.org/wiki/Helium"
-////        val prefix = "http://example.org/elements"
-////        val expectedResults = listOf(
+////    final def supportNumbers() {
+////        final def helium = "http://en.wikipedia.org/wiki/Helium"
+////        final def prefix = "http://example.org/elements"
+////        final def expectedResults = listOf(
 ////            Triple(IRI(helium), IRI("${prefix}atomicNumber"), TypedLiteral("2", IRI("${xsd}integer"))),
 ////            Triple(IRI(helium), IRI("${prefix}atomicMass"), TypedLiteral("4.002602", IRI("${xsd}float"))),
 ////            Triple(IRI(helium), IRI("${prefix}specificGravity"), TypedLiteral("1.663E-4", IRI("${xsd}double")))
 ////        )
-////        val results = turtle.parseTurtle(this.javaClass.getResource("/turtle/numbers.ttl").readText())
-////        Assert.assertEquals(results, expectedResults)
+////        final def results = turtle.parseTurtle(this.javaClass.getResource("/turtle/numbers.ttl").readText())
+////        results, expectedResults)
 ////    }
 ////
-////    @Test fun supportBooleans() {
-////        val expectedResults = listOf(
+////    final def supportBooleans() {
+////        final def expectedResults = listOf(
 ////            Triple(IRI("http://somecountry.example/census2007"), IRI("http://example.org/stats/isLandlocked"),
 ////                    TypedLiteral("false", IRI("${xsd}boolean")))
 ////        )
-////        val results = turtle.parseTurtle(this.javaClass.getResource("/turtle/booleans.ttl").readText())
-////        Assert.assertEquals(results, expectedResults)
+////        final def results = turtle.parseTurtle(this.javaClass.getResource("/turtle/booleans.ttl").readText())
+////        results, expectedResults)
 ////    }
 ////
-////    @Test fun supportBlankNodes() {
-////        val expectedResults = listOf(
+////    final def supportBlankNodes() {
+////        final def expectedResults = listOf(
 ////            Triple(BlankNode("alice"), IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("bob")),
 ////            Triple(BlankNode("bob"), IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("alice"))
 ////        )
-////        val results = turtle.parseTurtle(this.javaClass.getResource("/turtle/blankNodes.ttl").readText())
-////        Assert.assertEquals(results, expectedResults)
+////        final def results = turtle.parseTurtle(this.javaClass.getResource("/turtle/blankNodes.ttl").readText())
+////        results, expectedResults)
 ////    }
 ////
-////    @Test fun unlabeledBlankNodes() {
-////        val expectedResults = listOf(
+////    final def unlabeledBlankNodes() {
+////        final def expectedResults = listOf(
 ////            Triple(IRI("http://example.com/person/bob"), foafKnows, IRI("http://example.com/person/george")),
 ////            Triple(BlankNode("ANON0"), foafKnows, IRI("http://example.com/person/george")),
 ////            Triple(IRI("http://example.com/person/bob"), foafKnows, BlankNode("ANON1")),
 ////            Triple(BlankNode("ANON2"), IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("ANON3"))
 ////        )
-////        val results = turtle.parseTurtle(this.javaClass.getResource("/turtle/unlabeledBlankNodes.ttl").readText())
-////        Assert.assertEquals(results, expectedResults)
+////        final def results = turtle.parseTurtle(this.javaClass.getResource("/turtle/unlabeledBlankNodes.ttl").readText())
+////        results, expectedResults)
 ////    }
 ////
-////    @Test fun nestedUnlabeledBlankNodes() {
-////        val expectedResults = listOf(
+////    final def nestedUnlabeledBlankNodes() {
+////        final def expectedResults = listOf(
 ////            Triple(BlankNode("ANON1"), IRI("http://xmlns.com/foaf/0.1/name"), TypedLiteral("Bob")),
 ////            Triple(BlankNode("ANON0"), IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("ANON1"))
 ////        )
-////        val results = turtle.parseTurtle(this.javaClass.getResource("/turtle/nestedUnlabeledBlankNodes.ttl").readText())
-////        Assert.assertEquals(results, expectedResults)
+////        final def results = turtle.parseTurtle(this.javaClass.getResource("/turtle/nestedUnlabeledBlankNodes.ttl").readText())
+////        results, expectedResults)
 ////    }
 ////
-////    @Test fun complexUnlabeledBlankNodes() {
-////        val expectedResults = listOf(
+////    final def complexUnlabeledBlankNodes() {
+////        final def expectedResults = listOf(
 ////            Triple(BlankNode("ANON0"), IRI("http://xmlns.com/foaf/0.1/name"), TypedLiteral("Alice")),
 ////            Triple(BlankNode("ANON1"), IRI("http://xmlns.com/foaf/0.1/name"), TypedLiteral("Bob")),
 ////            Triple(BlankNode("ANON0"), IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("ANON1")),
@@ -184,13 +184,13 @@ class TurtleSpec {
 ////            Triple(BlankNode("ANON1"), IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("ANON2")),
 ////            Triple(BlankNode("ANON1"), IRI("http://xmlns.com/foaf/0.1/mbox"), IRI("http://bob@example.com"))
 ////        )
-////        val results = turtle.parseTurtle(this.javaClass.getResource("/turtle/complexUnlabeledBlankNodes.ttl").readText())
-////        val c = Comparator<Triple> { f, s -> f.toString().compareTo(s.toString()) }
-////        Assert.assertEquals(results.sortedWith(c), expectedResults.sortedWith(c))
+////        final def results = turtle.parseTurtle(this.javaClass.getResource("/turtle/complexUnlabeledBlankNodes.ttl").readText())
+////        final def c = Comparator<Triple> { f, s -> f.toString().compareTo(s.toString()) }
+////        results.sortedWith(c), expectedResults.sortedWith(c))
 ////    }
 ////
-////    @Test fun supportCollections() {
-////        val expectedResults = listOf(
+////    final def supportCollections() {
+////        final def expectedResults = listOf(
 ////                Triple(IRI("http://example.org/foo/subject"), IRI("http://example.org/foo/predicate"), BlankNode("ANON0")),
 ////                Triple(BlankNode("ANON0"), IRI("${rdf}first"), IRI("http://example.org/foo/a")),
 ////                Triple(BlankNode("ANON0"), IRI("${rdf}rest"), BlankNode("ANON1")),
@@ -200,23 +200,23 @@ class TurtleSpec {
 ////                Triple(BlankNode("ANON2"), IRI("${rdf}rest"), IRI("${rdf}nil")),
 ////                Triple(IRI("http://example.org/foo/subject"), IRI("http://example.org/foo/predicate2"), IRI("${rdf}nil"))
 ////        )
-////        val results = turtle.parseTurtle(this.javaClass.getResource("/turtle/collections.ttl").readText())
-////        val c = Comparator<Triple> { f, s -> f.toString().compareTo(s.toString()) }
-////        Assert.assertEquals(results.sortedWith(c), expectedResults.sortedWith(c))
+////        final def results = turtle.parseTurtle(this.javaClass.getResource("/turtle/collections.ttl").readText())
+////        final def c = Comparator<Triple> { f, s -> f.toString().compareTo(s.toString()) }
+////        results.sortedWith(c), expectedResults.sortedWith(c))
 ////    }
 //////
 //////    //TODO examples 19-26 and wordnetStinkpot.ttl
-//////    @Test fun wordnetTest() {
-//////        val expectedResults = listOf(
+//////    final def wordnetTest() {
+//////        final def expectedResults = listOf(
 //////                Triple(IRI(""),IRI(""),IRI(""))
 //////        )
-//////        val results = turtle.parseTurtle(this.javaClass.getResource("/turtle/wordnetStinkpot.ttl").readText())
-//////        Assert.assertEquals(results, expectedResults)
+//////        final def results = turtle.parseTurtle(this.javaClass.getResource("/turtle/wordnetStinkpot.ttl").readText())
+//////        results, expectedResults)
 //////    }
 ////
-////    @Test fun malformedQuotedLiterals() {
+////    final def malformedQuotedLiterals() {
 ////        try {
-////            val results = turtle.parseTurtle(this.javaClass.getResource("/turtle/malformed/quotedLiterals.ttl").readText())
+////            final def results = turtle.parseTurtle(this.javaClass.getResource("/turtle/malformed/quotedLiterals.ttl").readText())
 ////        } catch (exception: RuntimeException) {
 ////            return
 ////        }
