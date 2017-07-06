@@ -70,19 +70,33 @@ private class TriplesNTripleListener : NTriplesBaseListener() {
     override fun visitErrorNode(node: ErrorNode) {
         throw RuntimeException(node.toString()) //TODO do I need this or will ANTLR throw its own RTE?
     }
-}
 
-internal class TempTriple {
-    lateinit var subject: Subject
-    lateinit var predicate: Predicate
-    lateinit var `object`: Object
-}
+    internal fun handleIRI(iriRef: String): IRI {
+        if (iriRef.length > 2) {
+            return IRI(iriRef.substring(1, (iriRef.length-1)))
+        } else {
+            throw RuntimeException("Invalid iriRef - $iriRef")
+        }
+    }
 
-internal fun handleIRI(iriRef: String): IRI {
-    if (iriRef.length > 2) {
-        return IRI(iriRef.substring(1, (iriRef.length-1)))
-    } else {
-        throw RuntimeException("Invalid iriRef - $iriRef")
+    internal fun handleLiteral(literal: NTriplesParser.LiteralContext): Literal {
+        val value = if (literal.STRING_LITERAL_QUOTE().text.length >= 2) {
+            literal.STRING_LITERAL_QUOTE().text.substring(1, literal.STRING_LITERAL_QUOTE().text.length-1)
+        } else {
+            throw RuntimeException("Invalid literal.")
+        }
+
+        return when {
+            literal.LANGTAG() != null -> LangLiteral(value, literal.LANGTAG().text.substring(1))
+            literal.IRIREF() != null -> TypedLiteral(value, handleIRI(literal.IRIREF().text))
+            else -> TypedLiteral(value)
+        }
+    }
+
+    internal class TempTriple {
+        lateinit var subject: Subject
+        lateinit var predicate: Predicate
+        lateinit var `object`: Object
     }
 }
 
@@ -91,19 +105,5 @@ internal fun handleBlankNode(blankNode: String): BlankNode {
         return BlankNode(blankNode.substring(2))
     } else {
         throw RuntimeException("Invalid blank node label - $blankNode")
-    }
-}
-
-internal fun handleLiteral(literal: NTriplesParser.LiteralContext): Literal {
-    val value = if (literal.STRING_LITERAL_QUOTE().text.length >= 2) {
-        literal.STRING_LITERAL_QUOTE().text.substring(1, literal.STRING_LITERAL_QUOTE().text.length-1)
-    } else {
-        throw RuntimeException("Invalid literal.")
-    }
-
-    return when {
-        literal.LANGTAG() != null -> LangLiteral(value, literal.LANGTAG().text.substring(1))
-        literal.IRIREF() != null -> TypedLiteral(value, handleIRI(literal.IRIREF().text))
-        else -> TypedLiteral(value)
     }
 }
