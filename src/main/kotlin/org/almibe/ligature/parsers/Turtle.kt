@@ -71,7 +71,7 @@ private class TriplesTurtleListener : TurtleListener {
 
     override fun exitVerbObjectList(ctx: TurtleParser.VerbObjectListContext) {
         val iri = if (ctx.verb().text != null && !ctx.verb().text.equals("")) {
-            handleIRI(ctx.verb().text)
+            handleTurtleIRI(ctx.verb().predicate().iri())
         } else {
             IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
         }
@@ -94,7 +94,11 @@ private class TriplesTurtleListener : TurtleListener {
     }
 
     override fun exitBase(ctx: TurtleParser.BaseContext) {
-        this.base = ctx.iriRef().text
+        if (ctx.iriRef().text.length >= 2) {
+            this.base = ctx.iriRef().text.substring(1, ctx.iriRef().text.length-1)
+        } else {
+            throw RuntimeException("Unexpected base ${ctx.iriRef().text}.")
+        }
     }
 
     override fun exitPrefixID(ctx: TurtleParser.PrefixIDContext) {
@@ -110,19 +114,28 @@ private class TriplesTurtleListener : TurtleListener {
     }
 
     override fun exitSparqlBase(ctx: TurtleParser.SparqlBaseContext) {
-        this.base = ctx.iriRef().text
+        if (ctx.iriRef().text.length >= 2) {
+            this.base = ctx.iriRef().text.substring(1, ctx.iriRef().text.length-1)
+        } else {
+            throw RuntimeException("Unexpected sparql base ${ctx.iriRef().text}.")
+        }
     }
 
     override fun exitSparqlPrefix(ctx: TurtleParser.SparqlPrefixContext) {
         this.prefixes[ctx.PNAME_NS().text] = ctx.iriRef().text
+//        if (ctx.iriRef().text.length >= 2) {
+//            this.base = ctx.iriRef().text.substring(1, ctx.iriRef().text.length-1)
+//        } else {
+//            throw RuntimeException("Unexpected sparql base ${ctx.iriRef().text}.")
+//        }
     }
 
     fun handleTurtleIRI(ctx: TurtleParser.IriContext): IRI {
         return if (ctx.prefixedName() != null) {
             if (ctx.prefixedName().PNAME_LN() != null) {
-                TODO()
+                throw RuntimeException("Prefixes unsupported")
             } else if (ctx.prefixedName().PNAME_NS() != null) {
-                TODO()
+                throw RuntimeException("Prefixes unsupported")
             } else {
                 throw RuntimeException("Unexpected IRI type")
             }
@@ -144,7 +157,7 @@ private class TriplesTurtleListener : TurtleListener {
         return when {
             ctx.literal() != null -> handleTurtleLiteral(ctx.literal())
             ctx.blankNode() != null -> handleBlankNode(ctx.blankNode().text)
-            ctx.iri() != null -> handleIRI(ctx.iri().text)
+            ctx.iri() != null -> handleTurtleIRI(ctx.iri())
             ctx.blankNodePropertyList() != null -> TODO()
             ctx.collection() != null -> TODO()
             else -> throw RuntimeException("Unexpected object")
@@ -176,7 +189,7 @@ private class TriplesTurtleListener : TurtleListener {
         }
         return when {
             ctx.LANGTAG() != null -> LangLiteral(value, ctx.LANGTAG().text.substring(1))
-            ctx.iri() != null -> TypedLiteral(value, handleIRI(ctx.iri().text))
+            ctx.iri() != null -> TypedLiteral(value, handleTurtleIRI(ctx.iri()))
             else -> TypedLiteral(value)
         }
     }
