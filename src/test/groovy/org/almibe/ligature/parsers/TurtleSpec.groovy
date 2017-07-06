@@ -76,22 +76,36 @@ class TurtleSpec extends Specification {
     final def baseTwo2 = "http://two.example2/"
     final def base3 = "http://another.example/"
 
-    final def "turtle IRI parsing"() {
+    final def "turtle IRI parsing with base"() {
         given:
         final def expectedResults = [
-            new Triple(new IRI("http://one.example/subject1"), new IRI("http://one.example/predicate1"), new IRI("http://one.example/object1")),
             new Triple(new IRI("${base}subject2"), new IRI("${base}predicate2"), new IRI("${base}object2")),
             new Triple(new IRI("${base2}subject2"), new IRI("${base2}predicate2"), new IRI("${base2}object2")),
-            new Triple(new IRI("${baseTwo}subject3"), new IRI("${baseTwo}predicate3"), new IRI("${baseTwo}object3")),
-            new Triple(new IRI("${baseTwo2}subject3"), new IRI("${baseTwo2}predicate3"), new IRI("${baseTwo2}object3")),
-            new Triple(new IRI("${base2}path/subject4"), new IRI("${base2}path/predicate4"), new IRI("${base2}path/object4")),
-            new Triple(new IRI("${base3}subject5"), new IRI("${base3}predicate5"), new IRI("${base3}object5")),
-            new Triple(new IRI("${base3}subject6"), new IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), new IRI("${base3}subject7")),
-            new Triple(new IRI("http://伝言.example/?user=أكرم&amp;channel=R%26D"), new IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), new IRI("${base3}subject8"))
         ]
-        final def results = turtle.parseTurtle(this.class.getResource("/turtle/06-comprehensivePrefixBaseExample.ttl").text)
+        final def results = turtle.parseTurtle(this.class.getResource("/turtle/06-baseTriples.ttl").text)
         expect:
-        results == expectedResults
+        results[0] == expectedResults[0]
+        results[1] == expectedResults[1]
+    }
+
+    final def "turtle IRI parsing with prefixes"() {
+        given:
+        final def expectedResults = [
+                new Triple(new IRI("${baseTwo}subject3"), new IRI("${baseTwo}predicate3"), new IRI("${baseTwo}object3")),
+                new Triple(new IRI("${baseTwo2}subject3"), new IRI("${baseTwo2}predicate3"), new IRI("${baseTwo2}object3")),
+                new Triple(new IRI("${base2}path/subject4"), new IRI("${base2}path/predicate4"), new IRI("${base2}path/object4")),
+                new Triple(new IRI("${base3}subject5"), new IRI("${base3}predicate5"), new IRI("${base3}object5")),
+                new Triple(new IRI("${base3}subject6"), new IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), new IRI("${base3}subject7")),
+                new Triple(new IRI("http://伝言.example/?user=أكرم&amp;channel=R%26D"), new IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), new IRI("${base3}subject8"))
+        ]
+        final def results = turtle.parseTurtle(this.class.getResource("/turtle/07-prefixTriples.ttl").text)
+        expect:
+        results[0] == expectedResults[0]
+        results[1] == expectedResults[1]
+        results[2] == expectedResults[2]
+        results[3] == expectedResults[3]
+        results[4] == expectedResults[4]
+        results[5] == expectedResults[5]
     }
 }
 

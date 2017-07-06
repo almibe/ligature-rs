@@ -1,0 +1,5 @@
+@base <http://one.example/> .
+<subject2> <predicate2> <object2> .     # relative IRIs, e.g. http://one.example/subject2
+
+BASE <http://one.example2/>
+<subject2> <predicate2> <object2> .     # relative IRIs, e.g. http://one.example/subject2
