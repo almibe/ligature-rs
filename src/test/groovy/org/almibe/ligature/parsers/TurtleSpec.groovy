@@ -45,10 +45,10 @@ class TurtleSpec extends Specification {
 
     final def "support object lists"() {
         given:
-        final def expectedResults = [spidermanName, spidermanNameRu]
+        final def expectedResults = [spidermanName, spidermanNameRu, spidermanName, spidermanNameRu]
         final def results = turtle.parseTurtle(this.class.getResource("/turtle/03-objectList.ttl").text)
         expect:
-        results.size() == 2
+        results.size() == 4
         results == expectedResults
     }
 }
