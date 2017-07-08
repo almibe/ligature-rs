@@ -4,6 +4,22 @@
 
 package org.almibe.ligature.parsers
 
+import javafx.animation.Animation
+import javafx.animation.KeyFrame
+import javafx.animation.Timeline
+import javafx.application.Application
+import javafx.application.Platform
+import javafx.embed.swing.SwingNode
+import javafx.event.ActionEvent
+import javafx.geometry.Orientation
+import javafx.scene.Scene
+import javafx.scene.control.*
+import javafx.scene.layout.BorderPane
+import javafx.scene.layout.HBox
+import javafx.stage.Stage
+import javafx.util.Duration
+import org.almibe.ligature.parser.NTriplesLexer
+import org.almibe.ligature.parser.NTriplesParser
 import org.almibe.ligature.parser.TurtleLexer
 import org.almibe.ligature.parser.TurtleParser
 import org.antlr.v4.gui.TreeViewer
@@ -12,27 +28,81 @@ import org.antlr.v4.runtime.CommonTokenStream
 
 import javax.swing.*
 
-class ParseTreeDebugView {
-    static void main(String[] args) {
-        def stream = CharStreams.fromString("<http://example.org/#spiderman> <http://xmlns.com/foaf/0.1/name> \"test\"@ru .")
+class ParseTreeDebugView extends Application {
+    final String defaultDocument = "<http://one.example/subject1> <http://one.example/predicate1> <http://one.example/object1> ."
+    Stage stage
+    Scene scene
+    final BorderPane topControls = new BorderPane()
+    final TextArea textArea = new TextArea(defaultDocument)
+    final SwingNode swingNode = new SwingNode()
+    final ScrollPane bottomScrollPane = new ScrollPane(swingNode)
+    final SplitPane splitPane = new SplitPane(topControls, bottomScrollPane)
+    final ToggleGroup radioGroup = new ToggleGroup()
+    final RadioButton ntriplesButton = new RadioButton("N-Triples")
+    final RadioButton turtleButton = new RadioButton("Turtle")
+    final HBox buttonBox = new HBox(ntriplesButton, turtleButton)
+
+    @Override
+    void start(Stage primaryStage) throws Exception {
+        this.stage = stage
+        topControls.center = textArea
+        topControls.bottom = buttonBox
+        ntriplesButton.toggleGroup = radioGroup
+        turtleButton.toggleGroup = radioGroup
+        ntriplesButton.selected = true
+        splitPane.orientation = Orientation.VERTICAL
+        splitPane.setDividerPositions(0.2, 0.8)
+        scene = new Scene(splitPane, 1200, 800)
+        primaryStage.title = "Ligature Parser Debugger"
+        primaryStage.scene = scene
+        primaryStage.show()
+        swingNode.content = createNTriplesTreeView(defaultDocument)
+
+        Timeline timeline = new Timeline(new KeyFrame(
+                Duration.seconds(1.0),
+                { ActionEvent event ->
+                    checkDisplay()
+                }
+        ))
+        timeline.cycleCount = Animation.INDEFINITE
+        timeline.play()
+    }
+
+    void checkDisplay() {
+        Platform.runLater {
+            if (ntriplesButton.selected) {
+                updateSwingNode(createNTriplesTreeView(textArea.text))
+            } else {
+                updateSwingNode(createTurtleTreeView(textArea.text))
+            }
+        }
+    }
+
+    void updateSwingNode(JComponent component) {
+        SwingUtilities.invokeLater {
+            swingNode.content = component
+        }
+    }
+
+    JComponent createTurtleTreeView(String text) {
+        def stream = CharStreams.fromString(text)
         def lexer = new TurtleLexer(stream)
-//        def lexer = new NTriplesLexer(stream)
         def tokenStream = new CommonTokenStream(lexer)
         def parser = new TurtleParser(tokenStream)
-//        def parser = new NTriplesParser(tokenStream)
         def tree = parser.turtleDoc()
-//        def tree = parser.ntriplesDoc()
+        return new TreeViewer(parser.ruleNames.toList(), tree)
+    }
 
-        def frame = new JFrame("ANTLR TreeViewer")
-        def panel = new JPanel()
-        def scrollBox = new JScrollPane(panel)
-        def treeViewer = new TreeViewer(parser.ruleNames.toList(), tree)
+    JComponent createNTriplesTreeView(String text) {
+        def stream = CharStreams.fromString(text)
+        def lexer = new NTriplesLexer(stream)
+        def tokenStream = new CommonTokenStream(lexer)
+        def parser = new NTriplesParser(tokenStream)
+        def tree = parser.ntriplesDoc()
+        return new TreeViewer(parser.ruleNames.toList(), tree)
+    }
 
-        treeViewer.scale = 1.5
-        panel.add(treeViewer)
-        frame.add(scrollBox)
-        frame.setSize(800, 1200)
-        frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
-        frame.visible = true
+    static void main(String[] args) {
+        launch(ParseTreeDebugView.class, args)
     }
 }
