@@ -56,7 +56,7 @@ class ParseTreeDebugView extends Application {
         primaryStage.title = "Ligature Parser Debugger"
         primaryStage.scene = scene
         primaryStage.show()
-        swingNode.content = createNTriplesTreeView(defaultDocument)
+        checkDisplay()
 
         Timeline timeline = new Timeline(new KeyFrame(
                 Duration.seconds(1.0),
@@ -70,21 +70,20 @@ class ParseTreeDebugView extends Application {
 
     void checkDisplay() {
         Platform.runLater {
-            if (ntriplesButton.selected) {
-                updateSwingNode(createNTriplesTreeView(textArea.text))
-            } else {
-                updateSwingNode(createTurtleTreeView(textArea.text))
-            }
+            TreeViewer component = ntriplesButton.selected ? createNTriplesTreeView(textArea.text) :
+                createTurtleTreeView(textArea.text)
+            updateSwingNode(component)
         }
     }
 
-    void updateSwingNode(JComponent component) {
+    void updateSwingNode(TreeViewer component) {
         SwingUtilities.invokeLater {
+            component.scale = 1.5
             swingNode.content = component
         }
     }
 
-    JComponent createTurtleTreeView(String text) {
+    TreeViewer createTurtleTreeView(String text) {
         def stream = CharStreams.fromString(text)
         def lexer = new TurtleLexer(stream)
         def tokenStream = new CommonTokenStream(lexer)
@@ -93,7 +92,7 @@ class ParseTreeDebugView extends Application {
         return new TreeViewer(parser.ruleNames.toList(), tree)
     }
 
-    JComponent createNTriplesTreeView(String text) {
+    TreeViewer createNTriplesTreeView(String text) {
         def stream = CharStreams.fromString(text)
         def lexer = new NTriplesLexer(stream)
         def tokenStream = new CommonTokenStream(lexer)
