@@ -111,40 +111,42 @@ class TurtleSpec extends Specification {
     final def "support language literals"() {
         given:
         final def expectedResults = [spidermanNameRu]
-        final def results = turtle.parseTurtle(this.class.getResource("/turtle/literalWithLanguage.ttl").text)
+        final def results = turtle.parseTurtle(this.class.getResource("/turtle/08-literalWithLanguage.ttl").text)
         expect:
         results == expectedResults
     }
-////
-////    final def supportQuotedLiterals() {
-////        final def base = "http://www.libraryweasel.org/fake/madeup#"
-////        final def show = IRI("http://example.org/vocab/show/218")
-////        final def show219 = IRI("http://example.org/vocab/show/219")
-////        final def label = IRI("http://www.w3.org/2000/01/rdf-schema#label")
-////        final def localName = IRI("http://example.org/vocab/show/localName")
-////        final def blurb = IRI("http://example.org/vocab/show/blurb")
-////        final def multilineText = "This is a multi-line\n" +
-////            "literal with many quotes (\"\"\"\"\")\n" +
-////            "and up to two sequential apostrophes ('')."
-////        final def multilineText2 = "Another\n" +
-////            "multiline string with' 'a' \"custom datatype\"\\\"."
-////        final def expectedResults = [
-////            new Triple(show, label, TypedLiteral("That Seventies Show")),
-////            new Triple(show, label, TypedLiteral("That Seventies Show")),
-////            new Triple(show, label, TypedLiteral("That Seventies Show")),
-////            new Triple(show, new IRI("${base}pred"), TypedLiteral("That Seventies Show", new IRI("${base}string"))),
-////            new Triple(show, localName, LangLiteral("That Seventies Show", "en")),
-////            new Triple(show, localName, LangLiteral("Cette Série des Années Soixante-dix", "fr")),
-////            new Triple(show, localName, LangLiteral("Cette Série des Années Septante", "fr-be")),
-////            new Triple(show, blurb, TypedLiteral(multilineText)),
-////            new Triple(show219, blurb, TypedLiteral(multilineText2, new IRI("${base}long-string"))),
-////            new Triple(show219, blurb, TypedLiteral("")),
-////            new Triple(show219, blurb, TypedLiteral("")),
-////            new Triple(show219, blurb, TypedLiteral(""))
-////        )
-////        final def results = turtle.parseTurtle(this.class.getResource("/turtle/quotedLiterals.ttl").text)
-////        results == expectedResults
-////    }
+
+    final def "support quoted literals"() {
+        given:
+        final def base = "http://www.libraryweasel.org/fake/madeup#"
+        final def show = IRI("http://example.org/vocab/show/218")
+        final def show219 = IRI("http://example.org/vocab/show/219")
+        final def label = IRI("http://www.w3.org/2000/01/rdf-schema#label")
+        final def localName = IRI("http://example.org/vocab/show/localName")
+        final def blurb = IRI("http://example.org/vocab/show/blurb")
+        final def multilineText = "This is a multi-line\n" +
+            "literal with many quotes (\"\"\"\"\")\n" +
+            "and up to two sequential apostrophes ('')."
+        final def multilineText2 = "Another\n" +
+            "multiline string with' 'a' \"custom datatype\"\\\"."
+        final def expectedResults = [
+            new Triple(show, label, TypedLiteral("That Seventies Show")),
+            new Triple(show, label, TypedLiteral("That Seventies Show")),
+            new Triple(show, label, TypedLiteral("That Seventies Show")),
+            new Triple(show, new IRI("${base}pred"), TypedLiteral("That Seventies Show", new IRI("${base}string"))),
+            new Triple(show, localName, LangLiteral("That Seventies Show", "en")),
+            new Triple(show, localName, LangLiteral("Cette Série des Années Soixante-dix", "fr")),
+            new Triple(show, localName, LangLiteral("Cette Série des Années Septante", "fr-be")),
+            new Triple(show, blurb, TypedLiteral(multilineText)),
+            new Triple(show219, blurb, TypedLiteral(multilineText2, new IRI("${base}long-string"))),
+            new Triple(show219, blurb, TypedLiteral("")),
+            new Triple(show219, blurb, TypedLiteral("")),
+            new Triple(show219, blurb, TypedLiteral(""))
+        ]
+        final def results = turtle.parseTurtle(this.class.getResource("/turtle/09-quotedLiterals.ttl").text)
+        expect:
+        results == expectedResults
+    }
 ////
 ////    final def supportNumbers() {
 ////        final def helium = "http://en.wikipedia.org/wiki/Helium"
@@ -237,7 +239,7 @@ class TurtleSpec extends Specification {
 ////
 ////    final def malformedQuotedLiterals() {
 ////        try {
-////            final def results = turtle.parseTurtle(this.class.getResource("/turtle/malformed/quotedLiterals.ttl").text)
+////            final def results = turtle.parseTurtle(this.class.getResource("/turtle/malformed/09-quotedLiterals.ttl").text)
 ////        } catch (exception: RuntimeException) {
 ////            return
 ////        }
