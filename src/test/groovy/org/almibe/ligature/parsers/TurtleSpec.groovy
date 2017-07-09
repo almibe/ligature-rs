@@ -107,14 +107,14 @@ class TurtleSpec extends Specification {
         results[4] == expectedResults[4]
         results[5] == expectedResults[5]
     }
-}
 
-////
-////    final def supportLanguageLiterals() {
-////        final def expectedResults = [spidermanNameRu)
-////        final def results = turtle.parseTurtle(this.class.getResource("/turtle/literalWithLanguage.ttl").text)
-////        results, expectedResults)
-////    }
+    final def "support language literals"() {
+        given:
+        final def expectedResults = [spidermanNameRu]
+        final def results = turtle.parseTurtle(this.class.getResource("/turtle/literalWithLanguage.ttl").text)
+        expect:
+        results == expectedResults
+    }
 ////
 ////    final def supportQuotedLiterals() {
 ////        final def base = "http://www.libraryweasel.org/fake/madeup#"
@@ -143,7 +143,7 @@ class TurtleSpec extends Specification {
 ////            new Triple(show219, blurb, TypedLiteral(""))
 ////        )
 ////        final def results = turtle.parseTurtle(this.class.getResource("/turtle/quotedLiterals.ttl").text)
-////        results, expectedResults)
+////        results == expectedResults
 ////    }
 ////
 ////    final def supportNumbers() {
@@ -155,7 +155,7 @@ class TurtleSpec extends Specification {
 ////            new Triple(new IRI(helium), new IRI("${prefix}specificGravity"), TypedLiteral("1.663E-4", new IRI("${xsd}double")))
 ////        )
 ////        final def results = turtle.parseTurtle(this.class.getResource("/turtle/numbers.ttl").text)
-////        results, expectedResults)
+////        results == expectedResults
 ////    }
 ////
 ////    final def supportBooleans() {
@@ -164,7 +164,7 @@ class TurtleSpec extends Specification {
 ////                    TypedLiteral("false", new IRI("${xsd}boolean")))
 ////        )
 ////        final def results = turtle.parseTurtle(this.class.getResource("/turtle/booleans.ttl").text)
-////        results, expectedResults)
+////        results == expectedResults
 ////    }
 ////
 ////    final def supportBlankNodes() {
@@ -173,7 +173,7 @@ class TurtleSpec extends Specification {
 ////            new Triple(BlankNode("bob"), new IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("alice"))
 ////        )
 ////        final def results = turtle.parseTurtle(this.class.getResource("/turtle/blankNodes.ttl").text)
-////        results, expectedResults)
+////        results == expectedResults
 ////    }
 ////
 ////    final def unlabeledBlankNodes() {
@@ -184,7 +184,7 @@ class TurtleSpec extends Specification {
 ////            new Triple(BlankNode("ANON2"), new IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("ANON3"))
 ////        )
 ////        final def results = turtle.parseTurtle(this.class.getResource("/turtle/unlabeledBlankNodes.ttl").text)
-////        results, expectedResults)
+////        results == expectedResults
 ////    }
 ////
 ////    final def nestedUnlabeledBlankNodes() {
@@ -193,7 +193,7 @@ class TurtleSpec extends Specification {
 ////            new Triple(BlankNode("ANON0"), new IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("ANON1"))
 ////        )
 ////        final def results = turtle.parseTurtle(this.class.getResource("/turtle/nestedUnlabeledBlankNodes.ttl").text)
-////        results, expectedResults)
+////        results == expectedResults
 ////    }
 ////
 ////    final def complexUnlabeledBlankNodes() {
@@ -232,7 +232,7 @@ class TurtleSpec extends Specification {
 //////                new Triple(new IRI(""),IRI(""),IRI(""))
 //////        )
 //////        final def results = turtle.parseTurtle(this.class.getResource("/turtle/wordnetStinkpot.ttl").text)
-//////        results, expectedResults)
+//////        results == expectedResults
 //////    }
 ////
 ////    final def malformedQuotedLiterals() {
@@ -243,4 +243,4 @@ class TurtleSpec extends Specification {
 ////        }
 ////        throw RuntimeException("Test failed")
 ////    }
-//}
+}
