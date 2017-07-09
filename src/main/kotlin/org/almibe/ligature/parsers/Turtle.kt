@@ -70,7 +70,7 @@ private class TriplesTurtleListener : TurtleListener {
     }
 
     override fun exitVerbObjectList(ctx: TurtleParser.VerbObjectListContext) {
-        val iri = if (ctx.verb().text != null && !ctx.verb().text.equals("")) {
+        val iri = if (ctx.verb().text != null && !ctx.verb().text.equals("a")) {
             handleTurtleIRI(ctx.verb().predicate().iri())
         } else {
             IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
@@ -95,52 +95,58 @@ private class TriplesTurtleListener : TurtleListener {
 
     override fun exitBase(ctx: TurtleParser.BaseContext) {
         if (ctx.iriRef().text.length >= 2) {
-            this.base = ctx.iriRef().text.substring(1, ctx.iriRef().text.length-1)
+            this.base = ctx.iriRef().text.trim('<', '>')
         } else {
             throw RuntimeException("Unexpected base ${ctx.iriRef().text}.")
         }
     }
 
-    override fun exitPrefixID(ctx: TurtleParser.PrefixIDContext) {
-        if (ctx.PNAME_NS() != null)  {
-            this.prefixes[ctx.PNAME_NS().text] = ctx.iriRef().text
-        } else {
-            if (ctx.iriRef() != null) {
-                this.prefixes[""] = ctx.iriRef().text
-            } else {
-                //TODO("not sure what to do here yet")
-            }
-        }
-    }
-
     override fun exitSparqlBase(ctx: TurtleParser.SparqlBaseContext) {
         if (ctx.iriRef().text.length >= 2) {
-            this.base = ctx.iriRef().text.substring(1, ctx.iriRef().text.length-1)
+            this.base = ctx.iriRef().text.trim('<', '>')
         } else {
             throw RuntimeException("Unexpected sparql base ${ctx.iriRef().text}.")
         }
     }
 
+    override fun exitPrefixID(ctx: TurtleParser.PrefixIDContext) {
+        if (ctx.PNAME_NS() != null)  {
+            this.prefixes[ctx.PNAME_NS().text.trimEnd(':')] = handleIRIRef(ctx.iriRef())
+        } else {
+            throw RuntimeException("Unexpected prefix ${ctx.text}")
+        }
+    }
+
     override fun exitSparqlPrefix(ctx: TurtleParser.SparqlPrefixContext) {
-        this.prefixes[ctx.PNAME_NS().text] = ctx.iriRef().text
-//        if (ctx.iriRef().text.length >= 2) {
-//            this.base = ctx.iriRef().text.substring(1, ctx.iriRef().text.length-1)
-//        } else {
-//            throw RuntimeException("Unexpected sparql base ${ctx.iriRef().text}.")
-//        }
+        if (ctx.iriRef().text.length >= 2) {
+           this.prefixes[ctx.PNAME_NS().text.trimEnd(':')] = handleIRIRef(ctx.iriRef())
+        } else {
+            throw RuntimeException("Unexpected sparql base ${ctx.iriRef().text}.")
+        }
     }
 
     fun handleTurtleIRI(ctx: TurtleParser.IriContext): IRI {
         return if (ctx.PREFIXED_NAME() != null) {
-            throw RuntimeException("Prefixes unsupported")
-        } else if (ctx.iriRef() != null) {
-            if (ctx.iriRef().ABSOLUTE_IRI() != null) {
-                IRI(ctx.iriRef().ABSOLUTE_IRI().text)
-            } else if (ctx.iriRef().RELATIVE_IRI() != null) {
-                IRI(base + ctx.iriRef().RELATIVE_IRI().text)
+            val prefix = ctx.PREFIXED_NAME().text.split(":")
+            if (prefix.size == 1) {
+                IRI(prefixes[""] + prefix[0])
+            } else if (prefix.size == 2) {
+                IRI(prefixes[prefix[0]] + prefix[1])
             } else {
-                throw RuntimeException("Unexpected IRI type")
+                throw RuntimeException("Unexpected IRI prefix value ${ctx.PREFIXED_NAME().text}")
             }
+        } else if (ctx.iriRef() != null) {
+            IRI(handleIRIRef(ctx.iriRef()))
+        } else {
+            throw RuntimeException("Unexpected IRI type")
+        }
+    }
+
+    fun handleIRIRef(ctx: TurtleParser.IriRefContext): String {
+        return if (ctx.ABSOLUTE_IRI() != null) {
+            ctx.ABSOLUTE_IRI().text
+        } else if (ctx.RELATIVE_IRI() != null) {
+            base + ctx.RELATIVE_IRI().text
         } else {
             throw RuntimeException("Unexpected IRI type")
         }
@@ -177,7 +183,7 @@ private class TriplesTurtleListener : TurtleListener {
 
     internal fun handleRdfLiteral(ctx: TurtleParser.RdfLiteralContext): Literal {
         val value = if (ctx.string().text.length >= 2) {
-            ctx.string().text.substring(1, ctx.string().text.length-1)
+            ctx.string().text.trim('"', '\'')
         } else {
             throw RuntimeException("Invalid literal.")
         }

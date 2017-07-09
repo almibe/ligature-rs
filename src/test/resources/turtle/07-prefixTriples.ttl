@@ -1,3 +1,4 @@
+@base <http://one.example2/> .
 @prefix p: <http://two.example/> .
 p:subject3 p:predicate3 p:object3 .     # prefixed name, e.g. http://two.example/subject3
 
