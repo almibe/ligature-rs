@@ -131,14 +131,8 @@ private class TriplesTurtleListener : TurtleListener {
     }
 
     fun handleTurtleIRI(ctx: TurtleParser.IriContext): IRI {
-        return if (ctx.prefixedName() != null) {
-            if (ctx.prefixedName().PNAME_LN() != null) {
-                throw RuntimeException("Prefixes unsupported")
-            } else if (ctx.prefixedName().PNAME_NS() != null) {
-                throw RuntimeException("Prefixes unsupported")
-            } else {
-                throw RuntimeException("Unexpected IRI type")
-            }
+        return if (ctx.PREFIXED_NAME() != null) {
+            throw RuntimeException("Prefixes unsupported")
         } else if (ctx.iriRef() != null) {
             if (ctx.iriRef().ABSOLUTE_IRI() != null) {
                 IRI(ctx.iriRef().ABSOLUTE_IRI().text)
@@ -252,7 +246,6 @@ private class TriplesTurtleListener : TurtleListener {
     override fun enterEveryRule(ctx: ParserRuleContext) { /* do nothing */ }
     override fun enterPredicateObjectList(ctx: TurtleParser.PredicateObjectListContext) { /* do nothing */ }
     override fun enterSparqlBase(ctx: TurtleParser.SparqlBaseContext) { /* do nothing */ }
-    override fun enterPrefixedName(ctx: TurtleParser.PrefixedNameContext) { /* do nothing */ }
     override fun enterPrefixID(ctx: TurtleParser.PrefixIDContext) { /* do nothing */ }
     override fun enterBase(ctx: TurtleParser.BaseContext) { /* do nothing */ }
     override fun enterNumericLiteral(ctx: TurtleParser.NumericLiteralContext) { /* do nothing */ }
@@ -263,7 +256,6 @@ private class TriplesTurtleListener : TurtleListener {
     override fun exitStatement(ctx: TurtleParser.StatementContext) { /* do nothing */ }
     override fun exitString(ctx: TurtleParser.StringContext) { /* do nothing */ }
     override fun exitObjectList(ctx: TurtleParser.ObjectListContext) { /* do nothing */ }
-    override fun exitPrefixedName(ctx: TurtleParser.PrefixedNameContext) { /* do nothing */ }
     override fun exitNumericLiteral(ctx: TurtleParser.NumericLiteralContext) { /* do nothing */ }
     override fun exitEveryRule(ctx: ParserRuleContext) { /* do nothing */ }
     override fun exitIriRef(p0: TurtleParser.IriRefContext?) { /* do nothing */ }
