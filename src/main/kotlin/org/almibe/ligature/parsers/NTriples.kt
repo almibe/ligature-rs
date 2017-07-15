@@ -5,9 +5,9 @@
 package org.almibe.ligature.parsers
 
 import org.almibe.ligature.*
-import org.almibe.ligature.parser.NTriplesBaseListener
-import org.almibe.ligature.parser.NTriplesLexer
-import org.almibe.ligature.parser.NTriplesParser
+import org.almibe.ligature.parser.ntriples.NTriplesBaseListener
+import org.almibe.ligature.parser.ntriples.NTriplesLexer
+import org.almibe.ligature.parser.ntriples.NTriplesParser
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.tree.ErrorNode

@@ -5,9 +5,9 @@
 package org.almibe.ligature.parsers
 
 import org.almibe.ligature.*
-import org.almibe.ligature.parser.TurtleLexer
-import org.almibe.ligature.parser.TurtleListener
-import org.almibe.ligature.parser.TurtleParser
+import org.almibe.ligature.parser.turtle.TurtleLexer
+import org.almibe.ligature.parser.turtle.TurtleListener
+import org.almibe.ligature.parser.turtle.TurtleParser
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.ParserRuleContext
