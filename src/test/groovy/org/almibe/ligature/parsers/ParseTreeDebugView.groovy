@@ -18,10 +18,10 @@ import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
 import javafx.stage.Stage
 import javafx.util.Duration
-import org.almibe.ligature.parser.NTriplesLexer
-import org.almibe.ligature.parser.NTriplesParser
-import org.almibe.ligature.parser.TurtleLexer
-import org.almibe.ligature.parser.TurtleParser
+import org.almibe.ligature.parser.ntriples.NTriplesLexer
+import org.almibe.ligature.parser.ntriples.NTriplesParser
+import org.almibe.ligature.parser.turtle.TurtleLexer
+import org.almibe.ligature.parser.turtle.TurtleParser
 import org.antlr.v4.gui.TreeViewer
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
