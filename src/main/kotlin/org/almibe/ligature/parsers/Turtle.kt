@@ -5,9 +5,9 @@
 package org.almibe.ligature.parsers
 
 import org.almibe.ligature.*
-import org.almibe.ligature.parser.turtle.TurtleLexer
+import org.almibe.ligature.parser.turtle.ModalTurtleLexer
+import org.almibe.ligature.parser.turtle.Turtle
 import org.almibe.ligature.parser.turtle.TurtleListener
-import org.almibe.ligature.parser.turtle.TurtleParser
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.ParserRuleContext
@@ -17,17 +17,17 @@ import org.antlr.v4.runtime.tree.TerminalNode
 
 class Turtle {
     fun parseTurtle(text: String) : List<Triple> {
-        val parser = TurtleParserInstance()
+        val parser = TurtleInstance()
         return parser.parseTurtle(text)
     }
 }
 
-private class TurtleParserInstance {
+private class TurtleInstance {
     fun parseTurtle(text: String): List<Triple> {
         val stream = CharStreams.fromString(text)
-        val lexer = TurtleLexer(stream)
+        val lexer = ModalTurtleLexer(stream)
         val tokens = CommonTokenStream(lexer)
-        val parser = TurtleParser(tokens)
+        val parser = Turtle(tokens)
 
         val walker = ParseTreeWalker()
         val listener = TriplesTurtleListener()
@@ -56,7 +56,7 @@ private class TriplesTurtleListener : TurtleListener {
     lateinit var base: String
     var currentStatement: TurtleStatement = TurtleStatement()
 
-    override fun exitSubject(ctx: TurtleParser.SubjectContext) {
+    override fun exitSubject(ctx: Turtle.SubjectContext) {
         //TODO handle all subject logic here
         if (ctx.iri() != null) {
             currentStatement.subjects.add(handleTurtleIRI(ctx.iri()))
@@ -69,7 +69,7 @@ private class TriplesTurtleListener : TurtleListener {
         }
     }
 
-    override fun exitVerbObjectList(ctx: TurtleParser.VerbObjectListContext) {
+    override fun exitVerbObjectList(ctx: Turtle.VerbObjectListContext) {
         val iri = if (ctx.verb().text != null && !ctx.verb().text.equals("a")) {
             handleTurtleIRI(ctx.verb().predicate().iri())
         } else {
@@ -81,19 +81,19 @@ private class TriplesTurtleListener : TurtleListener {
         }
     }
 
-    override fun exitBlankNodePropertyList(ctx: TurtleParser.BlankNodePropertyListContext) {
+    override fun exitBlankNodePropertyList(ctx: Turtle.BlankNodePropertyListContext) {
         //TODO handle all blankNodePropertyList logic here
     }
 
-    override fun exitTriples(ctx: TurtleParser.TriplesContext) {
+    override fun exitTriples(ctx: Turtle.TriplesContext) {
         triples.addAll(currentStatement.computeTriples())
     }
 
-    override fun enterTriples(ctx: TurtleParser.TriplesContext) {
+    override fun enterTriples(ctx: Turtle.TriplesContext) {
         currentStatement = TurtleStatement()
     }
 
-    override fun exitBase(ctx: TurtleParser.BaseContext) {
+    override fun exitBase(ctx: Turtle.BaseContext) {
         if (ctx.iriRef().text.length >= 2) {
             this.base = ctx.iriRef().text.trim('<', '>')
         } else {
@@ -101,7 +101,7 @@ private class TriplesTurtleListener : TurtleListener {
         }
     }
 
-    override fun exitSparqlBase(ctx: TurtleParser.SparqlBaseContext) {
+    override fun exitSparqlBase(ctx: Turtle.SparqlBaseContext) {
         if (ctx.iriRef().text.length >= 2) {
             this.base = ctx.iriRef().text.trim('<', '>')
         } else {
@@ -109,7 +109,7 @@ private class TriplesTurtleListener : TurtleListener {
         }
     }
 
-    override fun exitPrefixID(ctx: TurtleParser.PrefixIDContext) {
+    override fun exitPrefixID(ctx: Turtle.PrefixIDContext) {
         if (ctx.PNAME_NS() != null)  {
             this.prefixes[ctx.PNAME_NS().text.trimEnd(':')] = handleIRIRef(ctx.iriRef())
         } else {
@@ -117,7 +117,7 @@ private class TriplesTurtleListener : TurtleListener {
         }
     }
 
-    override fun exitSparqlPrefix(ctx: TurtleParser.SparqlPrefixContext) {
+    override fun exitSparqlPrefix(ctx: Turtle.SparqlPrefixContext) {
         if (ctx.iriRef().text.length >= 2) {
            this.prefixes[ctx.PNAME_NS().text.trimEnd(':')] = handleIRIRef(ctx.iriRef())
         } else {
@@ -125,7 +125,7 @@ private class TriplesTurtleListener : TurtleListener {
         }
     }
 
-    fun handleTurtleIRI(ctx: TurtleParser.IriContext): IRI {
+    fun handleTurtleIRI(ctx: Turtle.IriContext): IRI {
         return if (ctx.PREFIXED_NAME() != null) {
             val prefix = ctx.PREFIXED_NAME().text.split(":")
             if (prefix.size == 1) {
@@ -142,7 +142,7 @@ private class TriplesTurtleListener : TurtleListener {
         }
     }
 
-    fun handleIRIRef(ctx: TurtleParser.IriRefContext): String {
+    fun handleIRIRef(ctx: Turtle.IriRefContext): String {
         return if (ctx.ABSOLUTE_IRI() != null) {
             ctx.ABSOLUTE_IRI().text
         } else if (ctx.RELATIVE_IRI() != null) {
@@ -153,7 +153,7 @@ private class TriplesTurtleListener : TurtleListener {
     }
 
     //non ANTRL member methods
-    internal fun handleObject(ctx: TurtleParser.ObjectContext): Object {
+    internal fun handleObject(ctx: Turtle.ObjectContext): Object {
         return when {
             ctx.literal() != null -> handleTurtleLiteral(ctx.literal())
             ctx.blankNode() != null -> handleBlankNode(ctx.blankNode().text)
@@ -164,7 +164,7 @@ private class TriplesTurtleListener : TurtleListener {
         }
     }
 
-    internal fun handleTurtleLiteral(ctx: TurtleParser.LiteralContext): Literal {
+    internal fun handleTurtleLiteral(ctx: Turtle.LiteralContext): Literal {
         return when {
             ctx.booleanLiteral() != null -> handleBooleanLiteral(ctx.booleanLiteral())
             ctx.numericLiteral() != null  -> handleNumericLiteral(ctx.numericLiteral())
@@ -173,15 +173,15 @@ private class TriplesTurtleListener : TurtleListener {
         }
     }
 
-    fun  handleBooleanLiteral(ctx: TurtleParser.BooleanLiteralContext): Literal {
+    fun  handleBooleanLiteral(ctx: Turtle.BooleanLiteralContext): Literal {
         TODO()
     }
 
-    fun  handleNumericLiteral(ctx: TurtleParser.NumericLiteralContext): Literal {
+    fun  handleNumericLiteral(ctx: Turtle.NumericLiteralContext): Literal {
         TODO()
     }
 
-    internal fun handleRdfLiteral(ctx: TurtleParser.RdfLiteralContext): Literal {
+    internal fun handleRdfLiteral(ctx: Turtle.RdfLiteralContext): Literal {
         val value = if (ctx.string().text.length >= 2) {
             ctx.string().text.trim('"', '\'')
         } else {
@@ -195,15 +195,15 @@ private class TriplesTurtleListener : TurtleListener {
     }
 
     //ANTRL methods that aren't being used currently / will be removed when switching to ABC
-    override fun exitBlankNode(ctx: TurtleParser.BlankNodeContext) {
+    override fun exitBlankNode(ctx: Turtle.BlankNodeContext) {
         //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun exitLiteral(ctx: TurtleParser.LiteralContext) {
+    override fun exitLiteral(ctx: Turtle.LiteralContext) {
         //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun exitCollection(ctx: TurtleParser.CollectionContext) {
+    override fun exitCollection(ctx: Turtle.CollectionContext) {
         //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
@@ -211,60 +211,60 @@ private class TriplesTurtleListener : TurtleListener {
         //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun exitVerb(ctx: TurtleParser.VerbContext) {
+    override fun exitVerb(ctx: Turtle.VerbContext) {
         //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun exitBooleanLiteral(ctx: TurtleParser.BooleanLiteralContext) {
+    override fun exitBooleanLiteral(ctx: Turtle.BooleanLiteralContext) {
         //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun exitObject(ctx: TurtleParser.ObjectContext) {
+    override fun exitObject(ctx: Turtle.ObjectContext) {
         //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun exitTurtleDoc(ctx: TurtleParser.TurtleDocContext) {
+    override fun exitTurtleDoc(ctx: Turtle.TurtleDocContext) {
         //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun exitRdfLiteral(ctx: TurtleParser.RdfLiteralContext) {
+    override fun exitRdfLiteral(ctx: Turtle.RdfLiteralContext) {
         //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun visitTerminal(node: TerminalNode?) { /* do nothing */ }
-    override fun enterString(ctx: TurtleParser.StringContext) { /* do nothing */ }
-    override fun exitPredicate(ctx: TurtleParser.PredicateContext) { /* do nothing */ }
-    override fun enterDirective(ctx: TurtleParser.DirectiveContext) { /* do nothing */ }
-    override fun exitPredicateObjectList(ctx: TurtleParser.PredicateObjectListContext) { /* do nothing */ }
-    override fun enterPredicate(ctx: TurtleParser.PredicateContext) { /* do nothing */ }
-    override fun exitIri(ctx: TurtleParser.IriContext) { /* do nothing */ }
-    override fun enterObjectList(ctx: TurtleParser.ObjectListContext) { /* do nothing */ }
-    override fun enterVerbObjectList(ctx: TurtleParser.VerbObjectListContext) { /* do nothing */}
-    override fun enterVerb(ctx: TurtleParser.VerbContext) { /* do nothing */ }
-    override fun enterSparqlPrefix(ctx: TurtleParser.SparqlPrefixContext) { /* do nothing */ }
-    override fun enterBlankNode(ctx: TurtleParser.BlankNodeContext) { /* do nothing */ }
-    override fun enterBooleanLiteral(ctx: TurtleParser.BooleanLiteralContext) { /* do nothing */ }
-    override fun enterBlankNodePropertyList(ctx: TurtleParser.BlankNodePropertyListContext) { /* do nothing */ }
-    override fun enterRdfLiteral(ctx: TurtleParser.RdfLiteralContext) { /* do nothing */ }
-    override fun enterObject(ctx: TurtleParser.ObjectContext) { /* do nothing */ }
-    override fun enterCollection(ctx: TurtleParser.CollectionContext) { /* do nothing */ }
-    override fun enterLiteral(ctx: TurtleParser.LiteralContext) { /* do nothing */ }
+    override fun enterString(ctx: Turtle.StringContext) { /* do nothing */ }
+    override fun exitPredicate(ctx: Turtle.PredicateContext) { /* do nothing */ }
+    override fun enterDirective(ctx: Turtle.DirectiveContext) { /* do nothing */ }
+    override fun exitPredicateObjectList(ctx: Turtle.PredicateObjectListContext) { /* do nothing */ }
+    override fun enterPredicate(ctx: Turtle.PredicateContext) { /* do nothing */ }
+    override fun exitIri(ctx: Turtle.IriContext) { /* do nothing */ }
+    override fun enterObjectList(ctx: Turtle.ObjectListContext) { /* do nothing */ }
+    override fun enterVerbObjectList(ctx: Turtle.VerbObjectListContext) { /* do nothing */}
+    override fun enterVerb(ctx: Turtle.VerbContext) { /* do nothing */ }
+    override fun enterSparqlPrefix(ctx: Turtle.SparqlPrefixContext) { /* do nothing */ }
+    override fun enterBlankNode(ctx: Turtle.BlankNodeContext) { /* do nothing */ }
+    override fun enterBooleanLiteral(ctx: Turtle.BooleanLiteralContext) { /* do nothing */ }
+    override fun enterBlankNodePropertyList(ctx: Turtle.BlankNodePropertyListContext) { /* do nothing */ }
+    override fun enterRdfLiteral(ctx: Turtle.RdfLiteralContext) { /* do nothing */ }
+    override fun enterObject(ctx: Turtle.ObjectContext) { /* do nothing */ }
+    override fun enterCollection(ctx: Turtle.CollectionContext) { /* do nothing */ }
+    override fun enterLiteral(ctx: Turtle.LiteralContext) { /* do nothing */ }
     override fun enterEveryRule(ctx: ParserRuleContext) { /* do nothing */ }
-    override fun enterPredicateObjectList(ctx: TurtleParser.PredicateObjectListContext) { /* do nothing */ }
-    override fun enterSparqlBase(ctx: TurtleParser.SparqlBaseContext) { /* do nothing */ }
-    override fun enterPrefixID(ctx: TurtleParser.PrefixIDContext) { /* do nothing */ }
-    override fun enterBase(ctx: TurtleParser.BaseContext) { /* do nothing */ }
-    override fun enterNumericLiteral(ctx: TurtleParser.NumericLiteralContext) { /* do nothing */ }
-    override fun enterTurtleDoc(ctx: TurtleParser.TurtleDocContext) { /* do nothing */ }
-    override fun enterIri(ctx: TurtleParser.IriContext) { /* do nothing */ }
-    override fun enterSubject(ctx: TurtleParser.SubjectContext) { /* do nothing */ }
-    override fun enterStatement(ctx: TurtleParser.StatementContext) { /* do nothing */ }
-    override fun exitStatement(ctx: TurtleParser.StatementContext) { /* do nothing */ }
-    override fun exitString(ctx: TurtleParser.StringContext) { /* do nothing */ }
-    override fun exitObjectList(ctx: TurtleParser.ObjectListContext) { /* do nothing */ }
-    override fun exitNumericLiteral(ctx: TurtleParser.NumericLiteralContext) { /* do nothing */ }
+    override fun enterPredicateObjectList(ctx: Turtle.PredicateObjectListContext) { /* do nothing */ }
+    override fun enterSparqlBase(ctx: Turtle.SparqlBaseContext) { /* do nothing */ }
+    override fun enterPrefixID(ctx: Turtle.PrefixIDContext) { /* do nothing */ }
+    override fun enterBase(ctx: Turtle.BaseContext) { /* do nothing */ }
+    override fun enterNumericLiteral(ctx: Turtle.NumericLiteralContext) { /* do nothing */ }
+    override fun enterTurtleDoc(ctx: Turtle.TurtleDocContext) { /* do nothing */ }
+    override fun enterIri(ctx: Turtle.IriContext) { /* do nothing */ }
+    override fun enterSubject(ctx: Turtle.SubjectContext) { /* do nothing */ }
+    override fun enterStatement(ctx: Turtle.StatementContext) { /* do nothing */ }
+    override fun exitStatement(ctx: Turtle.StatementContext) { /* do nothing */ }
+    override fun exitString(ctx: Turtle.StringContext) { /* do nothing */ }
+    override fun exitObjectList(ctx: Turtle.ObjectListContext) { /* do nothing */ }
+    override fun exitNumericLiteral(ctx: Turtle.NumericLiteralContext) { /* do nothing */ }
     override fun exitEveryRule(ctx: ParserRuleContext) { /* do nothing */ }
-    override fun exitIriRef(p0: TurtleParser.IriRefContext?) { /* do nothing */ }
-    override fun enterIriRef(p0: TurtleParser.IriRefContext?) { /* do nothing */ }
-    override fun exitDirective(ctx: TurtleParser.DirectiveContext) { /* do nothing */ }
+    override fun exitIriRef(p0: Turtle.IriRefContext?) { /* do nothing */ }
+    override fun enterIriRef(p0: Turtle.IriRefContext?) { /* do nothing */ }
+    override fun exitDirective(ctx: Turtle.DirectiveContext) { /* do nothing */ }
 }
