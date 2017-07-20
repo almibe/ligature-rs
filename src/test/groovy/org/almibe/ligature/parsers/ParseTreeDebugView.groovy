@@ -20,8 +20,8 @@ import javafx.stage.Stage
 import javafx.util.Duration
 import org.almibe.ligature.parser.ntriples.NTriplesLexer
 import org.almibe.ligature.parser.ntriples.NTriplesParser
-import org.almibe.ligature.parser.turtle.TurtleLexer
-import org.almibe.ligature.parser.turtle.TurtleParser
+import org.almibe.ligature.parser.turtle.ModalTurtleLexer
+import org.almibe.ligature.parser.turtle.Turtle
 import org.antlr.v4.gui.TreeViewer
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
@@ -85,9 +85,9 @@ class ParseTreeDebugView extends Application {
 
     TreeViewer createTurtleTreeView(String text) {
         def stream = CharStreams.fromString(text)
-        def lexer = new TurtleLexer(stream)
+        def lexer = new ModalTurtleLexer(stream)
         def tokenStream = new CommonTokenStream(lexer)
-        def parser = new TurtleParser(tokenStream)
+        def parser = new Turtle(tokenStream)
         def tree = parser.turtleDoc()
         return new TreeViewer(parser.ruleNames.toList(), tree)
     }
