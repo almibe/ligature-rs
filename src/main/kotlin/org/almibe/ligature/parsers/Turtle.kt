@@ -135,22 +135,14 @@ private class TriplesTurtleListener : TurtleListener {
             } else {
                 throw RuntimeException("Unexpected IRI prefix value ${ctx.PREFIXED_NAME().text}")
             }
-        //} else if (ctx.iriRef() != null) {
-        //    IRI(handleIRIRef(ctx.iriRef()))
+        } else if (ctx.ABSOLUTE_IRI() != null) {
+            IRI(ctx.ABSOLUTE_IRI().text)
+        } else if (ctx.RELATIVE_IRI() != null) {
+            IRI(base + ctx.RELATIVE_IRI().text)
         } else {
             throw RuntimeException("Unexpected IRI type")
         }
     }
-
-//    fun handleIRIRef(ctx: Turtle.IriRefContext): String {
-//        return if (ctx.ABSOLUTE_IRI() != null) {
-//            ctx.ABSOLUTE_IRI().text
-//        } else if (ctx.RELATIVE_IRI() != null) {
-//            base + ctx.RELATIVE_IRI().text
-//        } else {
-//            throw RuntimeException("Unexpected IRI type")
-//        }
-//    }
 
     //non ANTRL member methods
     internal fun handleObject(ctx: Turtle.ObjectContext): Object {
