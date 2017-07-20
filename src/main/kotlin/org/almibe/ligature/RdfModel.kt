@@ -4,10 +4,9 @@
 
 package org.almibe.ligature
 
-interface Node
-interface Subject: Node
+interface Subject
+interface Predicate
 interface Object
-interface Predicate: Node
 
 data class IRI(val value: String) : Subject, Predicate, Object
 data class BlankNode(val label: String) : Subject, Object
