@@ -35,59 +35,59 @@ class TurtleSpec extends Specification {
         results.first() == expectedResult
     }
 
-//    final def "support predicate lists"() {
-//        given:
-//        final def expectedResults = [spidermanEnemy, spidermanName]
-//        final def results = turtle.parseTurtle(this.class.getResource("/turtle/02-predicateList.ttl").text)
-//        expect:
-//        results.size() == 2
-//        results == expectedResults
-//    }
-//
-//    final def "support object lists"() {
-//        given:
-//        final def expectedResults = [spidermanName, spidermanNameRu, spidermanName, spidermanNameRu]
-//        final def results = turtle.parseTurtle(this.class.getResource("/turtle/03-objectList.ttl").text)
-//        expect:
-//        results.size() == 4
-//        results == expectedResults
-//    }
-//
-//    final def "support comments"() {
-//        given:
-//        final def expectedResults = [spidermanEnemy, spidermanName]
-//        final def results = turtle.parseTurtle(this.class.getResource("/turtle/04-comments.ttl").text)
-//        expect:
-//        results.size() == 2
-//        results == expectedResults
-//    }
-//
-//    final def "support multiline triples"() {
-//        given:
-//        final def expectedResults = [spidermanEnemy]
-//        final def results = turtle.parseTurtle(this.class.getResource("/turtle/05-multilineTriple.ttl").text)
-//        expect:
-//        results.size() == 1
-//        results == expectedResults
-//    }
-//
-//    final def base = "http://one.example/"
-//    final def base2 = "http://one.example2/"
-//    final def baseTwo = "http://two.example/"
-//    final def baseTwo2 = "http://two.example2/"
-//    final def base3 = "http://another.example/"
-//
-//    final def "turtle IRI parsing with base"() {
-//        given:
-//        final def expectedResults = [
-//            new Triple(new IRI("${base}subject2"), new IRI("${base}predicate2"), new IRI("${base}object2")),
-//            new Triple(new IRI("${base2}subject2"), new IRI("${base2}predicate2"), new IRI("${base2}object2")),
-//        ]
-//        final def results = turtle.parseTurtle(this.class.getResource("/turtle/06-baseTriples.ttl").text)
-//        expect:
-//        results[0] == expectedResults[0]
-//        results[1] == expectedResults[1]
-//    }
+    final def "support predicate lists"() {
+        given:
+        final def expectedResults = [spidermanEnemy, spidermanName]
+        final def results = turtle.parseTurtle(this.class.getResource("/turtle/02-predicateList.ttl").text)
+        expect:
+        results.size() == 2
+        results == expectedResults
+    }
+
+    final def "support object lists"() {
+        given:
+        final def expectedResults = [spidermanName, spidermanNameRu, spidermanName, spidermanNameRu]
+        final def results = turtle.parseTurtle(this.class.getResource("/turtle/03-objectList.ttl").text)
+        expect:
+        results.size() == 4
+        results == expectedResults
+    }
+
+    final def "support comments"() {
+        given:
+        final def expectedResults = [spidermanEnemy, spidermanName]
+        final def results = turtle.parseTurtle(this.class.getResource("/turtle/04-comments.ttl").text)
+        expect:
+        results.size() == 2
+        results == expectedResults
+    }
+
+    final def "support multiline triples"() {
+        given:
+        final def expectedResults = [spidermanEnemy]
+        final def results = turtle.parseTurtle(this.class.getResource("/turtle/05-multilineTriple.ttl").text)
+        expect:
+        results.size() == 1
+        results == expectedResults
+    }
+
+    final def base = "http://one.example/"
+    final def base2 = "http://one.example2/"
+    final def baseTwo = "http://two.example/"
+    final def baseTwo2 = "http://two.example2/"
+    final def base3 = "http://another.example/"
+
+    final def "turtle IRI parsing with base"() {
+        given:
+        final def expectedResults = [
+            new Triple(new IRI("${base}subject2"), new IRI("${base}predicate2"), new IRI("${base}object2")),
+            new Triple(new IRI("${base2}subject2"), new IRI("${base2}predicate2"), new IRI("${base2}object2")),
+        ]
+        final def results = turtle.parseTurtle(this.class.getResource("/turtle/06-baseTriples.ttl").text)
+        expect:
+        results[0] == expectedResults[0]
+        results[1] == expectedResults[1]
+    }
 //
 //    final def "turtle IRI parsing with prefixes"() {
 //        given:

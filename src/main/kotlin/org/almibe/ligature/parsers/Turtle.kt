@@ -174,11 +174,7 @@ private class TriplesTurtleListener : TurtleListener {
     }
 
     internal fun handleRdfLiteral(ctx: Turtle.RdfLiteralContext): Literal {
-        val value = if (ctx.string().text.length >= 2) {
-            ctx.string().text.trim('"', '\'')
-        } else {
-            throw RuntimeException("Invalid literal.")
-        }
+        val value = ctx.string().STRING_CONTENT_DOUBLE_QUOTE().text
         return when {
             ctx.LANGTAG() != null -> LangLiteral(value, ctx.LANGTAG().text.substring(1))
             ctx.iri() != null -> TypedLiteral(value, handleTurtleIRI(ctx.iri()))
