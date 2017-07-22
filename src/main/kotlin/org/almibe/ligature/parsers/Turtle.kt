@@ -26,6 +26,7 @@ val integerIRI = IRI("http://www.w3.org/2001/XMLSchema#integer")
 val doubleIRI = IRI("http://www.w3.org/2001/XMLSchema#double")
 val decimalIRI = IRI("http://www.w3.org/2001/XMLSchema#float")
 val typeIRI = IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+val booleanIRI = IRI("http://www.w3.org/2001/XMLSchema#boolean")
 
 private class TurtleInstance {
     fun parseTurtle(text: String): List<Triple> {
@@ -176,7 +177,7 @@ private class TriplesTurtleListener : TurtleListener {
     }
 
     fun  handleBooleanLiteral(ctx: Turtle.BooleanLiteralContext): Literal {
-        TODO()
+        return TypedLiteral(ctx.text, booleanIRI)
     }
 
     fun  handleNumericLiteral(ctx: Turtle.NumericLiteralContext): Literal {
