@@ -94,35 +94,35 @@ private class TriplesTurtleListener : TurtleListener {
     }
 
     override fun exitBase(ctx: Turtle.BaseContext) {
-//        if (ctx.iriRef().text.length >= 2) {
-//            this.base = ctx.iriRef().text.trim('<', '>')
-//        } else {
-//            throw RuntimeException("Unexpected base ${ctx.iriRef().text}.")
-//        }
+        if (ctx.iriRef().text.length >= 2) {
+            this.base = ctx.iriRef().text.trim('<', '>')
+        } else {
+            throw RuntimeException("Unexpected base ${ctx.iriRef().text}.")
+        }
     }
 
     override fun exitSparqlBase(ctx: Turtle.SparqlBaseContext) {
-//        if (ctx.iriRef().text.length >= 2) {
-//            this.base = ctx.iriRef().text.trim('<', '>')
-//        } else {
-//            throw RuntimeException("Unexpected sparql base ${ctx.iriRef().text}.")
-//        }
+        if (ctx.iriRef().text.length >= 2) {
+            this.base = ctx.iriRef().text.trim('<', '>')
+        } else {
+            throw RuntimeException("Unexpected sparql base ${ctx.iriRef().text}.")
+        }
     }
 
     override fun exitPrefixID(ctx: Turtle.PrefixIDContext) {
-//        if (ctx.PNAME_NS() != null)  {
-//            this.prefixes[ctx.PNAME_NS().text.trimEnd(':')] = handleIRIRef(ctx.iriRef())
-//        } else {
-//            throw RuntimeException("Unexpected prefix ${ctx.text}")
-//        }
+        if (ctx.PNAME_NS() != null)  {
+            this.prefixes[ctx.PNAME_NS().text.trimEnd(':')] = handleTurtleIRIRef(ctx.iriRef())
+        } else {
+            throw RuntimeException("Unexpected prefix ${ctx.text}")
+        }
     }
 
     override fun exitSparqlPrefix(ctx: Turtle.SparqlPrefixContext) {
-//        if (ctx.iriRef().text.length >= 2) {
-//           this.prefixes[ctx.PNAME_NS().text.trimEnd(':')] = handleIRIRef(ctx.iriRef())
-//        } else {
-//            throw RuntimeException("Unexpected sparql base ${ctx.iriRef().text}.")
-//        }
+        if (ctx.iriRef().text.length >= 2) {
+           this.prefixes[ctx.PNAME_NS().text.trimEnd(':')] = handleTurtleIRIRef(ctx.iriRef())
+        } else {
+            throw RuntimeException("Unexpected sparql base ${ctx.iriRef().text}.")
+        }
     }
 
     fun handleTurtleIRI(ctx: Turtle.IriContext): IRI {
@@ -135,16 +135,21 @@ private class TriplesTurtleListener : TurtleListener {
             } else {
                 throw RuntimeException("Unexpected IRI prefix value ${ctx.PREFIXED_NAME().text}")
             }
-        } else if (ctx.ABSOLUTE_IRI() != null) {
-            IRI(ctx.ABSOLUTE_IRI().text)
+        } else {
+            IRI(handleTurtleIRIRef(ctx.iriRef()))
+        }
+    }
+
+    fun handleTurtleIRIRef(ctx: Turtle.IriRefContext): String {
+        return if (ctx.ABSOLUTE_IRI() != null) {
+            ctx.ABSOLUTE_IRI().text
         } else if (ctx.RELATIVE_IRI() != null) {
-            IRI(base + ctx.RELATIVE_IRI().text)
+            base + ctx.RELATIVE_IRI().text
         } else {
             throw RuntimeException("Unexpected IRI type")
         }
     }
 
-    //non ANTRL member methods
     internal fun handleObject(ctx: Turtle.ObjectContext): Object {
         return when {
             ctx.literal() != null -> handleTurtleLiteral(ctx.literal())
@@ -253,4 +258,6 @@ private class TriplesTurtleListener : TurtleListener {
     override fun exitNumericLiteral(ctx: Turtle.NumericLiteralContext) { /* do nothing */ }
     override fun exitEveryRule(ctx: ParserRuleContext) { /* do nothing */ }
     override fun exitDirective(ctx: Turtle.DirectiveContext) { /* do nothing */ }
+    override fun exitIriRef(p0: Turtle.IriRefContext?) { /* do nothing */ }
+    override fun enterIriRef(p0: Turtle.IriRefContext?) { /* do nothing */ }
 }
