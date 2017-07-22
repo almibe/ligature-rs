@@ -22,6 +22,11 @@ class Turtle {
     }
 }
 
+val integerIRI = IRI("http://www.w3.org/2001/XMLSchema#integer")
+val doubleIRI = IRI("http://www.w3.org/2001/XMLSchema#double")
+val decimalIRI = IRI("http://www.w3.org/2001/XMLSchema#float")
+val typeIRI = IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+
 private class TurtleInstance {
     fun parseTurtle(text: String): List<Triple> {
         val stream = CharStreams.fromString(text)
@@ -73,7 +78,7 @@ private class TriplesTurtleListener : TurtleListener {
         val iri = if (ctx.verb().text != null && !ctx.verb().text.equals("a")) {
             handleTurtleIRI(ctx.verb().predicate().iri())
         } else {
-            IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+            typeIRI
         }
         ctx.objectList().`object`().forEach {
             val `object`: Object = handleObject(it)
@@ -175,7 +180,15 @@ private class TriplesTurtleListener : TurtleListener {
     }
 
     fun  handleNumericLiteral(ctx: Turtle.NumericLiteralContext): Literal {
-        TODO()
+        return if (ctx.DECIMAL() != null) {
+            TypedLiteral(ctx.DECIMAL().text, decimalIRI)
+        } else if (ctx.DOUBLE() != null) {
+            TypedLiteral(ctx.DOUBLE().text, doubleIRI)
+        } else if (ctx.INTEGER() != null) {
+            TypedLiteral(ctx.INTEGER().text, integerIRI)
+        } else {
+            throw RuntimeException("Unexpected Numeric type")
+        }
     }
 
     internal fun handleRdfLiteral(ctx: Turtle.RdfLiteralContext): Literal {

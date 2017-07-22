@@ -27,16 +27,16 @@ class TurtleSpec extends Specification {
         new IRI("http://xmlns.com/foaf/0.1/name"), new LangLiteral("Человек-паук", "ru"))
     final def stringIRI = new IRI("http://www.w3.org/2001/XMLSchema#string")
 
-    boolean compareLists(List first, List second) {
-        assert first.size() == second.size()
-        first.eachWithIndex{ def entry, int i ->
-            assert entry == second[i]
+    boolean compareLists(List results, List expectedResults) {
+        assert results.size() == expectedResults.size()
+        results.eachWithIndex{ def entry, int i ->
+            assert entry == expectedResults[i]
         }
     }
 
     final def "support basic IRI triple"() {
         given:
-        final def expectedResult = spidermanEnemy
+        final def expectedResults = [spidermanEnemy]
         final def results = turtle.parseTurtle(this.class.getResource("/turtle/01-basicTriple.ttl").text)
         expect:
         compareLists(results, expectedResults)
