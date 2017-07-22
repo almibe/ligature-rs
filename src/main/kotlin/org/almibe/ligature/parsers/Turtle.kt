@@ -179,12 +179,22 @@ private class TriplesTurtleListener : TurtleListener {
     }
 
     internal fun handleRdfLiteral(ctx: Turtle.RdfLiteralContext): Literal {
-        val value = ctx.string().STRING_CONTENT_DOUBLE_QUOTE().text
+        val value = extractStringLiteralValue(ctx.string())
         return when {
             ctx.LANGTAG() != null -> LangLiteral(value, ctx.LANGTAG().text.substring(1))
             ctx.iri() != null -> TypedLiteral(value, handleTurtleIRI(ctx.iri()))
             else -> TypedLiteral(value)
         }
+    }
+
+    internal fun extractStringLiteralValue(ctx: Turtle.StringContext): String {
+        return when {
+            ctx.START_SINGLE_QUOTE() != null -> ctx.STRING_CONTENT_SINGLE_QUOTE()
+            ctx.START_DOUBLE_QUOTE() != null -> ctx.STRING_CONTENT_DOUBLE_QUOTE()
+            ctx.START_TRIPLE_SINGLE_QUOTE() != null -> ctx.STRING_CONTENT_TRIPLE_SINGLE_QUOTE()
+            ctx.START_TRIPLE_DOUBLE_QUOTE() != null -> ctx.STRING_CONTENT_TRIPLE_DOUBLE_QUOTE()
+            else -> throw RuntimeException("Unexpected String type")
+        }?.text ?: ""
     }
 
     //ANTRL methods that aren't being used currently / will be removed when switching to ABC
