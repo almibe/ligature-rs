@@ -155,36 +155,42 @@ class TurtleSpec extends Specification {
         expect:
         compareLists(results, expectedResults)
     }
-////
-////    final def supportNumbers() {
-////        final def helium = "http://en.wikipedia.org/wiki/Helium"
-////        final def prefix = "http://example.org/elements"
-////        final def expectedResults = [
-////            new Triple(new IRI(helium), new IRI("${prefix}atomicNumber"), new TypedLiteral("2", new IRI("${xsd}integer"))),
-////            new Triple(new IRI(helium), new IRI("${prefix}atomicMass"), new TypedLiteral("4.002602", new IRI("${xsd}float"))),
-////            new Triple(new IRI(helium), new IRI("${prefix}specificGravity"), new TypedLiteral("1.663E-4", new IRI("${xsd}double")))
-////        )
-////        final def results = turtle.parseTurtle(this.class.getResource("/turtle/numbers.ttl").text)
-////        results == expectedResults
-////    }
-////
-////    final def supportBooleans() {
-////        final def expectedResults = [
-////            new Triple(new IRI("http://somecountry.example/census2007"), new IRI("http://example.org/stats/isLandlocked"),
-////                    new TypedLiteral("false", new IRI("${xsd}boolean")))
-////        )
-////        final def results = turtle.parseTurtle(this.class.getResource("/turtle/booleans.ttl").text)
-////        results == expectedResults
-////    }
-////
-////    final def supportBlankNodes() {
-////        final def expectedResults = [
-////            new Triple(BlankNode("alice"), new IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("bob")),
-////            new Triple(BlankNode("bob"), new IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("alice"))
-////        )
-////        final def results = turtle.parseTurtle(this.class.getResource("/turtle/blankNodes.ttl").text)
-////        results == expectedResults
-////    }
+
+    final def supportNumbers() {
+        given:
+        final def helium = "http://en.wikipedia.org/wiki/Helium"
+        final def prefix = "http://example.org/elements"
+        final def expectedResults = [
+            new Triple(new IRI(helium), new IRI("${prefix}atomicNumber"), new TypedLiteral("2", new IRI("${xsd}integer"))),
+            new Triple(new IRI(helium), new IRI("${prefix}atomicMass"), new TypedLiteral("4.002602", new IRI("${xsd}float"))),
+            new Triple(new IRI(helium), new IRI("${prefix}specificGravity"), new TypedLiteral("1.663E-4", new IRI("${xsd}double")))
+        ]
+        final def results = turtle.parseTurtle(this.class.getResource("/turtle/numbers.ttl").text)
+        expect:
+        results == expectedResults
+    }
+
+    final def supportBooleans() {
+        given:
+        final def expectedResults = [
+            new Triple(new IRI("http://somecountry.example/census2007"), new IRI("http://example.org/stats/isLandlocked"),
+                    new TypedLiteral("false", new IRI("${xsd}boolean")))
+        ]
+        final def results = turtle.parseTurtle(this.class.getResource("/turtle/booleans.ttl").text)
+        expect:
+        results == expectedResults
+    }
+
+    final def supportBlankNodes() {
+        given:
+        final def expectedResults = [
+            new Triple(BlankNode("alice"), new IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("bob")),
+            new Triple(BlankNode("bob"), new IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("alice"))
+        ]
+        final def results = turtle.parseTurtle(this.class.getResource("/turtle/blankNodes.ttl").text)
+        expect:
+        results == expectedResults
+    }
 ////
 ////    final def unlabeledBlankNodes() {
 ////        final def expectedResults = [
