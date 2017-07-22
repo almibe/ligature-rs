@@ -4,6 +4,7 @@
 
 package org.almibe.ligature.parsers
 
+import org.almibe.ligature.BlankNode
 import org.almibe.ligature.IRI
 import org.almibe.ligature.LangLiteral
 import org.almibe.ligature.Triple
@@ -38,8 +39,7 @@ class TurtleSpec extends Specification {
         final def expectedResult = spidermanEnemy
         final def results = turtle.parseTurtle(this.class.getResource("/turtle/01-basicTriple.ttl").text)
         expect:
-        results.size() == 1
-        results.first() == expectedResult
+        compareLists(results, expectedResults)
     }
 
     final def "support predicate lists"() {
@@ -47,8 +47,7 @@ class TurtleSpec extends Specification {
         final def expectedResults = [spidermanEnemy, spidermanName]
         final def results = turtle.parseTurtle(this.class.getResource("/turtle/02-predicateList.ttl").text)
         expect:
-        results.size() == 2
-        results == expectedResults
+        compareLists(results, expectedResults)
     }
 
     final def "support object lists"() {
@@ -56,8 +55,7 @@ class TurtleSpec extends Specification {
         final def expectedResults = [spidermanName, spidermanNameRu, spidermanName, spidermanNameRu]
         final def results = turtle.parseTurtle(this.class.getResource("/turtle/03-objectList.ttl").text)
         expect:
-        results.size() == 4
-        results == expectedResults
+        compareLists(results, expectedResults)
     }
 
     final def "support comments"() {
@@ -65,8 +63,7 @@ class TurtleSpec extends Specification {
         final def expectedResults = [spidermanEnemy, spidermanName]
         final def results = turtle.parseTurtle(this.class.getResource("/turtle/04-comments.ttl").text)
         expect:
-        results.size() == 2
-        results == expectedResults
+        compareLists(results, expectedResults)
     }
 
     final def "support multiline triples"() {
@@ -74,8 +71,7 @@ class TurtleSpec extends Specification {
         final def expectedResults = [spidermanEnemy]
         final def results = turtle.parseTurtle(this.class.getResource("/turtle/05-multilineTriple.ttl").text)
         expect:
-        results.size() == 1
-        results == expectedResults
+        compareLists(results, expectedResults)
     }
 
     final def base = "http://one.example/"
@@ -92,8 +88,7 @@ class TurtleSpec extends Specification {
         ]
         final def results = turtle.parseTurtle(this.class.getResource("/turtle/06-baseTriples.ttl").text)
         expect:
-        results[0] == expectedResults[0]
-        results[1] == expectedResults[1]
+        compareLists(results, expectedResults)
     }
 
     final def "turtle IRI parsing with prefixes"() {
@@ -108,12 +103,7 @@ class TurtleSpec extends Specification {
         ]
         final def results = turtle.parseTurtle(this.class.getResource("/turtle/07-prefixTriples.ttl").text)
         expect:
-        results[0] == expectedResults[0]
-        results[1] == expectedResults[1]
-        results[2] == expectedResults[2]
-        results[3] == expectedResults[3]
-        results[4] == expectedResults[4]
-        results[5] == expectedResults[5]
+        compareLists(results, expectedResults)
     }
 
     final def "support language literals"() {
@@ -121,7 +111,7 @@ class TurtleSpec extends Specification {
         final def expectedResults = [spidermanNameRu]
         final def results = turtle.parseTurtle(this.class.getResource("/turtle/08-literalWithLanguage.ttl").text)
         expect:
-        results == expectedResults
+        compareLists(results, expectedResults)
     }
 
     final def "support quoted literals"() {
@@ -167,7 +157,7 @@ class TurtleSpec extends Specification {
         ]
         final def results = turtle.parseTurtle(this.class.getResource("/turtle/numbers.ttl").text)
         expect:
-        results == expectedResults
+        compareLists(results, expectedResults)
     }
 
     final def supportBooleans() {
@@ -178,48 +168,48 @@ class TurtleSpec extends Specification {
         ]
         final def results = turtle.parseTurtle(this.class.getResource("/turtle/booleans.ttl").text)
         expect:
-        results == expectedResults
+        compareLists(results, expectedResults)
     }
 
     final def supportBlankNodes() {
         given:
         final def expectedResults = [
-            new Triple(BlankNode("alice"), new IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("bob")),
-            new Triple(BlankNode("bob"), new IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("alice"))
+            new Triple(new BlankNode("alice"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("bob")),
+            new Triple(new BlankNode("bob"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("alice"))
         ]
         final def results = turtle.parseTurtle(this.class.getResource("/turtle/blankNodes.ttl").text)
         expect:
-        results == expectedResults
+        compareLists(results, expectedResults)
     }
 ////
 ////    final def unlabeledBlankNodes() {
 ////        final def expectedResults = [
 ////            new Triple(new IRI("http://example.com/person/bob"), foafKnows, new IRI("http://example.com/person/george")),
-////            new Triple(BlankNode("ANON0"), foafKnows, new IRI("http://example.com/person/george")),
-////            new Triple(new IRI("http://example.com/person/bob"), foafKnows, BlankNode("ANON1")),
-////            new Triple(BlankNode("ANON2"), new IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("ANON3"))
+////            new Triple(new BlankNode("ANON0"), foafKnows, new IRI("http://example.com/person/george")),
+////            new Triple(new IRI("http://example.com/person/bob"), foafKnows, new BlankNode("ANON1")),
+////            new Triple(new BlankNode("ANON2"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON3"))
 ////        )
 ////        final def results = turtle.parseTurtle(this.class.getResource("/turtle/unlabeledBlankNodes.ttl").text)
-////        results == expectedResults
+////        compareLists(results, expectedResults)
 ////    }
 ////
 ////    final def nestedUnlabeledBlankNodes() {
 ////        final def expectedResults = [
-////            new Triple(BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Bob")),
-////            new Triple(BlankNode("ANON0"), new IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("ANON1"))
+////            new Triple(new BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Bob")),
+////            new Triple(new BlankNode("ANON0"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON1"))
 ////        )
 ////        final def results = turtle.parseTurtle(this.class.getResource("/turtle/nestedUnlabeledBlankNodes.ttl").text)
-////        results == expectedResults
+////        compareLists(results, expectedResults)
 ////    }
 ////
 ////    final def complexUnlabeledBlankNodes() {
 ////        final def expectedResults = [
-////            new Triple(BlankNode("ANON0"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Alice")),
-////            new Triple(BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Bob")),
-////            new Triple(BlankNode("ANON0"), new IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("ANON1")),
-////            new Triple(BlankNode("ANON2"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Eve")),
-////            new Triple(BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("ANON2")),
-////            new Triple(BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/mbox"), new IRI("http://bob@example.com"))
+////            new Triple(new BlankNode("ANON0"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Alice")),
+////            new Triple(new BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Bob")),
+////            new Triple(new BlankNode("ANON0"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON1")),
+////            new Triple(new BlankNode("ANON2"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Eve")),
+////            new Triple(new BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON2")),
+////            new Triple(new BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/mbox"), new IRI("http://bob@example.com"))
 ////        )
 ////        final def results = turtle.parseTurtle(this.class.getResource("/turtle/complexUnlabeledBlankNodes.ttl").text)
 ////        final def c = Comparator<Triple> { f, s -> f.toString().compareTo(s.toString()) }
@@ -228,13 +218,13 @@ class TurtleSpec extends Specification {
 ////
 ////    final def supportCollections() {
 ////        final def expectedResults = [
-////                new Triple(new IRI("http://example.org/foo/subject"), new IRI("http://example.org/foo/predicate"), BlankNode("ANON0")),
-////                new Triple(BlankNode("ANON0"), new IRI("${rdf}first"), new IRI("http://example.org/foo/a")),
-////                new Triple(BlankNode("ANON0"), new IRI("${rdf}rest"), BlankNode("ANON1")),
-////                new Triple(BlankNode("ANON1"), new IRI("${rdf}first"), new IRI("http://example.org/foo/b")),
-////                new Triple(BlankNode("ANON1"), new IRI("${rdf}rest"), BlankNode("ANON2")),
-////                new Triple(BlankNode("ANON2"), new IRI("${rdf}first"), new IRI("http://example.org/foo/c")),
-////                new Triple(BlankNode("ANON2"), new IRI("${rdf}rest"), new IRI("${rdf}nil")),
+////                new Triple(new IRI("http://example.org/foo/subject"), new IRI("http://example.org/foo/predicate"), new BlankNode("ANON0")),
+////                new Triple(new BlankNode("ANON0"), new IRI("${rdf}first"), new IRI("http://example.org/foo/a")),
+////                new Triple(new BlankNode("ANON0"), new IRI("${rdf}rest"), new BlankNode("ANON1")),
+////                new Triple(new BlankNode("ANON1"), new IRI("${rdf}first"), new IRI("http://example.org/foo/b")),
+////                new Triple(new BlankNode("ANON1"), new IRI("${rdf}rest"), new BlankNode("ANON2")),
+////                new Triple(new BlankNode("ANON2"), new IRI("${rdf}first"), new IRI("http://example.org/foo/c")),
+////                new Triple(new BlankNode("ANON2"), new IRI("${rdf}rest"), new IRI("${rdf}nil")),
 ////                new Triple(new IRI("http://example.org/foo/subject"), new IRI("http://example.org/foo/predicate2"), new IRI("${rdf}nil"))
 ////        )
 ////        final def results = turtle.parseTurtle(this.class.getResource("/turtle/collections.ttl").text)
@@ -248,7 +238,7 @@ class TurtleSpec extends Specification {
 //////                new Triple(new IRI(""),IRI(""),IRI(""))
 //////        )
 //////        final def results = turtle.parseTurtle(this.class.getResource("/turtle/wordnetStinkpot.ttl").text)
-//////        results == expectedResults
+//////        compareLists(results, expectedResults)
 //////    }
 ////
 ////    final def malformedQuotedLiterals() {
