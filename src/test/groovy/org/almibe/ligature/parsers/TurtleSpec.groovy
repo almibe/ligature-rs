@@ -155,7 +155,7 @@ class TurtleSpec extends Specification {
             new Triple(new IRI(helium), new IRI("${prefix}atomicMass"), new TypedLiteral("4.002602", new IRI("${xsd}float"))),
             new Triple(new IRI(helium), new IRI("${prefix}specificGravity"), new TypedLiteral("1.663E-4", new IRI("${xsd}double")))
         ]
-        final def results = turtle.parseTurtle(this.class.getResource("/turtle/numbers.ttl").text)
+        final def results = turtle.parseTurtle(this.class.getResource("/turtle/10-numbers.ttl").text)
         expect:
         compareLists(results, expectedResults)
     }
@@ -166,7 +166,7 @@ class TurtleSpec extends Specification {
             new Triple(new IRI("http://somecountry.example/census2007"), new IRI("http://example.org/stats/isLandlocked"),
                     new TypedLiteral("false", new IRI("${xsd}boolean")))
         ]
-        final def results = turtle.parseTurtle(this.class.getResource("/turtle/booleans.ttl").text)
+        final def results = turtle.parseTurtle(this.class.getResource("/turtle/11-booleans.ttl").text)
         expect:
         compareLists(results, expectedResults)
     }
@@ -177,28 +177,30 @@ class TurtleSpec extends Specification {
             new Triple(new BlankNode("alice"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("bob")),
             new Triple(new BlankNode("bob"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("alice"))
         ]
-        final def results = turtle.parseTurtle(this.class.getResource("/turtle/blankNodes.ttl").text)
+        final def results = turtle.parseTurtle(this.class.getResource("/turtle/12-blankNodes.ttl").text)
         expect:
         compareLists(results, expectedResults)
     }
-////
-////    final def unlabeledBlankNodes() {
-////        final def expectedResults = [
-////            new Triple(new IRI("http://example.com/person/bob"), foafKnows, new IRI("http://example.com/person/george")),
-////            new Triple(new BlankNode("ANON0"), foafKnows, new IRI("http://example.com/person/george")),
-////            new Triple(new IRI("http://example.com/person/bob"), foafKnows, new BlankNode("ANON1")),
-////            new Triple(new BlankNode("ANON2"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON3"))
-////        )
-////        final def results = turtle.parseTurtle(this.class.getResource("/turtle/unlabeledBlankNodes.ttl").text)
-////        compareLists(results, expectedResults)
-////    }
-////
+
+    final def unlabeledBlankNodes() {
+        given:
+        final def expectedResults = [
+            new Triple(new IRI("http://example.com/person/bob"), foafKnows, new IRI("http://example.com/person/george")),
+            new Triple(new BlankNode("ANON0"), foafKnows, new IRI("http://example.com/person/george")),
+            new Triple(new IRI("http://example.com/person/bob"), foafKnows, new BlankNode("ANON1")),
+            new Triple(new BlankNode("ANON2"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON3"))
+        ]
+        final def results = turtle.parseTurtle(this.class.getResource("/turtle/13-unlabeledBlankNodes.ttl").text)
+        expect:
+        compareLists(results, expectedResults)
+    }
+
 ////    final def nestedUnlabeledBlankNodes() {
 ////        final def expectedResults = [
 ////            new Triple(new BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Bob")),
 ////            new Triple(new BlankNode("ANON0"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON1"))
 ////        )
-////        final def results = turtle.parseTurtle(this.class.getResource("/turtle/nestedUnlabeledBlankNodes.ttl").text)
+////        final def results = turtle.parseTurtle(this.class.getResource("/turtle/14-nestedUnlabeledBlankNodes.ttl").text)
 ////        compareLists(results, expectedResults)
 ////    }
 ////
@@ -211,7 +213,7 @@ class TurtleSpec extends Specification {
 ////            new Triple(new BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON2")),
 ////            new Triple(new BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/mbox"), new IRI("http://bob@example.com"))
 ////        )
-////        final def results = turtle.parseTurtle(this.class.getResource("/turtle/complexUnlabeledBlankNodes.ttl").text)
+////        final def results = turtle.parseTurtle(this.class.getResource("/turtle/15-complexUnlabeledBlankNodes.ttl").text)
 ////        final def c = Comparator<Triple> { f, s -> f.toString().compareTo(s.toString()) }
 ////        results.sortedWith(c), expectedResults.sortedWith(c))
 ////    }
@@ -227,7 +229,7 @@ class TurtleSpec extends Specification {
 ////                new Triple(new BlankNode("ANON2"), new IRI("${rdf}rest"), new IRI("${rdf}nil")),
 ////                new Triple(new IRI("http://example.org/foo/subject"), new IRI("http://example.org/foo/predicate2"), new IRI("${rdf}nil"))
 ////        )
-////        final def results = turtle.parseTurtle(this.class.getResource("/turtle/collections.ttl").text)
+////        final def results = turtle.parseTurtle(this.class.getResource("/turtle/16-collections.ttl").text)
 ////        final def c = Comparator<Triple> { f, s -> f.toString().compareTo(s.toString()) }
 ////        results.sortedWith(c), expectedResults.sortedWith(c))
 ////    }

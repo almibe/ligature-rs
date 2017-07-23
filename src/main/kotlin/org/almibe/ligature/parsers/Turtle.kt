@@ -69,7 +69,7 @@ private class TriplesTurtleListener : TurtleListener {
         } else if (ctx.collection() != null) {
             TODO()
         } else if (ctx.blankNode() != null) {
-            TODO()
+            currentStatement.subjects.add(handleBlankNode(ctx.blankNode().text))
         } else {
             throw RuntimeException("Unexpected subject.")
         }
