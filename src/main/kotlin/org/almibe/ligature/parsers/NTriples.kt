@@ -98,12 +98,12 @@ private class TriplesNTripleListener : NTriplesBaseListener() {
         lateinit var predicate: Predicate
         lateinit var `object`: Object
     }
-}
 
-internal fun handleBlankNode(blankNode: String): BlankNode {
-    if (blankNode.length > 2) {
-        return BlankNode(blankNode.substring(2))
-    } else {
-        throw RuntimeException("Invalid blank node label - $blankNode")
+    internal fun handleBlankNode(blankNode: String): BlankNode {
+        if (blankNode.length > 2) {
+            return BlankNode(blankNode.substring(2))
+        } else {
+            throw RuntimeException("Invalid blank node label - $blankNode")
+        }
     }
 }

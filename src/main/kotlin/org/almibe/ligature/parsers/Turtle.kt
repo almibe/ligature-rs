@@ -69,7 +69,7 @@ private class TriplesTurtleListener : TurtleListener {
         } else if (ctx.collection() != null) {
             TODO()
         } else if (ctx.blankNode() != null) {
-            currentStatement.subjects.add(handleBlankNode(ctx.blankNode().text))
+            currentStatement.subjects.add(handleBlankNode(ctx.blankNode()))
         } else {
             throw RuntimeException("Unexpected subject.")
         }
@@ -159,7 +159,7 @@ private class TriplesTurtleListener : TurtleListener {
     internal fun handleObject(ctx: Turtle.ObjectContext): Object {
         return when {
             ctx.literal() != null -> handleTurtleLiteral(ctx.literal())
-            ctx.blankNode() != null -> handleBlankNode(ctx.blankNode().text)
+            ctx.blankNode() != null -> handleBlankNode(ctx.blankNode())
             ctx.iri() != null -> handleTurtleIRI(ctx.iri())
             ctx.blankNodePropertyList() != null -> TODO()
             ctx.collection() != null -> TODO()
@@ -198,6 +198,14 @@ private class TriplesTurtleListener : TurtleListener {
             ctx.LANGTAG() != null -> LangLiteral(value, ctx.LANGTAG().text.substring(1))
             ctx.iri() != null -> TypedLiteral(value, handleTurtleIRI(ctx.iri()))
             else -> TypedLiteral(value)
+        }
+    }
+
+    internal fun handleBlankNode(ctx: Turtle.BlankNodeContext): BlankNode {
+        if (ctx.text.length > 2) {
+            return BlankNode(ctx.text.substring(2))
+        } else {
+            throw RuntimeException("Invalid blank node label - ${ctx.text}")
         }
     }
 
