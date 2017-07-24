@@ -219,43 +219,16 @@ private class TriplesTurtleListener : TurtleListener {
         }?.text ?: ""
     }
 
-    //ANTRL methods that aren't being used currently / will be removed when switching to ABC
-    override fun exitBlankNode(ctx: Turtle.BlankNodeContext) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun exitLiteral(ctx: Turtle.LiteralContext) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun exitCollection(ctx: Turtle.CollectionContext) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun visitErrorNode(node: ErrorNode?) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun exitVerb(ctx: Turtle.VerbContext) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun exitBooleanLiteral(ctx: Turtle.BooleanLiteralContext) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun exitObject(ctx: Turtle.ObjectContext) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun exitTurtleDoc(ctx: Turtle.TurtleDocContext) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun exitRdfLiteral(ctx: Turtle.RdfLiteralContext) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
+    //TODO ANTRL listener methods that aren't being used currently / will be removed when switching to ABC
+    override fun exitBlankNode(ctx: Turtle.BlankNodeContext) { /* do nothing */ }
+    override fun exitLiteral(ctx: Turtle.LiteralContext) { /* do nothing */ }
+    override fun exitCollection(ctx: Turtle.CollectionContext) { /* do nothing */ }
+    override fun visitErrorNode(node: ErrorNode?) { /* do nothing */ }
+    override fun exitVerb(ctx: Turtle.VerbContext) { /* do nothing */ }
+    override fun exitBooleanLiteral(ctx: Turtle.BooleanLiteralContext) { /* do nothing */ }
+    override fun exitObject(ctx: Turtle.ObjectContext) { /* do nothing */ }
+    override fun exitTurtleDoc(ctx: Turtle.TurtleDocContext) { /* do nothing */ }
+    override fun exitRdfLiteral(ctx: Turtle.RdfLiteralContext) { /* do nothing */ }
     override fun visitTerminal(node: TerminalNode?) { /* do nothing */ }
     override fun enterString(ctx: Turtle.StringContext) { /* do nothing */ }
     override fun exitPredicate(ctx: Turtle.PredicateContext) { /* do nothing */ }
