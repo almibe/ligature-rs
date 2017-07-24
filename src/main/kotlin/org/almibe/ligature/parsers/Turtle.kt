@@ -55,6 +55,7 @@ private class TriplesTurtleListener : TurtleListener {
     val prefixes: MutableMap<String, String> = mutableMapOf()
     lateinit var base: String
     var currentStatement: TurtleStatement = TurtleStatement()
+    var anonymousCounter = 0
 
     override fun exitSubject(ctx: Turtle.SubjectContext) {
         //TODO handle all subject logic here
@@ -63,7 +64,7 @@ private class TriplesTurtleListener : TurtleListener {
         } else if (ctx.collection() != null) {
             TODO()
         } else if (ctx.blankNode() != null) {
-            currentStatement.subjects.add(handleBlankNode(ctx.blankNode()))
+            currentStatement.subjects.add(handleTurtleBlankNode(ctx.blankNode()))
         } else {
             throw RuntimeException("Unexpected subject.")
         }
@@ -153,7 +154,7 @@ private class TriplesTurtleListener : TurtleListener {
     internal fun handleObject(ctx: Turtle.ObjectContext): Object {
         return when {
             ctx.literal() != null -> handleTurtleLiteral(ctx.literal())
-            ctx.blankNode() != null -> handleBlankNode(ctx.blankNode())
+            ctx.blankNode() != null -> handleTurtleBlankNode(ctx.blankNode())
             ctx.iri() != null -> handleTurtleIRI(ctx.iri())
             ctx.blankNodePropertyList() != null -> TODO()
             ctx.collection() != null -> TODO()
@@ -195,11 +196,13 @@ private class TriplesTurtleListener : TurtleListener {
         }
     }
 
-    internal fun handleBlankNode(ctx: Turtle.BlankNodeContext): BlankNode {
-        if (ctx.text.length > 2) {
-            return BlankNode(ctx.text.substring(2))
+    internal fun handleTurtleBlankNode(ctx: Turtle.BlankNodeContext): BlankNode {
+        return if (ctx.ANON() != null) {
+            BlankNode("ANON${anonymousCounter++}")
+        } else if (ctx.BLANK_NODE_LABEL() != null) {
+            handleBlankNode(ctx.BLANK_NODE_LABEL().text)
         } else {
-            throw RuntimeException("Invalid blank node label - ${ctx.text}")
+            throw RuntimeException("Unexpected blank node - ${ctx.text}")
         }
     }
 
