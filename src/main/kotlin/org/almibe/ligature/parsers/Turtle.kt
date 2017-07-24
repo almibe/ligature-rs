@@ -16,19 +16,6 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker
 import org.antlr.v4.runtime.tree.TerminalNode
 
 class Turtle {
-    fun parseTurtle(text: String) : List<Triple> {
-        val parser = TurtleInstance()
-        return parser.parseTurtle(text)
-    }
-}
-
-val integerIRI = IRI("http://www.w3.org/2001/XMLSchema#integer")
-val doubleIRI = IRI("http://www.w3.org/2001/XMLSchema#double")
-val decimalIRI = IRI("http://www.w3.org/2001/XMLSchema#float")
-val typeIRI = IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
-val booleanIRI = IRI("http://www.w3.org/2001/XMLSchema#boolean")
-
-private class TurtleInstance {
     fun parseTurtle(text: String): List<Triple> {
         val stream = CharStreams.fromString(text)
         val lexer = ModalTurtleLexer(stream)
@@ -42,6 +29,13 @@ private class TurtleInstance {
     }
 }
 
+val integerIRI = IRI("http://www.w3.org/2001/XMLSchema#integer")
+val doubleIRI = IRI("http://www.w3.org/2001/XMLSchema#double")
+val decimalIRI = IRI("http://www.w3.org/2001/XMLSchema#float")
+val typeIRI = IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+val booleanIRI = IRI("http://www.w3.org/2001/XMLSchema#boolean")
+
+/** Temporary class used to hold data while parsing that will eventually be used to create RdfModel classes */
 private class TurtleStatement {
     val subjects = mutableListOf<Subject>()
     val blankNodePropertyList = mutableListOf<Pair<IRI, MutableList<Object>>>()
