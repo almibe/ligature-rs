@@ -77,8 +77,8 @@ private class TriplesTurtleListener : TurtleListener {
             typeIRI
         }
         ctx.objectList().`object`().forEach {
-            val `object`: Object = handleObject(it)
-            currentStatement.predicateObjectList.add(Pair(iri, mutableListOf(`object`)))
+            val objects = handleObject(it)
+            currentStatement.predicateObjectList.add(Pair(iri, objects))
         }
     }
 
@@ -151,12 +151,12 @@ private class TriplesTurtleListener : TurtleListener {
         }
     }
 
-    internal fun handleObject(ctx: Turtle.ObjectContext): Object {
+    internal fun handleObject(ctx: Turtle.ObjectContext): MutableList<Object> { //TODO make this return a collection of Objects or do something else?
         return when {
-            ctx.literal() != null -> handleTurtleLiteral(ctx.literal())
-            ctx.blankNode() != null -> handleTurtleBlankNode(ctx.blankNode())
-            ctx.iri() != null -> handleTurtleIRI(ctx.iri())
-            ctx.blankNodePropertyList() != null -> TODO()
+            ctx.literal() != null -> mutableListOf(handleTurtleLiteral(ctx.literal()))
+            ctx.blankNode() != null -> mutableListOf(handleTurtleBlankNode(ctx.blankNode()))
+            ctx.iri() != null -> mutableListOf(handleTurtleIRI(ctx.iri()))
+            ctx.blankNodePropertyList() != null -> handleBlankNodePropertyList(ctx.blankNodePropertyList())
             ctx.collection() != null -> TODO()
             else -> throw RuntimeException("Unexpected object")
         }
@@ -204,6 +204,10 @@ private class TriplesTurtleListener : TurtleListener {
         } else {
             throw RuntimeException("Unexpected blank node - ${ctx.text}")
         }
+    }
+
+    internal fun handleBlankNodePropertyList(ctx: Turtle.BlankNodePropertyListContext): MutableList<Object> {
+        return mutableListOf()
     }
 
     internal fun extractStringLiteralValue(ctx: Turtle.StringContext): String {
