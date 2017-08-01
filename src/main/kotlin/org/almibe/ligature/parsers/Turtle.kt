@@ -35,10 +35,14 @@ val decimalIRI = IRI("http://www.w3.org/2001/XMLSchema#float")
 val typeIRI = IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
 val booleanIRI = IRI("http://www.w3.org/2001/XMLSchema#boolean")
 
+/** Class used to represent Turtle's blankNodePropertyList concept
+ * which is hard to represent while processing a document with just basic RDF classes. */
+private data class BlankNodePropertyList(val predicateObjectList: MutableList<Pair<IRI, MutableList<Object>>>): Object
+
 /** Temporary class used to hold data while parsing that will eventually be used to create RdfModel classes */
 private class TurtleStatement {
     val subjects = mutableListOf<Subject>()
-    val blankNodePropertyList = mutableListOf<Pair<IRI, MutableList<Object>>>()
+    var blankNodePropertyList: BlankNodePropertyList? = null
     val predicateObjectList = mutableListOf<Pair<IRI, MutableList<Object>>>()
 
     fun computeTriples(): List<Triple> {
@@ -83,7 +87,9 @@ private class TriplesTurtleListener : TurtleListener {
     }
 
     override fun exitBlankNodePropertyList(ctx: Turtle.BlankNodePropertyListContext) {
-        //TODO handle all blankNodePropertyList logic here
+        if (currentStatement.subjects.size == 0) { //treat this blank node property list like the subject
+            currentStatement.blankNodePropertyList = handleBlankNodePropertyList(ctx)
+        }
     }
 
     override fun exitTriples(ctx: Turtle.TriplesContext) {
@@ -156,7 +162,7 @@ private class TriplesTurtleListener : TurtleListener {
             ctx.literal() != null -> mutableListOf(handleTurtleLiteral(ctx.literal()))
             ctx.blankNode() != null -> mutableListOf(handleTurtleBlankNode(ctx.blankNode()))
             ctx.iri() != null -> mutableListOf(handleTurtleIRI(ctx.iri()))
-            ctx.blankNodePropertyList() != null -> handleBlankNodePropertyList(ctx.blankNodePropertyList())
+            ctx.blankNodePropertyList() != null -> mutableListOf(handleBlankNodePropertyList(ctx.blankNodePropertyList()))
             ctx.collection() != null -> TODO()
             else -> throw RuntimeException("Unexpected object")
         }
@@ -206,8 +212,8 @@ private class TriplesTurtleListener : TurtleListener {
         }
     }
 
-    internal fun handleBlankNodePropertyList(ctx: Turtle.BlankNodePropertyListContext): MutableList<Object> {
-        return mutableListOf()
+    internal fun handleBlankNodePropertyList(ctx: Turtle.BlankNodePropertyListContext): BlankNodePropertyList {
+        TODO()
     }
 
     internal fun extractStringLiteralValue(ctx: Turtle.StringContext): String {
