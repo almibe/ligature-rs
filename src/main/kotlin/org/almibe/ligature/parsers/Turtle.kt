@@ -57,22 +57,7 @@ private class TriplesTurtleListener : TurtleListener {
     var currentStatement: TurtleStatement = TurtleStatement()
     var anonymousCounter = 0
 
-    override fun exitTriples(ctx: Turtle.TriplesContext) {
-        if (ctx.subject() != null) {
-            handleSubject(ctx.subject())
-            handlePredicateObjectList(ctx.predicateObjectList())
-        } else if (ctx.blankNodePropertyList() != null) {
-            handleBlankNodePropertyList(ctx.blankNodePropertyList())
-            if (ctx.predicateObjectList() != null) {
-                handlePredicateObjectList(ctx.predicateObjectList())
-            }
-        } else {
-            throw RuntimeException("Unexpected triple value.")
-        }
-        triples.addAll(currentStatement.computeTriples())
-    }
-
-    fun handleSubject(ctx: Turtle.SubjectContext) {
+    override fun exitSubject(ctx: Turtle.SubjectContext) {
         //TODO handle all subject logic here
         if (ctx.iri() != null) {
             currentStatement.subjects.add(handleTurtleIRI(ctx.iri()))
@@ -83,10 +68,6 @@ private class TriplesTurtleListener : TurtleListener {
         } else {
             throw RuntimeException("Unexpected subject.")
         }
-    }
-
-    internal fun handlePredicateObjectList(ctx: Turtle.PredicateObjectListContext) {
-
     }
 
     override fun exitVerbObjectList(ctx: Turtle.VerbObjectListContext) {
@@ -101,8 +82,12 @@ private class TriplesTurtleListener : TurtleListener {
         }
     }
 
-    fun handleBlankNodePropertyList(ctx: Turtle.BlankNodePropertyListContext) {
+    override fun exitBlankNodePropertyList(ctx: Turtle.BlankNodePropertyListContext) {
         //TODO handle all blankNodePropertyList logic here
+    }
+
+    override fun exitTriples(ctx: Turtle.TriplesContext) {
+        triples.addAll(currentStatement.computeTriples())
     }
 
     override fun enterTriples(ctx: Turtle.TriplesContext) {
@@ -171,7 +156,7 @@ private class TriplesTurtleListener : TurtleListener {
             ctx.literal() != null -> mutableListOf(handleTurtleLiteral(ctx.literal()))
             ctx.blankNode() != null -> mutableListOf(handleTurtleBlankNode(ctx.blankNode()))
             ctx.iri() != null -> mutableListOf(handleTurtleIRI(ctx.iri()))
-            //ctx.blankNodePropertyList() != null -> handleBlankNodePropertyList(ctx.blankNodePropertyList())
+            ctx.blankNodePropertyList() != null -> handleBlankNodePropertyList(ctx.blankNodePropertyList())
             ctx.collection() != null -> TODO()
             else -> throw RuntimeException("Unexpected object")
         }
@@ -221,6 +206,10 @@ private class TriplesTurtleListener : TurtleListener {
         }
     }
 
+    internal fun handleBlankNodePropertyList(ctx: Turtle.BlankNodePropertyListContext): MutableList<Object> {
+        return mutableListOf()
+    }
+
     internal fun extractStringLiteralValue(ctx: Turtle.StringContext): String {
         return when {
             ctx.START_SINGLE_QUOTE() != null -> ctx.STRING_CONTENT_SINGLE_QUOTE()
@@ -232,15 +221,12 @@ private class TriplesTurtleListener : TurtleListener {
     }
 
     //TODO ANTRL listener methods that aren't being used currently / will be removed when switching to ABC
-    override fun exitBlankNodePropertyList(p0: Turtle.BlankNodePropertyListContext?) { /* do nothing */ }
-    override fun exitSubject(p0: Turtle.SubjectContext?) { /* do nothing */ }
     override fun exitBlankNode(ctx: Turtle.BlankNodeContext) { /* do nothing */ }
     override fun exitLiteral(ctx: Turtle.LiteralContext) { /* do nothing */ }
     override fun exitCollection(ctx: Turtle.CollectionContext) { /* do nothing */ }
     override fun visitErrorNode(node: ErrorNode?) { /* do nothing */ }
     override fun exitVerb(ctx: Turtle.VerbContext) { /* do nothing */ }
     override fun exitBooleanLiteral(ctx: Turtle.BooleanLiteralContext) { /* do nothing */ }
-    override fun exitPredicateObjectList(ctx: Turtle.PredicateObjectListContext) { /* do nothing */ }
     override fun exitObject(ctx: Turtle.ObjectContext) { /* do nothing */ }
     override fun exitTurtleDoc(ctx: Turtle.TurtleDocContext) { /* do nothing */ }
     override fun exitRdfLiteral(ctx: Turtle.RdfLiteralContext) { /* do nothing */ }
@@ -248,6 +234,7 @@ private class TriplesTurtleListener : TurtleListener {
     override fun enterString(ctx: Turtle.StringContext) { /* do nothing */ }
     override fun exitPredicate(ctx: Turtle.PredicateContext) { /* do nothing */ }
     override fun enterDirective(ctx: Turtle.DirectiveContext) { /* do nothing */ }
+    override fun exitPredicateObjectList(ctx: Turtle.PredicateObjectListContext) { /* do nothing */ }
     override fun enterPredicate(ctx: Turtle.PredicateContext) { /* do nothing */ }
     override fun exitIri(ctx: Turtle.IriContext) { /* do nothing */ }
     override fun enterObjectList(ctx: Turtle.ObjectListContext) { /* do nothing */ }
