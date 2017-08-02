@@ -100,9 +100,9 @@ private class TriplesNTripleListener : NTriplesBaseListener() {
     }
 }
 
-fun handleBlankNode(blankNode: String): BlankNode {
+fun handleBlankNode(blankNode: String): LabeledBlankNode {
     if (blankNode.length > 2) {
-        return BlankNode(blankNode.substring(2))
+        return LabeledBlankNode(blankNode.substring(2))
     } else {
         throw RuntimeException("Invalid blank node label - $blankNode")
     }

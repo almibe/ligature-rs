@@ -160,7 +160,7 @@ private class TriplesTurtleListener : TurtleListener {
     internal fun handleObject(ctx: Turtle.ObjectContext): MutableList<Object> { //TODO make this return a collection of Objects or do something else?
         return when {
             ctx.literal() != null -> mutableListOf(handleTurtleLiteral(ctx.literal()))
-            ctx.blankNode() != null -> mutableListOf(handleTurtleBlankNode(ctx.blankNode()))
+            ctx.blankNode() != null -> mutableListOf(handleTurtleBlankNodeObject(ctx.blankNode()))
             ctx.iri() != null -> mutableListOf(handleTurtleIRI(ctx.iri()))
             ctx.blankNodePropertyList() != null -> mutableListOf(handleBlankNodePropertyList(ctx.blankNodePropertyList()))
             ctx.collection() != null -> TODO()
@@ -204,7 +204,17 @@ private class TriplesTurtleListener : TurtleListener {
 
     internal fun handleTurtleBlankNode(ctx: Turtle.BlankNodeContext): BlankNode {
         return if (ctx.ANON() != null) {
-            BlankNode("ANON${anonymousCounter++}")
+            UnlabeledBlankNode()
+        } else if (ctx.BLANK_NODE_LABEL() != null) {
+            handleBlankNode(ctx.BLANK_NODE_LABEL().text)
+        } else {
+            throw RuntimeException("Unexpected blank node - ${ctx.text}")
+        }
+    }
+
+    internal fun handleTurtleBlankNodeObject(ctx: Turtle.BlankNodeContext): Object {
+        return if (ctx.ANON() != null) {
+            UnlabeledBlankNode()
         } else if (ctx.BLANK_NODE_LABEL() != null) {
             handleBlankNode(ctx.BLANK_NODE_LABEL().text)
         } else {

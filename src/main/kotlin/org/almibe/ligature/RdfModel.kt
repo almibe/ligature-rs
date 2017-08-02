@@ -9,7 +9,9 @@ interface Predicate
 interface Object
 
 data class IRI(val value: String) : Subject, Predicate, Object
-data class BlankNode(val label: String) : Subject, Object
+interface BlankNode : Subject, Object
+data class LabeledBlankNode(val label: String) : BlankNode
+class UnlabeledBlankNode: BlankNode
 data class Triple(val subject: Subject, val predicate: Predicate, val `object`: Object)
 
 interface Literal : Object { val value: String}

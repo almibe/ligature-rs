@@ -61,8 +61,8 @@ class NTriplesSpec extends Specification {
 
     def "support blank nodes"() {
         given:
-        def expectedResult1 = new Triple(new BlankNode("alice"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("bob"))
-        def expectedResult2 = new Triple(new BlankNode("bob"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("alice"))
+        def expectedResult1 = new Triple(new LabeledBlankNode("alice"), new IRI("http://xmlns.com/foaf/0.1/knows"), new LabeledBlankNode("bob"))
+        def expectedResult2 = new Triple(new LabeledBlankNode("bob"), new IRI("http://xmlns.com/foaf/0.1/knows"), new LabeledBlankNode("alice"))
         def results = ligature.parseNTriples(this.class.getResource("/ntriples/05-blankNodes.nt").text)
         expect:
         results == [expectedResult1, expectedResult2]

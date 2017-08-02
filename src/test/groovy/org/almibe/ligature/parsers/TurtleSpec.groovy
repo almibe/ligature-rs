@@ -4,7 +4,7 @@
 
 package org.almibe.ligature.parsers
 
-import org.almibe.ligature.BlankNode
+import org.almibe.ligature.LabeledBlankNode
 import org.almibe.ligature.IRI
 import org.almibe.ligature.LangLiteral
 import org.almibe.ligature.Triple
@@ -174,8 +174,8 @@ class TurtleSpec extends Specification {
     final def "support blank nodes"() {
         given:
         final def expectedResults = [
-            new Triple(new BlankNode("alice"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("bob")),
-            new Triple(new BlankNode("bob"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("alice"))
+                new Triple(new LabeledBlankNode("alice"), new IRI("http://xmlns.com/foaf/0.1/knows"), new LabeledBlankNode("bob")),
+                new Triple(new LabeledBlankNode("bob"), new IRI("http://xmlns.com/foaf/0.1/knows"), new LabeledBlankNode("alice"))
         ]
         final def results = turtle.parseTurtle(this.class.getResource("/turtle/12-blankNodes.ttl").text)
         expect:
@@ -185,10 +185,10 @@ class TurtleSpec extends Specification {
     final def "unlabeled blank nodes"() {
         given:
         final def expectedResults = [
-            new Triple(new IRI("http://example.com/person/bob"), foafKnows, new IRI("http://example.com/person/george")),
-            new Triple(new BlankNode("ANON0"), foafKnows, new IRI("http://example.com/person/george")),
-            new Triple(new IRI("http://example.com/person/bob"), foafKnows, new BlankNode("ANON1")),
-            new Triple(new BlankNode("ANON2"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON3"))
+                new Triple(new IRI("http://example.com/person/bob"), foafKnows, new IRI("http://example.com/person/george")),
+                new Triple(new LabeledBlankNode("ANON0"), foafKnows, new IRI("http://example.com/person/george")),
+                new Triple(new IRI("http://example.com/person/bob"), foafKnows, new LabeledBlankNode("ANON1")),
+                new Triple(new LabeledBlankNode("ANON2"), new IRI("http://xmlns.com/foaf/0.1/knows"), new LabeledBlankNode("ANON3"))
         ]
         final def results = turtle.parseTurtle(this.class.getResource("/turtle/13-unlabeledBlankNodes.ttl").text)
         expect:
@@ -198,8 +198,8 @@ class TurtleSpec extends Specification {
     final def "nested unlabeled blank nodes"() {
         given:
         final def expectedResults = [
-            new Triple(new BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Bob", stringIRI)),
-            new Triple(new BlankNode("ANON0"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON1"))
+                new Triple(new LabeledBlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Bob", stringIRI)),
+                new Triple(new LabeledBlankNode("ANON0"), new IRI("http://xmlns.com/foaf/0.1/knows"), new LabeledBlankNode("ANON1"))
         ]
         final def results = turtle.parseTurtle(this.class.getResource("/turtle/14-nestedUnlabeledBlankNodes.ttl").text)
         expect:
