@@ -4,6 +4,8 @@
 
 package org.almibe.ligature.parsers
 
+import com.orientechnologies.orient.core.db.OrientDB
+import com.orientechnologies.orient.core.db.OrientDBConfig
 import org.almibe.ligature.*
 import org.almibe.ligature.parser.ntriples.NTriplesBaseListener
 import org.almibe.ligature.parser.ntriples.NTriplesLexer
@@ -14,20 +16,29 @@ import org.antlr.v4.runtime.tree.ErrorNode
 import org.antlr.v4.runtime.tree.ParseTreeWalker
 
 class NTriples {
-    fun parseNTriples(text: String) : List<Triple>  {
+    /**
+     * This method exists mainly for testing and experimentation.
+     * It returns a new in-memory OrientDB instance.
+     */
+    fun loadNTriples(text: String) : OrientDB {
+        val orientDB = OrientDB("memory:ntriples", OrientDBConfig.defaultConfig())
+        loadNTriples(text, orientDB)
+        return orientDB
+    }
+
+    fun loadNTriples(text: String, orientDB: OrientDB) {
         val stream = CharStreams.fromString(text)
         val lexer = NTriplesLexer(stream)
         val tokens = CommonTokenStream(lexer)
         val parser = NTriplesParser(tokens)
 
         val walker = ParseTreeWalker()
-        val listener = TriplesNTripleListener()
+        val listener = TriplesNTripleListener(orientDB)
         walker.walk(listener, parser.ntriplesDoc())
-        return listener.triples
     }
 }
 
-private class TriplesNTripleListener : NTriplesBaseListener() {
+private class TriplesNTripleListener(orientDB: OrientDB) : NTriplesBaseListener() {
     val triples: MutableList<Triple> = mutableListOf()
 
     lateinit var currentTriple: TempTriple
