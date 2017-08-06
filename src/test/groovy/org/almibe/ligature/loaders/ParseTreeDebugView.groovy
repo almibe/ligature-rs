@@ -2,7 +2,7 @@
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.almibe.ligature.parsers
+package org.almibe.ligature.loaders
 
 import javafx.animation.Animation
 import javafx.animation.KeyFrame

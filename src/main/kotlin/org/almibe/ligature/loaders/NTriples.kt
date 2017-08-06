@@ -2,10 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.almibe.ligature.parsers
+package org.almibe.ligature.loaders
 
 import com.orientechnologies.orient.core.db.OrientDB
-import com.orientechnologies.orient.core.db.OrientDBConfig
 import org.almibe.ligature.*
 import org.almibe.ligature.parser.ntriples.NTriplesBaseListener
 import org.almibe.ligature.parser.ntriples.NTriplesLexer
@@ -15,18 +14,8 @@ import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.tree.ErrorNode
 import org.antlr.v4.runtime.tree.ParseTreeWalker
 
-class NTriples {
-    /**
-     * This method exists mainly for making testing and experimentation easier.
-     * It returns a new in-memory OrientDB instance.
-     */
-    fun loadNTriples(text: String) : OrientDB {
-        val orientDB = OrientDB("memory:ligature", OrientDBConfig.defaultConfig())
-        loadNTriples(text, orientDB)
-        return orientDB
-    }
-
-    fun loadNTriples(text: String, orientDB: OrientDB) {
+class NTriples(val orientDB: OrientDB) {
+    fun loadNTriples(text: String) {
         val stream = CharStreams.fromString(text)
         val lexer = NTriplesLexer(stream)
         val tokens = CommonTokenStream(lexer)
