@@ -17,11 +17,11 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker
 
 class NTriples {
     /**
-     * This method exists mainly for testing and experimentation.
+     * This method exists mainly for making testing and experimentation easier.
      * It returns a new in-memory OrientDB instance.
      */
     fun loadNTriples(text: String) : OrientDB {
-        val orientDB = OrientDB("memory:ntriples", OrientDBConfig.defaultConfig())
+        val orientDB = OrientDB("memory:ligature", OrientDBConfig.defaultConfig())
         loadNTriples(text, orientDB)
         return orientDB
     }
@@ -31,27 +31,21 @@ class NTriples {
         val lexer = NTriplesLexer(stream)
         val tokens = CommonTokenStream(lexer)
         val parser = NTriplesParser(tokens)
-
         val walker = ParseTreeWalker()
         val listener = TriplesNTripleListener(orientDB)
         walker.walk(listener, parser.ntriplesDoc())
     }
 }
 
-private class TriplesNTripleListener(orientDB: OrientDB) : NTriplesBaseListener() {
-    val triples: MutableList<Triple> = mutableListOf()
-
+private class TriplesNTripleListener(val orientDB: OrientDB) : NTriplesBaseListener() {
     lateinit var currentTriple: TempTriple
 
     override fun enterTriple(ctx: NTriplesParser.TripleContext) {
         currentTriple = TempTriple()
     }
 
-    override fun exitTriple(ctx: NTriplesParser.TripleContext) {
-        triples.add(Triple(currentTriple.subject, currentTriple.predicate, currentTriple.`object`))
-    }
-
     override fun exitSubject(ctx: NTriplesParser.SubjectContext) {
+        //TODO persist subject in this method
         val subject: Subject = when {
             ctx.IRIREF() != null -> handleIRI(ctx.IRIREF().text)
             ctx.BLANK_NODE_LABEL() != null -> handleBlankNode(ctx.BLANK_NODE_LABEL().text)
@@ -61,6 +55,7 @@ private class TriplesNTripleListener(orientDB: OrientDB) : NTriplesBaseListener(
     }
 
     override fun exitPredicate(ctx: NTriplesParser.PredicateContext) {
+        //TODO persist predicate in this method
         val predicate: Predicate = when {
             ctx.IRIREF() != null -> handleIRI(ctx.IRIREF().text)
             else -> throw RuntimeException("Unexpected Predicate Type")
@@ -69,6 +64,7 @@ private class TriplesNTripleListener(orientDB: OrientDB) : NTriplesBaseListener(
     }
 
     override fun exitObject(ctx: NTriplesParser.ObjectContext) {
+        //TODO persist object in this method
         val `object`: Object = when {
             ctx.IRIREF() != null -> handleIRI(ctx.IRIREF().text)
             ctx.BLANK_NODE_LABEL() != null -> handleBlankNode(ctx.BLANK_NODE_LABEL().text)
