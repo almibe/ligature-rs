@@ -38,22 +38,20 @@ private class TriplesNTripleListener(val dbPool: ODatabasePool) : NTriplesBaseLi
     }
 
     override fun exitSubject(ctx: NTriplesParser.SubjectContext) {
-        //TODO persist subject in this method
-        val subject: Subject = when {
+        currentTriple.subject = when {
             ctx.IRIREF() != null -> handleIRI(ctx.IRIREF().text)
             ctx.BLANK_NODE_LABEL() != null -> handleBlankNode(ctx.BLANK_NODE_LABEL().text)
             else -> throw RuntimeException("Unexpected Subject Type")
         }
-        //currentTriple.subject = subject
+        orids.add(currentTriple.subject.identity)
     }
 
     override fun exitPredicate(ctx: NTriplesParser.PredicateContext) {
-        //TODO persist predicate in this method
-        val predicate: Predicate = when {
-            ctx.IRIREF() != null -> handleIRI(ctx.IRIREF().text)
+        val predicate: String = when {
+            ctx.IRIREF() != null -> ctx.IRIREF().text
             else -> throw RuntimeException("Unexpected Predicate Type")
         }
-        //currentTriple.predicate = predicate
+        currentTriple.predicate = predicate
     }
 
     override fun exitObject(ctx: NTriplesParser.ObjectContext) {
@@ -71,7 +69,8 @@ private class TriplesNTripleListener(val dbPool: ODatabasePool) : NTriplesBaseLi
         throw RuntimeException(node.toString()) //TODO do I need this or will ANTLR throw its own RTE?
     }
 
-    internal fun handleIRI(iriRef: String): IRI {
+    internal fun handleIRI(iriRef: String): OVertex {
+        //TODO persist iri in this method
         if (iriRef.length > 2) {
             return IRI(iriRef.substring(1, (iriRef.length-1)))
         } else {
@@ -99,7 +98,8 @@ private class TriplesNTripleListener(val dbPool: ODatabasePool) : NTriplesBaseLi
     }
 }
 
-fun handleBlankNode(blankNode: String): LabeledBlankNode {
+fun handleBlankNode(blankNode: String): OVertex {
+    //TODO persist blank node in this method
     if (blankNode.length > 2) {
         return LabeledBlankNode(blankNode.substring(2))
     } else {
