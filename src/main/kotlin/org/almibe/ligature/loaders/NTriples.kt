@@ -32,6 +32,7 @@ class NTriples(val dbPool: ODatabasePool) {
 private class TriplesNTripleListener(val dbPool: ODatabasePool) : NTriplesBaseListener() {
     val orids = HashSet<ORID>()
     lateinit var currentTriple: TempTriple
+    val blankNodes = HashMap<String, OVertex>()
 
     override fun enterTriple(ctx: NTriplesParser.TripleContext) {
         currentTriple = TempTriple()
@@ -55,14 +56,15 @@ private class TriplesNTripleListener(val dbPool: ODatabasePool) : NTriplesBaseLi
     }
 
     override fun exitObject(ctx: NTriplesParser.ObjectContext) {
-        //TODO persist object in this method
-        val `object`: Object = when {
-            ctx.IRIREF() != null -> handleIRI(ctx.IRIREF().text)
-            ctx.BLANK_NODE_LABEL() != null -> handleBlankNode(ctx.BLANK_NODE_LABEL().text)
-            ctx.literal() != null -> handleLiteral(ctx.literal())
-            else -> throw RuntimeException("Unexpected Object Type")
+        if (ctx.IRIREF() != null) {
+            handleIRI(ctx.IRIREF().text)
+        } else if (ctx.BLANK_NODE_LABEL() != null) {
+            handleBlankNode(ctx.BLANK_NODE_LABEL().text)
+        } else if (ctx.literal() != null) {
+            handleLiteral(ctx.literal())
+        } else {
+            throw RuntimeException("Unexpected Object Type")
         }
-        //currentTriple.`object` = `object`
     }
 
     override fun visitErrorNode(node: ErrorNode) {
@@ -70,9 +72,10 @@ private class TriplesNTripleListener(val dbPool: ODatabasePool) : NTriplesBaseLi
     }
 
     internal fun handleIRI(iriRef: String): OVertex {
-        //TODO persist iri in this method
         if (iriRef.length > 2) {
-            return IRI(iriRef.substring(1, (iriRef.length-1)))
+            val iri = IRI(iriRef.substring(1, (iriRef.length-1)))
+            //TODO if iri exists return existing OVertex
+            //TODO if not then persist iri in this method and return new OVertx
         } else {
             throw RuntimeException("Invalid iriRef - $iriRef")
         }
@@ -92,17 +95,21 @@ private class TriplesNTripleListener(val dbPool: ODatabasePool) : NTriplesBaseLi
         }
     }
 
+    fun handleBlankNode(blankNode: String): OVertex {
+        if (blankNode.length > 2) {
+            val blankNodeLabel = blankNode.substring(2)
+            if (blankNodes.containsKey(blankNodeLabel)) {
+                return blankNodes[blankNodeLabel]!!
+            } else {
+                //TODO create new blank node and return after adding to blankNodes map
+            }
+        } else {
+            throw RuntimeException("Invalid blank node label - $blankNode")
+        }
+    }
+
     internal class TempTriple {
         lateinit var subject: OVertex
         lateinit var predicate: String
-    }
-}
-
-fun handleBlankNode(blankNode: String): OVertex {
-    //TODO persist blank node in this method
-    if (blankNode.length > 2) {
-        return LabeledBlankNode(blankNode.substring(2))
-    } else {
-        throw RuntimeException("Invalid blank node label - $blankNode")
     }
 }
