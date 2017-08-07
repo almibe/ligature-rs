@@ -4,7 +4,9 @@
 
 package org.almibe.ligature.loaders
 
-import com.orientechnologies.orient.core.db.OrientDB
+import com.orientechnologies.orient.core.db.ODatabasePool
+import com.orientechnologies.orient.core.id.ORID
+import com.orientechnologies.orient.core.record.OVertex
 import org.almibe.ligature.*
 import org.almibe.ligature.parser.ntriples.NTriplesBaseListener
 import org.almibe.ligature.parser.ntriples.NTriplesLexer
@@ -14,19 +16,21 @@ import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.tree.ErrorNode
 import org.antlr.v4.runtime.tree.ParseTreeWalker
 
-class NTriples(val orientDB: OrientDB) {
-    fun loadNTriples(text: String) {
+class NTriples(val dbPool: ODatabasePool) {
+    fun loadNTriples(text: String): Set<ORID> {
         val stream = CharStreams.fromString(text)
         val lexer = NTriplesLexer(stream)
         val tokens = CommonTokenStream(lexer)
         val parser = NTriplesParser(tokens)
         val walker = ParseTreeWalker()
-        val listener = TriplesNTripleListener(orientDB)
+        val listener = TriplesNTripleListener(dbPool)
         walker.walk(listener, parser.ntriplesDoc())
+        return listener.orids
     }
 }
 
-private class TriplesNTripleListener(val orientDB: OrientDB) : NTriplesBaseListener() {
+private class TriplesNTripleListener(val dbPool: ODatabasePool) : NTriplesBaseListener() {
+    val orids = HashSet<ORID>()
     lateinit var currentTriple: TempTriple
 
     override fun enterTriple(ctx: NTriplesParser.TripleContext) {
@@ -40,7 +44,7 @@ private class TriplesNTripleListener(val orientDB: OrientDB) : NTriplesBaseListe
             ctx.BLANK_NODE_LABEL() != null -> handleBlankNode(ctx.BLANK_NODE_LABEL().text)
             else -> throw RuntimeException("Unexpected Subject Type")
         }
-        currentTriple.subject = subject
+        //currentTriple.subject = subject
     }
 
     override fun exitPredicate(ctx: NTriplesParser.PredicateContext) {
@@ -49,7 +53,7 @@ private class TriplesNTripleListener(val orientDB: OrientDB) : NTriplesBaseListe
             ctx.IRIREF() != null -> handleIRI(ctx.IRIREF().text)
             else -> throw RuntimeException("Unexpected Predicate Type")
         }
-        currentTriple.predicate = predicate
+        //currentTriple.predicate = predicate
     }
 
     override fun exitObject(ctx: NTriplesParser.ObjectContext) {
@@ -60,7 +64,7 @@ private class TriplesNTripleListener(val orientDB: OrientDB) : NTriplesBaseListe
             ctx.literal() != null -> handleLiteral(ctx.literal())
             else -> throw RuntimeException("Unexpected Object Type")
         }
-        currentTriple.`object` = `object`
+        //currentTriple.`object` = `object`
     }
 
     override fun visitErrorNode(node: ErrorNode) {
@@ -90,9 +94,8 @@ private class TriplesNTripleListener(val orientDB: OrientDB) : NTriplesBaseListe
     }
 
     internal class TempTriple {
-        lateinit var subject: Subject
-        lateinit var predicate: Predicate
-        lateinit var `object`: Object
+        lateinit var subject: OVertex
+        lateinit var predicate: String
     }
 }
 

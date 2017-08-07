@@ -8,16 +8,18 @@ import org.almibe.ligature.*
 import spock.lang.Specification
 
 class NTriplesSpec extends Specification {
-    final ligature = new NTriples()
+    final ligature = new Ligature()
     final stringIRI = new IRI("http://www.w3.org/2001/XMLSchema#string")
 
     def "support basic IRI triple"() {
-        given:
+        when:
+        def orids = ligature.loadNTriples(this.class.getResource("/ntriples/01-basicTriple.nt").text)
+
         def expectedResult = new Triple( new IRI("http://example.org/#spiderman"),
                 new IRI("http://www.perceive.net/schemas/relationship/enemyOf"),
                 new IRI("http://example.org/#green-goblin"))
-        def results = ligature.loadNTriples(this.class.getResource("/ntriples/01-basicTriple.nt").text)
-        expect:
+
+        then:
         results.size() == 1
         results == [expectedResult]
     }
