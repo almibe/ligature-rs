@@ -7,8 +7,8 @@ package org.almibe.ligature.loaders
 import com.orientechnologies.orient.core.db.ODatabasePool
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument
 import com.orientechnologies.orient.core.id.ORID
+import com.orientechnologies.orient.core.record.OEdge
 import com.orientechnologies.orient.core.record.OVertex
-import org.almibe.ligature.*
 import org.almibe.ligature.parser.ntriples.NTriplesBaseListener
 import org.almibe.ligature.parser.ntriples.NTriplesLexer
 import org.almibe.ligature.parser.ntriples.NTriplesParser
@@ -29,6 +29,7 @@ class NTriples(val dbPool: ODatabasePool) {
         db.use {
             val listener = TriplesNTripleListener(db)
             walker.walk(listener, parser.ntriplesDoc())
+            db.commit()
             return listener.orids
         }
     }
@@ -61,14 +62,11 @@ private class TriplesNTripleListener(val db: ODatabaseDocument) : NTriplesBaseLi
     }
 
     override fun exitObject(ctx: NTriplesParser.ObjectContext) {
-        if (ctx.IRIREF() != null) {
-            handleIRI(ctx.IRIREF().text)
-        } else if (ctx.BLANK_NODE_LABEL() != null) {
-            handleBlankNode(ctx.BLANK_NODE_LABEL().text)
-        } else if (ctx.literal() != null) {
-            handleLiteral(ctx.literal())
-        } else {
-            throw RuntimeException("Unexpected Object Type")
+        when {
+            ctx.IRIREF() != null -> handleObject(handleIRI(ctx.IRIREF().text))
+            ctx.BLANK_NODE_LABEL() != null -> handleObject(handleBlankNode(ctx.BLANK_NODE_LABEL().text))
+            ctx.literal() != null -> handleLiteral(ctx.literal())
+            else -> throw RuntimeException("Unexpected Object Type")
         }
     }
 
@@ -78,9 +76,13 @@ private class TriplesNTripleListener(val db: ODatabaseDocument) : NTriplesBaseLi
 
     internal fun handleIRI(iriRef: String): OVertex {
         if (iriRef.length > 2) {
-            val iri = IRI(iriRef.substring(1, (iriRef.length-1)))
+            //val iri = IRI(iriRef.substring(1, (iriRef.length-1)))
             //TODO if iri exists return existing OVertex
             //TODO if not then persist iri in this method and return new OVertx
+            val iriVertx = db.newVertex()
+            iriVertx.setProperty("iri", iriRef.substring(1, (iriRef.length-1)))
+            iriVertx.save<OVertex>()
+            return iriVertx
         } else {
             throw RuntimeException("Invalid iriRef - $iriRef")
         }
@@ -113,11 +115,17 @@ private class TriplesNTripleListener(val db: ODatabaseDocument) : NTriplesBaseLi
             if (blankNodes.containsKey(blankNodeLabel)) {
                 return blankNodes[blankNodeLabel]!!
             } else {
-                //TODO create new blank node and return after adding to blankNodes map
+                TODO("create new blank node and return after adding to blankNodes map")
             }
         } else {
             throw RuntimeException("Invalid blank node label - $blankNode")
         }
+    }
+
+    fun handleObject(objectVertx: OVertex) {
+        val edge = currentTriple.subject.addEdge(objectVertx)
+        edge.setProperty("predicate", currentTriple.predicate)
+        edge.save<OEdge>()
     }
 
     internal class TempTriple {
