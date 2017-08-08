@@ -5,6 +5,7 @@
 package org.almibe.ligature.loaders
 
 import com.orientechnologies.orient.core.db.ODatabasePool
+import com.orientechnologies.orient.core.db.document.ODatabaseDocument
 import com.orientechnologies.orient.core.id.ORID
 import com.orientechnologies.orient.core.record.OVertex
 import org.almibe.ligature.*
@@ -23,13 +24,17 @@ class NTriples(val dbPool: ODatabasePool) {
         val tokens = CommonTokenStream(lexer)
         val parser = NTriplesParser(tokens)
         val walker = ParseTreeWalker()
-        val listener = TriplesNTripleListener(dbPool)
-        walker.walk(listener, parser.ntriplesDoc())
-        return listener.orids
+
+        val db: ODatabaseDocument = dbPool.acquire()
+        db.use {
+            val listener = TriplesNTripleListener(db)
+            walker.walk(listener, parser.ntriplesDoc())
+            return listener.orids
+        }
     }
 }
 
-private class TriplesNTripleListener(val dbPool: ODatabasePool) : NTriplesBaseListener() {
+private class TriplesNTripleListener(val db: ODatabaseDocument) : NTriplesBaseListener() {
     val orids = HashSet<ORID>()
     lateinit var currentTriple: TempTriple
     val blankNodes = HashMap<String, OVertex>()
@@ -81,17 +86,24 @@ private class TriplesNTripleListener(val dbPool: ODatabasePool) : NTriplesBaseLi
         }
     }
 
-    internal fun handleLiteral(literal: NTriplesParser.LiteralContext): Literal {
+    internal fun handleLiteral(literal: NTriplesParser.LiteralContext) {
+        //TODO figure out how to store literals, does OrientDB handle maps in properties
+        //TODO or do I need to use an embedded doc/vertx?
         val value = if (literal.STRING_LITERAL_QUOTE().text.length >= 2) {
             literal.STRING_LITERAL_QUOTE().text.substring(1, literal.STRING_LITERAL_QUOTE().text.length-1)
         } else {
             throw RuntimeException("Invalid literal.")
         }
 
-        return when {
-            literal.LANGTAG() != null -> LangLiteral(value, literal.LANGTAG().text.substring(1))
-            literal.IRIREF() != null -> TypedLiteral(value, handleIRI(literal.IRIREF().text))
-            else -> TypedLiteral(value)
+        if (literal.LANGTAG() != null) {
+            //LangLiteral(value, literal.LANGTAG().text.substring(1))
+            //TODO persist literal
+        } else if (literal.IRIREF() != null) {
+            //TypedLiteral(value, handleIRI(literal.IRIREF().text))
+            //TODO persist literal
+        } else {
+            //TypedLiteral(value)
+            //TODO persist literal
         }
     }
 
