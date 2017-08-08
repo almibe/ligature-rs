@@ -206,7 +206,7 @@ private class TriplesTurtleListener : TurtleListener {
         return if (ctx.ANON() != null) {
             UnlabeledBlankNode()
         } else if (ctx.BLANK_NODE_LABEL() != null) {
-            handleBlankNode(ctx.BLANK_NODE_LABEL().text)
+            TODO("handleBlankNode(ctx.BLANK_NODE_LABEL().text)")
         } else {
             throw RuntimeException("Unexpected blank node - ${ctx.text}")
         }
