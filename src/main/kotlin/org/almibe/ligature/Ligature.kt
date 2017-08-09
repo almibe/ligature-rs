@@ -9,5 +9,5 @@ import org.almibe.ligature.loaders.NTriples
 
 class Ligature {
     private val nTriples = NTriples()
-    fun loadNTriples(text: String): ImmutableNetwork<Object, Predicate> = nTriples.loadNTriples(text)
+    fun loadNTriples(text: String): ImmutableNetwork<Node, Predicate> = nTriples.loadNTriples(text)
 }

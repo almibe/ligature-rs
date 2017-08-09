@@ -5,6 +5,7 @@
 package org.almibe.ligature.loaders
 
 import com.google.common.graph.ImmutableNetwork
+import com.google.common.graph.MutableNetwork
 import com.google.common.graph.NetworkBuilder
 import org.almibe.ligature.*
 import org.almibe.ligature.parser.ntriples.NTriplesBaseListener
@@ -16,7 +17,7 @@ import org.antlr.v4.runtime.tree.ErrorNode
 import org.antlr.v4.runtime.tree.ParseTreeWalker
 
 class NTriples {
-    fun loadNTriples(text: String): ImmutableNetwork<Object, Predicate> {
+    fun loadNTriples(text: String): ImmutableNetwork<Node, Predicate> {
         val stream = CharStreams.fromString(text)
         val lexer = NTriplesLexer(stream)
         val tokens = CommonTokenStream(lexer)
@@ -29,8 +30,8 @@ class NTriples {
 }
 
 private class TriplesNTripleListener : NTriplesBaseListener() {
-    val subgraph = NetworkBuilder.directed().allowsParallelEdges(true)
-            .allowsSelfLoops(true).build<Object, Predicate>()
+    val subgraph: MutableNetwork<Node, Predicate> = NetworkBuilder.directed().allowsParallelEdges(true)
+            .allowsSelfLoops(true).build<Node, Predicate>()
     lateinit var currentTriple: TempTriple
     val blankNodes = HashMap<String, BlankNode>()
 
@@ -47,11 +48,7 @@ private class TriplesNTripleListener : NTriplesBaseListener() {
     }
 
     override fun exitPredicate(ctx: NTriplesParser.PredicateContext) {
-        val predicate: String = when {
-            ctx.IRIREF() != null -> ctx.IRIREF().text
-            else -> throw RuntimeException("Unexpected Predicate Type")
-        }
-        currentTriple.predicate = IRI(predicate)
+        currentTriple.predicate = handleIRI(ctx.IRIREF().text)
     }
 
     override fun exitObject(ctx: NTriplesParser.ObjectContext) {
@@ -69,13 +66,8 @@ private class TriplesNTripleListener : NTriplesBaseListener() {
 
     internal fun handleIRI(iriRef: String): IRI {
         if (iriRef.length > 2) {
-            //val iri = IRI(iriRef.substring(1, (iriRef.length-1)))
-            //TODO if iri exists return existing OVertex
-            //TODO if not then persist iri in this method and return new OVertx
-//            val iriVertx = db.newVertex()
-//            iriVertx.setProperty("iri", iriRef.substring(1, (iriRef.length-1)))
-//            iriVertx.save<OVertex>()
-            return IRI(iriRef.substring(1, (iriRef.length-1)))
+            val iri = IRI(iriRef.substring(1, (iriRef.length-1)))
+            return iri
         } else {
             throw RuntimeException("Invalid iriRef - $iriRef")
         }
@@ -116,6 +108,7 @@ private class TriplesNTripleListener : NTriplesBaseListener() {
     }
 
     fun handleObject(objectVertx: Object) {
+        subgraph.addEdge(currentTriple.subject, objectVertx, currentTriple.predicate)
     }
 
     internal class TempTriple {

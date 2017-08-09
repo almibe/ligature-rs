@@ -4,22 +4,13 @@
 
 package org.almibe.ligature.loaders
 
-import com.google.common.graph.MutableNetwork
-import com.google.common.graph.NetworkBuilder
 import org.almibe.ligature.IRI
 import org.almibe.ligature.Ligature
-import org.almibe.ligature.Object
-import org.almibe.ligature.Predicate
 import spock.lang.Specification
 
 class NTriplesSpec extends Specification {
     final ligature = new Ligature()
     final stringIRI = new IRI("http://www.w3.org/2001/XMLSchema#string")
-
-    MutableNetwork<Object, Predicate> createNetwork() {
-        return NetworkBuilder.directed().allowsParallelEdges(true)
-                .allowsSelfLoops(true).build()
-    }
 
     def "support basic IRI triple"() {
         when:
