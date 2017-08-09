@@ -16,7 +16,6 @@ repositories {
 dependencies {
     compile 'org.antlr:antlr4-runtime:4.7'
     compile 'org.jetbrains.kotlin:kotlin-stdlib:1.1.3-2'
-    compile 'com.orientechnologies:orientdb-core:3.0.0m2'
     compile 'org.almibe:ligature-grammar:0.1.0-SNAPSHOT'
     compile 'com.google.guava:guava:23.0'
     testCompile 'org.antlr:antlr4:4.7'

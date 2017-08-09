@@ -4,22 +4,10 @@
 
 package org.almibe.ligature
 
-import com.orientechnologies.orient.core.db.ODatabasePool
-import com.orientechnologies.orient.core.db.ODatabaseType
-import com.orientechnologies.orient.core.db.OrientDB
-import com.orientechnologies.orient.core.db.OrientDBConfig
-import com.orientechnologies.orient.core.id.ORID
+import com.google.common.graph.ImmutableNetwork
 import org.almibe.ligature.loaders.NTriples
 
-class Ligature(val dbPool: ODatabasePool) {
-    companion object {
-        @JvmStatic fun createInMemoryStore(): ODatabasePool {
-            val db = OrientDB("memory:ligature", OrientDBConfig.defaultConfig())
-            db.create("ligature", ODatabaseType.MEMORY)
-            return ODatabasePool(db, "ligature", "admin", "admin")
-        }
-    }
-
-    private val nTriples = NTriples(dbPool)
-    fun loadNTriples(text: String): Set<ORID> = nTriples.loadNTriples(text)
+class Ligature {
+    private val nTriples = NTriples()
+    fun loadNTriples(text: String): ImmutableNetwork<Object, Predicate> = nTriples.loadNTriples(text)
 }

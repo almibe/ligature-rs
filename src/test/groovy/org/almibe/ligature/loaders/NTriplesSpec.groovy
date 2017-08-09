@@ -4,28 +4,32 @@
 
 package org.almibe.ligature.loaders
 
-import org.almibe.ligature.*
+import com.google.common.graph.MutableNetwork
+import com.google.common.graph.NetworkBuilder
+import org.almibe.ligature.IRI
+import org.almibe.ligature.Ligature
+import org.almibe.ligature.Object
+import org.almibe.ligature.Predicate
 import spock.lang.Specification
 
 class NTriplesSpec extends Specification {
-    final ligature = new Ligature(Ligature.createInMemoryStore())
+    final ligature = new Ligature()
     final stringIRI = new IRI("http://www.w3.org/2001/XMLSchema#string")
+
+    MutableNetwork<Object, Predicate> createNetwork() {
+        return NetworkBuilder.directed().allowsParallelEdges(true)
+                .allowsSelfLoops(true).build()
+    }
 
     def "support basic IRI triple"() {
         when:
-        def orids = ligature.loadNTriples(this.class.getResource("/ntriples/01-basicTriple.nt").text)
-
-        ligature.dbPool.acquire().withCloseable {
-
-        }
-
-//        def expectedResult = new Triple( new IRI("http://example.org/#spiderman"),
-//                new IRI("http://www.perceive.net/schemas/relationship/enemyOf"),
-//                new IRI("http://example.org/#green-goblin"))
-
+        def result = ligature.loadNTriples(this.class.getResource("/ntriples/01-basicTriple.nt").text)
         then:
-        results.size() == 1
-        results == [expectedResult]
+        result.nodes().size() == 2
+        result.edges().size() == 1
+        result.edgeConnectingOrNull(new IRI("http://example.org/#spiderman"),
+                new IRI("http://example.org/#green-goblin")) ==
+                new IRI("http://www.perceive.net/schemas/relationship/enemyOf")
     }
 
 //    def "support multiple IRI triples"() {
