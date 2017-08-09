@@ -4,6 +4,7 @@
 
 package org.almibe.ligature.loaders
 
+import com.google.common.graph.ImmutableNetwork
 import org.almibe.ligature.*
 import org.almibe.ligature.parser.turtle.ModalTurtleLexer
 import org.almibe.ligature.parser.turtle.Turtle
@@ -16,7 +17,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker
 import org.antlr.v4.runtime.tree.TerminalNode
 
 class Turtle {
-    fun parseTurtle(text: String): List<Triple> {
+    fun parseTurtle(text: String): ImmutableNetwork<Object, Predicate> {
         val stream = CharStreams.fromString(text)
         val lexer = ModalTurtleLexer(stream)
         val tokens = CommonTokenStream(lexer)
@@ -25,7 +26,8 @@ class Turtle {
         val walker = ParseTreeWalker()
         val listener = TriplesTurtleListener()
         walker.walk(listener, parser.turtleDoc())
-        return listener.triples
+        TODO()
+        //return listener.triples
     }
 }
 
@@ -45,7 +47,7 @@ private class TurtleStatement {
     var blankNodePropertyList: BlankNodePropertyList? = null
     val predicateObjectList = mutableListOf<Pair<IRI, MutableList<Object>>>()
 
-    fun computeTriples(): List<Triple> {
+    fun computeTriples(): List<*> {
         if (subjects.size == 1) {
             return predicateObjectList.map { Triple(subjects.first(), it.first, it.second.first()) }
         } else {
@@ -55,7 +57,7 @@ private class TurtleStatement {
 }
 
 private class TriplesTurtleListener : TurtleListener {
-    val triples = mutableListOf<Triple>()
+    //val triples = mutableListOf<>()
     val prefixes: MutableMap<String, String> = mutableMapOf()
     lateinit var base: String
     var currentStatement: TurtleStatement = TurtleStatement()
@@ -93,7 +95,7 @@ private class TriplesTurtleListener : TurtleListener {
     }
 
     override fun exitTriples(ctx: Turtle.TriplesContext) {
-        triples.addAll(currentStatement.computeTriples())
+        //triples.addAll(currentStatement.computeTriples())
     }
 
     override fun enterTriples(ctx: Turtle.TriplesContext) {

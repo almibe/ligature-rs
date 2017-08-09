@@ -19,9 +19,9 @@ class NTriplesSpec extends Specification {
 
         }
 
-        def expectedResult = new Triple( new IRI("http://example.org/#spiderman"),
-                new IRI("http://www.perceive.net/schemas/relationship/enemyOf"),
-                new IRI("http://example.org/#green-goblin"))
+//        def expectedResult = new Triple( new IRI("http://example.org/#spiderman"),
+//                new IRI("http://www.perceive.net/schemas/relationship/enemyOf"),
+//                new IRI("http://example.org/#green-goblin"))
 
         then:
         results.size() == 1
