@@ -4,6 +4,9 @@
 
 package org.almibe.ligature
 
+import java.util.*
+import java.util.concurrent.ConcurrentHashMap
+
 interface Subject
 interface Predicate
 interface Object
@@ -19,8 +22,19 @@ data class TypedLiteral(override val value: String,
                         val datatypeIRI: IRI = IRI("http://www.w3.org/2001/XMLSchema#string")) : Literal
 
 class Graph {
+    //for now just using a single ConcurrentHashMap for this, later it might be better to create a few different maps
+    val statements: ConcurrentHashMap<Subject, MutableSet<Pair<Predicate, Object>>> = ConcurrentHashMap()
+
     fun addStatement(subject: Subject, predicate: Predicate, `object`: Object) {
-        TODO()
+        if (statements.containsKey(subject)) {
+            statements[subject]!!.add(Pair(predicate, `object`))
+        } else {
+            val newSet = Collections.newSetFromMap(ConcurrentHashMap<Pair<Predicate, Object>, Boolean>())
+            val pair = Pair(predicate, `object`)
+            newSet.add(pair)
+            //add new value OR if value has been set since last checked add new pair
+            statements.putIfAbsent(subject, newSet)?.add(pair)
+        }
     }
 
     fun getStatements(subject: Subject): Set<Pair<Predicate, Object>> {
