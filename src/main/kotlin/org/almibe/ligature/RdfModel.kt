@@ -38,26 +38,58 @@ class Graph {
     }
 
     fun getStatements(subject: Subject): Set<Pair<Predicate, Object>> {
-        TODO()
+        return statements[subject] ?: setOf()
     }
 
     fun getPredicates(): Set<Predicate> {
-        TODO()
+        val results = mutableSetOf<Predicate>()
+        statements.forEach {
+            it.value.forEach { (predicate) ->
+                results.add(predicate)
+            }
+        }
+        return results
     }
 
     fun getSubjects(): Set<Subject> {
-        TODO()
+        return statements.keys
     }
 
     fun getObjects(): Set<Object> {
-        TODO()
+        val results = mutableSetOf<Object>()
+        statements.forEach {
+            it.value.forEach { (_, `object`) ->
+                results.add(`object`)
+            }
+        }
+        return results
     }
 
     fun getIRIs(): Set<IRI> {
-        TODO()
+        val results = mutableSetOf<IRI>()
+        statements.forEach {
+            if (it.key is IRI) {
+                results.add(it.key as IRI)
+            }
+            it.value.forEach { (predicate, `object`) ->
+                results.add(predicate as IRI)
+                if (`object` is IRI) {
+                    results.add(`object`)
+                }
+            }
+        }
+        return results
     }
 
     fun getLiterals(): Set<Literal> {
-        TODO()
+        val results = mutableSetOf<Literal>()
+        statements.forEach {
+            it.value.forEach { (_, `object`) ->
+                if (`object` is Literal) {
+                    results.add(`object`)
+                }
+            }
+        }
+        return results
     }
 }

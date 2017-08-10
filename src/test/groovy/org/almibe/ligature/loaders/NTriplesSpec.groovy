@@ -11,9 +11,9 @@ import spock.lang.Specification
 class NTriplesSpec extends Specification {
     def ligature = new Ligature()
     final stringIRI = new IRI("http://www.w3.org/2001/XMLSchema#string")
-    final spiderMan = new IRI("http://example.org/#spiderman")
-    final greenGoblin = new IRI("http://example.org/#green-goblin")
-    final enemyOf = new IRI("http://www.perceive.net/schemas/relationship/enemyOf")
+    static final spiderMan = new IRI("http://example.org/#spiderman")
+    static final greenGoblin = new IRI("http://example.org/#green-goblin")
+    static final enemyOf = new IRI("http://www.perceive.net/schemas/relationship/enemyOf")
 
     def "support basic IRI triple"() {
         given:
