@@ -4,9 +4,6 @@
 
 package org.almibe.ligature.loaders
 
-import com.google.common.graph.ImmutableNetwork
-import com.google.common.graph.MutableNetwork
-import com.google.common.graph.NetworkBuilder
 import org.almibe.ligature.*
 import org.almibe.ligature.parser.ntriples.NTriplesBaseListener
 import org.almibe.ligature.parser.ntriples.NTriplesLexer
@@ -17,7 +14,7 @@ import org.antlr.v4.runtime.tree.ErrorNode
 import org.antlr.v4.runtime.tree.ParseTreeWalker
 
 class NTriples {
-    fun loadNTriples(text: String): ImmutableNetwork<Node, Predicate> {
+    fun loadNTriples(text: String): Graph {
         val stream = CharStreams.fromString(text)
         val lexer = NTriplesLexer(stream)
         val tokens = CommonTokenStream(lexer)
@@ -25,13 +22,12 @@ class NTriples {
         val walker = ParseTreeWalker()
         val listener = TriplesNTripleListener()
         walker.walk(listener, parser.ntriplesDoc())
-        return ImmutableNetwork.copyOf(listener.subgraph)
+        return listener.subgraph
     }
 }
 
 private class TriplesNTripleListener : NTriplesBaseListener() {
-    val subgraph: MutableNetwork<Node, Predicate> = NetworkBuilder.directed().allowsParallelEdges(true)
-            .allowsSelfLoops(true).build<Node, Predicate>()
+    val subgraph = Graph()
     lateinit var currentTriple: TempTriple
     val blankNodes = HashMap<String, BlankNode>()
 
@@ -108,7 +104,7 @@ private class TriplesNTripleListener : NTriplesBaseListener() {
     }
 
     fun handleObject(objectVertx: Object) {
-        subgraph.addEdge(currentTriple.subject, objectVertx, currentTriple.predicate)
+        subgraph.addStatement(currentTriple.subject, currentTriple.predicate, objectVertx)
     }
 
     internal class TempTriple {

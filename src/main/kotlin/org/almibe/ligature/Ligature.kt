@@ -4,10 +4,9 @@
 
 package org.almibe.ligature
 
-import com.google.common.graph.ImmutableNetwork
 import org.almibe.ligature.loaders.NTriples
 
 class Ligature {
     private val nTriples = NTriples()
-    fun loadNTriples(text: String): ImmutableNetwork<Node, Predicate> = nTriples.loadNTriples(text)
+    fun loadNTriples(text: String): Graph = nTriples.loadNTriples(text)
 }

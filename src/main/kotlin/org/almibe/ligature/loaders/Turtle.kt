@@ -4,7 +4,6 @@
 
 package org.almibe.ligature.loaders
 
-import com.google.common.graph.ImmutableNetwork
 import org.almibe.ligature.*
 import org.almibe.ligature.parser.turtle.ModalTurtleLexer
 import org.almibe.ligature.parser.turtle.Turtle
@@ -17,7 +16,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker
 import org.antlr.v4.runtime.tree.TerminalNode
 
 class Turtle {
-    fun parseTurtle(text: String): ImmutableNetwork<Object, Predicate> {
+    fun parseTurtle(text: String): Graph {
         val stream = CharStreams.fromString(text)
         val lexer = ModalTurtleLexer(stream)
         val tokens = CommonTokenStream(lexer)
