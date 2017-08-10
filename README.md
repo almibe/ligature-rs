@@ -7,7 +7,7 @@ The goals of this project are as follows:
 * Support the N-Triples (http://www.w3.org/TR/n-triples/) and 
 Turtle (https://www.w3.org/TR/turtle/) specifications with ANTRL grammars
 * Provide simple Kotlin api for working with library
-* Express graph data using Google Guava's network implementation
+* Work with data in memory by default by supply an api for plugging in persistence layer
 * Have extensive example based tests written in Spock (http://spockframework.org/)
 * Support OSGi
 
