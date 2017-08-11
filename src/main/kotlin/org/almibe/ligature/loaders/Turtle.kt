@@ -16,7 +16,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker
 import org.antlr.v4.runtime.tree.TerminalNode
 
 class Turtle {
-    fun parseTurtle(text: String): Graph {
+    fun parseTurtle(text: String) {
         val stream = CharStreams.fromString(text)
         val lexer = ModalTurtleLexer(stream)
         val tokens = CommonTokenStream(lexer)
@@ -25,8 +25,6 @@ class Turtle {
         val walker = ParseTreeWalker()
         val listener = TriplesTurtleListener()
         walker.walk(listener, parser.turtleDoc())
-        TODO()
-        //return listener.triples
     }
 }
 

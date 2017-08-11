@@ -4,8 +4,8 @@ import kotlin.Pair
 import org.almibe.ligature.loaders.NTriplesSpec
 import spock.lang.Specification
 
-class GraphSpec extends Specification {
-    def graph = new Graph()
+class InMemoryModelSpec extends Specification {
+    def graph = new InMemoryModel()
 
     def "test adding statement and checking subject"() {
         given:

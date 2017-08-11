@@ -4,12 +4,16 @@
 
 package org.almibe.ligature.loaders
 
+import kotlin.Pair
 import org.almibe.ligature.IRI
+import org.almibe.ligature.InMemoryModel
 import org.almibe.ligature.Ligature
+import org.almibe.ligature.Object
+import org.almibe.ligature.Predicate
 import spock.lang.Specification
 
 class NTriplesSpec extends Specification {
-    def ligature = new Ligature()
+    def ligature = new Ligature(new InMemoryModel())
     final stringIRI = new IRI("http://www.w3.org/2001/XMLSchema#string")
     static final spiderMan = new IRI("http://example.org/#spiderman")
     static final greenGoblin = new IRI("http://example.org/#green-goblin")
@@ -17,30 +21,30 @@ class NTriplesSpec extends Specification {
 
     def "support basic IRI triple"() {
         given:
-        def result = ligature.loadNTriples(this.class.getResource("/ntriples/01-basicTriple.nt").text)
+        ligature.loadNTriples(this.class.getResource("/ntriples/01-basicTriple.nt").text)
         expect:
-        result.edgeConnectingOrNull(spiderMan, greenGoblin) == enemyOf
-        result.nodes().size() == 2
-        result.edges().size() == 1
+        ligature.model.getStatements(spiderMan) == [new Pair<Predicate, Object>(enemyOf, greenGoblin)].toSet()
+        ligature.model.subjects.size() == 1
+        ligature.model.IRIs.size() == 3
     }
 
     def "support multiple IRI triples"() {
         given:
-        def result = ligature.loadNTriples(this.class.getResource("/ntriples/02-multipleIRITriples.nt").text)
+        ligature.loadNTriples(this.class.getResource("/ntriples/02-multipleIRITriples.nt").text)
         expect:
-        result.edgeConnectingOrNull(spiderMan, greenGoblin) == enemyOf
-        result.edgeConnectingOrNull(spiderMan, new IRI("http://example.org/#black-cat")) == enemyOf
-        result.nodes().size() == 3
-        result.edges().size() == 2
+        ligature.model.getStatements(spiderMan) == [new Pair(enemyOf, greenGoblin), new Pair(enemyOf, new IRI("http://example.org/#black-cat"))].toSet()
+        ligature.model.subjects.size() == 1
+        ligature.model.objects.size() == 2
+        ligature.model.predicates.size() == 1
     }
 
     def "support beginning of line and end of line comments"() {
         given:
-        def result = ligature.loadNTriples(this.class.getResource("/ntriples/03-comments.nt").text)
+        ligature.loadNTriples(this.class.getResource("/ntriples/03-comments.nt").text)
         expect:
-        result.edgeConnectingOrNull(spiderMan, greenGoblin) == enemyOf
-        result.nodes().size() == 2
-        result.edges().size() == 1
+        ligature.model.getStatements(spiderMan) == [new Pair(enemyOf, greenGoblin)].toSet()
+        ligature.model.subjects.size() == 1
+        ligature.model.IRIs.size() == 3
     }
 
 //    def "support literals with languages and types"() {

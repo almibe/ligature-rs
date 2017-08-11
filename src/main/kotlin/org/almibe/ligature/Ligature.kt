@@ -6,7 +6,7 @@ package org.almibe.ligature
 
 import org.almibe.ligature.loaders.NTriples
 
-class Ligature {
-    private val nTriples = NTriples()
-    fun loadNTriples(text: String): Graph = nTriples.loadNTriples(text)
+class Ligature(val model: Model) {
+    private val nTriples = NTriples(model)
+    fun loadNTriples(text: String) = nTriples.loadNTriples(text)
 }

@@ -13,21 +13,19 @@ import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.tree.ErrorNode
 import org.antlr.v4.runtime.tree.ParseTreeWalker
 
-class NTriples {
-    fun loadNTriples(text: String): Graph {
+class NTriples(val model: Model) {
+    fun loadNTriples(text: String) {
         val stream = CharStreams.fromString(text)
         val lexer = NTriplesLexer(stream)
         val tokens = CommonTokenStream(lexer)
         val parser = NTriplesParser(tokens)
         val walker = ParseTreeWalker()
-        val listener = TriplesNTripleListener()
+        val listener = TriplesNTripleListener(model)
         walker.walk(listener, parser.ntriplesDoc())
-        return listener.subgraph
     }
 }
 
-private class TriplesNTripleListener : NTriplesBaseListener() {
-    val subgraph = Graph()
+private class TriplesNTripleListener(val model: Model) : NTriplesBaseListener() {
     lateinit var currentTriple: TempTriple
     val blankNodes = HashMap<String, BlankNode>()
 
@@ -104,7 +102,7 @@ private class TriplesNTripleListener : NTriplesBaseListener() {
     }
 
     fun handleObject(objectVertx: Object) {
-        subgraph.addStatement(currentTriple.subject, currentTriple.predicate, objectVertx)
+        model.addStatement(currentTriple.subject, currentTriple.predicate, objectVertx)
     }
 
     internal class TempTriple {

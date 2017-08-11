@@ -21,11 +21,21 @@ data class LangLiteral(override val value: String, val langTag: String) : Litera
 data class TypedLiteral(override val value: String,
                         val datatypeIRI: IRI = IRI("http://www.w3.org/2001/XMLSchema#string")) : Literal
 
-class Graph {
+interface Model {
+    fun addStatement(subject: Subject, predicate: Predicate, `object`: Object)
+    fun getStatements(subject: Subject): Set<Pair<Predicate, Object>>
+    fun getPredicates(): Set<Predicate>
+    fun getSubjects(): Set<Subject>
+    fun getObjects(): Set<Object>
+    fun getIRIs(): Set<IRI>
+    fun getLiterals(): Set<Literal>
+}
+
+class InMemoryModel: Model {
     //for now just using a single ConcurrentHashMap for this, later it might be better to create a few different maps
     val statements: ConcurrentHashMap<Subject, MutableSet<Pair<Predicate, Object>>> = ConcurrentHashMap()
 
-    fun addStatement(subject: Subject, predicate: Predicate, `object`: Object) {
+    override fun addStatement(subject: Subject, predicate: Predicate, `object`: Object) {
         if (statements.containsKey(subject)) {
             statements[subject]!!.add(Pair(predicate, `object`))
         } else {
@@ -37,11 +47,11 @@ class Graph {
         }
     }
 
-    fun getStatements(subject: Subject): Set<Pair<Predicate, Object>> {
+    override fun getStatements(subject: Subject): Set<Pair<Predicate, Object>> {
         return statements[subject] ?: setOf()
     }
 
-    fun getPredicates(): Set<Predicate> {
+    override fun getPredicates(): Set<Predicate> {
         val results = mutableSetOf<Predicate>()
         statements.forEach {
             it.value.forEach { (predicate) ->
@@ -51,11 +61,11 @@ class Graph {
         return results
     }
 
-    fun getSubjects(): Set<Subject> {
+    override fun getSubjects(): Set<Subject> {
         return statements.keys
     }
 
-    fun getObjects(): Set<Object> {
+    override fun getObjects(): Set<Object> {
         val results = mutableSetOf<Object>()
         statements.forEach {
             it.value.forEach { (_, `object`) ->
@@ -65,7 +75,7 @@ class Graph {
         return results
     }
 
-    fun getIRIs(): Set<IRI> {
+    override fun getIRIs(): Set<IRI> {
         val results = mutableSetOf<IRI>()
         statements.forEach {
             if (it.key is IRI) {
@@ -81,7 +91,7 @@ class Graph {
         return results
     }
 
-    fun getLiterals(): Set<Literal> {
+    override fun getLiterals(): Set<Literal> {
         val results = mutableSetOf<Literal>()
         statements.forEach {
             it.value.forEach { (_, `object`) ->
