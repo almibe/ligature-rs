@@ -90,9 +90,13 @@ class NTriplesSpec extends Specification {
         ligature.subjects.size() == 4
         ligature.predicates.size() == 1
         ligature.objects.size() == 4
-        ligature.statementsFor(new BlankNode("bob_1")) == [new Pair(new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("alice_2"))].toSet()
-        ligature.statementsFor(new BlankNode("alice_2")) == [new Pair(new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("bob_1"))].toSet()
-        ligature.statementsFor(new BlankNode("bob_3")) == [new Pair(new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("alice_4"))].toSet()
-        ligature.statementsFor(new BlankNode("alice_4")) == [new Pair(new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("bob_3"))].toSet()
+        ligature.statementsFor(new BlankNode("bob_1")) == [
+                new Pair(new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("alice_2"))].toSet()
+        ligature.statementsFor(new BlankNode("alice_2")) == [
+                new Pair(new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("bob_1"))].toSet()
+        ligature.statementsFor(new BlankNode("bob_3")) == [
+                new Pair(new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("alice_4"))].toSet()
+        ligature.statementsFor(new BlankNode("alice_4")) == [
+                new Pair(new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("bob_3"))].toSet()
     }
 }

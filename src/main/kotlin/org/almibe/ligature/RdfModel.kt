@@ -44,24 +44,34 @@ class InMemoryModel: Model {
      * is given a unique name and no blank node merging is attempted.
      */
     override fun addModel(model: ReadOnlyModel) {
+        val blankNodeMap = mutableMapOf<BlankNode, BlankNode>()
+
         model.getSubjects().forEach { subject ->
-            val finalSubject = checkSubject(subject)
+            val finalSubject = when (subject) {
+                is BlankNode -> createUniqueBlankNode(subject, blankNodeMap)
+                else -> subject
+            }
+
             model.statementsFor(subject).forEach {
-                addStatement(finalSubject, it.first, it.second)
+                val finalObject = when (it.second) {
+                    is BlankNode -> createUniqueBlankNode(it.second as BlankNode, blankNodeMap)
+                    else -> it.second
+                }
+                addStatement(finalSubject, it.first, finalObject)
             }
         }
     }
 
-    private fun checkSubject(subject: Subject): Subject {
-        if (subject is BlankNode) {
-            while (true) {
-                val tempBlankNode = BlankNode("${subject.label}_${blankNodeCounter.incrementAndGet()}")
-                if (!statements.containsKey(tempBlankNode)) {
-                    return tempBlankNode
-                }
+    private fun createUniqueBlankNode(subject: BlankNode, blankNodeMap: MutableMap<BlankNode, BlankNode>): BlankNode {
+        if (blankNodeMap.containsKey(subject)) {
+            return blankNodeMap[subject]!!
+        }
+        while (true) {
+            val tempBlankNode = BlankNode("${subject.label}_${blankNodeCounter.incrementAndGet()}")
+            if (!statements.containsKey(tempBlankNode)) {
+                blankNodeMap[subject] = tempBlankNode
+                return tempBlankNode
             }
-        } else {
-            return subject
         }
     }
 
