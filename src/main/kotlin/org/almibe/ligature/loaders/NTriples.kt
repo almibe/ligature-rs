@@ -68,24 +68,17 @@ private class TriplesNTripleListener(val model: Model) : NTriplesBaseListener() 
     }
 
     internal fun handleLiteral(literal: NTriplesParser.LiteralContext) {
-        //TODO figure out how to store literals, does OrientDB handle maps in properties
-        //TODO or do I need to use an embedded doc/vertx?
         val value = if (literal.STRING_LITERAL_QUOTE().text.length >= 2) {
             literal.STRING_LITERAL_QUOTE().text.substring(1, literal.STRING_LITERAL_QUOTE().text.length-1)
         } else {
             throw RuntimeException("Invalid literal.")
         }
-
-        if (literal.LANGTAG() != null) {
-            //LangLiteral(value, literal.LANGTAG().text.substring(1))
-            //TODO persist literal
-        } else if (literal.IRIREF() != null) {
-            //TypedLiteral(value, handleIRI(literal.IRIREF().text))
-            //TODO persist literal
-        } else {
-            //TypedLiteral(value)
-            //TODO persist literal
+        val literal = when {
+            literal.LANGTAG() != null -> LangLiteral(value, literal.LANGTAG().text.substring(1))
+            literal.IRIREF() != null -> TypedLiteral(value, handleIRI(literal.IRIREF().text))
+            else -> TypedLiteral(value)
         }
+        model.addStatement(currentTriple.subject, currentTriple.predicate, literal)
     }
 
     fun handleBlankNode(blankNode: String): BlankNode {
