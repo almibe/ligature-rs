@@ -45,7 +45,7 @@ private class TurtleStatement {
     var blankNodePropertyList: BlankNodePropertyList? = null
     val predicateObjectList = mutableListOf<Pair<IRI, MutableList<Object>>>()
 
-    fun computeTriples(): List<*> {
+    fun computeTriples(): List<Triple<Subject, Predicate, Object>> {
         if (subjects.size == 1) {
             return predicateObjectList.map { Triple(subjects.first(), it.first, it.second.first()) }
         } else {
@@ -93,7 +93,9 @@ private class TriplesTurtleListener : TurtleListener {
     }
 
     override fun exitTriples(ctx: Turtle.TriplesContext) {
-        //triples.addAll(currentStatement.computeTriples())
+        currentStatement.computeTriples().forEach { (subject, predicate, `object`) ->
+            model.addStatement(subject, predicate, `object`)
+        }
     }
 
     override fun enterTriples(ctx: Turtle.TriplesContext) {
