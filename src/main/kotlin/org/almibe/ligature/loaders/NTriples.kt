@@ -14,7 +14,7 @@ import org.antlr.v4.runtime.tree.ErrorNode
 import org.antlr.v4.runtime.tree.ParseTreeWalker
 
 class NTriples {
-    fun loadNTriples(text: String): Model {
+    fun loadNTriples(text: String): ReadOnlyModel {
         val stream = CharStreams.fromString(text)
         val lexer = NTriplesLexer(stream)
         val tokens = CommonTokenStream(lexer)

@@ -20,16 +20,18 @@ data class LangLiteral(override val value: String, val langTag: String) : Litera
 data class TypedLiteral(override val value: String,
                         val datatypeIRI: IRI = IRI("http://www.w3.org/2001/XMLSchema#string")) : Literal
 
-//TODO there should probably be a read only Model
-interface Model {
-    fun addModel(model: Model)
-    fun addStatement(subject: Subject, predicate: Predicate, `object`: Object)
+interface ReadOnlyModel {
     fun statementsFor(subject: Subject): Set<Pair<Predicate, Object>>
     fun getPredicates(): Set<Predicate>
     fun getSubjects(): Set<Subject>
     fun getObjects(): Set<Object>
     fun getIRIs(): Set<IRI>
     fun getLiterals(): Set<Literal>
+}
+
+interface Model: ReadOnlyModel {
+    fun addModel(model: ReadOnlyModel)
+    fun addStatement(subject: Subject, predicate: Predicate, `object`: Object)
 }
 
 class InMemoryModel: Model {
@@ -41,7 +43,7 @@ class InMemoryModel: Model {
      * Adds the contents of the passed in model to this model.  Blank nodes from the model that is passed in
      * are given unique names and no blank node merging is attempted.
      */
-    override fun addModel(model: Model) {
+    override fun addModel(model: ReadOnlyModel) {
         TODO()
     }
 
