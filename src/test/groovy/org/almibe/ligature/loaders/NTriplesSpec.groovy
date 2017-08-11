@@ -70,18 +70,29 @@ class NTriplesSpec extends Specification {
 
     def "support blank nodes"() {
         given:
+        def nTriples = new NTriples()
+        def model = nTriples.loadNTriples(this.class.getResource("/ntriples/05-blankNodes.nt").text)
+        expect:
+        model.subjects.size() == 2
+        model.predicates.size() == 1
+        model.objects.size() == 2
+        model.statementsFor(new BlankNode("bob")) == [
+                new Pair(new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("alice"))].toSet()
+        model.statementsFor(new BlankNode("alice")) == [
+                new Pair(new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("bob"))].toSet()
+    }
+
+    def "make sure blank nodes are unique across document loads"() {
+        given:
+        ligature.loadNTriples(this.class.getResource("/ntriples/05-blankNodes.nt").text)
         ligature.loadNTriples(this.class.getResource("/ntriples/05-blankNodes.nt").text)
         expect:
-        ligature.subjects.size() == 2
-
-//        def expectedResult1 = new Triple(, new IRI("http://xmlns.com/foaf/0.1/knows"), new LabeledBlankNode("bob"))
-//        def expectedResult2 = new Triple(new LabeledBlankNode("bob"), new IRI("http://xmlns.com/foaf/0.1/knows"), new LabeledBlankNode("alice"))
+        ligature.subjects.size() == 4
+        ligature.predicates.size() == 1
+        ligature.objects.size() == 4
+        ligature.statementsFor(new BlankNode("bob_1")) == [new Pair(new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("alice_2"))].toSet()
+        ligature.statementsFor(new BlankNode("alice_2")) == [new Pair(new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("bob_1"))].toSet()
+        ligature.statementsFor(new BlankNode("bob_3")) == [new Pair(new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("alice_4"))].toSet()
+        ligature.statementsFor(new BlankNode("alice_4")) == [new Pair(new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("bob_3"))].toSet()
     }
-//
-//    def "make sure blank nodes are unique across document loads"() {
-//        given:
-//
-//        expect:
-//
-//    }
 }
