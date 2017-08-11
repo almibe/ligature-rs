@@ -13,19 +13,21 @@ import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.tree.ErrorNode
 import org.antlr.v4.runtime.tree.ParseTreeWalker
 
-class NTriples(val model: Model) {
-    fun loadNTriples(text: String) {
+class NTriples {
+    fun loadNTriples(text: String): Model {
         val stream = CharStreams.fromString(text)
         val lexer = NTriplesLexer(stream)
         val tokens = CommonTokenStream(lexer)
         val parser = NTriplesParser(tokens)
         val walker = ParseTreeWalker()
-        val listener = TriplesNTripleListener(model)
+        val listener = TriplesNTripleListener()
         walker.walk(listener, parser.ntriplesDoc())
+        return listener.model
     }
 }
 
-private class TriplesNTripleListener(val model: Model) : NTriplesBaseListener() {
+private class TriplesNTripleListener : NTriplesBaseListener() {
+    val model = InMemoryModel()
     lateinit var currentTriple: TempTriple
     val blankNodes = HashMap<String, BlankNode>()
 
@@ -87,7 +89,9 @@ private class TriplesNTripleListener(val model: Model) : NTriplesBaseListener() 
             if (blankNodes.containsKey(blankNodeLabel)) {
                 return blankNodes[blankNodeLabel]!!
             } else {
-                TODO("create new blank node and return after adding to blankNodes map")
+                val newBlankNode = BlankNode(blankNodeLabel)
+                blankNodes[blankNodeLabel] = newBlankNode
+                return newBlankNode
             }
         } else {
             throw RuntimeException("Invalid blank node label - $blankNode")

@@ -6,22 +6,23 @@ package org.almibe.ligature
 
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
 interface Subject
 interface Predicate
 interface Object
 
 data class IRI(val value: String) : Subject, Predicate, Object
-interface BlankNode : Subject, Object
-data class LabeledBlankNode(val label: String) : BlankNode
-class UnlabeledBlankNode: BlankNode
+data class BlankNode(val label: String) : Subject, Object
 
 interface Literal : Object { val value: String}
 data class LangLiteral(override val value: String, val langTag: String) : Literal
 data class TypedLiteral(override val value: String,
                         val datatypeIRI: IRI = IRI("http://www.w3.org/2001/XMLSchema#string")) : Literal
 
+//TODO there should probably be a read only Model
 interface Model {
+    fun addModel(model: Model)
     fun addStatement(subject: Subject, predicate: Predicate, `object`: Object)
     fun statementsFor(subject: Subject): Set<Pair<Predicate, Object>>
     fun getPredicates(): Set<Predicate>
@@ -34,7 +35,19 @@ interface Model {
 class InMemoryModel: Model {
     //for now just using a single ConcurrentHashMap for this, later it might be better to create a few different maps
     val statements: ConcurrentHashMap<Subject, MutableSet<Pair<Predicate, Object>>> = ConcurrentHashMap()
+    val blankNodeCounter = AtomicInteger()
 
+    /**
+     * Adds the contents of the passed in model to this model.  Blank nodes from the model that is passed in
+     * are given unique names and no blank node merging is attempted.
+     */
+    override fun addModel(model: Model) {
+        TODO()
+    }
+
+    /**
+     * Add a specified statement to the current model.  Blank nodes that are added will use the name that is given.
+     */
     override fun addStatement(subject: Subject, predicate: Predicate, `object`: Object) {
         if (statements.containsKey(subject)) {
             statements[subject]!!.add(Pair(predicate, `object`))

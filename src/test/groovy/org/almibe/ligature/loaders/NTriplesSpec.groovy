@@ -68,14 +68,15 @@ class NTriplesSpec extends Specification {
                 new TypedLiteral("1.663E-4", new IRI("http://www.w3.org/2001/XMLSchema#double"))].toSet()
     }
 
-//    def "support blank nodes"() {
-//        given:
-//        def expectedResult1 = new Triple(new LabeledBlankNode("alice"), new IRI("http://xmlns.com/foaf/0.1/knows"), new LabeledBlankNode("bob"))
+    def "support blank nodes"() {
+        given:
+        ligature.loadNTriples(this.class.getResource("/ntriples/05-blankNodes.nt").text)
+        expect:
+        ligature.subjects.size() == 2
+
+//        def expectedResult1 = new Triple(, new IRI("http://xmlns.com/foaf/0.1/knows"), new LabeledBlankNode("bob"))
 //        def expectedResult2 = new Triple(new LabeledBlankNode("bob"), new IRI("http://xmlns.com/foaf/0.1/knows"), new LabeledBlankNode("alice"))
-//        def results = ligature.parseNTriples(this.class.getResource("/ntriples/05-blankNodes.nt").text)
-//        expect:
-//        results == [expectedResult1, expectedResult2]
-//    }
+    }
 //
 //    def "make sure blank nodes are unique across document loads"() {
 //        given:

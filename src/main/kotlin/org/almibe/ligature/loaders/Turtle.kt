@@ -203,7 +203,8 @@ private class TriplesTurtleListener : TurtleListener {
 
     internal fun handleTurtleBlankNode(ctx: Turtle.BlankNodeContext): BlankNode {
         return if (ctx.ANON() != null) {
-            UnlabeledBlankNode()
+            TODO()
+            //UnlabeledBlankNode()
         } else if (ctx.BLANK_NODE_LABEL() != null) {
             TODO("handleBlankNode(ctx.BLANK_NODE_LABEL().text)")
         } else {
