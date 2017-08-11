@@ -40,11 +40,29 @@ class InMemoryModel: Model {
     val blankNodeCounter = AtomicInteger()
 
     /**
-     * Adds the contents of the passed in model to this model.  Blank nodes from the model that is passed in
-     * are given unique names and no blank node merging is attempted.
+     * Adds the contents of the passed in model to this model.  Every blank node from the model that is passed in
+     * is given a unique name and no blank node merging is attempted.
      */
     override fun addModel(model: ReadOnlyModel) {
-        TODO()
+        model.getSubjects().forEach { subject ->
+            val finalSubject = checkSubject(subject)
+            model.statementsFor(subject).forEach {
+                addStatement(finalSubject, it.first, it.second)
+            }
+        }
+    }
+
+    private fun checkSubject(subject: Subject): Subject {
+        if (subject is BlankNode) {
+            while (true) {
+                val tempBlankNode = BlankNode("${subject.label}_${blankNodeCounter.incrementAndGet()}")
+                if (!statements.containsKey(tempBlankNode)) {
+                    return tempBlankNode
+                }
+            }
+        } else {
+            return subject
+        }
     }
 
     /**
