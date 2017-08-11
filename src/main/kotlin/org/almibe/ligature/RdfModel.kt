@@ -23,7 +23,7 @@ data class TypedLiteral(override val value: String,
 
 interface Model {
     fun addStatement(subject: Subject, predicate: Predicate, `object`: Object)
-    fun getStatements(subject: Subject): Set<Pair<Predicate, Object>>
+    fun statementsFor(subject: Subject): Set<Pair<Predicate, Object>>
     fun getPredicates(): Set<Predicate>
     fun getSubjects(): Set<Subject>
     fun getObjects(): Set<Object>
@@ -47,7 +47,7 @@ class InMemoryModel: Model {
         }
     }
 
-    override fun getStatements(subject: Subject): Set<Pair<Predicate, Object>> {
+    override fun statementsFor(subject: Subject): Set<Pair<Predicate, Object>> {
         return statements[subject] ?: setOf()
     }
 
