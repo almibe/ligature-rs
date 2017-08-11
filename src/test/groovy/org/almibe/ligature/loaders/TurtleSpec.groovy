@@ -4,19 +4,22 @@
 
 package org.almibe.ligature.loaders
 
+import kotlin.Pair
+import org.almibe.ligature.IRI
+import org.almibe.ligature.InMemoryModel
+import org.almibe.ligature.Ligature
+import spock.lang.Specification
+
 //import org.almibe.ligature.LabeledBlankNode
-//import org.almibe.ligature.IRI
 //import org.almibe.ligature.LangLiteral
 //import org.almibe.ligature.Triple
 //import org.almibe.ligature.TypedLiteral
-import spock.lang.Specification
-
 class TurtleSpec extends Specification {
-//    final def turtle = new Turtle()
-//    final def xsd = "http://www.w3.org/2001/XMLSchema#"
-//    final def foafKnows = new IRI("http://xmlns.com/foaf/0.1/knows")
-//    final def rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-//
+    def ligature = new Ligature(new InMemoryModel())
+    final def xsd = "http://www.w3.org/2001/XMLSchema#"
+    final def foafKnows = new IRI("http://xmlns.com/foaf/0.1/knows")
+    final def rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+
 //    final def spidermanEnemy = new Triple(new IRI("http://example.org/#spiderman"),
 //        new IRI("http://www.perceive.net/schemas/relationship/enemyOf"), new IRI("http://example.org/#green-goblin"))
 //
@@ -25,23 +28,27 @@ class TurtleSpec extends Specification {
 //
 //    final def spidermanNameRu = new Triple(new IRI("http://example.org/#spiderman"),
 //        new IRI("http://xmlns.com/foaf/0.1/name"), new LangLiteral("Человек-паук", "ru"))
-//    final def stringIRI = new IRI("http://www.w3.org/2001/XMLSchema#string")
-//
-//    boolean compareLists(List results, List expectedResults) {
-//        assert results.size() == expectedResults.size()
-//        results.eachWithIndex{ def entry, int i ->
-//            assert entry == expectedResults[i]
-//        }
-//    }
-//
-//    final def "support basic IRI triple"() {
-//        given:
-//        final def expectedResults = [spidermanEnemy]
-//        final def results = turtle.parseTurtle(this.class.getResource("/turtle/01-basicTriple.ttl").text)
-//        expect:
-//        compareLists(results, expectedResults)
-//    }
-//
+    final def stringIRI = new IRI("http://www.w3.org/2001/XMLSchema#string")
+
+    boolean compareLists(List results, List expectedResults) {
+        assert results.size() == expectedResults.size()
+        results.eachWithIndex{ def entry, int i ->
+            assert entry == expectedResults[i]
+        }
+    }
+
+    final def "support basic IRI triple"() {
+        given:
+        ligature.loadTurtle(this.class.getResource("/turtle/01-basicTriple.ttl").text)
+        expect:
+        ligature.statementsFor(NTriplesSpec.spiderMan) == [new Pair(NTriplesSpec.enemyOf, NTriplesSpec.greenGoblin)].toSet()
+        ligature.subjects.size() == 1
+        ligature.IRIs.size() == 3
+        ligature.predicates.size() == 1
+        ligature.objects.size() == 1
+        ligature.literals.size() == 0
+    }
+
 //    final def "support predicate lists"() {
 //        given:
 //        final def expectedResults = [spidermanEnemy, spidermanName]
