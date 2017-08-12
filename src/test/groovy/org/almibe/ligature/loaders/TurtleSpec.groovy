@@ -165,70 +165,62 @@ class TurtleSpec extends Specification {
         compareModels(ligature, expectedModel)
     }
 
-//    final def "support blank nodes"() {
-//        given:
-//        final def expectedResults = [
-//                new Triple(new LabeledBlankNode("alice"), new IRI("http://xmlns.com/foaf/0.1/knows"), new LabeledBlankNode("bob")),
-//                new Triple(new LabeledBlankNode("bob"), new IRI("http://xmlns.com/foaf/0.1/knows"), new LabeledBlankNode("alice"))
-//        ]
-//        ligature.loadTurtle(this.class.getResource("/turtle/12-blankNodes.ttl").text)
-//        expect:
-//        compareModels(ligature, expectedModel)
-//    }
-//
-//    final def "unlabeled blank nodes"() {
-//        given:
-//        final def expectedResults = [
-//                new Triple(new IRI("http://example.com/person/bob"), foafKnows, new IRI("http://example.com/person/george")),
-//                new Triple(new LabeledBlankNode("ANON0"), foafKnows, new IRI("http://example.com/person/george")),
-//                new Triple(new IRI("http://example.com/person/bob"), foafKnows, new LabeledBlankNode("ANON1")),
-//                new Triple(new LabeledBlankNode("ANON2"), new IRI("http://xmlns.com/foaf/0.1/knows"), new LabeledBlankNode("ANON3"))
-//        ]
-//        ligature.loadTurtle(this.class.getResource("/turtle/13-unlabeledBlankNodes.ttl").text)
-//        expect:
-//        compareModels(ligature, expectedModel)
-//    }
-//
-//    final def "nested unlabeled blank nodes"() {
-//        given:
-//        final def expectedResults = [
-//                new Triple(new LabeledBlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Bob", stringIRI)),
-//                new Triple(new LabeledBlankNode("ANON0"), new IRI("http://xmlns.com/foaf/0.1/knows"), new LabeledBlankNode("ANON1"))
-//        ]
-//        ligature.loadTurtle(this.class.getResource("/turtle/14-nestedUnlabeledBlankNodes.ttl").text)
-//        expect:
-//        compareModels(ligature, expectedModel)
-//    }
-//////
-//////    final def complexUnlabeledBlankNodes() {
-//////        final def expectedResults = [
-//////            new Triple(new BlankNode("ANON0"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Alice", stringIRI)),
-//////            new Triple(new BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Bob", stringIRI)),
-//////            new Triple(new BlankNode("ANON0"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON1")),
-//////            new Triple(new BlankNode("ANON2"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Eve", stringIRI)),
-//////            new Triple(new BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON2")),
-//////            new Triple(new BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/mbox"), new IRI("http://bob@example.com"))
-//////        )
-//////        ligature.loadTurtle(this.class.getResource("/turtle/15-complexUnlabeledBlankNodes.ttl").text)
-//////        final def c = Comparator<Triple> { f, s -> f.toString().compareTo(s.toString()) }
-//////        results.sortedWith(c), expectedResults.sortedWith(c))
-//////    }
-//////
-//////    final def supportCollections() {
-//////        final def expectedResults = [
-//////                new Triple(new IRI("http://example.org/foo/subject"), new IRI("http://example.org/foo/predicate"), new BlankNode("ANON0")),
-//////                new Triple(new BlankNode("ANON0"), new IRI("${rdf}first"), new IRI("http://example.org/foo/a")),
-//////                new Triple(new BlankNode("ANON0"), new IRI("${rdf}rest"), new BlankNode("ANON1")),
-//////                new Triple(new BlankNode("ANON1"), new IRI("${rdf}first"), new IRI("http://example.org/foo/b")),
-//////                new Triple(new BlankNode("ANON1"), new IRI("${rdf}rest"), new BlankNode("ANON2")),
-//////                new Triple(new BlankNode("ANON2"), new IRI("${rdf}first"), new IRI("http://example.org/foo/c")),
-//////                new Triple(new BlankNode("ANON2"), new IRI("${rdf}rest"), new IRI("${rdf}nil")),
-//////                new Triple(new IRI("http://example.org/foo/subject"), new IRI("http://example.org/foo/predicate2"), new IRI("${rdf}nil"))
-//////        )
-//////        ligature.loadTurtle(this.class.getResource("/turtle/16-collections.ttl").text)
-//////        final def c = Comparator<Triple> { f, s -> f.toString().compareTo(s.toString()) }
-//////        results.sortedWith(c), expectedResults.sortedWith(c))
-//////    }
+    final def "support blank nodes"() {
+        given:
+        ligature.loadTurtle(this.class.getResource("/turtle/12-blankNodes.ttl").text)
+        expectedModel.addStatement(new BlankNode("alice_1"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("bob_2"))
+        expectedModel.addStatement(new BlankNode("bob_2"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("alice_1"))
+        expect:
+        compareModels(ligature, expectedModel)
+    }
+
+    final def "unlabeled blank nodes"() {
+        given:
+        ligature.loadTurtle(this.class.getResource("/turtle/13-unBlankNodes.ttl").text)
+        expectedModel.addStatement(new IRI("http://example.com/person/bob"), foafKnows, new IRI("http://example.com/person/george"))
+        expectedModel.addStatement(new BlankNode("ANON0"), foafKnows, new IRI("http://example.com/person/george"))
+        expectedModel.addStatement(new IRI("http://example.com/person/bob"), foafKnows, new BlankNode("ANON1"))
+        expectedModel.addStatement(new BlankNode("ANON2"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON3"))
+        expect:
+        compareModels(ligature, expectedModel)
+    }
+
+    final def "nested unlabeled blank nodes"() {
+        given:
+        ligature.loadTurtle(this.class.getResource("/turtle/14-nestedUnBlankNodes.ttl").text)
+        expectedModel.addStatement(new BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Bob", stringIRI))
+        expectedModel.addStatement(new BlankNode("ANON0"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON1"))
+        expect:
+        compareModels(ligature, expectedModel)
+    }
+
+    final def complexUnBlankNodes() {
+        given:
+        ligature.loadTurtle(this.class.getResource("/turtle/15-complexUnBlankNodes.ttl").text)
+        expectedModel.addStatement(new BlankNode("ANON0"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Alice", stringIRI))
+        expectedModel.addStatement(new BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Bob", stringIRI))
+        expectedModel.addStatement(new BlankNode("ANON0"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON1"))
+        expectedModel.addStatement(new BlankNode("ANON2"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Eve", stringIRI))
+        expectedModel.addStatement(new BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON2"))
+        expectedModel.addStatement(new BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/mbox"), new IRI("http://bob@example.com"))
+        expect:
+        compareModels(ligature, expectedModel)
+    }
+
+    final def supportCollections() {
+        given:
+        ligature.loadTurtle(this.class.getResource("/turtle/16-collections.ttl").text)
+        expectedModel.addStatement(new IRI("http://example.org/foo/subject"), new IRI("http://example.org/foo/predicate"), new BlankNode("ANON0"))
+        expectedModel.addStatement(new BlankNode("ANON0"), new IRI("${rdf}first"), new IRI("http://example.org/foo/a"))
+        expectedModel.addStatement(new BlankNode("ANON0"), new IRI("${rdf}rest"), new BlankNode("ANON1"))
+        expectedModel.addStatement(new BlankNode("ANON1"), new IRI("${rdf}first"), new IRI("http://example.org/foo/b"))
+        expectedModel.addStatement(new BlankNode("ANON1"), new IRI("${rdf}rest"), new BlankNode("ANON2"))
+        expectedModel.addStatement(new BlankNode("ANON2"), new IRI("${rdf}first"), new IRI("http://example.org/foo/c"))
+        expectedModel.addStatement(new BlankNode("ANON2"), new IRI("${rdf}rest"), new IRI("${rdf}nil"))
+        expectedModel.addStatement(new IRI("http://example.org/foo/subject"), new IRI("http://example.org/foo/predicate2"), new IRI("${rdf}nil"))
+        expect:
+        compareModels(ligature, expectedModel)
+    }
 ////////
 ////////    //TODO examples 19-26 and wordnetStinkpot.ttl
 ////////    final def wordnetTest() {
