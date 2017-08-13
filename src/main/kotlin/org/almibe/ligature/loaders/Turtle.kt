@@ -209,24 +209,23 @@ private class TriplesTurtleListener : TurtleListener {
         return if (ctx.ANON() != null) {
             handleBlankNode("ANON${++anonymousCounter}")
         } else if (ctx.BLANK_NODE_LABEL() != null) {
-            handleBlankNode(ctx.BLANK_NODE_LABEL().text)
+            if (ctx.BLANK_NODE_LABEL().text.length > 2) {
+                handleBlankNode(ctx.BLANK_NODE_LABEL().text.substring(2))
+            } else {
+                throw RuntimeException("Invalid blank node label - ${ctx.BLANK_NODE_LABEL().text}")
+            }
         } else {
             throw RuntimeException("Unexpected blank node - ${ctx.text}")
         }
     }
 
     private fun handleBlankNode(blankNode: String): BlankNode {
-        if (blankNode.length > 2) {
-            val blankNodeLabel = blankNode.substring(2)
-            if (blankNodes.containsKey(blankNodeLabel)) {
-                return blankNodes[blankNodeLabel]!!
-            } else {
-                val newBlankNode = BlankNode(blankNodeLabel)
-                blankNodes[blankNodeLabel] = newBlankNode
-                return newBlankNode
-            }
+        if (blankNodes.containsKey(blankNode)) {
+            return blankNodes[blankNode]!!
         } else {
-            throw RuntimeException("Invalid blank node label - $blankNode")
+            val newBlankNode = BlankNode(blankNode)
+            blankNodes[blankNode] = newBlankNode
+            return newBlankNode
         }
     }
 

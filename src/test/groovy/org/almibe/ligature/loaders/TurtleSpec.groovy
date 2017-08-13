@@ -9,6 +9,7 @@ import spock.lang.Specification
 
 class TurtleSpec extends Specification {
     def ligature = new Ligature(new InMemoryModel())
+    def turtle = new Turtle()
     def expectedModel = new InMemoryModel()
     final def xsd = "http://www.w3.org/2001/XMLSchema#"
     final def foafKnows = new IRI("http://xmlns.com/foaf/0.1/knows")
@@ -24,7 +25,7 @@ class TurtleSpec extends Specification {
 //        new IRI("http://xmlns.com/foaf/0.1/name"), new LangLiteral("Человек-паук", "ru"))
     final def stringIRI = new IRI("http://www.w3.org/2001/XMLSchema#string")
 
-    boolean compareModels(Model results, Model expectedResults) {
+    boolean compareModels(ReadOnlyModel results, ReadOnlyModel expectedResults) {
         assert results.subjects.each { subject ->
             assert results.statementsFor(subject) == expectedResults.statementsFor(subject)
         }
@@ -167,36 +168,37 @@ class TurtleSpec extends Specification {
 
     final def "support blank nodes"() {
         given:
-        ligature.loadTurtle(this.class.getResource("/turtle/12-blankNodes.ttl").text)
-        expectedModel.addStatement(new BlankNode("alice_1"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("bob_2"))
-        expectedModel.addStatement(new BlankNode("bob_2"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("alice_1"))
+        def result = turtle.loadTurtle(this.class.getResource("/turtle/12-blankNodes.ttl").text)
+        expectedModel.addStatement(new BlankNode("alice"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("bob"))
+        expectedModel.addStatement(new BlankNode("bob"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("alice"))
         expect:
-        compareModels(ligature, expectedModel)
+        compareModels(result, expectedModel)
     }
 
     final def "unlabeled blank nodes"() {
         given:
-        ligature.loadTurtle(this.class.getResource("/turtle/13-unBlankNodes.ttl").text)
+        def result = turtle.loadTurtle(this.class.getResource("/turtle/13-unlabeledBlankNodes.ttl").text)
         expectedModel.addStatement(new IRI("http://example.com/person/bob"), foafKnows, new IRI("http://example.com/person/george"))
-        expectedModel.addStatement(new BlankNode("ANON0"), foafKnows, new IRI("http://example.com/person/george"))
-        expectedModel.addStatement(new IRI("http://example.com/person/bob"), foafKnows, new BlankNode("ANON1"))
-        expectedModel.addStatement(new BlankNode("ANON2"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON3"))
+        expectedModel.addStatement(new BlankNode("ANON1"), foafKnows, new IRI("http://example.com/person/george"))
+        expectedModel.addStatement(new IRI("http://example.com/person/bob"), foafKnows, new BlankNode("ANON2"))
+        expectedModel.addStatement(new BlankNode("ANON3"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON4"))
         expect:
-        compareModels(ligature, expectedModel)
+        assert result.subjects == expectedModel.subjects //TODO remove me when test passes
+        compareModels(result, expectedModel)
     }
 
     final def "nested unlabeled blank nodes"() {
         given:
-        ligature.loadTurtle(this.class.getResource("/turtle/14-nestedUnBlankNodes.ttl").text)
+        def result = turtle.loadTurtle(this.class.getResource("/turtle/14-nestedUnlabeledBlankNodes.ttl").text)
         expectedModel.addStatement(new BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Bob", stringIRI))
         expectedModel.addStatement(new BlankNode("ANON0"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON1"))
         expect:
-        compareModels(ligature, expectedModel)
+        compareModels(result, expectedModel)
     }
 
-    final def complexUnBlankNodes() {
+    final def "complex unlabeled blank nodes"() {
         given:
-        ligature.loadTurtle(this.class.getResource("/turtle/15-complexUnBlankNodes.ttl").text)
+        def result = turtle.loadTurtle(this.class.getResource("/turtle/15-complexUnlabeledBlankNodes.ttl").text)
         expectedModel.addStatement(new BlankNode("ANON0"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Alice", stringIRI))
         expectedModel.addStatement(new BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Bob", stringIRI))
         expectedModel.addStatement(new BlankNode("ANON0"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON1"))
@@ -204,12 +206,12 @@ class TurtleSpec extends Specification {
         expectedModel.addStatement(new BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON2"))
         expectedModel.addStatement(new BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/mbox"), new IRI("http://bob@example.com"))
         expect:
-        compareModels(ligature, expectedModel)
+        compareModels(result, expectedModel)
     }
 
-    final def supportCollections() {
+    final def "support collections"() {
         given:
-        ligature.loadTurtle(this.class.getResource("/turtle/16-collections.ttl").text)
+        def result = turtle.loadTurtle(this.class.getResource("/turtle/16-collections.ttl").text)
         expectedModel.addStatement(new IRI("http://example.org/foo/subject"), new IRI("http://example.org/foo/predicate"), new BlankNode("ANON0"))
         expectedModel.addStatement(new BlankNode("ANON0"), new IRI("${rdf}first"), new IRI("http://example.org/foo/a"))
         expectedModel.addStatement(new BlankNode("ANON0"), new IRI("${rdf}rest"), new BlankNode("ANON1"))
@@ -219,7 +221,7 @@ class TurtleSpec extends Specification {
         expectedModel.addStatement(new BlankNode("ANON2"), new IRI("${rdf}rest"), new IRI("${rdf}nil"))
         expectedModel.addStatement(new IRI("http://example.org/foo/subject"), new IRI("http://example.org/foo/predicate2"), new IRI("${rdf}nil"))
         expect:
-        compareModels(ligature, expectedModel)
+        compareModels(result, expectedModel)
     }
 ////////
 ////////    //TODO examples 19-26 and wordnetStinkpot.ttl
