@@ -67,10 +67,42 @@ private class TurtleDocVisitor: TurtleBaseVisitor<Model>() {
 
     fun handleDirective(directiveContext: Turtle.DirectiveContext) {
         when {
-            directiveContext.base() != null -> TODO()
-            directiveContext.prefixID() != null -> TODO()
-            directiveContext.sparqlBase() != null -> TODO()
-            directiveContext.sparqlPrefix() != null -> TODO()
+            directiveContext.base() != null -> handleBase(directiveContext.base())
+            directiveContext.prefixID() != null -> handlePrefixID(directiveContext.prefixID())
+            directiveContext.sparqlBase() != null -> handleSparqlBase(directiveContext.sparqlBase())
+            directiveContext.sparqlPrefix() != null -> handleSparqlPrefix(directiveContext.sparqlPrefix())
+        }
+    }
+
+    fun handleBase(ctx: Turtle.BaseContext) {
+        if (ctx.iriRef().text.length >= 2) {
+            this.base = ctx.iriRef().text.trim('<', '>')
+        } else {
+            throw RuntimeException("Unexpected base ${ctx.iriRef().text}.")
+        }
+    }
+
+    fun handleSparqlBase(ctx: Turtle.SparqlBaseContext) {
+        if (ctx.iriRef().text.length >= 2) {
+            this.base = ctx.iriRef().text.trim('<', '>')
+        } else {
+            throw RuntimeException("Unexpected sparql base ${ctx.iriRef().text}.")
+        }
+    }
+
+    fun handlePrefixID(ctx: Turtle.PrefixIDContext) {
+        if (ctx.PNAME_NS() != null)  {
+            this.prefixes[ctx.PNAME_NS().text.trimEnd(':')] = handleTurtleIRIRef(ctx.iriRef())
+        } else {
+            throw RuntimeException("Unexpected prefix ${ctx.text}")
+        }
+    }
+
+    fun handleSparqlPrefix(ctx: Turtle.SparqlPrefixContext) {
+        if (ctx.iriRef().text.length >= 2) {
+            this.prefixes[ctx.PNAME_NS().text.trimEnd(':')] = handleTurtleIRIRef(ctx.iriRef())
+        } else {
+            throw RuntimeException("Unexpected sparql base ${ctx.iriRef().text}.")
         }
     }
 
