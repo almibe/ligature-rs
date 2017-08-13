@@ -52,15 +52,183 @@ private class TurtleDocVisitor: TurtleBaseVisitor<Model>() {
     val model = InMemoryModel()
     val prefixes: MutableMap<String, String> = mutableMapOf()
     lateinit var base: String
-    var currentStatement: Stack<TurtleStatement> = Stack()
     var anonymousCounter = 0
     val blankNodes = HashMap<String, BlankNode>()
 
     override fun visitTurtleDoc(ctx: Turtle.TurtleDocContext): Model {
-        ctx.statement().forEach {
-
+        ctx.statement().forEach { statement ->
+            when {
+                statement.directive() != null -> handleDirective(statement.directive())
+                statement.triples() != null -> handleTriples(statement.triples())
+            }
         }
         return model
+    }
+
+    fun handleDirective(directiveContext: Turtle.DirectiveContext) {
+        when {
+            directiveContext.base() != null -> TODO()
+            directiveContext.prefixID() != null -> TODO()
+            directiveContext.sparqlBase() != null -> TODO()
+            directiveContext.sparqlPrefix() != null -> TODO()
+        }
+    }
+
+    fun handleTriples(triplesContext: Turtle.TriplesContext) {
+        if (triplesContext.subject() != null) {
+            val subject = handleTurtleIRI(triplesContext.subject().iri())
+            val predicateObjectList = mutableListOf<Pair<IRI, MutableList<Object>>>()
+            triplesContext.predicateObjectList().verbObjectList().forEach { verbObjectList ->
+                predicateObjectList.addAll(handleVerbObjectList(verbObjectList))
+            }
+            predicateObjectList.forEach { (predicate, objects) ->
+                objects.forEach { `object` ->
+                    model.addStatement(subject, predicate, `object`)
+                }
+            }
+        } else if (triplesContext.blankNodePropertyList() != null) {
+            TODO()
+        } else {
+            throw RuntimeException("Unexpected triples values ${triplesContext.text}.")
+        }
+    }
+
+    fun handleVerbObjectList(ctx: Turtle.VerbObjectListContext): List<Pair<IRI, MutableList<Object>>> {
+        val result = mutableListOf<Pair<IRI, MutableList<Object>>>()
+        val iri = if (ctx.verb().text != null && !ctx.verb().text.equals("a")) {
+            handleTurtleIRI(ctx.verb().predicate().iri())
+        } else {
+            typeIRI
+        }
+        ctx.objectList().`object`().forEach {
+            val objects = handleObject(it)
+            result.add(Pair(iri, objects))
+        }
+        return result
+    }
+
+    private fun handleObject(ctx: Turtle.ObjectContext): MutableList<Object> { //TODO make this return a collection of Objects or do something else?
+        return when {
+            ctx.literal() != null -> mutableListOf(handleTurtleLiteral(ctx.literal()))
+            ctx.blankNode() != null -> mutableListOf(handleTurtleBlankNode(ctx.blankNode()))
+            ctx.iri() != null -> mutableListOf(handleTurtleIRI(ctx.iri()))
+            ctx.blankNodePropertyList() != null -> mutableListOf(handleBlankNodePropertyList(ctx.blankNodePropertyList()))
+            ctx.collection() != null -> TODO()
+            else -> throw RuntimeException("Unexpected object")
+        }
+    }
+
+    private fun handleTurtleLiteral(ctx: Turtle.LiteralContext): Literal {
+        return when {
+            ctx.booleanLiteral() != null -> handleBooleanLiteral(ctx.booleanLiteral())
+            ctx.numericLiteral() != null  -> handleNumericLiteral(ctx.numericLiteral())
+            ctx.rdfLiteral() != null  -> handleRdfLiteral(ctx.rdfLiteral())
+            else -> throw RuntimeException("Unexpected literal")
+        }
+    }
+
+    private fun handleBooleanLiteral(ctx: Turtle.BooleanLiteralContext): Literal {
+        return TypedLiteral(ctx.text, booleanIRI)
+    }
+
+    private fun handleNumericLiteral(ctx: Turtle.NumericLiteralContext): Literal {
+        return if (ctx.DECIMAL() != null) {
+            TypedLiteral(ctx.DECIMAL().text, decimalIRI)
+        } else if (ctx.DOUBLE() != null) {
+            TypedLiteral(ctx.DOUBLE().text, doubleIRI)
+        } else if (ctx.INTEGER() != null) {
+            TypedLiteral(ctx.INTEGER().text, integerIRI)
+        } else {
+            throw RuntimeException("Unexpected Numeric type")
+        }
+    }
+
+    private fun handleRdfLiteral(ctx: Turtle.RdfLiteralContext): Literal {
+        val value = extractStringLiteralValue(ctx.string())
+        return when {
+            ctx.LANGTAG() != null -> LangLiteral(value, ctx.LANGTAG().text.substring(1))
+            ctx.iri() != null -> TypedLiteral(value, handleTurtleIRI(ctx.iri()))
+            else -> TypedLiteral(value)
+        }
+    }
+
+    private fun extractStringLiteralValue(ctx: Turtle.StringContext): String {
+        return when {
+            ctx.START_SINGLE_QUOTE() != null -> ctx.STRING_CONTENT_SINGLE_QUOTE()
+            ctx.START_DOUBLE_QUOTE() != null -> ctx.STRING_CONTENT_DOUBLE_QUOTE()
+            ctx.START_TRIPLE_SINGLE_QUOTE() != null -> ctx.STRING_CONTENT_TRIPLE_SINGLE_QUOTE()
+            ctx.START_TRIPLE_DOUBLE_QUOTE() != null -> ctx.STRING_CONTENT_TRIPLE_DOUBLE_QUOTE()
+            else -> throw RuntimeException("Unexpected String type")
+        }?.text ?: ""
+    }
+
+    private fun handleTurtleBlankNode(ctx: Turtle.BlankNodeContext): BlankNode {
+        return if (ctx.ANON() != null) {
+            handleBlankNode("ANON${++anonymousCounter}")
+        } else if (ctx.BLANK_NODE_LABEL() != null) {
+            if (ctx.BLANK_NODE_LABEL().text.length > 2) {
+                handleBlankNode(ctx.BLANK_NODE_LABEL().text.substring(2))
+            } else {
+                throw RuntimeException("Invalid blank node label - ${ctx.BLANK_NODE_LABEL().text}")
+            }
+        } else {
+            throw RuntimeException("Unexpected blank node - ${ctx.text}")
+        }
+    }
+
+    private fun handleBlankNode(blankNode: String): BlankNode {
+        if (blankNodes.containsKey(blankNode)) {
+            return blankNodes[blankNode]!!
+        } else {
+            val newBlankNode = BlankNode(blankNode)
+            blankNodes[blankNode] = newBlankNode
+            return newBlankNode
+        }
+    }
+
+    private fun handleTurtleIRI(ctx: Turtle.IriContext): IRI {
+        return if (ctx.PREFIXED_NAME() != null) {
+            val prefix = ctx.PREFIXED_NAME().text.split(":")
+            if (prefix.size == 1) {
+                IRI(prefixes[""] + prefix[0])
+            } else if (prefix.size == 2) {
+                IRI(prefixes[prefix[0]] + prefix[1])
+            } else {
+                throw RuntimeException("Unexpected IRI prefix value ${ctx.PREFIXED_NAME().text}")
+            }
+        } else {
+            IRI(handleTurtleIRIRef(ctx.iriRef()))
+        }
+    }
+
+    private fun handleTurtleIRIRef(ctx: Turtle.IriRefContext): String {
+        return if (ctx.ABSOLUTE_IRI() != null) {
+            ctx.ABSOLUTE_IRI().text
+        } else if (ctx.RELATIVE_IRI() != null) {
+            base + ctx.RELATIVE_IRI().text
+        } else {
+            throw RuntimeException("Unexpected IRI type")
+        }
+    }
+
+    private fun handleBlankNodePropertyList(ctx: Turtle.BlankNodePropertyListContext): Object {
+//        val statement = TurtleStatement()
+//        currentStatement.push(statement)
+        val node = handleBlankNode("ANON${++anonymousCounter}")
+//        statement.subjects.add(node)
+//        ctx.predicateObjectList().verbObjectList().forEach { verbObjectList ->
+//            val predicate = handleTurtleIRI(verbObjectList.verb().predicate().iri())
+//            verbObjectList.objectList().`object`().forEach { objectContext ->
+//                handleObject(objectContext)//.forEach { `object` ->
+//                //model.addStatement(node, predicate, `object`)
+//                //}
+//            }
+//        }
+//        currentStatement.peek().computeTriples().forEach { (subject, predicate, `object`) ->
+//            model.addStatement(subject, predicate, `object`)
+//        }
+//        currentStatement.pop()
+        return node
     }
 }
 
