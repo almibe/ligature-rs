@@ -60,6 +60,7 @@ private class TriplesTurtleListener : TurtleListener {
     lateinit var base: String
     var currentStatement: TurtleStatement = TurtleStatement()
     var anonymousCounter = 0
+    val blankNodes = HashMap<String, BlankNode>()
 
     override fun exitSubject(ctx: Turtle.SubjectContext) {
         //TODO handle all subject logic here
@@ -206,12 +207,26 @@ private class TriplesTurtleListener : TurtleListener {
 
     internal fun handleTurtleBlankNode(ctx: Turtle.BlankNodeContext): BlankNode {
         return if (ctx.ANON() != null) {
-            TODO()
-            //UnlabeledBlankNode()
+            handleBlankNode("ANON${++anonymousCounter}")
         } else if (ctx.BLANK_NODE_LABEL() != null) {
-            TODO("handleBlankNode(ctx.BLANK_NODE_LABEL().text)")
+            handleBlankNode(ctx.BLANK_NODE_LABEL().text)
         } else {
             throw RuntimeException("Unexpected blank node - ${ctx.text}")
+        }
+    }
+
+    private fun handleBlankNode(blankNode: String): BlankNode {
+        if (blankNode.length > 2) {
+            val blankNodeLabel = blankNode.substring(2)
+            if (blankNodes.containsKey(blankNodeLabel)) {
+                return blankNodes[blankNodeLabel]!!
+            } else {
+                val newBlankNode = BlankNode(blankNodeLabel)
+                blankNodes[blankNodeLabel] = newBlankNode
+                return newBlankNode
+            }
+        } else {
+            throw RuntimeException("Invalid blank node label - $blankNode")
         }
     }
 
