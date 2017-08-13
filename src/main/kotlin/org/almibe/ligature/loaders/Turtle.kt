@@ -37,7 +37,7 @@ val booleanIRI = IRI("http://www.w3.org/2001/XMLSchema#boolean")
 
 /** Class used to represent Turtle's blankNodePropertyList concept
  * which is hard to represent while processing a document with just basic RDF classes. */
-private data class BlankNodePropertyList(val predicateObjectList: MutableList<Pair<IRI, MutableList<Object>>>): Object
+private data class BlankNodePropertyList(val predicateObjectList: MutableList<Pair<IRI, MutableList<Object>>> = mutableListOf()): Object
 
 /** Temporary class used to hold data while parsing that will eventually be used to create RdfModel classes */
 private class TurtleStatement {
@@ -63,7 +63,6 @@ private class TriplesTurtleListener : TurtleListener {
     val blankNodes = HashMap<String, BlankNode>()
 
     override fun exitSubject(ctx: Turtle.SubjectContext) {
-        //TODO handle all subject logic here
         if (ctx.iri() != null) {
             currentStatement.subjects.add(handleTurtleIRI(ctx.iri()))
         } else if (ctx.collection() != null) {
@@ -135,7 +134,7 @@ private class TriplesTurtleListener : TurtleListener {
         }
     }
 
-    fun handleTurtleIRI(ctx: Turtle.IriContext): IRI {
+    private fun handleTurtleIRI(ctx: Turtle.IriContext): IRI {
         return if (ctx.PREFIXED_NAME() != null) {
             val prefix = ctx.PREFIXED_NAME().text.split(":")
             if (prefix.size == 1) {
@@ -150,7 +149,7 @@ private class TriplesTurtleListener : TurtleListener {
         }
     }
 
-    fun handleTurtleIRIRef(ctx: Turtle.IriRefContext): String {
+    private fun handleTurtleIRIRef(ctx: Turtle.IriRefContext): String {
         return if (ctx.ABSOLUTE_IRI() != null) {
             ctx.ABSOLUTE_IRI().text
         } else if (ctx.RELATIVE_IRI() != null) {
@@ -160,7 +159,7 @@ private class TriplesTurtleListener : TurtleListener {
         }
     }
 
-    internal fun handleObject(ctx: Turtle.ObjectContext): MutableList<Object> { //TODO make this return a collection of Objects or do something else?
+    private fun handleObject(ctx: Turtle.ObjectContext): MutableList<Object> { //TODO make this return a collection of Objects or do something else?
         return when {
             ctx.literal() != null -> mutableListOf(handleTurtleLiteral(ctx.literal()))
             ctx.blankNode() != null -> mutableListOf(handleTurtleBlankNode(ctx.blankNode()))
@@ -171,7 +170,7 @@ private class TriplesTurtleListener : TurtleListener {
         }
     }
 
-    internal fun handleTurtleLiteral(ctx: Turtle.LiteralContext): Literal {
+    private fun handleTurtleLiteral(ctx: Turtle.LiteralContext): Literal {
         return when {
             ctx.booleanLiteral() != null -> handleBooleanLiteral(ctx.booleanLiteral())
             ctx.numericLiteral() != null  -> handleNumericLiteral(ctx.numericLiteral())
@@ -180,11 +179,11 @@ private class TriplesTurtleListener : TurtleListener {
         }
     }
 
-    fun  handleBooleanLiteral(ctx: Turtle.BooleanLiteralContext): Literal {
+    private fun handleBooleanLiteral(ctx: Turtle.BooleanLiteralContext): Literal {
         return TypedLiteral(ctx.text, booleanIRI)
     }
 
-    fun  handleNumericLiteral(ctx: Turtle.NumericLiteralContext): Literal {
+    private fun handleNumericLiteral(ctx: Turtle.NumericLiteralContext): Literal {
         return if (ctx.DECIMAL() != null) {
             TypedLiteral(ctx.DECIMAL().text, decimalIRI)
         } else if (ctx.DOUBLE() != null) {
@@ -196,7 +195,7 @@ private class TriplesTurtleListener : TurtleListener {
         }
     }
 
-    internal fun handleRdfLiteral(ctx: Turtle.RdfLiteralContext): Literal {
+    private fun handleRdfLiteral(ctx: Turtle.RdfLiteralContext): Literal {
         val value = extractStringLiteralValue(ctx.string())
         return when {
             ctx.LANGTAG() != null -> LangLiteral(value, ctx.LANGTAG().text.substring(1))
@@ -205,7 +204,7 @@ private class TriplesTurtleListener : TurtleListener {
         }
     }
 
-    internal fun handleTurtleBlankNode(ctx: Turtle.BlankNodeContext): BlankNode {
+    private fun handleTurtleBlankNode(ctx: Turtle.BlankNodeContext): BlankNode {
         return if (ctx.ANON() != null) {
             handleBlankNode("ANON${++anonymousCounter}")
         } else if (ctx.BLANK_NODE_LABEL() != null) {
@@ -229,11 +228,20 @@ private class TriplesTurtleListener : TurtleListener {
         }
     }
 
-    internal fun handleBlankNodePropertyList(ctx: Turtle.BlankNodePropertyListContext): BlankNodePropertyList {
-        TODO()
+    private fun handleBlankNodePropertyList(ctx: Turtle.BlankNodePropertyListContext): BlankNodePropertyList {
+        val blankNodePropertyList = BlankNodePropertyList()
+        ctx.predicateObjectList().verbObjectList().forEach { verbObjectList ->
+            val predicate = handleTurtleIRI(verbObjectList.verb().predicate().iri())
+            val objectList = mutableListOf<Object>()
+            verbObjectList.objectList().`object`().forEach { `object` ->
+                objectList.addAll(handleObject(`object`))
+            }
+            blankNodePropertyList.predicateObjectList.add(Pair(predicate, objectList))
+        }
+        return blankNodePropertyList
     }
 
-    internal fun extractStringLiteralValue(ctx: Turtle.StringContext): String {
+    private fun extractStringLiteralValue(ctx: Turtle.StringContext): String {
         return when {
             ctx.START_SINGLE_QUOTE() != null -> ctx.STRING_CONTENT_SINGLE_QUOTE()
             ctx.START_DOUBLE_QUOTE() != null -> ctx.STRING_CONTENT_DOUBLE_QUOTE()

@@ -5,6 +5,7 @@
 package org.almibe.ligature.loaders
 
 import org.almibe.ligature.*
+import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 class TurtleSpec extends Specification {
@@ -14,24 +15,15 @@ class TurtleSpec extends Specification {
     final def xsd = "http://www.w3.org/2001/XMLSchema#"
     final def foafKnows = new IRI("http://xmlns.com/foaf/0.1/knows")
     final def rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-
-//    final def spidermanEnemy = new Triple(new IRI("http://example.org/#spiderman"),
-//        new IRI("http://www.perceive.net/schemas/relationship/enemyOf"), new IRI("http://example.org/#green-goblin"))
-//
-//    final def spidermanName = new Triple(new IRI("http://example.org/#spiderman"),
-//        new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Spiderman", new IRI("http://www.w3.org/2001/XMLSchema#string")))
-//
-//    final def spidermanNameRu = new Triple(new IRI("http://example.org/#spiderman"),
-//        new IRI("http://xmlns.com/foaf/0.1/name"), new LangLiteral("Человек-паук", "ru"))
     final def stringIRI = new IRI("http://www.w3.org/2001/XMLSchema#string")
 
     boolean compareModels(ReadOnlyModel results, ReadOnlyModel expectedResults) {
-        assert results.subjects.each { subject ->
-            assert results.statementsFor(subject) == expectedResults.statementsFor(subject)
-        }
         assert results.subjects == expectedResults.subjects
         assert results.objects == expectedResults.objects
         assert results.predicates == expectedResults.predicates
+        assert results.subjects.each { subject ->
+            assert results.statementsFor(subject) == expectedResults.statementsFor(subject)
+        }
         return true
     }
 
@@ -183,15 +175,15 @@ class TurtleSpec extends Specification {
         expectedModel.addStatement(new IRI("http://example.com/person/bob"), foafKnows, new BlankNode("ANON2"))
         expectedModel.addStatement(new BlankNode("ANON3"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON4"))
         expect:
-        assert result.subjects == expectedModel.subjects //TODO remove me when test passes
         compareModels(result, expectedModel)
     }
 
+    @IgnoreRest
     final def "nested unlabeled blank nodes"() {
         given:
         def result = turtle.loadTurtle(this.class.getResource("/turtle/14-nestedUnlabeledBlankNodes.ttl").text)
-        expectedModel.addStatement(new BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Bob", stringIRI))
-        expectedModel.addStatement(new BlankNode("ANON0"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON1"))
+        expectedModel.addStatement(new BlankNode("ANON2"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Bob", stringIRI))
+        expectedModel.addStatement(new BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON2"))
         expect:
         compareModels(result, expectedModel)
     }
@@ -199,12 +191,12 @@ class TurtleSpec extends Specification {
     final def "complex unlabeled blank nodes"() {
         given:
         def result = turtle.loadTurtle(this.class.getResource("/turtle/15-complexUnlabeledBlankNodes.ttl").text)
-        expectedModel.addStatement(new BlankNode("ANON0"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Alice", stringIRI))
-        expectedModel.addStatement(new BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Bob", stringIRI))
-        expectedModel.addStatement(new BlankNode("ANON0"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON1"))
-        expectedModel.addStatement(new BlankNode("ANON2"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Eve", stringIRI))
+        expectedModel.addStatement(new BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Alice", stringIRI))
+        expectedModel.addStatement(new BlankNode("ANON2"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Bob", stringIRI))
         expectedModel.addStatement(new BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON2"))
-        expectedModel.addStatement(new BlankNode("ANON1"), new IRI("http://xmlns.com/foaf/0.1/mbox"), new IRI("http://bob@example.com"))
+        expectedModel.addStatement(new BlankNode("ANON3"), new IRI("http://xmlns.com/foaf/0.1/name"), new TypedLiteral("Eve", stringIRI))
+        expectedModel.addStatement(new BlankNode("ANON2"), new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("ANON3"))
+        expectedModel.addStatement(new BlankNode("ANON2"), new IRI("http://xmlns.com/foaf/0.1/mbox"), new IRI("http://bob@example.com"))
         expect:
         compareModels(result, expectedModel)
     }
@@ -212,13 +204,13 @@ class TurtleSpec extends Specification {
     final def "support collections"() {
         given:
         def result = turtle.loadTurtle(this.class.getResource("/turtle/16-collections.ttl").text)
-        expectedModel.addStatement(new IRI("http://example.org/foo/subject"), new IRI("http://example.org/foo/predicate"), new BlankNode("ANON0"))
-        expectedModel.addStatement(new BlankNode("ANON0"), new IRI("${rdf}first"), new IRI("http://example.org/foo/a"))
-        expectedModel.addStatement(new BlankNode("ANON0"), new IRI("${rdf}rest"), new BlankNode("ANON1"))
-        expectedModel.addStatement(new BlankNode("ANON1"), new IRI("${rdf}first"), new IRI("http://example.org/foo/b"))
+        expectedModel.addStatement(new IRI("http://example.org/foo/subject"), new IRI("http://example.org/foo/predicate"), new BlankNode("ANON1"))
+        expectedModel.addStatement(new BlankNode("ANON1"), new IRI("${rdf}first"), new IRI("http://example.org/foo/a"))
         expectedModel.addStatement(new BlankNode("ANON1"), new IRI("${rdf}rest"), new BlankNode("ANON2"))
-        expectedModel.addStatement(new BlankNode("ANON2"), new IRI("${rdf}first"), new IRI("http://example.org/foo/c"))
-        expectedModel.addStatement(new BlankNode("ANON2"), new IRI("${rdf}rest"), new IRI("${rdf}nil"))
+        expectedModel.addStatement(new BlankNode("ANON2"), new IRI("${rdf}first"), new IRI("http://example.org/foo/b"))
+        expectedModel.addStatement(new BlankNode("ANON2"), new IRI("${rdf}rest"), new BlankNode("ANON3"))
+        expectedModel.addStatement(new BlankNode("ANON3"), new IRI("${rdf}first"), new IRI("http://example.org/foo/c"))
+        expectedModel.addStatement(new BlankNode("ANON3"), new IRI("${rdf}rest"), new IRI("${rdf}nil"))
         expectedModel.addStatement(new IRI("http://example.org/foo/subject"), new IRI("http://example.org/foo/predicate2"), new IRI("${rdf}nil"))
         expect:
         compareModels(result, expectedModel)
