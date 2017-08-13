@@ -7,13 +7,14 @@ package org.almibe.ligature.loaders
 import org.almibe.ligature.*
 import org.almibe.ligature.parser.turtle.ModalTurtleLexer
 import org.almibe.ligature.parser.turtle.Turtle
+import org.almibe.ligature.parser.turtle.TurtleBaseVisitor
 import org.almibe.ligature.parser.turtle.TurtleListener
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.tree.ErrorNode
-import org.antlr.v4.runtime.tree.ParseTreeWalker
 import org.antlr.v4.runtime.tree.TerminalNode
+import java.util.*
 
 class Turtle {
     fun loadTurtle(text: String): ReadOnlyModel {
@@ -21,11 +22,7 @@ class Turtle {
         val lexer = ModalTurtleLexer(stream)
         val tokens = CommonTokenStream(lexer)
         val parser = Turtle(tokens)
-
-        val walker = ParseTreeWalker()
-        val listener = TriplesTurtleListener()
-        walker.walk(listener, parser.turtleDoc())
-        return listener.model
+        return TurtleDocVisitor().visitTurtleDoc(parser.turtleDoc())
     }
 }
 
@@ -35,40 +32,54 @@ val decimalIRI = IRI("http://www.w3.org/2001/XMLSchema#float")
 val typeIRI = IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
 val booleanIRI = IRI("http://www.w3.org/2001/XMLSchema#boolean")
 
-/** Class used to represent Turtle's blankNodePropertyList concept
- * which is hard to represent while processing a document with just basic RDF classes. */
-private data class BlankNodePropertyList(val predicateObjectList: MutableList<Pair<IRI, MutableList<Object>>> = mutableListOf()): Object
-
 /** Temporary class used to hold data while parsing that will eventually be used to create RdfModel classes */
 private class TurtleStatement {
     val subjects = mutableListOf<Subject>()
-    var blankNodePropertyList: BlankNodePropertyList? = null
     val predicateObjectList = mutableListOf<Pair<IRI, MutableList<Object>>>()
 
     fun computeTriples(): List<Triple<Subject, Predicate, Object>> {
         if (subjects.size == 1) {
-            return predicateObjectList.map { Triple(subjects.first(), it.first, it.second.first()) }
+            return predicateObjectList.map {
+                Triple(subjects.first(), it.first, it.second.first())
+            }
         } else {
             TODO("finish")
         }
     }
 }
 
+private class TurtleDocVisitor: TurtleBaseVisitor<Model>() {
+    val model = InMemoryModel()
+    val prefixes: MutableMap<String, String> = mutableMapOf()
+    lateinit var base: String
+    var currentStatement: Stack<TurtleStatement> = Stack()
+    var anonymousCounter = 0
+    val blankNodes = HashMap<String, BlankNode>()
+
+    override fun visitTurtleDoc(ctx: Turtle.TurtleDocContext): Model {
+        ctx.statement().forEach {
+
+        }
+        return model
+    }
+}
+
+//TODO ************************************** eventually remove this class *********************************************
 private class TriplesTurtleListener : TurtleListener {
     val model = InMemoryModel()
     val prefixes: MutableMap<String, String> = mutableMapOf()
     lateinit var base: String
-    var currentStatement: TurtleStatement = TurtleStatement()
+    var currentStatement: Stack<TurtleStatement> = Stack()
     var anonymousCounter = 0
     val blankNodes = HashMap<String, BlankNode>()
 
     override fun exitSubject(ctx: Turtle.SubjectContext) {
         if (ctx.iri() != null) {
-            currentStatement.subjects.add(handleTurtleIRI(ctx.iri()))
+            currentStatement.peek().subjects.add(handleTurtleIRI(ctx.iri()))
         } else if (ctx.collection() != null) {
             TODO()
         } else if (ctx.blankNode() != null) {
-            currentStatement.subjects.add(handleTurtleBlankNode(ctx.blankNode()))
+            currentStatement.peek().subjects.add(handleTurtleBlankNode(ctx.blankNode()))
         } else {
             throw RuntimeException("Unexpected subject.")
         }
@@ -82,24 +93,22 @@ private class TriplesTurtleListener : TurtleListener {
         }
         ctx.objectList().`object`().forEach {
             val objects = handleObject(it)
-            currentStatement.predicateObjectList.add(Pair(iri, objects))
+            currentStatement.peek().predicateObjectList.add(Pair(iri, objects)) //TODO this method shouldn't be called here since we might be working on a blank node and not the current statement
         }
     }
 
     override fun exitBlankNodePropertyList(ctx: Turtle.BlankNodePropertyListContext) {
-        if (currentStatement.subjects.size == 0) { //treat this blank node property list like the subject
-            currentStatement.blankNodePropertyList = handleBlankNodePropertyList(ctx)
-        }
     }
 
     override fun exitTriples(ctx: Turtle.TriplesContext) {
-        currentStatement.computeTriples().forEach { (subject, predicate, `object`) ->
+        currentStatement.peek().computeTriples().forEach { (subject, predicate, `object`) ->
             model.addStatement(subject, predicate, `object`)
         }
+        currentStatement.pop()
     }
 
     override fun enterTriples(ctx: Turtle.TriplesContext) {
-        currentStatement = TurtleStatement()
+        currentStatement.push(TurtleStatement())
     }
 
     override fun exitBase(ctx: Turtle.BaseContext) {
@@ -228,17 +237,24 @@ private class TriplesTurtleListener : TurtleListener {
         }
     }
 
-    private fun handleBlankNodePropertyList(ctx: Turtle.BlankNodePropertyListContext): BlankNodePropertyList {
-        val blankNodePropertyList = BlankNodePropertyList()
+    private fun handleBlankNodePropertyList(ctx: Turtle.BlankNodePropertyListContext): Object {
+        val statement = TurtleStatement()
+        currentStatement.push(statement)
+        val node = handleBlankNode("ANON${++anonymousCounter}")
+        statement.subjects.add(node)
         ctx.predicateObjectList().verbObjectList().forEach { verbObjectList ->
             val predicate = handleTurtleIRI(verbObjectList.verb().predicate().iri())
-            val objectList = mutableListOf<Object>()
-            verbObjectList.objectList().`object`().forEach { `object` ->
-                objectList.addAll(handleObject(`object`))
+            verbObjectList.objectList().`object`().forEach { objectContext ->
+                handleObject(objectContext)//.forEach { `object` ->
+                    //model.addStatement(node, predicate, `object`)
+                //}
             }
-            blankNodePropertyList.predicateObjectList.add(Pair(predicate, objectList))
         }
-        return blankNodePropertyList
+        currentStatement.peek().computeTriples().forEach { (subject, predicate, `object`) ->
+            model.addStatement(subject, predicate, `object`)
+        }
+        currentStatement.pop()
+        return node
     }
 
     private fun extractStringLiteralValue(ctx: Turtle.StringContext): String {
