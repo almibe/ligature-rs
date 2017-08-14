@@ -27,6 +27,8 @@ val doubleIRI = IRI("http://www.w3.org/2001/XMLSchema#double")
 val decimalIRI = IRI("http://www.w3.org/2001/XMLSchema#float")
 val typeIRI = IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
 val booleanIRI = IRI("http://www.w3.org/2001/XMLSchema#boolean")
+val firstIRI = IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#first")
+val restIRI = IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#rest")
 
 private class TurtleDocVisitor: TurtleBaseVisitor<Model>() {
     val model = InMemoryModel()
@@ -93,7 +95,7 @@ private class TurtleDocVisitor: TurtleBaseVisitor<Model>() {
             } else if (triplesContext.subject().blankNode() != null) {
                 handleTurtleBlankNode(triplesContext.subject().blankNode())
             } else if (triplesContext.subject().collection() != null) {
-                TODO()
+                handleCollection(triplesContext.subject().collection())
             } else {
                 throw RuntimeException("Unexpected subject. ${triplesContext.subject().text}")
             }
@@ -107,7 +109,6 @@ private class TurtleDocVisitor: TurtleBaseVisitor<Model>() {
                 }
             }
         } else if (triplesContext.blankNodePropertyList() != null) {
-            //TODO finish the code in this condition
             val blankNode = handleBlankNodePropertyList(triplesContext.blankNodePropertyList())
             val predicateObjectList = mutableListOf<Pair<IRI, MutableList<Object>>>()
 
@@ -140,13 +141,13 @@ private class TurtleDocVisitor: TurtleBaseVisitor<Model>() {
         return result
     }
 
-    private fun handleObject(ctx: Turtle.ObjectContext): MutableList<Object> {
+    private fun handleObject(ctx: Turtle.ObjectContext): MutableList<Object> { //TODO this could be rewritten to just return Object
         return when {
             ctx.literal() != null -> mutableListOf(handleTurtleLiteral(ctx.literal()))
             ctx.blankNode() != null -> mutableListOf(handleTurtleBlankNode(ctx.blankNode()))
             ctx.iri() != null -> mutableListOf(handleTurtleIRI(ctx.iri()))
             ctx.blankNodePropertyList() != null -> mutableListOf(handleBlankNodePropertyList(ctx.blankNodePropertyList()))
-            ctx.collection() != null -> TODO()
+            ctx.collection() != null -> mutableListOf(handleCollection(ctx.collection()))
             else -> throw RuntimeException("Unexpected object")
         }
     }
@@ -255,5 +256,16 @@ private class TurtleDocVisitor: TurtleBaseVisitor<Model>() {
             }
         }
         return subject
+    }
+
+    private fun handleCollection(ctx: Turtle.CollectionContext): BlankNode {
+        val firstNode = handleBlankNode("ANON${++anonymousCounter}")
+        var currentNode = firstNode
+        ctx.`object`().forEach {
+            val currentObject = handleObject(it)
+            TODO("add first statement")
+            TODO("add rest statement")
+        }
+        return firstNode
     }
 }
