@@ -29,6 +29,7 @@ val typeIRI = IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
 val booleanIRI = IRI("http://www.w3.org/2001/XMLSchema#boolean")
 val firstIRI = IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#first")
 val restIRI = IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#rest")
+val nilIRI = IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#nil")
 
 private class TurtleDocVisitor: TurtleBaseVisitor<Model>() {
     val model = InMemoryModel()
@@ -261,11 +262,16 @@ private class TurtleDocVisitor: TurtleBaseVisitor<Model>() {
     private fun handleCollection(ctx: Turtle.CollectionContext): BlankNode {
         val firstNode = handleBlankNode("ANON${++anonymousCounter}")
         var currentNode = firstNode
+        var lastNode: BlankNode? = null
         ctx.`object`().forEach {
+            if (lastNode != null) {
+                model.addStatement(lastNode!!, restIRI, currentNode)
+            }
             val currentObject = handleObject(it)
-            TODO("add first statement")
-            TODO("add rest statement")
+            model.addStatement(currentNode, firstIRI, currentObject.first())
+            lastNode = currentNode
         }
+        model.addStatement(currentNode, restIRI, nilIRI)
         return firstNode
     }
 }
