@@ -5,7 +5,6 @@
 package org.almibe.ligature.loaders
 
 import org.almibe.ligature.*
-import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 class TurtleSpec extends Specification {
@@ -16,6 +15,15 @@ class TurtleSpec extends Specification {
     final def foafKnows = new IRI("http://xmlns.com/foaf/0.1/knows")
     final def rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     final def stringIRI = new IRI("http://www.w3.org/2001/XMLSchema#string")
+
+    def prettyPrint(ReadOnlyModel model) {
+        model.subjects.each { subject ->
+            println("* $subject")
+            model.statementsFor(subject).each { statement ->
+                println("** $statement")
+            }
+        }
+    }
 
     boolean compareModels(ReadOnlyModel results, ReadOnlyModel expectedResults) {
         assert results.subjects == expectedResults.subjects
@@ -178,7 +186,6 @@ class TurtleSpec extends Specification {
         compareModels(result, expectedModel)
     }
 
-    @IgnoreRest
     final def "nested unlabeled blank nodes"() {
         given:
         def result = turtle.loadTurtle(this.class.getResource("/turtle/14-nestedUnlabeledBlankNodes.ttl").text)
