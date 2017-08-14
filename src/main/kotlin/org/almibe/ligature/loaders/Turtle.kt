@@ -148,7 +148,7 @@ private class TurtleDocVisitor: TurtleBaseVisitor<Model>() {
             ctx.blankNode() != null -> mutableListOf(handleTurtleBlankNode(ctx.blankNode()))
             ctx.iri() != null -> mutableListOf(handleTurtleIRI(ctx.iri()))
             ctx.blankNodePropertyList() != null -> mutableListOf(handleBlankNodePropertyList(ctx.blankNodePropertyList()))
-            ctx.collection() != null -> mutableListOf(handleCollection(ctx.collection()))
+            ctx.collection() != null -> mutableListOf(handleCollection(ctx.collection()) as Object)
             else -> throw RuntimeException("Unexpected object")
         }
     }
@@ -259,17 +259,24 @@ private class TurtleDocVisitor: TurtleBaseVisitor<Model>() {
         return subject
     }
 
-    private fun handleCollection(ctx: Turtle.CollectionContext): BlankNode {
+    private fun handleCollection(ctx: Turtle.CollectionContext): Subject {
+        if (ctx.`object`().isEmpty()) {
+            return nilIRI
+        }
         val firstNode = handleBlankNode("ANON${++anonymousCounter}")
         var currentNode = firstNode
         var lastNode: BlankNode? = null
-        ctx.`object`().forEach {
+        val iterator = ctx.`object`().iterator()
+        while(iterator.hasNext()) {
             if (lastNode != null) {
                 model.addStatement(lastNode!!, restIRI, currentNode)
             }
-            val currentObject = handleObject(it)
+            val currentObject = handleObject(iterator.next())
             model.addStatement(currentNode, firstIRI, currentObject.first())
             lastNode = currentNode
+            if (iterator.hasNext()) {
+                currentNode = handleBlankNode("ANON${++anonymousCounter}")
+            }
         }
         model.addStatement(currentNode, restIRI, nilIRI)
         return firstNode
