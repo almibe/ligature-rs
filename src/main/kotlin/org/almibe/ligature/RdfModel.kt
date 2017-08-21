@@ -7,6 +7,7 @@ package org.almibe.ligature
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.stream.Stream
 
 interface Subject
 interface Predicate
@@ -22,11 +23,7 @@ data class TypedLiteral(override val value: String,
 
 interface ReadOnlyModel {
     fun statementsFor(subject: Subject): Set<Pair<Predicate, Object>>
-    fun getPredicates(): Set<Predicate>
-    fun getSubjects(): Set<Subject>
-    fun getObjects(): Set<Object>
-    fun getIRIs(): Set<IRI>
-    fun getLiterals(): Set<Literal>
+    fun getSubjects(): Stream<Subject>
 }
 
 interface Model: ReadOnlyModel {
@@ -94,7 +91,7 @@ class InMemoryModel: Model {
         return statements[subject] ?: setOf()
     }
 
-    override fun getPredicates(): Set<Predicate> {
+    fun getPredicates(): Set<Predicate> {
         val results = mutableSetOf<Predicate>()
         statements.forEach {
             it.value.forEach { (predicate) ->
@@ -104,11 +101,11 @@ class InMemoryModel: Model {
         return results
     }
 
-    override fun getSubjects(): Set<Subject> {
-        return statements.keys
+    override fun getSubjects(): Stream<Subject> {
+        return statements.keys.parallelStream()
     }
 
-    override fun getObjects(): Set<Object> {
+    fun getObjects(): Set<Object> {
         val results = mutableSetOf<Object>()
         statements.forEach {
             it.value.forEach { (_, `object`) ->
@@ -118,7 +115,7 @@ class InMemoryModel: Model {
         return results
     }
 
-    override fun getIRIs(): Set<IRI> {
+    fun getIRIs(): Set<IRI> {
         val results = mutableSetOf<IRI>()
         statements.forEach {
             if (it.key is IRI) {
@@ -134,7 +131,7 @@ class InMemoryModel: Model {
         return results
     }
 
-    override fun getLiterals(): Set<Literal> {
+    fun getLiterals(): Set<Literal> {
         val results = mutableSetOf<Literal>()
         statements.forEach {
             it.value.forEach { (_, `object`) ->
