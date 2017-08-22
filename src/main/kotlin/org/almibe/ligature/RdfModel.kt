@@ -29,6 +29,8 @@ interface ReadOnlyModel {
 interface Model: ReadOnlyModel {
     fun addModel(model: ReadOnlyModel)
     fun addStatement(subject: Subject, predicate: Predicate, `object`: Object)
+    fun removeStatement(subject: Subject, predicate: Predicate, `object`: Object)
+    fun removeSubject(subject: Subject)
 }
 
 class InMemoryModel: Model {
@@ -89,6 +91,14 @@ class InMemoryModel: Model {
 
     override fun statementsFor(subject: Subject): Set<Pair<Predicate, Object>> {
         return statements[subject] ?: setOf()
+    }
+
+    override fun removeSubject(subject: Subject) {
+        statements.remove(subject)
+    }
+
+    override fun removeStatement(subject: Subject, predicate: Predicate, `object`: Object) {
+        statements[subject]?.remove(Pair(predicate, `object`))
     }
 
     fun getPredicates(): Set<Predicate> {
