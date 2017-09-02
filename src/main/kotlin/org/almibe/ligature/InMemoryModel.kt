@@ -63,6 +63,10 @@ class InMemoryModel: Model {
             //add new value OR if value has been set since last checked add new pair
             statements.putIfAbsent(subject, newSet)?.add(pair)
         }
+        //make sure that object is persisted as a subject if it is one
+        if (`object` is Subject) {
+            addSubject(`object`)
+        }
     }
 
     override fun statementsFor(subject: Subject): Set<Pair<Predicate, Object>> {
@@ -70,11 +74,13 @@ class InMemoryModel: Model {
     }
 
     override fun addSubject(subject: Subject) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val newSet = Collections.newSetFromMap(ConcurrentHashMap<Pair<Predicate, Object>, Boolean>())
+        statements.putIfAbsent(subject, newSet)
     }
 
     override fun removeSubject(subject: Subject) {
         statements.remove(subject)
+        //TODO remove all statements that have this subject as the object
     }
 
     override fun removeStatement(subject: Subject, predicate: Predicate, `object`: Object) {
