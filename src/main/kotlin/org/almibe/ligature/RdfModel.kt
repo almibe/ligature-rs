@@ -27,10 +27,32 @@ interface ReadOnlyModel {
 }
 
 interface Model: ReadOnlyModel {
+    /**
+     * Adds the passed in model to this current one.  IRIs are merged and all blank nodes from the new model are
+     * given unique names in the current model.  Literals are not merged.
+     */
     fun addModel(model: ReadOnlyModel)
+    /**
+     * Add a given statement to this model.  The subject will be added if it doesn't already exist, a new predicate
+     * is always added to this subject, and the object is always created if it is a Literal otherwise a new object
+     * is only created if it doesn't already exist.
+     */
     fun addStatement(subject: Subject, predicate: Predicate, `object`: Object)
+    /**
+     * Remove a given statement from this model.  The subject is not removed, the predicate always is removed,
+     * and the object is removed only if it is a Literal.
+     */
     fun removeStatement(subject: Subject, predicate: Predicate, `object`: Object)
+    /**
+     * Remove a subject from this model.  All predicates related to this object are removed and all objects of those
+     * statements are removed if they are Literals, BlankNodes and IRIs are left in the model.  This method does
+     * nothing if the subject doesn't exist.
+     */
     fun removeSubject(subject: Subject)
+    /**
+     * Adds a new subject to this model or does nothing if this subject already exists.
+     */
+    fun addSubject(subject: Subject)
 }
 
 class InMemoryModel: Model {
@@ -91,6 +113,10 @@ class InMemoryModel: Model {
 
     override fun statementsFor(subject: Subject): Set<Pair<Predicate, Object>> {
         return statements[subject] ?: setOf()
+    }
+
+    override fun addSubject(subject: Subject) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun removeSubject(subject: Subject) {
