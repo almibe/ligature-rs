@@ -29,4 +29,16 @@ class InMemoryModelSpec extends Specification {
         model.IRIs == [NTriplesSpec.spiderMan, NTriplesSpec.enemyOf, NTriplesSpec.greenGoblin, new IRI("http://xmlns.com/foaf/0.1/name")].toSet()
         model.literals == [new LangLiteral("Dr. Octopus", "en"), new LangLiteral("Spiderman", "en")].toSet()
     }
+
+    def "adding a single subject should be saved without any statements attached to it"() {
+
+    }
+
+    def "removing a subject should remove all predicates attached to it and all literals attached to those predicates"() {
+
+    }
+
+    def "removing statements shouldn't remove any subjects just predicates and literals"() {
+
+    }
 }
