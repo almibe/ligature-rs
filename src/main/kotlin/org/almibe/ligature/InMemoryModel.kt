@@ -10,12 +10,13 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.stream.Stream
 import kotlin.collections.HashMap
+import kotlin.concurrent.read
 import kotlin.concurrent.write
 
 class InMemoryModel: Model {
     //TODO replace ConcurrentHashMap with Lock/sync and multiple collections
     private val lock = ReentrantReadWriteLock()
-    val statements: MutableMap<Subject, MutableSet<Pair<Predicate, Object>>> = HashMap()
+    private val statements: MutableMap<Subject, MutableSet<Pair<Predicate, Object>>> = HashMap()
     private val blankNodeCounter = AtomicInteger()
 
     /**
@@ -78,7 +79,7 @@ class InMemoryModel: Model {
     }
 
     override fun statementsFor(subject: Subject): Set<Pair<Predicate, Object>> {
-        return statements[subject] ?: setOf()
+        return lock.read { statements[subject] ?: setOf() }
     }
 
     override fun addSubject(subject: Subject) {
@@ -91,7 +92,14 @@ class InMemoryModel: Model {
     override fun removeSubject(subject: Subject) {
         lock.write {
             statements.remove(subject)
-            //TODO remove all statements that have this subject as the object
+            //remove all statements that have this subject as the object
+            statements.keys.forEach { currentSubject ->
+                statements[currentSubject]?.forEach { statement ->
+                    if (statement.second == subject) {
+                        statements[currentSubject]?.remove(statement)
+                    }
+                }
+            }
         }
     }
 
@@ -103,23 +111,27 @@ class InMemoryModel: Model {
 
     fun getPredicates(): Set<Predicate> {
         val results = mutableSetOf<Predicate>()
-        statements.forEach {
-            it.value.forEach { (predicate) ->
-                results.add(predicate)
+        lock.read {
+            statements.forEach {
+                it.value.forEach { (predicate) ->
+                    results.add(predicate)
+                }
             }
         }
         return results
     }
 
     override fun getSubjects(): Stream<Subject> {
-        return statements.keys.parallelStream()
+        return lock.read { statements.keys.parallelStream() }
     }
 
     fun getObjects(): Set<Object> {
         val results = mutableSetOf<Object>()
-        statements.forEach {
-            it.value.forEach { (_, `object`) ->
-                results.add(`object`)
+        lock.read {
+            statements.forEach {
+                it.value.forEach { (_, `object`) ->
+                    results.add(`object`)
+                }
             }
         }
         return results
@@ -127,14 +139,16 @@ class InMemoryModel: Model {
 
     fun getIRIs(): Set<IRI> {
         val results = mutableSetOf<IRI>()
-        statements.forEach {
-            if (it.key is IRI) {
-                results.add(it.key as IRI)
-            }
-            it.value.forEach { (predicate, `object`) ->
-                results.add(predicate as IRI)
-                if (`object` is IRI) {
-                    results.add(`object`)
+        lock.read {
+            statements.forEach {
+                if (it.key is IRI) {
+                    results.add(it.key as IRI)
+                }
+                it.value.forEach { (predicate, `object`) ->
+                    results.add(predicate as IRI)
+                    if (`object` is IRI) {
+                        results.add(`object`)
+                    }
                 }
             }
         }
@@ -143,10 +157,12 @@ class InMemoryModel: Model {
 
     fun getLiterals(): Set<Literal> {
         val results = mutableSetOf<Literal>()
-        statements.forEach {
-            it.value.forEach { (_, `object`) ->
-                if (`object` is Literal) {
-                    results.add(`object`)
+        lock.read {
+            statements.forEach {
+                it.value.forEach { (_, `object`) ->
+                    if (`object` is Literal) {
+                        results.add(`object`)
+                    }
                 }
             }
         }
