@@ -8,7 +8,6 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.ReentrantReadWriteLock
-import java.util.stream.Stream
 import kotlin.collections.HashMap
 import kotlin.concurrent.read
 import kotlin.concurrent.write
@@ -121,8 +120,8 @@ class InMemoryModel: Model {
         return results
     }
 
-    override fun getSubjects(): Stream<Subject> {
-        return lock.read { statements.keys.parallelStream() }
+    override fun getSubjects(): Set<Subject> {
+        return lock.read { statements.keys }
     }
 
     fun getObjects(): Set<Object> {

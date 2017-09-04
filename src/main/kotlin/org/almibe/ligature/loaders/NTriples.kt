@@ -62,8 +62,7 @@ private class TriplesNTripleListener : NTriplesBaseListener() {
 
     internal fun handleIRI(iriRef: String): IRI {
         if (iriRef.length > 2) {
-            val iri = IRI(iriRef.substring(1, (iriRef.length-1)))
-            return iri
+            return IRI(iriRef.substring(1, (iriRef.length-1)))
         } else {
             throw RuntimeException("Invalid iriRef - $iriRef")
         }
@@ -75,31 +74,31 @@ private class TriplesNTripleListener : NTriplesBaseListener() {
         } else {
             throw RuntimeException("Invalid literal.")
         }
-        val literal = when {
+        val result = when {
             literal.LANGTAG() != null -> LangLiteral(value, literal.LANGTAG().text.substring(1))
             literal.IRIREF() != null -> TypedLiteral(value, handleIRI(literal.IRIREF().text))
             else -> TypedLiteral(value)
         }
-        model.addStatement(currentTriple.subject, currentTriple.predicate, literal)
+        model.addStatement(currentTriple.subject, currentTriple.predicate, result)
     }
 
     fun handleBlankNode(blankNode: String): BlankNode {
-        if (blankNode.length > 2) {
+        return if (blankNode.length > 2) {
             val blankNodeLabel = blankNode.substring(2)
             if (blankNodes.containsKey(blankNodeLabel)) {
-                return blankNodes[blankNodeLabel]!!
+                blankNodes[blankNodeLabel]!!
             } else {
                 val newBlankNode = BlankNode(blankNodeLabel)
                 blankNodes[blankNodeLabel] = newBlankNode
-                return newBlankNode
+                newBlankNode
             }
         } else {
             throw RuntimeException("Invalid blank node label - $blankNode")
         }
     }
 
-    fun handleObject(objectVertx: Object) {
-        model.addStatement(currentTriple.subject, currentTriple.predicate, objectVertx)
+    fun handleObject(objectVertex: Object) {
+        model.addStatement(currentTriple.subject, currentTriple.predicate, objectVertex)
     }
 
     internal class TempTriple {

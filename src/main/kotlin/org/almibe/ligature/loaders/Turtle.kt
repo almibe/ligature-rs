@@ -167,14 +167,11 @@ private class TurtleDocVisitor: TurtleBaseVisitor<Model>() {
     }
 
     private fun handleNumericLiteral(ctx: Turtle.NumericLiteralContext): Literal {
-        return if (ctx.DECIMAL() != null) {
-            TypedLiteral(ctx.DECIMAL().text, decimalIRI)
-        } else if (ctx.DOUBLE() != null) {
-            TypedLiteral(ctx.DOUBLE().text, doubleIRI)
-        } else if (ctx.INTEGER() != null) {
-            TypedLiteral(ctx.INTEGER().text, integerIRI)
-        } else {
-            throw RuntimeException("Unexpected Numeric type")
+        return when {
+            ctx.DECIMAL() != null -> TypedLiteral(ctx.DECIMAL().text, decimalIRI)
+            ctx.DOUBLE() != null -> TypedLiteral(ctx.DOUBLE().text, doubleIRI)
+            ctx.INTEGER() != null -> TypedLiteral(ctx.INTEGER().text, integerIRI)
+            else -> throw RuntimeException("Unexpected Numeric type")
         }
     }
 
@@ -224,12 +221,10 @@ private class TurtleDocVisitor: TurtleBaseVisitor<Model>() {
     private fun handleTurtleIRI(ctx: Turtle.IriContext): IRI {
         return if (ctx.PREFIXED_NAME() != null) {
             val prefix = ctx.PREFIXED_NAME().text.split(":")
-            if (prefix.size == 1) {
-                IRI(prefixes[""] + prefix[0])
-            } else if (prefix.size == 2) {
-                IRI(prefixes[prefix[0]] + prefix[1])
-            } else {
-                throw RuntimeException("Unexpected IRI prefix value ${ctx.PREFIXED_NAME().text}")
+            when {
+                prefix.size == 1 -> IRI(prefixes[""] + prefix[0])
+                prefix.size == 2 -> IRI(prefixes[prefix[0]] + prefix[1])
+                else -> throw RuntimeException("Unexpected IRI prefix value ${ctx.PREFIXED_NAME().text}")
             }
         } else {
             IRI(handleTurtleIRIRef(ctx.iriRef()))
@@ -237,12 +232,10 @@ private class TurtleDocVisitor: TurtleBaseVisitor<Model>() {
     }
 
     private fun handleTurtleIRIRef(ctx: Turtle.IriRefContext): String {
-        return if (ctx.ABSOLUTE_IRI() != null) {
-            ctx.ABSOLUTE_IRI().text
-        } else if (ctx.RELATIVE_IRI() != null) {
-            base + ctx.RELATIVE_IRI().text
-        } else {
-            throw RuntimeException("Unexpected IRI type")
+        return when {
+            ctx.ABSOLUTE_IRI() != null -> ctx.ABSOLUTE_IRI().text
+            ctx.RELATIVE_IRI() != null -> base + ctx.RELATIVE_IRI().text
+            else -> throw RuntimeException("Unexpected IRI type")
         }
     }
 
@@ -269,7 +262,7 @@ private class TurtleDocVisitor: TurtleBaseVisitor<Model>() {
         val iterator = ctx.`object`().iterator()
         while(iterator.hasNext()) {
             if (lastNode != null) {
-                model.addStatement(lastNode!!, restIRI, currentNode)
+                model.addStatement(lastNode, restIRI, currentNode)
             }
             val currentObject = handleObject(iterator.next())
             model.addStatement(currentNode, firstIRI, currentObject.first())

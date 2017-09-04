@@ -4,8 +4,6 @@
 
 package org.almibe.ligature
 
-import java.util.stream.Stream
-
 interface Subject
 interface Predicate
 interface Object
@@ -19,8 +17,9 @@ data class TypedLiteral(override val value: String,
                         val datatypeIRI: IRI = IRI("http://www.w3.org/2001/XMLSchema#string")) : Literal
 
 interface ReadOnlyModel {
+    //TODO probably remove these two methods and just have a more general query dsl/sparql support, see #36
     fun statementsFor(subject: Subject): Set<Pair<Predicate, Object>>
-    fun getSubjects(): Stream<Subject>
+    fun getSubjects(): Set<Subject>
 }
 
 interface Model: ReadOnlyModel {
