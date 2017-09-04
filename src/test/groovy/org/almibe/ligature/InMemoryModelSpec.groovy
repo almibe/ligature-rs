@@ -11,7 +11,7 @@ class InMemoryModelSpec extends Specification {
         given:
         model.addStatement(NTriplesSpec.spiderMan, NTriplesSpec.enemyOf, NTriplesSpec.greenGoblin)
         expect:
-        model.subjects == [NTriplesSpec.spiderMan].toSet()
+        model.subjects == [NTriplesSpec.spiderMan, NTriplesSpec.greenGoblin].toSet()
         model.statementsFor(NTriplesSpec.spiderMan).toList() == [new Pair(NTriplesSpec.enemyOf, NTriplesSpec.greenGoblin)]
     }
 
@@ -30,15 +30,15 @@ class InMemoryModelSpec extends Specification {
         model.literals == [new LangLiteral("Dr. Octopus", "en"), new LangLiteral("Spiderman", "en")].toSet()
     }
 
-    def "adding a single subject should be saved without any statements attached to it"() {
-
-    }
-
-    def "removing a subject should remove all predicates attached to it and all literals attached to those predicates"() {
-
-    }
-
-    def "removing statements shouldn't remove any subjects just predicates and literals"() {
-
-    }
+//    def "adding a single subject should be saved without any statements attached to it"() {
+//
+//    }
+//
+//    def "removing a subject should remove all predicates attached to it and all literals attached to those predicates"() {
+//
+//    }
+//
+//    def "removing statements shouldn't remove any subjects just predicates and literals"() {
+//
+//    }
 }

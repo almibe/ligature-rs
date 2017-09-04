@@ -8,7 +8,8 @@ import org.almibe.ligature.*
 import spock.lang.Specification
 
 class TurtleSpec extends Specification {
-    def ligature = new Ligature(new InMemoryModel())
+    def model = new InMemoryModel()
+    def ligature = new Ligature(model)
     def turtle = new Turtle()
     def expectedModel = new InMemoryModel()
     final def xsd = "http://www.w3.org/2001/XMLSchema#"
@@ -25,7 +26,7 @@ class TurtleSpec extends Specification {
         }
     }
 
-    boolean compareModels(ReadOnlyModel results, ReadOnlyModel expectedResults) {
+    boolean compareModels(InMemoryModel results, InMemoryModel expectedResults) {
         assert results.subjects == expectedResults.subjects
         assert results.objects == expectedResults.objects
         assert results.predicates == expectedResults.predicates
@@ -40,7 +41,7 @@ class TurtleSpec extends Specification {
         ligature.loadTurtle(this.class.getResource("/turtle/01-basicTriple.ttl").text)
         expectedModel.addStatement(NTriplesSpec.spiderMan, NTriplesSpec.enemyOf, NTriplesSpec.greenGoblin)
         expect:
-        compareModels(ligature, expectedModel)
+        compareModels(model, expectedModel)
     }
 
     final def "support predicate lists"() {
@@ -50,7 +51,7 @@ class TurtleSpec extends Specification {
         expectedModel.addStatement(NTriplesSpec.spiderMan, new IRI("http://xmlns.com/foaf/0.1/name"),
                 new TypedLiteral("Spiderman", new IRI("http://www.w3.org/2001/XMLSchema#string")))
         expect:
-        compareModels(ligature, expectedModel)
+        compareModels(model, expectedModel)
     }
 
     final def "support object lists"() {
@@ -61,7 +62,7 @@ class TurtleSpec extends Specification {
         expectedModel.addStatement(NTriplesSpec.spiderMan, new IRI("http://xmlns.com/foaf/0.1/name"),
                 new LangLiteral("Человек-паук", "ru"))
         expect:
-        compareModels(ligature, expectedModel)
+        compareModels(model, expectedModel)
     }
 
     final def "support comments"() {
@@ -71,7 +72,7 @@ class TurtleSpec extends Specification {
         expectedModel.addStatement(NTriplesSpec.spiderMan, new IRI("http://xmlns.com/foaf/0.1/name"),
                 new TypedLiteral("Spiderman", new IRI("http://www.w3.org/2001/XMLSchema#string")))
         expect:
-        compareModels(ligature, expectedModel)
+        compareModels(model, expectedModel)
     }
 
     final def "support multiline triples"() {
@@ -79,7 +80,7 @@ class TurtleSpec extends Specification {
         ligature.loadTurtle(this.class.getResource("/turtle/05-multilineTriple.ttl").text)
         expectedModel.addStatement(NTriplesSpec.spiderMan, NTriplesSpec.enemyOf, NTriplesSpec.greenGoblin)
         expect:
-        compareModels(ligature, expectedModel)
+        compareModels(model, expectedModel)
     }
 
     final def base = "http://one.example/"
@@ -94,7 +95,7 @@ class TurtleSpec extends Specification {
         expectedModel.addStatement(new IRI("${base}subject2"), new IRI("${base}predicate2"), new IRI("${base}object2"))
         expectedModel.addStatement(new IRI("${base2}subject2"), new IRI("${base2}predicate2"), new IRI("${base2}object2"))
         expect:
-        compareModels(ligature, expectedModel)
+        compareModels(model, expectedModel)
     }
 
     final def "turtle IRI parsing with prefixes"() {
@@ -107,7 +108,7 @@ class TurtleSpec extends Specification {
         expectedModel.addStatement(new IRI("${base3}subject6"), new IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), new IRI("${base3}subject7"))
         expectedModel.addStatement(new IRI("http://伝言.example/?user=أكرم&amp;channel=R%26D"), new IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), new IRI("${base3}subject8"))
         expect:
-        compareModels(ligature, expectedModel)
+        compareModels(model, expectedModel)
     }
 
     final def "support language literals"() {
@@ -116,7 +117,7 @@ class TurtleSpec extends Specification {
         expectedModel.addStatement(new IRI("http://example.org/#spiderman"),
                 new IRI("http://xmlns.com/foaf/0.1/name"), new LangLiteral("Человек-паук", "ru"))
         expect:
-        compareModels(ligature, expectedModel)
+        compareModels(model, expectedModel)
     }
 
     final def "support quoted literals"() {
@@ -142,7 +143,7 @@ class TurtleSpec extends Specification {
         expectedModel.addStatement(show219, blurb, new TypedLiteral(multilineText2, new IRI("${base}long-string")))
         expectedModel.addStatement(show219, blurb, new TypedLiteral("", stringIRI))
         expect:
-        compareModels(ligature, expectedModel)
+        compareModels(model, expectedModel)
     }
 
     final def "support number types"() {
@@ -154,7 +155,7 @@ class TurtleSpec extends Specification {
         expectedModel.addStatement(new IRI(helium), new IRI("${prefix}atomicMass"), new TypedLiteral("4.002602", new IRI("${xsd}float")))
         expectedModel.addStatement(new IRI(helium), new IRI("${prefix}specificGravity"), new TypedLiteral("1.663E-4", new IRI("${xsd}double")))
         expect:
-        compareModels(ligature, expectedModel)
+        compareModels(model, expectedModel)
     }
 
     final def "support booleans"() {
@@ -163,7 +164,7 @@ class TurtleSpec extends Specification {
         expectedModel.addStatement(new IRI("http://somecountry.example/census2007"), new IRI("http://example.org/stats/isLandlocked"),
                 new TypedLiteral("false", new IRI("${xsd}boolean")))
         expect:
-        compareModels(ligature, expectedModel)
+        compareModels(model, expectedModel)
     }
 
     final def "support blank nodes"() {
@@ -229,7 +230,7 @@ class TurtleSpec extends Specification {
 ////////                new Triple(new IRI(""),IRI(""),IRI(""))
 ////////        )
 ////////        ligature.loadTurtle(this.class.getResource("/turtle/wordnetStinkpot.ttl").text)
-////////        compareModels(ligature, expectedModel)
+////////        compareModels(model, expectedModel)
 ////////    }
 //////
 //////    final def malformedQuotedLiterals() {

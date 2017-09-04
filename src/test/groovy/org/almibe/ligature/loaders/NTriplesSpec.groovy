@@ -9,7 +9,8 @@ import org.almibe.ligature.*
 import spock.lang.Specification
 
 class NTriplesSpec extends Specification {
-    def ligature = new Ligature(new InMemoryModel())
+    def model = new InMemoryModel()
+    def ligature = new Ligature(model)
     final stringIRI = new IRI("http://www.w3.org/2001/XMLSchema#string")
     static final spiderMan = new IRI("http://example.org/#spiderman")
     static final greenGoblin = new IRI("http://example.org/#green-goblin")
@@ -23,8 +24,8 @@ class NTriplesSpec extends Specification {
         ligature.loadNTriples(this.class.getResource("/ntriples/01-basicTriple.nt").text)
         expect:
         ligature.statementsFor(spiderMan) == [new Pair<Predicate, Object>(enemyOf, greenGoblin)].toSet()
-        ligature.subjects.size() == 1
-        ligature.IRIs.size() == 3
+        ligature.subjects.size() == 2
+        model.IRIs.size() == 3
     }
 
     def "support multiple IRI triples"() {
@@ -32,9 +33,9 @@ class NTriplesSpec extends Specification {
         ligature.loadNTriples(this.class.getResource("/ntriples/02-multipleIRITriples.nt").text)
         expect:
         ligature.statementsFor(spiderMan) == [new Pair(enemyOf, greenGoblin), new Pair(enemyOf, new IRI("http://example.org/#black-cat"))].toSet()
-        ligature.subjects.size() == 1
-        ligature.objects.size() == 2
-        ligature.predicates.size() == 1
+        ligature.subjects.size() == 3
+        model.objects.size() == 2
+        model.predicates.size() == 1
     }
 
     def "support beginning of line and end of line comments"() {
@@ -42,8 +43,8 @@ class NTriplesSpec extends Specification {
         ligature.loadNTriples(this.class.getResource("/ntriples/03-comments.nt").text)
         expect:
         ligature.statementsFor(spiderMan) == [new Pair(enemyOf, greenGoblin)].toSet()
-        ligature.subjects.size() == 1
-        ligature.IRIs.size() == 3
+        ligature.subjects.size() == 2
+        model.IRIs.size() == 3
     }
 
     def "support literals with languages and types"() {
@@ -60,7 +61,7 @@ class NTriplesSpec extends Specification {
         ligature.statementsFor(helium) == [
                 new Pair(new IRI("http://example.org/elements/atomicNumber"), new TypedLiteral("2", new IRI("http://www.w3.org/2001/XMLSchema#integer"))),
                 new Pair(new IRI("http://example.org/elements/specificGravity"), new TypedLiteral("1.663E-4", new IRI("http://www.w3.org/2001/XMLSchema#double")))].toSet()
-        ligature.literals == [new TypedLiteral("That Seventies Show", stringIRI),
+        model.literals == [new TypedLiteral("That Seventies Show", stringIRI),
                 new LangLiteral("That Seventies Show", "en"),
                 new LangLiteral("Cette Série des Années Septante", "fr-be"),
                 new TypedLiteral("This is a multi-line\\nliteral with many quotes (\\\"\\\"\\\"\\\"\\\")\\nand two apostrophes ('').", stringIRI),
@@ -88,8 +89,8 @@ class NTriplesSpec extends Specification {
         ligature.loadNTriples(this.class.getResource("/ntriples/05-blankNodes.nt").text)
         expect:
         ligature.subjects.size() == 4
-        ligature.predicates.size() == 1
-        ligature.objects.size() == 4
+        model.predicates.size() == 1
+        ligature.model.objects.size() == 4
         ligature.statementsFor(new BlankNode("bob_1")) == [
                 new Pair(new IRI("http://xmlns.com/foaf/0.1/knows"), new BlankNode("alice_2"))].toSet()
         ligature.statementsFor(new BlankNode("alice_2")) == [
