@@ -13,4 +13,4 @@ Turtle (https://www.w3.org/TR/turtle/) specifications with ANTRL grammars
 
 Related projects
 * almibe/ligature-grammar - the ANTLR grammars used by this project
-* almibe/ligature-store - backend for Ligature based on using OrientDB to persist values
+* almibe/ligature-store - backend for Ligature that persists values to disk
