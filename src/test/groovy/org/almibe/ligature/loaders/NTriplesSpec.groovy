@@ -12,12 +12,12 @@ class NTriplesSpec extends Specification {
     def model = new InMemoryModel()
     def ligature = new Ligature(model)
     final stringIRI = new IRI("http://www.w3.org/2001/XMLSchema#string")
-    static final spiderMan = new IRI("http://example.org/#spiderman")
-    static final greenGoblin = new IRI("http://example.org/#green-goblin")
-    static final enemyOf = new IRI("http://www.perceive.net/schemas/relationship/enemyOf")
-    static final thatSeventiesShow = new IRI("http://example.org/show/218")
-    static final helium = new IRI("http://en.wikipedia.org/wiki/Helium")
-    static final label = new IRI("http://www.w3.org/2000/01/rdf-schema#label")
+    public static final IRI spiderMan = new IRI("http://example.org/#spiderman")
+    public static final IRI greenGoblin = new IRI("http://example.org/#green-goblin")
+    public static final IRI enemyOf = new IRI("http://www.perceive.net/schemas/relationship/enemyOf")
+    public static final IRI thatSeventiesShow = new IRI("http://example.org/show/218")
+    public static final IRI helium = new IRI("http://en.wikipedia.org/wiki/Helium")
+    public static final IRI label = new IRI("http://www.w3.org/2000/01/rdf-schema#label")
 
     def "support basic IRI triple"() {
         given:
