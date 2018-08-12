@@ -10,11 +10,12 @@ import org.almibe.ligature.parser.turtle.Turtle
 import org.almibe.ligature.parser.turtle.TurtleBaseVisitor
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
+import java.io.Reader
 import java.util.*
 
 class Turtle {
-    fun loadTurtle(text: String): ReadOnlyModel {
-        val stream = CharStreams.fromString(text)
+    fun loadTurtle(reader: Reader): ReadOnlyModel {
+        val stream = CharStreams.fromReader(reader)
         val lexer = ModalTurtleLexer(stream)
         val tokens = CommonTokenStream(lexer)
         val parser = Turtle(tokens)

@@ -12,10 +12,11 @@ import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.tree.ErrorNode
 import org.antlr.v4.runtime.tree.ParseTreeWalker
+import java.io.Reader
 
 class NTriples {
-    fun loadNTriples(text: String): ReadOnlyModel {
-        val stream = CharStreams.fromString(text)
+    fun loadNTriples(reader: Reader): ReadOnlyModel {
+        val stream = CharStreams.fromReader(reader)
         val lexer = NTriplesLexer(stream)
         val tokens = CommonTokenStream(lexer)
         val parser = NTriplesParser(tokens)

@@ -6,16 +6,18 @@ package org.almibe.ligature
 
 import org.almibe.ligature.loaders.NTriples
 import org.almibe.ligature.loaders.Turtle
+import java.io.Reader
 
 class Ligature(val model: Model): Model by model {
     private val nTriples = NTriples()
     private val turtle = Turtle()
-    fun loadNTriples(text: String) {
-        val loadedModel = nTriples.loadNTriples(text)
+
+    fun loadNTriples(reader: Reader) {
+        val loadedModel = nTriples.loadNTriples(reader)
         model.addModel(loadedModel)
     }
-    fun loadTurtle(text: String) {
-        val loadedModel = turtle.loadTurtle(text)
+    fun loadTurtle(reader: Reader) {
+        val loadedModel = turtle.loadTurtle(reader)
         model.addModel(loadedModel)
     }
 }
