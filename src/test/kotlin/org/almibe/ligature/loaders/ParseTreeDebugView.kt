@@ -12,6 +12,7 @@ import org.antlr.v4.gui.TreeViewer
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import java.awt.BorderLayout
+import java.awt.event.ActionListener
 import javax.swing.*
 
 fun main(args: Array<String>) {
@@ -42,30 +43,41 @@ class ParseTreeDebugView {
         buttonBox.add(ntriplesButton)
         buttonBox.add(turtleButton)
 
-        splitPane.add(topControls)
-        splitPane.add(bottomScrollPane)
+        splitPane.orientation = JSplitPane.VERTICAL_SPLIT
 
-        splitPane.orientation = JSplitPane.HORIZONTAL_SPLIT
-        splitPane.setDividerLocation(0.7)
+        splitPane.add(topControls, JSplitPane.TOP)
+        splitPane.add(bottomScrollPane, JSplitPane.BOTTOM)
 
         frame.setSize(1200, 800)
         frame.add(splitPane)
         frame.title = "Ligature Parser Debugger"
         frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
         frame.isVisible = true
-        checkDisplay() //TODO should be called on a timer?
+        splitPane.setDividerLocation(0.15)
+        checkDisplay()
+
+        val timer = Timer(500, ActionListener {
+            checkDisplay()
+        })
+        timer.isRepeats = true
+        timer.start()
     }
 
     fun checkDisplay() {
         SwingUtilities.invokeLater {
-//            val component = ntriplesButton.selected ? createNTriplesTreeView(textArea.text) :
-//            createTurtleTreeView(textArea.text)
-//            updateSwingNode(component)
+            val component = if (ntriplesButton.isSelected) {
+                createNTriplesTreeView(textArea.text)
+            } else {
+                createTurtleTreeView(textArea.text)
+            }
+            updateSwingNode(component)
         }
     }
 
     fun updateSwingNode(component: TreeViewer) {
         SwingUtilities.invokeLater {
+            swingNode.removeAll()
+            swingNode.add(component)
             component.scale = 1.5
         }
     }
