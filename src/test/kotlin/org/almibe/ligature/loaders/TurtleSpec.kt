@@ -6,7 +6,6 @@ package org.almibe.ligature.loaders
 
 import io.kotlintest.specs.StringSpec
 import org.almibe.ligature.*
-import spock.lang.Specification
 
 class TurtleSpec : StringSpec() {
     override fun isInstancePerTest() = true
@@ -41,14 +40,13 @@ class TurtleSpec : StringSpec() {
         }
 
         "support basic IRI triple" {
-
             ligature.loadTurtle(readText("/turtle/01-basicTriple.ttl"))
             expectedModel.addStatement(spiderMan, enemyOf, greenGoblin)
 
             compareModels(model, expectedModel)
         }
-        "support predicate lists" {
 
+        "support predicate lists" {
             ligature.loadTurtle(readText("/turtle/02-predicateList.ttl"))
             expectedModel.addStatement(spiderMan, enemyOf, greenGoblin)
             expectedModel.addStatement(spiderMan, IRI("http://xmlns.com/foaf/0.1/name"),
@@ -58,7 +56,6 @@ class TurtleSpec : StringSpec() {
         }
 
         "support object lists" {
-
             ligature.loadTurtle(readText("/turtle/03-objectList.ttl"))
             expectedModel.addStatement(spiderMan, IRI("http://xmlns.com/foaf/0.1/name"),
                     TypedLiteral("Spiderman", IRI("http://www.w3.org/2001/XMLSchema#string")))
@@ -69,7 +66,6 @@ class TurtleSpec : StringSpec() {
         }
 
         "support comments" {
-
             ligature.loadTurtle(readText("/turtle/04-comments.ttl"))
             expectedModel.addStatement(spiderMan, enemyOf, greenGoblin)
             expectedModel.addStatement(spiderMan, IRI("http://xmlns.com/foaf/0.1/name"),
@@ -79,7 +75,6 @@ class TurtleSpec : StringSpec() {
         }
 
         "support multiline triples" {
-
             ligature.loadTurtle(readText("/turtle/05-multilineTriple.ttl"))
             expectedModel.addStatement(spiderMan, enemyOf, greenGoblin)
 
@@ -93,7 +88,6 @@ class TurtleSpec : StringSpec() {
         val base3 = "http://another.example/"
 
         "turtle IRI parsing with base" {
-
             ligature.loadTurtle(readText("/turtle/06-baseTriples.ttl"))
             expectedModel.addStatement(IRI("${base}subject2"), IRI("${base}predicate2"), IRI("${base}object2"))
             expectedModel.addStatement(IRI("${base2}subject2"), IRI("${base2}predicate2"), IRI("${base2}object2"))
@@ -102,7 +96,6 @@ class TurtleSpec : StringSpec() {
         }
 
         "turtle IRI parsing with prefixes" {
-
             ligature.loadTurtle(readText("/turtle/07-prefixTriples.ttl"))
             expectedModel.addStatement(IRI("${baseTwo}subject3"), IRI("${baseTwo}predicate3"), IRI("${baseTwo}object3"))
             expectedModel.addStatement(IRI("${baseTwo2}subject3"), IRI("${baseTwo2}predicate3"), IRI("${baseTwo2}object3"))
@@ -113,8 +106,8 @@ class TurtleSpec : StringSpec() {
 
             compareModels(model, expectedModel)
         }
-        "support language literals" {
 
+        "support language literals" {
             ligature.loadTurtle(readText("/turtle/08-literalWithLanguage.ttl"))
             expectedModel.addStatement(IRI("http://example.org/#spiderman"),
                     IRI("http://xmlns.com/foaf/0.1/name"), LangLiteral("Человек-паук", "ru"))
@@ -123,7 +116,6 @@ class TurtleSpec : StringSpec() {
         }
 
         "support quoted literals" {
-
             val base = "http://www.libraryweasel.org/fake/madeup#"
             val show = IRI("http://example.org/vocab/show/218")
             val show219 = IRI("http://example.org/vocab/show/219")
@@ -149,7 +141,6 @@ class TurtleSpec : StringSpec() {
         }
 
         "support number types" {
-
             val helium = "http://en.wikipedia.org/wiki/Helium"
             val prefix = "http://example.org/elements"
             ligature.loadTurtle(readText("/turtle/10-numbers.ttl"))
@@ -161,7 +152,6 @@ class TurtleSpec : StringSpec() {
         }
 
         "support booleans" {
-
             ligature.loadTurtle(readText("/turtle/11-booleans.ttl"))
             expectedModel.addStatement(IRI("http://somecountry.example/census2007"), IRI("http://example.org/stats/isLandlocked"),
                     TypedLiteral("false", IRI("${xsd}boolean")))
@@ -170,8 +160,7 @@ class TurtleSpec : StringSpec() {
         }
 
         "support blank nodes" {
-
-            def result = turtle.loadTurtle(readText("/turtle/12-blankNodes.ttl"))
+            val result: InMemoryModel = turtle.loadTurtle(readText("/turtle/12-blankNodes.ttl")) as InMemoryModel
             expectedModel.addStatement(BlankNode("alice"), IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("bob"))
             expectedModel.addStatement(BlankNode("bob"), IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("alice"))
 
@@ -179,8 +168,7 @@ class TurtleSpec : StringSpec() {
         }
 
         "unlabeled blank nodes" {
-
-            def result = turtle.loadTurtle(readText("/turtle/13-unlabeledBlankNodes.ttl"))
+            val result = turtle.loadTurtle(readText("/turtle/13-unlabeledBlankNodes.ttl")) as InMemoryModel
             expectedModel.addStatement(IRI("http://example.com/person/bob"), foafKnows, IRI("http://example.com/person/george"))
             expectedModel.addStatement(BlankNode("ANON1"), foafKnows, IRI("http://example.com/person/george"))
             expectedModel.addStatement(IRI("http://example.com/person/bob"), foafKnows, BlankNode("ANON2"))
@@ -190,8 +178,7 @@ class TurtleSpec : StringSpec() {
         }
 
         "nested unlabeled blank nodes" {
-
-            def result = turtle.loadTurtle(readText("/turtle/14-nestedUnlabeledBlankNodes.ttl"))
+            val result = turtle.loadTurtle(readText("/turtle/14-nestedUnlabeledBlankNodes.ttl")) as InMemoryModel
             expectedModel.addStatement(BlankNode("ANON2"), IRI("http://xmlns.com/foaf/0.1/name"), TypedLiteral("Bob", org.almibe.ligature.loaders.stringIRI))
             expectedModel.addStatement(BlankNode("ANON1"), IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("ANON2"))
 
@@ -199,8 +186,7 @@ class TurtleSpec : StringSpec() {
         }
 
         "complex unlabeled blank nodes" {
-
-            def result = turtle.loadTurtle(readText("/turtle/15-complexUnlabeledBlankNodes.ttl"))
+            val result = turtle.loadTurtle(readText("/turtle/15-complexUnlabeledBlankNodes.ttl")) as InMemoryModel
             expectedModel.addStatement(BlankNode("ANON1"), IRI("http://xmlns.com/foaf/0.1/name"), TypedLiteral("Alice", org.almibe.ligature.loaders.stringIRI))
             expectedModel.addStatement(BlankNode("ANON2"), IRI("http://xmlns.com/foaf/0.1/name"), TypedLiteral("Bob", org.almibe.ligature.loaders.stringIRI))
             expectedModel.addStatement(BlankNode("ANON1"), IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("ANON2"))
@@ -212,8 +198,7 @@ class TurtleSpec : StringSpec() {
         }
 
         "support collections" {
-
-            def result = turtle.loadTurtle(readText("/turtle/16-collections.ttl"))
+            val result = turtle.loadTurtle(readText("/turtle/16-collections.ttl")) as InMemoryModel
             expectedModel.addStatement(IRI("http://example.org/foo/subject"), IRI("http://example.org/foo/predicate"), BlankNode("ANON1"))
             expectedModel.addStatement(BlankNode("ANON1"), IRI("${rdf}first"), IRI("http://example.org/foo/a"))
             expectedModel.addStatement(BlankNode("ANON1"), IRI("${rdf}rest"), BlankNode("ANON2"))
@@ -227,10 +212,6 @@ class TurtleSpec : StringSpec() {
         }
 
     }
-
-
-
-
 
 ////////
 ////////    //TODO examples 19-26 and wordnetStinkpot.ttl
