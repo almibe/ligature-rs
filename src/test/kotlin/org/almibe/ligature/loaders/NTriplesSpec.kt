@@ -12,7 +12,7 @@ class NTriplesSpec : StringSpec() {
     override fun isInstancePerTest() = true
     
     init {
-        val model = InMemoryModel()
+        val model = InMemoryGraph()
         val ligature = Ligature(model)
 
         "support basic IRI triple" {

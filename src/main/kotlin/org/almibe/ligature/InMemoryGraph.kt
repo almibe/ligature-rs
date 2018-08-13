@@ -12,7 +12,7 @@ import kotlin.collections.HashMap
 import kotlin.concurrent.read
 import kotlin.concurrent.write
 
-class InMemoryModel: Model {
+class InMemoryGraph: Graph {
     //TODO replace ConcurrentHashMap with Lock/sync and multiple collections
     private val lock = ReentrantReadWriteLock()
     private val statements: MutableMap<Subject, MutableSet<Pair<Predicate, Object>>> = HashMap()
@@ -22,17 +22,17 @@ class InMemoryModel: Model {
      * Adds the contents of the passed in model to this model.  Every blank node from the model that is passed in
      * is given a unique name and no blank node merging is attempted.
      */
-    override fun addModel(model: ReadOnlyModel) {
+    override fun addModel(graph: ReadOnlyGraph) {
         lock.write {
             val blankNodeMap = mutableMapOf<BlankNode, BlankNode>()
 
-            model.getSubjects().forEach { subject ->
+            graph.getSubjects().forEach { subject ->
                 val finalSubject = when (subject) {
                     is BlankNode -> createUniqueBlankNode(subject, blankNodeMap)
                     else -> subject
                 }
 
-                model.statementsFor(subject).forEach {
+                graph.statementsFor(subject).forEach {
                     val finalObject = when (it.second) {
                         is BlankNode -> createUniqueBlankNode(it.second as BlankNode, blankNodeMap)
                         else -> it.second

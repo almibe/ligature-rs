@@ -14,7 +14,7 @@ import java.io.Reader
 import java.util.*
 
 class Turtle {
-    fun loadTurtle(reader: Reader): ReadOnlyModel {
+    fun loadTurtle(reader: Reader): ReadOnlyGraph {
         val stream = CharStreams.fromReader(reader)
         val lexer = ModalTurtleLexer(stream)
         val tokens = CommonTokenStream(lexer)
@@ -32,14 +32,14 @@ val firstIRI = IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#first")
 val restIRI = IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#rest")
 val nilIRI = IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#nil")
 
-private class TurtleDocVisitor: TurtleBaseVisitor<Model>() {
-    val model = InMemoryModel()
+private class TurtleDocVisitor: TurtleBaseVisitor<Graph>() {
+    val model = InMemoryGraph()
     val prefixes: MutableMap<String, String> = mutableMapOf()
     lateinit var base: String
     var anonymousCounter = 0
     val blankNodes = HashMap<String, BlankNode>()
 
-    override fun visitTurtleDoc(ctx: Turtle.TurtleDocContext): Model {
+    override fun visitTurtleDoc(ctx: Turtle.TurtleDocContext): Graph {
         ctx.statement().forEach { statement ->
             when {
                 statement.directive() != null -> handleDirective(statement.directive())

@@ -11,25 +11,25 @@ class TurtleSpec : StringSpec() {
     override fun isInstancePerTest() = true
     
     init {
-        val model = InMemoryModel()
+        val model = InMemoryGraph()
         val ligature = Ligature(model)
         val turtle = Turtle()
-        val expectedModel = InMemoryModel()
+        val expectedModel = InMemoryGraph()
         val xsd = "http://www.w3.org/2001/XMLSchema#"
         val foafKnows = IRI("http://xmlns.com/foaf/0.1/knows")
         val rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
         val stringIRI = IRI("http://www.w3.org/2001/XMLSchema#string")
 
-        fun prettyPrint(model :ReadOnlyModel) {
-            model.getSubjects().forEach { subject ->
+        fun prettyPrint(graph :ReadOnlyGraph) {
+            graph.getSubjects().forEach { subject ->
                 println("* $subject")
-                model.statementsFor(subject).forEach { statement ->
+                graph.statementsFor(subject).forEach { statement ->
                     println("** $statement")
                 }
             }
         }
 
-        fun compareModels(results: InMemoryModel, expectedResults: InMemoryModel): Boolean {
+        fun compareModels(results: InMemoryGraph, expectedResults: InMemoryGraph): Boolean {
             assert(results.getSubjects() == expectedResults.getSubjects())
             assert(results.getObjects() == expectedResults.getObjects())
             assert(results.getPredicates() == expectedResults.getPredicates())
@@ -160,7 +160,7 @@ class TurtleSpec : StringSpec() {
         }
 
         "support blank nodes" {
-            val result: InMemoryModel = turtle.loadTurtle(readText("/turtle/12-blankNodes.ttl")) as InMemoryModel
+            val result: InMemoryGraph = turtle.loadTurtle(readText("/turtle/12-blankNodes.ttl")) as InMemoryGraph
             expectedModel.addStatement(BlankNode("alice"), IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("bob"))
             expectedModel.addStatement(BlankNode("bob"), IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("alice"))
 
@@ -168,7 +168,7 @@ class TurtleSpec : StringSpec() {
         }
 
         "unlabeled blank nodes" {
-            val result = turtle.loadTurtle(readText("/turtle/13-unlabeledBlankNodes.ttl")) as InMemoryModel
+            val result = turtle.loadTurtle(readText("/turtle/13-unlabeledBlankNodes.ttl")) as InMemoryGraph
             expectedModel.addStatement(IRI("http://example.com/person/bob"), foafKnows, IRI("http://example.com/person/george"))
             expectedModel.addStatement(BlankNode("ANON1"), foafKnows, IRI("http://example.com/person/george"))
             expectedModel.addStatement(IRI("http://example.com/person/bob"), foafKnows, BlankNode("ANON2"))
@@ -178,7 +178,7 @@ class TurtleSpec : StringSpec() {
         }
 
         "nested unlabeled blank nodes" {
-            val result = turtle.loadTurtle(readText("/turtle/14-nestedUnlabeledBlankNodes.ttl")) as InMemoryModel
+            val result = turtle.loadTurtle(readText("/turtle/14-nestedUnlabeledBlankNodes.ttl")) as InMemoryGraph
             expectedModel.addStatement(BlankNode("ANON2"), IRI("http://xmlns.com/foaf/0.1/name"), TypedLiteral("Bob", org.almibe.ligature.loaders.stringIRI))
             expectedModel.addStatement(BlankNode("ANON1"), IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("ANON2"))
 
@@ -186,7 +186,7 @@ class TurtleSpec : StringSpec() {
         }
 
         "complex unlabeled blank nodes" {
-            val result = turtle.loadTurtle(readText("/turtle/15-complexUnlabeledBlankNodes.ttl")) as InMemoryModel
+            val result = turtle.loadTurtle(readText("/turtle/15-complexUnlabeledBlankNodes.ttl")) as InMemoryGraph
             expectedModel.addStatement(BlankNode("ANON1"), IRI("http://xmlns.com/foaf/0.1/name"), TypedLiteral("Alice", org.almibe.ligature.loaders.stringIRI))
             expectedModel.addStatement(BlankNode("ANON2"), IRI("http://xmlns.com/foaf/0.1/name"), TypedLiteral("Bob", org.almibe.ligature.loaders.stringIRI))
             expectedModel.addStatement(BlankNode("ANON1"), IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("ANON2"))
@@ -198,7 +198,7 @@ class TurtleSpec : StringSpec() {
         }
 
         "support collections" {
-            val result = turtle.loadTurtle(readText("/turtle/16-collections.ttl")) as InMemoryModel
+            val result = turtle.loadTurtle(readText("/turtle/16-collections.ttl")) as InMemoryGraph
             expectedModel.addStatement(IRI("http://example.org/foo/subject"), IRI("http://example.org/foo/predicate"), BlankNode("ANON1"))
             expectedModel.addStatement(BlankNode("ANON1"), IRI("${rdf}first"), IRI("http://example.org/foo/a"))
             expectedModel.addStatement(BlankNode("ANON1"), IRI("${rdf}rest"), BlankNode("ANON2"))

@@ -10,7 +10,7 @@ class InMemoryModelSpec : StringSpec() {
     override fun isInstancePerTest() = true
 
     init {
-        val model = InMemoryModel()
+        val model = InMemoryGraph()
 
         "test adding statement and checking subject" {
             model.addStatement(spiderMan, enemyOf, greenGoblin)

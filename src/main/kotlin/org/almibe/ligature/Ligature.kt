@@ -8,7 +8,7 @@ import org.almibe.ligature.loaders.NTriples
 import org.almibe.ligature.loaders.Turtle
 import java.io.Reader
 
-class Ligature(val model: Model): Model by model {
+class Ligature(val model: Graph): Graph by model {
     private val nTriples = NTriples()
     private val turtle = Turtle()
 
