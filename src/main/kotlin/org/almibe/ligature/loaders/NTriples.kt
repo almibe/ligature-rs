@@ -15,7 +15,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker
 import java.io.Reader
 
 class NTriples {
-    fun loadNTriples(reader: Reader): ReadOnlyGraph {
+    fun loadNTriples(reader: Reader): Graph {
         val stream = CharStreams.fromReader(reader)
         val lexer = NTriplesLexer(stream)
         val tokens = CommonTokenStream(lexer)

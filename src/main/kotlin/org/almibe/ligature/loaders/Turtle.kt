@@ -14,7 +14,7 @@ import java.io.Reader
 import java.util.*
 
 class Turtle {
-    fun loadTurtle(reader: Reader): ReadOnlyGraph {
+    fun loadTurtle(reader: Reader): Graph {
         val stream = CharStreams.fromReader(reader)
         val lexer = ModalTurtleLexer(stream)
         val tokens = CommonTokenStream(lexer)

@@ -16,18 +16,16 @@ data class LangLiteral(override val value: String, val langTag: String) : Litera
 data class TypedLiteral(override val value: String,
                         val datatypeIRI: IRI = IRI("http://www.w3.org/2001/XMLSchema#string")) : Literal
 
-interface ReadOnlyGraph {
-    //TODO probably remove these two methods and just have a more general query dsl/sparql support, see #36
+interface Graph {
+
     fun statementsFor(subject: Subject): Set<Pair<Predicate, Object>>
     fun getSubjects(): Set<Subject>
-}
 
-interface Graph: ReadOnlyGraph {
     /**
      * Adds the passed in model to this current one.  IRIs are merged and all blank nodes from the new model are
      * given unique names in the current model.  Literals are not merged.
      */
-    fun addModel(graph: ReadOnlyGraph)
+    fun addModel(graph: Graph)
     /**
      * Add a given statement to this model.  The subject will be added if it doesn't already exist, a new predicate
      * is always added to this subject, and the object is always created if it is a Literal otherwise a new object

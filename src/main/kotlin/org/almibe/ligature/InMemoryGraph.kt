@@ -22,7 +22,7 @@ class InMemoryGraph: Graph {
      * Adds the contents of the passed in model to this model.  Every blank node from the model that is passed in
      * is given a unique name and no blank node merging is attempted.
      */
-    override fun addModel(graph: ReadOnlyGraph) {
+    override fun addModel(graph: Graph) {
         lock.write {
             val blankNodeMap = mutableMapOf<BlankNode, BlankNode>()
 

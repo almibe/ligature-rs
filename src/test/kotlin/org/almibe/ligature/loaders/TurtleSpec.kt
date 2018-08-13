@@ -20,7 +20,7 @@ class TurtleSpec : StringSpec() {
         val rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
         val stringIRI = IRI("http://www.w3.org/2001/XMLSchema#string")
 
-        fun prettyPrint(graph :ReadOnlyGraph) {
+        fun prettyPrint(graph : Graph) {
             graph.getSubjects().forEach { subject ->
                 println("* $subject")
                 graph.statementsFor(subject).forEach { statement ->
