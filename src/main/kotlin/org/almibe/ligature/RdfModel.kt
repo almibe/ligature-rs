@@ -16,8 +16,13 @@ data class LangLiteral(override val value: String, val langTag: String) : Litera
 data class TypedLiteral(override val value: String,
                         val datatypeIRI: IRI = IRI("http://www.w3.org/2001/XMLSchema#string")) : Literal
 
-interface Graph {
+interface Store {
+    fun query(query: String) //TODO return queryResult or JSON or something else?
+    fun defaultGraph(): Graph
+    fun namedGraph(name: String): Graph?
+}
 
+interface Graph {
     fun statementsFor(subject: Subject): Set<Pair<Predicate, Object>>
     fun getSubjects(): Set<Subject>
 
