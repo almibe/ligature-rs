@@ -4,6 +4,8 @@
 
 package org.almibe.ligature
 
+import java.util.stream.Stream
+
 interface Subject
 interface Predicate
 interface Object
@@ -17,14 +19,14 @@ data class TypedLiteral(override val value: String,
                         val datatypeIRI: IRI = IRI("http://www.w3.org/2001/XMLSchema#string")) : Literal
 
 interface Store {
-    fun query(query: String) //TODO return queryResult or JSON or something else?
+    fun execute(sparql: String) //TODO return queryResult or JSON or something else?
     fun defaultGraph(): Graph
     fun namedGraph(name: String): Graph?
 }
 
 interface Graph {
-    fun statementsFor(subject: Subject): Set<Pair<Predicate, Object>>
-    fun getSubjects(): Set<Subject>
+    fun statementsFor(subject: Subject): Stream<Pair<Predicate, Object>>
+    fun getSubjects(): Stream<Subject>
 
     /**
      * Adds the passed in model to this current one.  IRIs are merged and all blank nodes from the new model are

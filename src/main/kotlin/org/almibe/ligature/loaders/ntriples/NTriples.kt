@@ -8,6 +8,7 @@ import org.almibe.ligature.*
 import org.almibe.ligature.parser.ntriples.NTriplesBaseListener
 import org.almibe.ligature.parser.ntriples.NTriplesLexer
 import org.almibe.ligature.parser.ntriples.NTriplesParser
+import org.almibe.ligature.store.InMemoryStore
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.tree.ErrorNode
@@ -28,7 +29,7 @@ class NTriples {
 }
 
 private class TriplesNTripleListener : NTriplesBaseListener() {
-    val model = InMemoryGraph()
+    val model = InMemoryStore()
     lateinit var currentTriple: TempTriple
     val blankNodes = HashMap<String, BlankNode>()
 

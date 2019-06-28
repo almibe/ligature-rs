@@ -8,6 +8,7 @@ import org.almibe.ligature.*
 import org.almibe.ligature.parser.turtle.ModalTurtleLexer
 import org.almibe.ligature.parser.turtle.Turtle
 import org.almibe.ligature.parser.turtle.TurtleBaseVisitor
+import org.almibe.ligature.store.InMemoryStore
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import java.io.Reader
@@ -33,7 +34,7 @@ val restIRI = IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#rest")
 val nilIRI = IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#nil")
 
 private class TurtleDocVisitor: TurtleBaseVisitor<Graph>() {
-    val model = InMemoryGraph()
+    val model = InMemoryStore()
     val prefixes: MutableMap<String, String> = mutableMapOf()
     lateinit var base: String
     var anonymousCounter = 0
