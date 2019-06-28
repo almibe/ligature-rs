@@ -7,7 +7,7 @@ import org.almibe.ligature.loaders.greenGoblin
 import org.almibe.ligature.loaders.spiderMan
 import org.almibe.ligature.store.InMemoryGraph
 
-class InMemoryModelSpec : StringSpec() {
+class InMemoryGraphSpec : StringSpec() {
     override fun isInstancePerTest() = true
 
     init {
@@ -17,7 +17,7 @@ class InMemoryModelSpec : StringSpec() {
             model.addStatement(spiderMan, enemyOf, greenGoblin)
 
             model.getSubjects() shouldBe setOf(spiderMan, greenGoblin)
-            model.statementsFor(spiderMan).toList() shouldBe listOf(Pair(enemyOf, greenGoblin))
+            listOf(model.statementsFor(spiderMan)) shouldBe listOf(Pair(enemyOf, greenGoblin))
         }
 
         "test multiple statements + getter methods" {
@@ -34,14 +34,6 @@ class InMemoryModelSpec : StringSpec() {
             model.getLiterals() shouldBe setOf(LangLiteral("Dr. Octopus", "en"), LangLiteral("Spiderman", "en"))
         }
 
-        "adding a single subject should be saved without any statements attached to it" {
-            model.addSubject(spiderMan)
-
-            model.getSubjects().size shouldBe 1
-            model.statementsFor(spiderMan).size shouldBe 0
-            model.getSubjects().first() shouldBe spiderMan
-        }
-
         "removing a subject should remove all predicates attached to it and all literals attached to those predicates" {
             model.addStatement(spiderMan, enemyOf, greenGoblin)
             model.addStatement(spiderMan, enemyOf, LangLiteral("Dr. Octopus", "en"))
@@ -51,7 +43,7 @@ class InMemoryModelSpec : StringSpec() {
             model.removeSubject(greenGoblin)
 
             model.getSubjects() shouldBe setOf(spiderMan)
-            model.statementsFor(spiderMan).size shouldBe 2
+            listOf(model.statementsFor(spiderMan)).size shouldBe 2
         }
 
         "removing statements shouldn't remove any subjects just predicates and literals" {
@@ -61,8 +53,8 @@ class InMemoryModelSpec : StringSpec() {
             model.removeStatement(spiderMan, enemyOf, greenGoblin)
 
             model.getSubjects() shouldBe setOf(spiderMan, greenGoblin)
-            model.statementsFor(spiderMan).size shouldBe 2
-            model.statementsFor(greenGoblin).size shouldBe 0
+            listOf(model.statementsFor(spiderMan)).size shouldBe 2
+            listOf(model.statementsFor(greenGoblin)).size shouldBe 0
         }
     }
 }
