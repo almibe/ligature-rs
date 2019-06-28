@@ -5,13 +5,13 @@ import io.kotlintest.specs.StringSpec
 import org.almibe.ligature.loaders.enemyOf
 import org.almibe.ligature.loaders.greenGoblin
 import org.almibe.ligature.loaders.spiderMan
-import org.almibe.ligature.store.InMemoryStore
+import org.almibe.ligature.store.InMemoryGraph
 
 class InMemoryModelSpec : StringSpec() {
     override fun isInstancePerTest() = true
 
     init {
-        val model = InMemoryStore()
+        val model = InMemoryGraph()
 
         "test adding statement and checking subject" {
             model.addStatement(spiderMan, enemyOf, greenGoblin)
