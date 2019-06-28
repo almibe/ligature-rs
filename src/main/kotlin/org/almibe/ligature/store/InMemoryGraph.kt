@@ -9,11 +9,12 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.ReentrantReadWriteLock
+import java.util.stream.Stream
 import kotlin.collections.HashMap
 import kotlin.concurrent.read
 import kotlin.concurrent.write
 
-class InMemoryGraph: Store {
+class InMemoryGraph: Graph {
     //TODO replace ConcurrentHashMap with Lock/sync and multiple collections
     private val lock = ReentrantReadWriteLock()
     private val statements: MutableMap<Subject, MutableSet<Pair<Predicate, Object>>> = HashMap()
@@ -23,7 +24,7 @@ class InMemoryGraph: Store {
      * Adds the contents of the passed in model to this model.  Every blank node from the model that is passed in
      * is given a unique name and no blank node merging is attempted.
      */
-    override fun addModel(graph: Graph) {
+    override fun addGraph(graph: Graph) {
         lock.write {
             val blankNodeMap = mutableMapOf<BlankNode, BlankNode>()
 
@@ -78,11 +79,11 @@ class InMemoryGraph: Store {
         }
     }
 
-    override fun statementsFor(subject: Subject): Set<Pair<Predicate, Object>> {
-        return lock.read { statements[subject] ?: setOf() }
+    override fun statementsFor(subject: Subject): Stream<Pair<Predicate, Object>> {
+        return lock.read { statements[subject] ?: setOf() }.stream()
     }
 
-    override fun addSubject(subject: Subject) {
+    private fun addSubject(subject: Subject) {
         lock.write {
             val newSet = Collections.newSetFromMap(ConcurrentHashMap<Pair<Predicate, Object>, Boolean>())
             statements.putIfAbsent(subject, newSet)
@@ -121,8 +122,8 @@ class InMemoryGraph: Store {
         return results
     }
 
-    override fun getSubjects(): Set<Subject> {
-        return lock.read { statements.keys }
+    override fun getSubjects(): Stream<Subject> {
+        return lock.read { statements.keys }.stream()
     }
 
     fun getObjects(): Set<Object> {
