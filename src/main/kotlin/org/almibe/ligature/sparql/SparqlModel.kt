@@ -4,3 +4,5 @@
 
 package org.almibe.ligature.sparql
 
+sealed class SparqlResult
+sealed class SparqlCommand
