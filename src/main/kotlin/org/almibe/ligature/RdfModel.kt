@@ -32,7 +32,7 @@ interface DataSet {
     fun getDataSetName(): String
     fun execute(sparql: String): SparqlResult
     fun execute(sparql: SparqlCommand): SparqlResult
-    fun addStatement(subject: Subject, predicate: Predicate, `object`: Object, graph: IRI?)
-    fun removeStatement(subject: Subject, predicate: Predicate, `object`: Object, graph: IRI?)
+    fun addStatements(statements: Collection<Quad>)
+    fun removeStatements(statements: Collection<Quad>)
     fun findAll(subject: Subject?, predicate: Predicate?, `object`: Object?, graph: IRI?): Stream<Quad>
 }
