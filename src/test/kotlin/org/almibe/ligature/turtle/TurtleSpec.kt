@@ -2,14 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.almibe.ligature.loaders.turtle
+package org.almibe.ligature.turtle
 
 import io.kotlintest.specs.StringSpec
 import org.almibe.ligature.*
-import org.almibe.ligature.loaders.enemyOf
-import org.almibe.ligature.loaders.greenGoblin
-import org.almibe.ligature.loaders.readText
-import org.almibe.ligature.loaders.spiderMan
+import org.almibe.ligature.parsers.enemyOf
+import org.almibe.ligature.parsers.greenGoblin
+import org.almibe.ligature.parsers.readText
+import org.almibe.ligature.parsers.spiderMan
 
 class TurtleSpec : StringSpec() {
     override fun isInstancePerTest() = true
@@ -132,14 +132,14 @@ class TurtleSpec : StringSpec() {
             val multilineText2 = "Another\n" +
                     "multiline string with' 'a' \"custom datatype\"\\\"."
             ligature.loadTurtle(readText("/turtle/09-quotedLiterals.ttl"))
-            expectedModel.addStatement(show, label, TypedLiteral("That Seventies Show", org.almibe.ligature.loaders.stringIRI))
+            expectedModel.addStatement(show, label, TypedLiteral("That Seventies Show", org.almibe.ligature.parsers.stringIRI))
             expectedModel.addStatement(show, IRI("${base}pred"), TypedLiteral("That Seventies Show", IRI("${base}string")))
             expectedModel.addStatement(show, localName, LangLiteral("That Seventies Show", "en"))
             expectedModel.addStatement(show, localName, LangLiteral("Cette Série des Années Soixante-dix", "fr"))
             expectedModel.addStatement(show, localName, LangLiteral("Cette Série des Années Septante", "fr-be"))
-            expectedModel.addStatement(show, blurb, TypedLiteral(multilineText, org.almibe.ligature.loaders.stringIRI))
+            expectedModel.addStatement(show, blurb, TypedLiteral(multilineText, org.almibe.ligature.parsers.stringIRI))
             expectedModel.addStatement(show219, blurb, TypedLiteral(multilineText2, IRI("${base}long-string")))
-            expectedModel.addStatement(show219, blurb, TypedLiteral("", org.almibe.ligature.loaders.stringIRI))
+            expectedModel.addStatement(show219, blurb, TypedLiteral("", org.almibe.ligature.parsers.stringIRI))
 
             compareModels(model, expectedModel)
         }
@@ -183,7 +183,7 @@ class TurtleSpec : StringSpec() {
 
         "nested unlabeled blank nodes" {
             val result = turtle.loadTurtle(readText("/turtle/14-nestedUnlabeledBlankNodes.ttl")) as InMemoryGraph
-            expectedModel.addStatement(BlankNode("ANON2"), IRI("http://xmlns.com/foaf/0.1/name"), TypedLiteral("Bob", org.almibe.ligature.loaders.stringIRI))
+            expectedModel.addStatement(BlankNode("ANON2"), IRI("http://xmlns.com/foaf/0.1/name"), TypedLiteral("Bob", org.almibe.ligature.parsers.stringIRI))
             expectedModel.addStatement(BlankNode("ANON1"), IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("ANON2"))
 
             compareModels(result, expectedModel)
@@ -191,10 +191,10 @@ class TurtleSpec : StringSpec() {
 
         "complex unlabeled blank nodes" {
             val result = turtle.loadTurtle(readText("/turtle/15-complexUnlabeledBlankNodes.ttl")) as InMemoryGraph
-            expectedModel.addStatement(BlankNode("ANON1"), IRI("http://xmlns.com/foaf/0.1/name"), TypedLiteral("Alice", org.almibe.ligature.loaders.stringIRI))
-            expectedModel.addStatement(BlankNode("ANON2"), IRI("http://xmlns.com/foaf/0.1/name"), TypedLiteral("Bob", org.almibe.ligature.loaders.stringIRI))
+            expectedModel.addStatement(BlankNode("ANON1"), IRI("http://xmlns.com/foaf/0.1/name"), TypedLiteral("Alice", org.almibe.ligature.parsers.stringIRI))
+            expectedModel.addStatement(BlankNode("ANON2"), IRI("http://xmlns.com/foaf/0.1/name"), TypedLiteral("Bob", org.almibe.ligature.parsers.stringIRI))
             expectedModel.addStatement(BlankNode("ANON1"), IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("ANON2"))
-            expectedModel.addStatement(BlankNode("ANON3"), IRI("http://xmlns.com/foaf/0.1/name"), TypedLiteral("Eve", org.almibe.ligature.loaders.stringIRI))
+            expectedModel.addStatement(BlankNode("ANON3"), IRI("http://xmlns.com/foaf/0.1/name"), TypedLiteral("Eve", org.almibe.ligature.parsers.stringIRI))
             expectedModel.addStatement(BlankNode("ANON2"), IRI("http://xmlns.com/foaf/0.1/knows"), BlankNode("ANON3"))
             expectedModel.addStatement(BlankNode("ANON2"), IRI("http://xmlns.com/foaf/0.1/mbox"), IRI("http://bob@example.com"))
 

@@ -2,21 +2,17 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.almibe.ligature.loaders.turtle
+package org.almibe.ligature.turtle
 
 import org.almibe.ligature.*
-import org.almibe.ligature.loaders.Loader
-import org.almibe.ligature.parser.turtle.ModalTurtleLexer
 import org.almibe.ligature.parser.turtle.Turtle
 import org.almibe.ligature.parser.turtle.TurtleBaseVisitor
 import org.almibe.ligature.store.InMemoryStore
-import org.antlr.v4.runtime.CharStreams
-import org.antlr.v4.runtime.CommonTokenStream
 import java.io.Reader
 import java.io.Writer
 import java.util.*
 
-class Turtle: Loader {
+class Turtle: Parser {
     override fun import(reader: Reader, store: Store, defaultGraph: IRI?) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }

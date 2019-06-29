@@ -2,22 +2,17 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.almibe.ligature.loaders.ntriples
+package org.almibe.ligature.ntriples
 
 import org.almibe.ligature.*
-import org.almibe.ligature.loaders.Loader
 import org.almibe.ligature.parser.ntriples.NTriplesBaseListener
-import org.almibe.ligature.parser.ntriples.NTriplesLexer
 import org.almibe.ligature.parser.ntriples.NTriplesParser
 import org.almibe.ligature.store.InMemoryStore
-import org.antlr.v4.runtime.CharStreams
-import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.tree.ErrorNode
-import org.antlr.v4.runtime.tree.ParseTreeWalker
 import java.io.Reader
 import java.io.Writer
 
-class NTriples: Loader {
+class NTriples: Parser {
     override fun import(reader: Reader, store: Store, defaultGraph: IRI?) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
