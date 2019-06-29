@@ -14,11 +14,13 @@ import kotlin.collections.HashMap
 import kotlin.concurrent.read
 import kotlin.concurrent.write
 
-class InMemoryGraph: Graph {
+class InMemoryGraph(private val name: IRI? = null): Graph {
     //TODO replace ConcurrentHashMap with Lock/sync and multiple collections
     private val lock = ReentrantReadWriteLock()
     private val statements: MutableMap<Subject, MutableSet<Pair<Predicate, Object>>> = HashMap()
     private val blankNodeCounter = AtomicInteger()
+
+    override fun getName(): IRI? = name
 
     /**
      * Adds the contents of the passed in model to this model.  Every blank node from the model that is passed in

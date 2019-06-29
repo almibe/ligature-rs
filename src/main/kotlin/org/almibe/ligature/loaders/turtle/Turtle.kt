@@ -5,6 +5,7 @@
 package org.almibe.ligature.loaders.turtle
 
 import org.almibe.ligature.*
+import org.almibe.ligature.loaders.Loader
 import org.almibe.ligature.parser.turtle.ModalTurtleLexer
 import org.almibe.ligature.parser.turtle.Turtle
 import org.almibe.ligature.parser.turtle.TurtleBaseVisitor
@@ -12,17 +13,28 @@ import org.almibe.ligature.store.InMemoryStore
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import java.io.Reader
+import java.io.Writer
 import java.util.*
 
-class Turtle {
-    fun loadTurtle(reader: Reader): Graph {
-        val stream = CharStreams.fromReader(reader)
-        val lexer = ModalTurtleLexer(stream)
-        val tokens = CommonTokenStream(lexer)
-        val parser = Turtle(tokens)
-        return TurtleDocVisitor().visitTurtleDoc(parser.turtleDoc())
+class Turtle: Loader {
+    override fun import(reader: Reader, store: Store, defaultGraph: IRI?) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
+
+    override fun export(writer: Writer, graphs: Collection<Graph>) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
 }
+//{
+//    fun loadTurtle(reader: Reader): Graph {
+//        val stream = CharStreams.fromReader(reader)
+//        val lexer = ModalTurtleLexer(stream)
+//        val tokens = CommonTokenStream(lexer)
+//        val parser = Turtle(tokens)
+//        return TurtleDocVisitor().visitTurtleDoc(parser.turtleDoc())
+//    }
+//}
 
 val integerIRI = IRI("http://www.w3.org/2001/XMLSchema#integer")
 val doubleIRI = IRI("http://www.w3.org/2001/XMLSchema#double")

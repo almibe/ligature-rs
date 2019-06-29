@@ -1,7 +1,6 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.2.41'
     id 'org.dm.bundle' version '0.10.0'
-    id 'groovy'
     id 'maven'
 }
 
@@ -14,13 +13,13 @@ repositories {
 }
 
 dependencies {
-    compile 'org.antlr:antlr4-runtime:4.7'
+    compile 'org.antlr:antlr4-runtime:4.7.2'
     compile 'org.jetbrains.kotlin:kotlin-stdlib:1.2.41'
     compile 'org.almibe:ligature-grammar:0.1.0-SNAPSHOT'
     compile 'com.google.code.gson:gson:2.8.5'
     compile 'com.fasterxml.woodstox:woodstox-core:5.2.1'
-    testCompile 'org.antlr:antlr4:4.7'
-    testCompile 'io.kotlintest:kotlintest-runner-junit5:3.1.7'
+    testCompile 'org.antlr:antlr4:4.7.2'
+    testCompile 'io.kotlintest:kotlintest-runner-junit5:3.3.3'
 }
 
 bundle {

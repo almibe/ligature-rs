@@ -21,12 +21,13 @@ data class TypedLiteral(override val value: String,
 interface Store {
     fun execute(sparql: String) //TODO return queryResult or JSON or something else?
     fun defaultGraph(): Graph
-    fun namedGraph(name: String): Graph?
+    fun namedGraph(name: IRI): Graph?
 }
 
 interface Graph {
     fun statementsFor(subject: Subject): Stream<Pair<Predicate, Object>>
     fun getSubjects(): Stream<Subject>
+    fun getName(): IRI?
 
     /**
      * Adds the passed in graph to this current one.  IRIs are merged and all blank nodes from the new model are

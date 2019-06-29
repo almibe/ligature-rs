@@ -12,6 +12,5 @@ import java.io.Writer
 
 interface Loader {
     fun import(reader: Reader, store: Store, defaultGraph: IRI? = null)
-    fun export(writer: Writer, store: Store)
     fun export(writer: Writer, graphs: Collection<Graph>)
 }

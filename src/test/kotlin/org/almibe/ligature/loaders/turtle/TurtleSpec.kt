@@ -2,10 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.almibe.ligature.loaders
+package org.almibe.ligature.loaders.turtle
 
 import io.kotlintest.specs.StringSpec
 import org.almibe.ligature.*
+import org.almibe.ligature.loaders.enemyOf
+import org.almibe.ligature.loaders.greenGoblin
+import org.almibe.ligature.loaders.readText
+import org.almibe.ligature.loaders.spiderMan
 
 class TurtleSpec : StringSpec() {
     override fun isInstancePerTest() = true

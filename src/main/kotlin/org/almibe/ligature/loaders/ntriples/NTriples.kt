@@ -5,6 +5,7 @@
 package org.almibe.ligature.loaders.ntriples
 
 import org.almibe.ligature.*
+import org.almibe.ligature.loaders.Loader
 import org.almibe.ligature.parser.ntriples.NTriplesBaseListener
 import org.almibe.ligature.parser.ntriples.NTriplesLexer
 import org.almibe.ligature.parser.ntriples.NTriplesParser
@@ -14,19 +15,30 @@ import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.tree.ErrorNode
 import org.antlr.v4.runtime.tree.ParseTreeWalker
 import java.io.Reader
+import java.io.Writer
 
-class NTriples {
-    fun loadNTriples(reader: Reader): Graph {
-        val stream = CharStreams.fromReader(reader)
-        val lexer = NTriplesLexer(stream)
-        val tokens = CommonTokenStream(lexer)
-        val parser = NTriplesParser(tokens)
-        val walker = ParseTreeWalker()
-        val listener = TriplesNTripleListener()
-        walker.walk(listener, parser.ntriplesDoc())
-        return listener.model
+class NTriples: Loader {
+    override fun import(reader: Reader, store: Store, defaultGraph: IRI?) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
+
+    override fun export(writer: Writer, graphs: Collection<Graph>) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
 }
+//{
+//    fun loadNTriples(reader: Reader): Graph {
+//        val stream = CharStreams.fromReader(reader)
+//        val lexer = NTriplesLexer(stream)
+//        val tokens = CommonTokenStream(lexer)
+//        val parser = NTriplesParser(tokens)
+//        val walker = ParseTreeWalker()
+//        val listener = TriplesNTripleListener()
+//        walker.walk(listener, parser.ntriplesDoc())
+//        return listener.model
+//    }
+//}
 
 private class TriplesNTripleListener : NTriplesBaseListener() {
     val model = InMemoryStore()

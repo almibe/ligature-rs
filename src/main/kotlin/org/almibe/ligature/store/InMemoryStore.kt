@@ -5,6 +5,7 @@
 package org.almibe.ligature.store
 
 import org.almibe.ligature.Graph
+import org.almibe.ligature.IRI
 import org.almibe.ligature.Store
 
 class InMemoryStore: Store {
@@ -16,7 +17,7 @@ class InMemoryStore: Store {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun namedGraph(name: String): Graph? {
+    override fun namedGraph(name: IRI): Graph? {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

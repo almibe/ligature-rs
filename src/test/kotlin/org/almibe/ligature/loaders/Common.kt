@@ -5,6 +5,7 @@
 package org.almibe.ligature.loaders
 
 import org.almibe.ligature.IRI
+import org.almibe.ligature.loaders.ntriples.NTriplesSpec
 import java.io.InputStreamReader
 import java.io.Reader
 
