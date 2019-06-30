@@ -30,7 +30,6 @@ interface Store {
 
 interface DataSet {
     fun getDataSetName(): String
-    fun execute(sparql: String): SparqlResult
     fun execute(sparql: SparqlCommand): SparqlResult
     fun addStatements(statements: Collection<Quad>)
     fun removeStatements(statements: Collection<Quad>)
