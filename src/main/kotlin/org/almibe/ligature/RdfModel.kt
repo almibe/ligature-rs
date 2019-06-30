@@ -4,8 +4,6 @@
 
 package org.almibe.ligature
 
-import org.almibe.ligature.sparql.SparqlCommand
-import org.almibe.ligature.sparql.SparqlResult
 import java.util.stream.Stream
 
 interface Subject

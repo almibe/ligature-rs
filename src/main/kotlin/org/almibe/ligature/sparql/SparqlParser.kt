@@ -4,3 +4,6 @@
 
 package org.almibe.ligature.sparql
 
+class SparqlParser {
+    //TODO
+}
