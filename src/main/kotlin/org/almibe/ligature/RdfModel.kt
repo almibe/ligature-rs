@@ -31,5 +31,6 @@ interface DataSet {
     fun execute(sparql: SparqlCommand): SparqlResult
     fun addStatements(statements: Collection<Quad>)
     fun removeStatements(statements: Collection<Quad>)
-    fun findAll(subject: Subject?, predicate: Predicate?, `object`: Object?, graph: IRI?): Stream<Quad>
+    fun findAll(subject: Subject? = null, predicate: Predicate? = null,
+                `object`: Object? = null, graph: IRI? = null): Stream<Quad>
 }
