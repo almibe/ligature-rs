@@ -13,10 +13,10 @@ interface Object
 data class IRI(val value: String) : Subject, Predicate, Object
 data class BlankNode(val label: String) : Subject, Object
 
-interface Literal : Object { val value: String}
-data class LangLiteral(override val value: String, val langTag: String) : Literal
-data class TypedLiteral(override val value: String,
-                        val datatypeIRI: IRI = IRI("http://www.w3.org/2001/XMLSchema#string")) : Literal
+sealed class Literal : Object
+data class LangLiteral(val value: String, val langTag: String) : Literal()
+data class TypedLiteral(val value: String,
+                        val datatypeIRI: IRI = IRI("http://www.w3.org/2001/XMLSchema#string")) : Literal()
 
 data class Quad(val subject: Subject, val predicate: Predicate, val `object`: Object, val graph: IRI? = null)
 
