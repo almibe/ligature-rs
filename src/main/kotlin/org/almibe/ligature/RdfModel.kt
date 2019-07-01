@@ -18,7 +18,7 @@ data class LangLiteral(override val value: String, val langTag: String) : Litera
 data class TypedLiteral(override val value: String,
                         val datatypeIRI: IRI = IRI("http://www.w3.org/2001/XMLSchema#string")) : Literal
 
-data class Quad(val subject: Subject, val predicate: Predicate, val `object`: Object, val graph: IRI?)
+data class Quad(val subject: Subject, val predicate: Predicate, val `object`: Object, val graph: IRI? = null)
 
 interface Store {
     fun getDataSetNames(): Stream<String>
