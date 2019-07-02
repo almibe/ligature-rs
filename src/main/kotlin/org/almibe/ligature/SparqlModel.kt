@@ -6,18 +6,31 @@ package org.almibe.ligature
 
 sealed class SparqlResult
 sealed class SparqlCommand
+data class Query(val queryType: QueryType, val valuesClause: ValuesClause): SparqlCommand() //2
+data class UpdateCommand(val update: Update): SparqlCommand() //30
 
-data class Query(val queryType: QueryType, val valuesClause ValuesClause): SparqlCommand
-data class Update(TODO): SparqlCommand
+sealed class Update
+data class Load(TODO): Update() //31
+data class Clear(TODO): Update() //32
+data class Drop(TODO): Update() //33
+data class Create(TODO): Update() //34
+data class Add(TODO): Update() //35
+data class Move(TODO): Update() //36
+data class Copy(TODO): Update() //37
+data class InsertData(TODO): Update() //38
+data class DeleteData(TODO): Update() //39
+data class DeleteWhere(TODO): Update() //40
+data class Modify(TODO): Update() //41
 
-enum SelectModifier { DISTINCT, REDUCED }
-data class Var(name: String, as: String?)
+enum class SelectModifier { DISTINCT, REDUCED }
+data class Var(val name: String, val `as`: String?)
 
 sealed class QueryType
-data class SelectQuery(val selectClause: SelectClause, val datasetClauses: List<DatasetClause>, val whereClause: WhereClause, val solutionModifier: SolutionModifier): QueryType
-data class ConstructQuery(TODO): QueryType
-data class DescribeQuery(TODO): QueryType
-data class AskQuery(TODO): QueryType
+data class SelectQuery(val selectClause: SelectClause, val datasetClauses: List<DatasetClause>,
+                       val whereClause: WhereClause, val solutionModifier: SolutionModifier): QueryType()
+data class ConstructQuery(TODO): QueryType()
+data class DescribeQuery(TODO): QueryType()
+data class AskQuery(TODO): QueryType()
 
 data class SelectClause(val modifier: SelectModifier?, val vars: List<Var>)
 
@@ -38,16 +51,16 @@ data class HavingClause(val constraint: Constraint)
 data class OrderClause(val orderConditions: List<OrderCondition>)
 
 sealed class LimitOffsetClauses
-data class LimitOffsetClause(val limit: Int, val offset: Int?): LimitOffsetClauses
-data class OffsetLimitClause(val offset: Int, val limit: Int?): LimitOffsetClauses
+data class LimitOffsetClause(val limit: Int, val offset: Int?): LimitOffsetClauses()
+data class OffsetLimitClause(val offset: Int, val limit: Int?): LimitOffsetClauses()
 
 sealed class Constraint
-data class BrackettedExpression(TODO): Constraint
-data class BuiltInCall(TODO): Constraint
-data class FunctionCall(TODO): Constraint
+data class BrackettedExpression(TODO): Constraint()
+data class BuiltInCall(TODO): Constraint()
+data class FunctionCall(TODO): Constraint()
 
 data class ValuesClause(val dataBlock: DataBlock?)
 
 sealed class DataBlock
-data class InlineDataOneVar(TODO): DataBlock
-data class InlineDataFull(TODO): DataBlock
+data class InlineDataOneVar(TODO): DataBlock()
+data class InlineDataFull(TODO): DataBlock()
