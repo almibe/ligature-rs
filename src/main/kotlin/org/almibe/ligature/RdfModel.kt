@@ -25,6 +25,8 @@ sealed class Graph
 object DefaultGraph: Graph()
 data class NamedGraph(val iri: IRI): Graph()
 
+data class SparqlResultField(val name: String, val value: Object)
+
 interface Store: Closeable {
     fun getDataSetNames(): Stream<String>
     fun getDataSet(name: String): DataSet
@@ -34,7 +36,7 @@ interface Store: Closeable {
 
 interface DataSet {
     fun getDataSetName(): String
-    fun execute(sparql: SparqlCommand): SparqlResult
+    fun executeSparql(sparql: String): List<List<SparqlResultField>>
     fun addStatements(statements: Collection<Quad>)
     fun removeStatements(statements: Collection<Quad>)
     fun findAll(subject: Subject? = null, predicate: Predicate? = null,
