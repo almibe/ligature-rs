@@ -36,7 +36,7 @@ interface Store: Closeable {
 
 interface DataSet {
     fun getDataSetName(): String
-    fun executeSparql(sparql: String): List<List<SparqlResultField>>
+    fun executeSparql(sparql: String): Stream<List<SparqlResultField>>
     fun addStatements(statements: Collection<Quad>)
     fun removeStatements(statements: Collection<Quad>)
     fun findAll(subject: Subject? = null, predicate: Predicate? = null,
