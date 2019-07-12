@@ -40,5 +40,5 @@ interface Dataset {
     fun addStatements(statements: Collection<Quad>)
     fun removeStatements(statements: Collection<Quad>)
     fun findAll(subject: Subject? = null, predicate: Predicate? = null,
-                `object`: Object? = null, graph: Graph = DefaultGraph): Stream<Quad>
+                `object`: Object? = null, graph: Graph? = null): Stream<Quad>
 }
