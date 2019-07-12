@@ -28,14 +28,14 @@ data class NamedGraph(val iri: IRI): Graph()
 data class SparqlResultField(val name: String, val value: Object)
 
 interface Store: Closeable {
-    fun getDataSetNames(): Stream<String>
-    fun getDataSet(name: String): DataSet
-    fun deleteDataSet(name: String)
+    fun getDatasetNames(): Stream<String>
+    fun getDataset(name: String): Dataset
+    fun deleteDataset(name: String)
     override fun close()
 }
 
-interface DataSet {
-    fun getDataSetName(): String
+interface Dataset {
+    fun getDatasetName(): String
     fun executeSparql(sparql: String): Stream<List<SparqlResultField>>
     fun addStatements(statements: Collection<Quad>)
     fun removeStatements(statements: Collection<Quad>)
