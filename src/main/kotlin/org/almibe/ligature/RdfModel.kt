@@ -19,7 +19,7 @@ data class LangLiteral(val value: String, val langTag: String) : Literal()
 data class TypedLiteral(val value: String,
                         val datatypeIRI: IRI = IRI("http://www.w3.org/2001/XMLSchema#string")) : Literal()
 
-data class Quad(val subject: Subject, val predicate: Predicate, val `object`: Object, val graph: Graph = DefaultGraph)
+data class Statement(val subject: Subject, val predicate: Predicate, val `object`: Object, val graph: Graph = DefaultGraph)
 
 sealed class Graph
 object DefaultGraph: Graph()
@@ -36,8 +36,7 @@ interface Store: Closeable {
 
 interface Dataset {
     fun getDatasetName(): String
-    fun executeSparql(sparql: String): Stream<List<SparqlResultField>>
-    fun addStatements(statements: Collection<Quad>)
-    fun removeStatements(statements: Collection<Quad>)
-    fun allStatements(): Stream<Quad>
+    fun addStatements(statements: Collection<Statement>)
+    fun removeStatements(statements: Collection<Statement>)
+    fun allStatements(): Stream<Statement>
 }
