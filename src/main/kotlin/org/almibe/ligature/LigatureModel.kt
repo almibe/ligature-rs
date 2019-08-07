@@ -7,20 +7,15 @@ package org.almibe.ligature
 import java.io.Closeable
 import java.util.stream.Stream
 
-interface Subject
-interface Predicate
-interface Object
+sealed class Element
+data class Symbol(val value: String) : Element()
+sealed class Literal: Element()
 
-data class Symbol(val value: String) : Subject, Predicate, Object
-
-enum class DataType
-
-sealed class Literal : Object
 data class LangLiteral(val value: String, val langTag: String) : Literal()
-data class TypedLiteral(val value: String,
-                        val datatype: DataType) : Literal()
+data class LongLiteral(val value: Long) : Literal()
+//other literals...
 
-data class Statement(val subject: Subject, val predicate: Predicate, val `object`: Object, val graph: Graph = DefaultGraph)
+data class Statement(val subject: Element, val predicate: Symbol, val `object`: Element, val graph: Graph = DefaultGraph)
 
 sealed class Graph
 object DefaultGraph: Graph()
