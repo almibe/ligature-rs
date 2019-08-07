@@ -11,21 +11,20 @@ interface Subject
 interface Predicate
 interface Object
 
-data class IRI(val value: String) : Subject, Predicate, Object
-data class BlankNode(val label: String) : Subject, Object
+data class Symbol(val value: String) : Subject, Predicate, Object
+
+enum class DataType
 
 sealed class Literal : Object
 data class LangLiteral(val value: String, val langTag: String) : Literal()
 data class TypedLiteral(val value: String,
-                        val datatypeIRI: IRI = IRI("http://www.w3.org/2001/XMLSchema#string")) : Literal()
+                        val datatype: DataType) : Literal()
 
 data class Statement(val subject: Subject, val predicate: Predicate, val `object`: Object, val graph: Graph = DefaultGraph)
 
 sealed class Graph
 object DefaultGraph: Graph()
-data class NamedGraph(val iri: IRI): Graph()
-
-data class SparqlResultField(val name: String, val value: Object)
+data class NamedGraph(val symbol: Symbol): Graph()
 
 interface Store: Closeable {
     fun getDatasetNames(): Stream<String>
