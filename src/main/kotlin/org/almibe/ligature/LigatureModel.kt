@@ -5,6 +5,8 @@
 package org.almibe.ligature
 
 import java.io.Closeable
+import java.math.BigDecimal
+import java.util.*
 import java.util.stream.Stream
 
 sealed class Element
@@ -12,14 +14,33 @@ data class Symbol(val value: String) : Element()
 sealed class Literal: Element()
 
 data class LangLiteral(val value: String, val langTag: String) : Literal()
+data class StringLiteral(val value: String) : Literal()
+data class BooleanLiteral(val value: Boolean): Literal()
 data class LongLiteral(val value: Long) : Literal()
-//other literals...
+data class DecimalLiteral(val value: BigDecimal) : Literal()
 
-data class Statement(val subject: Element, val predicate: Symbol, val `object`: Element, val graph: Graph = DefaultGraph)
-
-sealed class Graph
+sealed class Graph: Element()
 object DefaultGraph: Graph()
 data class NamedGraph(val symbol: Symbol): Graph()
+class AnonymousGraph: Graph() {
+    private val uuid = UUID.randomUUID()
+
+    override fun equals(other: Any?): Boolean {
+        return when (other) {
+            is AnonymousGraph -> return other.uuid == uuid
+            else -> false
+        }
+    }
+
+    override fun hashCode(): Int {
+        return uuid.hashCode()
+    }
+}
+
+data class Statement(val subject: Element,
+                     val predicate: Symbol,
+                     val `object`: Element,
+                     val graph: Graph = DefaultGraph)
 
 interface Store: Closeable {
     fun getDatasetNames(): Stream<String>
