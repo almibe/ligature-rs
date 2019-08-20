@@ -6,7 +6,6 @@ package org.almibe.ligature
 
 import java.io.Closeable
 import java.math.BigDecimal
-import java.util.*
 import java.util.stream.Stream
 
 sealed class Value
