@@ -36,6 +36,6 @@ interface Dataset {
     fun removeStatements(statements: Collection<Statement>)
     fun allStatements(): Stream<Statement>
     fun newNode(): Node
-    fun relabelNode(node: Node, label: String)
+    fun relabelNode(node: Node, label: String?)
     fun deleteNode(node: Node)
 }
