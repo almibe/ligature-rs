@@ -9,10 +9,9 @@ import java.math.BigDecimal
 import java.util.stream.Stream
 
 sealed class Value
-data class Node(val id: String) : Value()
-data class Attribute(val attribute: String)
-sealed class Literal: Value()
+data class Node(val label: String): Value()
 
+sealed class Literal: Value()
 data class LangLiteral(val value: String, val langTag: String) : Literal()
 data class StringLiteral(val value: String) : Literal()
 data class BooleanLiteral(val value: Boolean): Literal()
@@ -20,7 +19,7 @@ data class LongLiteral(val value: Long) : Literal()
 data class DecimalLiteral(val value: BigDecimal) : Literal()
 
 data class Statement(val entity: Node,
-                     val attribute: Attribute,
+                     val attribute: Node,
                      val value: Value,
                      val context: Node)
 
@@ -37,4 +36,6 @@ interface Dataset {
     fun removeStatements(statements: Collection<Statement>)
     fun allStatements(): Stream<Statement>
     fun newNode(): Node
+    fun relabelNode(node: Node, label: String)
+    fun deleteNode(node: Node)
 }
