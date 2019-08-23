@@ -18,10 +18,12 @@ data class BooleanLiteral(val value: Boolean): Literal()
 data class LongLiteral(val value: Long) : Literal()
 data class DecimalLiteral(val value: BigDecimal) : Literal()
 
-data class Statement(val entity: Node,
-                     val attribute: Node,
-                     val value: Value,
-                     val context: Node)
+data class Statement(
+        val entity: Node,
+        val attribute: Node,
+        val value: Value,
+        val context: Node? = null
+)
 
 interface Store: Closeable {
     fun getDatasetNames(): Stream<String>
@@ -34,7 +36,15 @@ interface Dataset {
     fun getDatasetName(): String
     fun addStatements(statements: Collection<Statement>)
     fun removeStatements(statements: Collection<Statement>)
+    fun matchAll(
+            entity: Node? = null,
+            attribute: Node? = null,
+            value: Value? = null,
+            context: Node? = null
+    ): Stream<Statement>
     fun allStatements(): Stream<Statement>
+    fun allNodes(): Stream<Node>
+    fun allLiterals(): Stream<Literal>
     fun newNode(): Node
     fun relabelNode(node: Node, label: String?)
     fun deleteNode(node: Node)
