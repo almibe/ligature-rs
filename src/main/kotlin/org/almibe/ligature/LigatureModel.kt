@@ -34,8 +34,8 @@ interface Store: Closeable {
 
 interface Dataset {
     fun getDatasetName(): String
-    fun addStatements(statements: Collection<Statement>)
-    fun removeStatements(statements: Collection<Statement>)
+    fun addStatements(statements: Stream<Statement>)
+    fun removeStatements(statements: Stream<Statement>)
     fun matchAll(
             entity: Node? = null,
             attribute: Node? = null,
