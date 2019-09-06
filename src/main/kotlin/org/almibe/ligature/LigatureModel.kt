@@ -9,7 +9,7 @@ import java.math.BigDecimal
 import java.util.stream.Stream
 
 sealed class Value
-data class Node(val label: String): Value()
+data class Node(val label: String, val types: Collection<String>): Value()
 
 sealed class Literal: Value()
 data class LangLiteral(val value: String, val langTag: String) : Literal()
@@ -18,11 +18,12 @@ data class BooleanLiteral(val value: Boolean): Literal()
 data class LongLiteral(val value: Long) : Literal()
 data class DecimalLiteral(val value: BigDecimal) : Literal()
 
+data class Attribute(val label: String)
+
 data class Statement(
         val entity: Node,
-        val attribute: Node,
-        val value: Value,
-        val context: Node? = null
+        val attribute: Attribute,
+        val value: Value
 )
 
 interface Store: Closeable {
@@ -38,14 +39,22 @@ interface Dataset {
     fun removeStatements(statements: Stream<Statement>)
     fun matchAll(
             entity: Node? = null,
-            attribute: Node? = null,
-            value: Value? = null,
-            context: Node? = null
+            attribute: Attribute? = null,
+            value: Value? = null
+    ): Stream<Statement>
+    fun matchAll(
+            types: Collection<String> = listOf(),
+            attribute: Attribute? = null,
+            value: Value? = null
     ): Stream<Statement>
     fun allStatements(): Stream<Statement>
-    fun allNodes(): Stream<Node>
+    fun allNodes(types: Collection<String> = listOf()): Stream<Node>
+    fun allAttributes(): Stream<Attribute>
     fun allLiterals(): Stream<Literal>
-    fun newNode(): Node
+    fun newNode(type: String? = null): Node
     fun relabelNode(node: Node, label: String?)
     fun deleteNode(node: Node)
+    fun nodeTypes(node: Node): Collection<String>
+    fun addNodeTypes(node: Node, types: Collection<String>)
+    fun removeNodeTypes(node: Node, types: Collection<String>)
 }
