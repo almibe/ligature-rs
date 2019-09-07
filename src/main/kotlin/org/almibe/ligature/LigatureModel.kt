@@ -44,12 +44,6 @@ interface Dataset {
             value: Value? = null,
             context: Node? = null
     ): Stream<Statement>
-    fun matchAll(
-            types: Collection<String> = listOf(),
-            attribute: Attribute? = null,
-            value: Value? = null,
-            context: Node? = null
-    ): Stream<Statement>
     fun allStatements(): Stream<Statement>
     fun allNodes(types: Collection<String> = listOf()): Stream<Node>
     fun allAttributes(): Stream<Attribute>
