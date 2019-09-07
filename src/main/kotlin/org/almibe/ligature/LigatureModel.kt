@@ -48,6 +48,7 @@ interface Dataset {
     fun allNodes(types: Collection<String> = listOf()): Stream<Node>
     fun allAttributes(): Stream<Attribute>
     fun allLiterals(): Stream<Literal>
+    fun allTypes(): Stream<String>
     fun newNode(types: Collection<String> = listOf()): Node
     fun relabelNode(node: Node, label: String?)
     fun deleteNode(node: Node)
