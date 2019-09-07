@@ -23,7 +23,8 @@ data class Attribute(val label: String)
 data class Statement(
         val entity: Node,
         val attribute: Attribute,
-        val value: Value
+        val value: Value,
+        val context: Node? = null
 )
 
 interface Store: Closeable {
@@ -40,18 +41,20 @@ interface Dataset {
     fun matchAll(
             entity: Node? = null,
             attribute: Attribute? = null,
-            value: Value? = null
+            value: Value? = null,
+            context: Node? = null
     ): Stream<Statement>
     fun matchAll(
             types: Collection<String> = listOf(),
             attribute: Attribute? = null,
-            value: Value? = null
+            value: Value? = null,
+            context: Node? = null
     ): Stream<Statement>
     fun allStatements(): Stream<Statement>
     fun allNodes(types: Collection<String> = listOf()): Stream<Node>
     fun allAttributes(): Stream<Attribute>
     fun allLiterals(): Stream<Literal>
-    fun newNode(type: String? = null): Node
+    fun newNode(types: Collection<String> = listOf()): Node
     fun relabelNode(node: Node, label: String?)
     fun deleteNode(node: Node)
     fun nodeTypes(node: Node): Collection<String>
