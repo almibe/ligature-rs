@@ -15,6 +15,7 @@ sealed class Literal: Value()
 data class LangLiteral(val value: String, val langTag: String) : Literal()
 data class StringLiteral(val value: String) : Literal()
 data class BooleanLiteral(val value: Boolean): Literal()
+data class IntLiteral(val value: Int) : Literal()
 data class LongLiteral(val value: Long) : Literal()
 data class DecimalLiteral(val value: BigDecimal) : Literal()
 
