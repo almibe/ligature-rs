@@ -9,7 +9,7 @@ import java.math.BigDecimal
 import java.util.stream.Stream
 
 sealed class Value
-data class Node(val label: String, val types: Collection<String>): Value()
+data class Node(val label: String): Value()
 
 sealed class Literal: Value()
 data class LangLiteral(val value: String, val langTag: String) : Literal()
@@ -46,14 +46,11 @@ interface Dataset {
             context: Node? = null
     ): Stream<Statement>
     fun allStatements(): Stream<Statement>
-    fun allNodes(types: Collection<String> = listOf()): Stream<Node>
+    fun allNodes(): Stream<Node>
     fun allAttributes(): Stream<Attribute>
     fun allLiterals(): Stream<Literal>
     fun allTypes(): Stream<String>
-    fun newNode(types: Collection<String> = listOf()): Node
+    fun newNode(): Node
     fun relabelNode(node: Node, label: String?)
     fun deleteNode(node: Node)
-    fun nodeTypes(node: Node): Collection<String>
-    fun addNodeTypes(node: Node, types: Collection<String>)
-    fun removeNodeTypes(node: Node, types: Collection<String>)
 }
