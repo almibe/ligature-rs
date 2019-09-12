@@ -32,7 +32,6 @@ interface Store: Closeable {
     fun getDatasetNames(): Stream<String>
     fun getDataset(name: String): Dataset
     fun deleteDataset(name: String)
-    override fun close()
 }
 
 interface Dataset {
@@ -45,11 +44,9 @@ interface Dataset {
             value: Value? = null,
             context: Node? = null
     ): Stream<Statement>
-    fun allStatements(): Stream<Statement>
     fun allNodes(): Stream<Node>
     fun allAttributes(): Stream<Attribute>
     fun allLiterals(): Stream<Literal>
     fun allTypes(): Stream<String>
     fun newNode(): Node
-    fun deleteNode(node: Node)
 }
