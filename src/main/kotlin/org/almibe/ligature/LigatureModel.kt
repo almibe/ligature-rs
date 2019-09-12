@@ -6,18 +6,22 @@ package org.almibe.ligature
 
 import java.io.Closeable
 import java.math.BigDecimal
+import java.time.LocalDate
+import java.time.LocalTime
 import java.util.stream.Stream
 
 sealed class Value
 data class Node(val id: String): Value()
 
 sealed class Literal: Value()
-data class LangLiteral(val value: String, val langTag: String) : Literal()
-data class StringLiteral(val value: String) : Literal()
+data class LangLiteral(val value: String, val langTag: String): Literal()
+data class StringLiteral(val value: String): Literal()
 data class BooleanLiteral(val value: Boolean): Literal()
-data class IntLiteral(val value: Int) : Literal()
-data class LongLiteral(val value: Long) : Literal()
-data class DecimalLiteral(val value: BigDecimal) : Literal()
+data class IntLiteral(val value: Int): Literal()
+data class LongLiteral(val value: Long): Literal()
+data class DecimalLiteral(val value: BigDecimal): Literal()
+data class TimeLiteral(val value: LocalTime): Literal()
+data class DateLiteral(val value: LocalDate): Literal()
 
 data class Attribute(val label: String)
 
