@@ -48,9 +48,5 @@ interface Dataset {
             value: Value? = null,
             context: Node? = null
     ): Stream<Statement>
-    fun allNodes(): Stream<Node>
-    fun allAttributes(): Stream<Attribute>
-    fun allLiterals(): Stream<Literal>
-    fun allTypes(): Stream<String>
     fun newNode(): Node
 }
