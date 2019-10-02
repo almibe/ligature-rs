@@ -11,7 +11,7 @@ import java.time.LocalTime
 import java.util.stream.Stream
 
 sealed class Value
-data class Node(val id: String): Value()
+data class Node(private val id: String): Value()
 
 sealed class Literal: Value()
 data class LangLiteral(val value: String, val langTag: String): Literal()
@@ -48,5 +48,5 @@ interface Dataset {
             value: Value? = null,
             context: Node? = null
     ): Stream<Statement>
-    fun newNode(): Node
+    fun newNode(vararg attributes: Pair<Attribute, Value>): Node
 }
