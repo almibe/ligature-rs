@@ -1,6 +1,6 @@
 # Ligature
 
-Ligature is an free and open source sematic network library and database.
+Ligature is an free and open source semantic network library and database.
 Ligature allows you to model your data in a flexible way based on statements made about nodes.
 Ligature takes a lot of inspiration from RDF but attempts to be more general purpose and applicable outside of the semantic web.
 This project provides the API all implementations of Ligature should implement.
