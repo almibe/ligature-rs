@@ -48,5 +48,5 @@ interface Dataset {
             value: Value? = null,
             context: Node? = null
     ): Stream<Statement>
-    fun newNode(vararg attributes: Pair<Attribute, Value>): Node
+    fun newNode(): Node
 }
