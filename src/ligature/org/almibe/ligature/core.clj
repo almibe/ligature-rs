@@ -1,4 +1,4 @@
-(ns ligature.core)
+(ns org.almibe.ligature.core)
 
 (defprotocol LigatureStore
   (get-dataset [this dateset-name])
