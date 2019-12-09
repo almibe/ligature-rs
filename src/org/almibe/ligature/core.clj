@@ -17,15 +17,25 @@
   (sparql-query [this query])
   (wander-query [this query]))
 
-(defn subject? [])
+(defn blank-node? [blank-node]
+  "Accepts a String representing a Blank Node and returns true or false depending on if it is valid."
+  )
+
+(defn iri? [iri]
+  "Accepts a String representing an iri and returns true or false depending on if it is valid."
+
+  )
+
+(defn subject? [subject]
+  "Accepts a String representing a subject and returns true or false depending of
+  whether or not that String is a valid IRI or Blank Node"
+  (or (iri? subject) (blank-node? subject)))
 
 (defn predicate? [])
 
 (defn object? [])
 
-(defn iri? [])
 
-(defn blank-node? [])
 
 (defn literal? [])
 
