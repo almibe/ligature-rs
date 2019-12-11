@@ -19,14 +19,9 @@
   (sparql-query [this query])
   (wander-query [this query]))
 
-(defn blank-node?
-  "Accepts a String representing a Blank Node and returns true or false depending on if it is valid."
-  [blank-node]
-  (throw (RuntimeException. "TODO")))
-
-(defn iri?
-  "Accepts a String representing an iri and returns true or false depending on if it is valid."
-  [iri]
+(defn identifier?
+  "Accepts a String representing an identifier and returns true or false depending on if it is valid."
+  [identifier]
   (throw (RuntimeException. "TODO")))
 
 (defn string-literal?
@@ -42,7 +37,7 @@
 
 (defn typed-literal?
   "Accepts a Map and returns true or false depending on if it is a valid typed literal.
-  A typed literal should contain a :valud key with a valid string literal and a :type key with a valid IRI."
+  A typed literal should contain a :valud key with a valid string literal and a :type key with a valid identifier."
   [literal]
   (throw (RuntimeException. "TODO")))
 
@@ -53,17 +48,17 @@
 
 (defn subject?
   "Accepts a String representing a subject and returns true or false depending of
-  whether or not that String is a valid IRI or Blank Node"
+  whether or not that String is a valid identifier."
   [subject]
-  (or (iri? subject) (blank-node? subject)))
+  (identifier? subject))
 
 (defn predicate? [predicate]
   "Accepts a String representing a predicate and returns true or false depending on if it is valid."
-  (iri? predicate))
+  (identifier? predicate))
 
 (defn object? [object]
   "Accepts a String or Map representing an object and returns true or false depending on if it is valid."
-  (or (iri? object) (blank-node? object) (literal? object)))
+  (or (identifier? object) (literal? object)))
 
 (defn statement?
   "Accepts a Map and returns true or false depending on if it is a valid Statement.
