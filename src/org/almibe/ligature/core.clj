@@ -2,16 +2,25 @@
 
 (defprotocol LigatureStore
   "A Store manages many named Datasets."
-  (get-dataset [this dateset-name])
-  (delete-dataset [this dateset-name])
-  (all-datasets [this])
-  (close [this]))
+  (get-dataset [this dateset-name]
+    "Returns an existing or new dataset based on the name passed.")
+  (delete-dataset [this dateset-name]
+    "Deletes the dataset of the name given.")
+  (all-datasets [this]
+    "Returns a seq of all existing datasets.")
+  (close [this]
+    "Close connection with the Store."))
 
 (defprotocol LigatureDataset
   "A Dataset manages a collection of Statements and supports ontologies and querying."
-  (add-statements [this statements]) ; accepts a seq of statement tuples
-  (remove-statements [this statements]) ; accepts a seq of statement tuples
-  (all-statements [this]) ; accepts nothing but returns a seq
+  (add-statements [this statements]
+    "Accepts a seq of statement tuples")
+  (remove-statements [this statements]
+    "Accepts a seq of statement tuples")
+  (all-statements [this]
+    "Accepts nothing but returns a seq of all Statements in the Dataset.")
+  (new-identifier [this]
+    "Returns a unique, new identifier in the form _:NUMBER")
   (match [this pattern])
   (dataset-name [this])
   (set-ontology [this ontology])
