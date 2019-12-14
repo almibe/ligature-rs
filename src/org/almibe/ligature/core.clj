@@ -33,11 +33,6 @@
   [identifier]
   (throw (RuntimeException. "TODO")))
 
-(defn string-literal?
-  "Accepts a String and returns if it is a valid string literal."
-  [literal]
-  (string? literal))
-
 (defn lang-literal?
   "Accepts a Map and returns true or false depending on if it is a valid lang literal.
   A lang literal should contain a :value key with a valid string literal and a :lang key with a valid lang code."
@@ -53,7 +48,7 @@
 (defn literal?
   "Accepts a String or Map representing a literal and returns true or false depending on if it is valid."
   [literal]
-  (or (string-literal? literal) (lang-literal? literal) (typed-literal? literal)))
+  (or (lang-literal? literal) (typed-literal? literal)))
 
 (defn subject?
   "Accepts a String representing a subject and returns true or false depending of

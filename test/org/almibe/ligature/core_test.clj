@@ -4,16 +4,13 @@
 
 (deftest identifier?-test
   (testing "Common examples"
-    (is ((identifier? "") false)))
+    (is ((identifier? "") false))
     (is ((identifier? "http://localhost/people/7") true))
     (is ((identifier? "http://localhost(/people/7") false))
-    (is ((identifier? "http://localhost /people/7") false))) ;TODO more test cases
-
-(deftest string-literal?-test
-  (testing "Common examples"
-    (is (string-literal? "This is a string") true)
-    (is (string-literal? "") true)
-    (is (string-literal? {}) false))) ;TODO more test cases
+    (is ((identifier? "http://localhost /people/7") false))
+    (is ((identifier? "hello") true))
+    (is ((identifier? "_:1")))
+    (is ((identifier? "_:1344"))))) ; TODO more test cases
 
 (deftest lang-literal?-test
   (testing "Common examples"
@@ -29,6 +26,6 @@
     (is (typed-literal? {:value "Hello" :type "identifier"}) true)
     (is (typed-literal? {:value "56" :type "number" :lang "en"}) false))) ; TODO more test cases
 
-(deftest literal?-test
+(deftest statement?-test
   (testing "Common examples"
-    ))
+    (is (statement? (statement "hello" "world" "triple")))))
