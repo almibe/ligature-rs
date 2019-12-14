@@ -2,14 +2,33 @@
   (:require [clojure.test :refer :all]
             [org.almibe.ligature.core :refer :all]))
 
-(deftest iri?-test
+(deftest identifier?-test
   (testing "Common examples"
-    (is ((iri? "") false)))
-    (is ((iri? "http://localhost/people/7") true))) ;TODO more test cases
+    (is ((identifier? "") false)))
+    (is ((identifier? "http://localhost/people/7") true))
+    (is ((identifier? "http://localhost(/people/7") false))
+    (is ((identifier? "http://localhost /people/7") false))) ;TODO more test cases
 
-(deftest blank-node?-test
+(deftest string-literal?-test
   (testing "Common examples"
-    (is ((blank-node? "_:a") true)))
-    (is ((blank-node? "") false))
-    (is ((blank-node? "_:sometext") true))
-    (is ((blank-node? "_:sometext moretext") false))) ;TODO more test cases
+    (is (string-literal? "This is a string") true)
+    (is (string-literal? "") true)
+    (is (string-literal? {}) false))) ;TODO more test cases
+
+(deftest lang-literal?-test
+  (testing "Common examples"
+    (is (lang-literal? "not a lang lit") false)
+    (is (lang-literal? {:value "" :lang ""}) false)
+    (is (lang-literal? {:value "Hello" :lang "en"}) true)
+    (is (lang-literal? {:value "Bonjour" :lang "fr" :type "fr"}) false))) ; TODO more test cases
+
+(deftest typed-literal?-test
+  (testing "Common examples"
+    (is (typed-literal? "not a typed literal") false)
+    (is (typed-literal? {}) false)
+    (is (typed-literal? {:value "Hello" :type "identifier"}) true)
+    (is (typed-literal? {:value "56" :type "number" :lang "en"}) false))) ; TODO more test cases
+
+(deftest literal?-test
+  (testing "Common examples"
+    ))
