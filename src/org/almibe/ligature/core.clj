@@ -9,7 +9,9 @@
   (all-datasets [this]
     "Returns a seq of all existing datasets.")
   (close [this]
-    "Close connection with the Store."))
+    "Close connection with the Store.")
+  (location [this]
+    "Returns a String representation of this Store's location."))
 
 (defprotocol LigatureDataset
   "A Dataset manages a collection of Statements and supports ontologies and querying."
