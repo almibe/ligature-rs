@@ -4,4 +4,4 @@
   :license {:name "MPL-2.0"
             :url "https://www.mozilla.org/en-US/MPL/"}
   :dependencies [[org.clojure/clojure "1.10.0"]]
-  :repl-options {:init-ns ligature.core})
+  :repl-options {:init-ns org.almibe.ligature.core})

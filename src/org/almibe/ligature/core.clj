@@ -50,7 +50,7 @@
   [literal]
   (and
     (map? literal)
-    (= (keys literal) [:lang :value])
+    (= (set (keys literal)) #{:lang :value})
     (lang-tag? (:lang literal))
     (string? (:value literal))))
 
@@ -60,7 +60,7 @@
   [literal]
   (and
     (map? literal)
-    (= (keys literal) [:type :value])
+    (= (set (keys literal)) #{:type :value})
     (identifier? (:type literal))
     (string? (:value literal))))
 
@@ -97,8 +97,8 @@
   (and
     (map? statement)
     (or
-      (= (keys statement) [:subject :predicate :object])
-      (= (keys statement) [:subject :predicate :object :graph]))
+      (= (set (keys statement)) #{:subject :predicate :object})
+      (= (set (keys statement)) #{:subject :predicate :object :graph}))
     (subject? (:subject statement))
     (predicate? (:predicate statement))
     (object? (:object statement))
