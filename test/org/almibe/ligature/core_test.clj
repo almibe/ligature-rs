@@ -31,3 +31,14 @@
 (deftest statement?-test
   (testing "Common examples"
     (is (statement? (statement "hello" "world" "triple")))))
+
+(deftest lang-tag?-test
+  (testing "Common examples"
+    (is (not (lang-tag? "")))
+    (is (lang-tag? "en"))
+    (is (not (lang-tag? "en-")))
+    (is (lang-tag? "en-fr"))
+    (is (not (lang-tag? "en-fr-")))
+    (is (lang-tag? "en-fr-sp"))
+    (is (lang-tag? "ennnenefnk-dkfjkjfl-dfakjelfkjalkf-fakjeflkajlkfj"))
+    (is (not (lang-tag? "en-fr-ef ")))))
