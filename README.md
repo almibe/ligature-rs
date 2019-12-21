@@ -54,4 +54,4 @@ For example here is some pseudo code.
 
 | Name | Description | URL |
 | ---- | ----------- | --- |
-| ligature-in-memory | In-memory implementation of the Ligature API in Clojure | https://github.com/almibe/ligaute-in-memory |
+| ligature-in-memory | In-memory implementation of the Ligature API in Clojure | https://github.com/almibe/ligature-in-memory |
