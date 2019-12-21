@@ -30,7 +30,10 @@
 
 (deftest statement?-test
   (testing "Common examples"
-    (is (statement? (statement "hello" "world" "triple")))))
+    (is (statement? (statement "hello" "world" "triple")))
+    (is (statement? (statement "hello" "world" "triple" "graph")))
+    (is (not (statement? (statement 5 3 66 554))))
+    (is (not (statement? (statement "test" "test" :a)))))) ; TODO more test cases
 
 (deftest lang-tag?-test
   (testing "Common examples"
