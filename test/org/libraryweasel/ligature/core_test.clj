@@ -8,7 +8,7 @@
 
 (ns org.libraryweasel.ligature.core-test
   (:require [clojure.test :refer :all]
-            [org.almibe.ligature.core :refer :all]))
+            [org.libraryweasel.ligature.core :refer :all]))
 
 (deftest identifier?-test
   (testing "Common examples"
