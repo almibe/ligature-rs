@@ -50,6 +50,11 @@ For example here is some pseudo code.
 (add-statements db [(statement "_:34567" "isa" "bird")]) ; probably will error out since I doubt that identifer has been created....but it could....but it probably wasn't
 ```
 
+## Building
+Ligature requires Leiningen to be installed.
+See https://leiningen.org for installation instructions.
+Once that is set up use `lein test` to run tests `lein install` to install the artifact locally.
+
 ## Related Projects
 
 | Name | Description | URL |
