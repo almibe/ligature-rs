@@ -31,10 +31,12 @@
     "Accepts nothing but returns a seq of all Statements in the Dataset.")
   (new-identifier [this]
     "Returns a unique, new identifier in the form _:NUMBER")
-  (match [this pattern])
+  (match-statements [this pattern])
   (dataset-name [this])
-  (set-ontology [this ontology])
-  (get-ontology [this])
+  (add-rules [this rules])
+  (remove-rules [this rules])
+  (all-rules [this])
+  (match-rules [this pattern])
   (sparql-query [this query])
   (wander-query [this query]))
 
