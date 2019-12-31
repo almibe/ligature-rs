@@ -42,7 +42,8 @@
     (is (statement? (statement "hello" "world" "triple" "graph")))
     (is (not (statement? (statement 5 3 66 554))))
     (is (not (statement? (statement "test" "test" :a))))
-    (is (= (statement "test" :a "test" "test") (statement "test" "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" "test" "test"))))) ; TODO more test cases
+    (is (= (statement "test" :a "test" "test") (statement "test" "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" "test" "test")))
+    (is (statement? (statement "test" :a "test" "test"))))) ; TODO more test cases
 
 (deftest lang-tag?-test
   (testing "Common examples"
