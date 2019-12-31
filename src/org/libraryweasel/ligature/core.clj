@@ -114,9 +114,14 @@
     (object? (:object statement))
     (graph? (:graph statement))))
 
+(defn- expand-predicate
+  [predicate]
+  (if (= predicate :a) "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" predicate))
+
 (defn statement
-  "This function acts as a helper function for creating Statement maps."
+  "This function acts as a helper function for creating Statement maps.
+  This function allow users to shortcut :a for http://www.w3.org/1999/02/22-rdf-syntax-ns#type in the predicate position."
   ([subject predicate object]
-   {:subject subject :predicate predicate :object object})
+   {:subject subject :predicate (expand-predicate predicate) :object object})
   ([subject predicate object graph]
-    {:subject subject :predicate predicate :object object :graph graph}))
+    {:subject subject :predicate (expand-predicate predicate) :object object :graph graph}))
