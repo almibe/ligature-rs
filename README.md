@@ -1,5 +1,6 @@
 # ligature
 Ligature is a Clojure library for working with semantic data.
+This project provides the main protocols for Ligature as well as some common helper and validation functions.
 It is based on RDF and related standards but has a more flexible approach to working with semantic data.
 It's main difference is that it is intended to be used in a broader context than strict RDF.
 This means that identifiers do not have to be IRIs and blank nodes only exist in compatibility contexts.
@@ -59,4 +60,11 @@ Once that is set up use `lein test` to run tests `lein install` to install the a
 
 | Name | Description | URL |
 | ---- | ----------- | --- |
+| wander | A scripting language for working with Ligature. | https://github.com/almibe/wander |
+| ligature-sparql | SPARQL support for Ligature. | https://github.com/almibe/ligature-sparql |
+| ligature-ontology | Ontology/OWL support for Ligature. | https://github.com/almibe/ligature-ontology |
+| ligature-test-suite | A common test suite for Ligature implementations. | https://github.com/almibe/ligature-test-suite |
 | ligature-in-memory | In-memory implementation of the Ligature API in Clojure | https://github.com/almibe/ligature-in-memory |
+| ligature-xodus | Implementation of Ligature for the JVM that uses the Xodus data store. | https://github.com/almibe/ligature-xodus |
+| ligature-foundationdb | Implementation of Ligature for the JVM that uses FoundationDB as its data store. | https://github.com/almibe/ligature-foundationdb |
+| ligature-indexdb | Implementation for ClojureScript that uses IndexDB as its data store. | https://github.com/almibe/ligature-indexdb |
