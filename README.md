@@ -45,9 +45,9 @@ For example here is some pseudo code.
 
 ```clojure
 (def x (new-identifier db))  ; x = _:34
-(add-statements db [(statement x "isa" "company")]) ; should run fine
+(add-statements db [(statement x :a "company")]) ; should run fine
 (add-statements db [(statement "_:34" "name" "Pear")]) ; should run fine since _:34 has been created already
-(add-statements db [(statement "_:34567" "isa" "bird")]) ; probably will error out since I doubt that identifer has been created....but it could....but it probably wasn't
+(add-statements db [(statement "_:34567" :a "bird")]) ; probably will error out since I doubt that identifer has been created....but it could....but it probably wasn't
 ```
 
 ## Building
