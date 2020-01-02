@@ -1,4 +1,4 @@
-; Copyright (c) 2019 Alex Michael Berry
+; Copyright (c) 2019-2020 Alex Michael Berry
 ;
 ; This program and the accompanying materials are made
 ; available under the terms of the Eclipse Public License 2.0
