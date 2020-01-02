@@ -23,9 +23,9 @@
 
 (defprotocol LigatureDataset
   "A Dataset manages a collection of Statements and supports ontologies and querying."
-  (add-statements [this & statements]
+  (add-statements [this statements]
     "Accepts a seq of statement tuples")
-  (remove-statements [this & statements]
+  (remove-statements [this statements]
     "Accepts a seq of statement tuples")
   (all-statements [this]
     "Accepts nothing but returns a seq of all Statements in the Dataset.")
@@ -33,8 +33,8 @@
     "Returns a unique, new identifier in the form _:NUMBER")
   (match-statements [this pattern])
   (dataset-name [this])
-  (add-rules [this & rules])
-  (remove-rules [this & rules])
+  (add-rules [this rules])
+  (remove-rules [this rules])
   (all-rules [this])
   (match-rules [this pattern])
   (sparql-query [this query])
