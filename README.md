@@ -1,8 +1,8 @@
 # ligature
 Ligature is a Clojure library for working with semantic data.
-This project provides the main protocols for Ligature as well as some common helper and validation functions.
+This project provides the main protocols for Ligature as well as Spec support and some common helper functions.
 It is based on RDF and related standards but has a more flexible approach to working with semantic data.
-It's main difference is that it is intended to be used in a broader context than strict RDF.
+Its main difference is that it is intended to be used in a broader context than strict RDF.
 This means that identifiers do not have to be IRIs and blank nodes only exist in compatibility contexts.
 
 ## RDF's Data Model
@@ -45,10 +45,10 @@ The form `_:NUMBER` is special in Ligature and only IDs that have been already c
 For example here is some pseudo code.
 
 ```clojure
-(def x (new-identifier db))  ; x = _:34
-(add-statements db [(statement x :a "company")]) ; should run fine
-(add-statements db [(statement "_:34" "name" "Pear")]) ; should run fine since _:34 has been created already
-(add-statements db [(statement "_:34567" :a "bird")]) ; probably will error out since I doubt that identifer has been created....but it could....but it probably wasn't
+(def x (new-identifier dataset))  ; x = _:34
+(add-statements dataset [[ x :a "company"]]) ; should run fine
+(add-statements dataset [[ "_:34" "name" "Pear"]]) ; should run fine since _:34 has been created already
+(add-statements dataset [[ "_:34567" :a "bird"]]) ; probably will error out since I doubt that identifer has been created....but it could....but it probably wasn't
 ```
 
 ## Building
