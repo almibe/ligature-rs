@@ -152,13 +152,15 @@
 
 (s/def ::object object?)
 
-(s/def ::triple triple?)
+(s/def ::graph graph?)
 
-(s/def ::quad quad?)
+(s/def ::triple (s/tuple ::subject ::predicate ::object))
 
-(s/def ::statement statement?)
+(s/def ::quad (s/tuple ::subject ::predicate ::object ::graph))
 
-(s/def ::statements statements?)
+(s/def ::statement (s/or ::triple ::quad))
+
+(s/def ::statements (s/coll-of ::statement))
 
 (defn subject
   "Accepts a Statement tuple and returns the Subject."
