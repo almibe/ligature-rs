@@ -6,7 +6,8 @@
 ;
 ; SPDX-License-Identifier: EPL-2.0
 
-(ns org.libraryweasel.ligature.core)
+(ns org.libraryweasel.ligature.core
+  (:require [clojure.spec.alpha :as s]))
 
 (defprotocol LigatureStore
   "A Store manages many named Datasets."
@@ -100,6 +101,14 @@
     (nil? graph)
     (identifier? graph)))
 
+(defn triple?
+  [triple]
+  )
+
+(defn quad?
+  [quad]
+  )
+
 (defn statement?
   "Accepts a Map and returns true or false depending on if it is a valid Statement.
   A valid Statement contains a :subject, :predicate, :object, and optionally a :graph key with valid values."
@@ -114,6 +123,11 @@
     (object? (:object statement))
     (graph? (:graph statement))))
 
+(defn statements?
+  "Check that a vector contains valid Statements."
+  [statements]
+  (comment TODO))
+
 (defn- expand-predicate
   [predicate]
   (if (= predicate :a) "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" predicate))
@@ -124,4 +138,44 @@
   ([subject predicate object]
    {:subject subject :predicate (expand-predicate predicate) :object object})
   ([subject predicate object graph]
-    {:subject subject :predicate (expand-predicate predicate) :object object :graph graph}))
+   {:subject subject :predicate (expand-predicate predicate) :object object :graph graph}))
+
+(s/def ::literal literal?)
+
+(s/def ::lang-literal lang-literal?)
+
+(s/def ::typed-literal typed-literal?)
+
+(s/def ::subject subject?)
+
+(s/def ::predicate predicate?)
+
+(s/def ::object object?)
+
+(s/def ::triple triple?)
+
+(s/def ::quad quad?)
+
+(s/def ::statement statement?)
+
+(s/def ::statements statements?)
+
+(defn subject
+  "Accepts a Statement tuple and returns the Subject."
+  [statement]
+  (get statement 0))
+
+(defn predicate
+  "Accepts a Statement tuple and returns the Predicate."
+  [statement]
+  (get statement 1))
+
+(defn object
+  "Accepts a Statement tuple and returns the Object."
+  [statement]
+  (get statement 2))
+
+(defn graph
+  "Accepts a Statement tuple and returns the Graph."
+  [statement]
+  (get statement 3))
