@@ -60,6 +60,7 @@ Once that is set up use `lein test` to run tests `lein install` to install the a
 
 | Name | Description | URL |
 | ---- | ----------- | --- |
+| ligature-formats | Support for various RDF serializations with Ligature | https://github.com/almibe/ligature-formats |
 | wander | A scripting language for working with Ligature. | https://github.com/almibe/wander |
 | ligature-sparql | SPARQL support for Ligature. | https://github.com/almibe/ligature-sparql |
 | ligature-ontology | Ontology/OWL support for Ligature. | https://github.com/almibe/ligature-ontology |
