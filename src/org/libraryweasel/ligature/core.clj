@@ -102,32 +102,55 @@
     (nil? graph)
     (identifier? graph)))
 
+(defn subject
+  "Accepts a Statement tuple and returns the Subject."
+  [statement]
+  (get statement 0))
+
+(defn predicate
+  "Accepts a Statement tuple and returns the Predicate."
+  [statement]
+  (get statement 1))
+
+(defn object
+  "Accepts a Statement tuple and returns the Object."
+  [statement]
+  (get statement 2))
+
+(defn graph
+  "Accepts a Statement tuple and returns the Graph."
+  [statement]
+  (get statement 3))
+
 (defn triple?
   [triple]
-  (comment TODO))
+  (and (vector? triple)
+       (= (count triple) 3)
+       (subject? (subject triple))
+       (predicate? (predicate triple))
+       (object? (object triple))))
 
 (defn quad?
   [quad]
-  (comment TODO))
+  (and (vector? quad)
+       (= (count quad) 4)
+       (subject? (subject triple))
+       (predicate? (predicate triple))
+       (object? (object triple))
+       (graph? (graph triple))))
 
 (defn statement?
   "Accepts a Map and returns true or false depending on if it is a valid Statement.
   A valid Statement contains a :subject, :predicate, :object, and optionally a :graph key with valid values."
   [statement]
-  (and
-    (map? statement)
-    (or
-      (= (set (keys statement)) #{:subject :predicate :object})
-      (= (set (keys statement)) #{:subject :predicate :object :graph}))
-    (subject? (:subject statement))
-    (predicate? (:predicate statement))
-    (object? (:object statement))
-    (graph? (:graph statement))))
+  (or (triple? statement)
+      (quad? statement)))
 
 (defn statements?
   "Check that a vector contains valid Statements."
   [statements]
-  (comment TODO))
+  (and (or (set? statements) (vector? statements) (list? statements))
+       (every? statement? statements)))
 
 (defn- expand-predicate
   [predicate]
@@ -162,23 +185,3 @@
 (s/def ::statement (s/or ::triple ::quad))
 
 (s/def ::statements (s/coll-of ::statement))
-
-(defn subject
-  "Accepts a Statement tuple and returns the Subject."
-  [statement]
-  (get statement 0))
-
-(defn predicate
-  "Accepts a Statement tuple and returns the Predicate."
-  [statement]
-  (get statement 1))
-
-(defn object
-  "Accepts a Statement tuple and returns the Object."
-  [statement]
-  (get statement 2))
-
-(defn graph
-  "Accepts a Statement tuple and returns the Graph."
-  [statement]
-  (get statement 3))
