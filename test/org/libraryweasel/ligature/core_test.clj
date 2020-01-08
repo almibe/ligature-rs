@@ -48,6 +48,12 @@
     (is (not (statement? ["test" "test" :a])))
     (is (statement? ["test" :a "test" "test"])))) ; TODO more test cases
 
+(deftest statements?-test
+  (testing "Common examples"
+    (is (statements? [["hello" "world" "triple"]]))
+    (is (statements? #{["hello" "world" "triple"]}))
+    (is (statements? '(["hello" "world" "triple"]))))) ; TODO more test cases
+
 (deftest lang-tag?-test
   (testing "Common examples"
     (is (not (lang-tag? "")))
