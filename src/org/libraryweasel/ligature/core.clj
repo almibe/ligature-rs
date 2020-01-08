@@ -11,8 +11,9 @@
 
 (defprotocol LigatureStore
   "A Store manages many named Collections."
-  (get-collection [this collection-name]
-    "Returns an existing or new collection based on the name passed.")
+  (collection [this collection-name]
+    "Returns a collection based on the name passed.
+    Calling this function will not create a new collection, it just binds a Store and Collection name.")
   (delete-collection [this collection-name]
     "Deletes the collection of the name given.")
   (all-collections [this]
