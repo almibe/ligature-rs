@@ -89,7 +89,9 @@
 
 (defn predicate? [predicate]
   "Accepts a String representing a predicate and returns true or false depending on if it is valid."
-  (identifier? predicate))
+  (or
+    (identifier? predicate)
+    (= :a predicate)))
 
 (defn object? [object]
   "Accepts a String or Map representing an object and returns true or false depending on if it is valid."
@@ -134,10 +136,10 @@
   [quad]
   (and (vector? quad)
        (= (count quad) 4)
-       (subject? (subject triple))
-       (predicate? (predicate triple))
-       (object? (object triple))
-       (graph? (graph triple))))
+       (subject? (subject quad))
+       (predicate? (predicate quad))
+       (object? (object quad))
+       (graph? (graph quad))))
 
 (defn statement?
   "Accepts a Map and returns true or false depending on if it is a valid Statement.
