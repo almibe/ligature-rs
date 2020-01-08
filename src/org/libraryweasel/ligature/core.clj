@@ -10,30 +10,30 @@
   (:require [clojure.spec.alpha :as s]))
 
 (defprotocol LigatureStore
-  "A Store manages many named Datasets."
-  (get-dataset [this dateset-name]
-    "Returns an existing or new dataset based on the name passed.")
-  (delete-dataset [this dateset-name]
-    "Deletes the dataset of the name given.")
-  (all-datasets [this]
-    "Returns a seq of all existing datasets.")
+  "A Store manages many named Collections."
+  (get-collection [this collection-name]
+    "Returns an existing or new collection based on the name passed.")
+  (delete-collection [this collection-name]
+    "Deletes the collection of the name given.")
+  (all-collections [this]
+    "Returns a seq of all existing collections.")
   (close [this]
     "Close connection with the Store.")
-  (location [this]
-    "Returns a String representation of this Store's location."))
+  (details [this]
+    "Returns an implementation specific map of details about this Store useful for debugging."))
 
-(defprotocol LigatureDataset
-  "A Dataset manages a collection of Statements and supports ontologies and querying."
+(defprotocol LigatureCollection
+  "A Collection manages a collection of Statements and supports ontologies and querying."
   (add-statements [this statements]
     "Accepts a seq of statement tuples")
   (remove-statements [this statements]
     "Accepts a seq of statement tuples")
   (all-statements [this]
-    "Accepts nothing but returns a seq of all Statements in the Dataset.")
+    "Accepts nothing but returns a seq of all Statements in the Collection.")
   (new-identifier [this]
     "Returns a unique, new identifier in the form _:NUMBER")
   (match-statements [this pattern])
-  (dataset-name [this])
+  (collection-name [this])
   (add-rules [this rules])
   (remove-rules [this rules])
   (all-rules [this])
@@ -103,11 +103,11 @@
 
 (defn triple?
   [triple]
-  )
+  (comment TODO))
 
 (defn quad?
   [quad]
-  )
+  (comment TODO))
 
 (defn statement?
   "Accepts a Map and returns true or false depending on if it is a valid Statement.
