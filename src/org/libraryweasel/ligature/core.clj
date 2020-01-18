@@ -184,6 +184,6 @@
 
 (s/def ::quad (s/tuple ::subject ::predicate ::object ::graph))
 
-(s/def ::statement (s/or ::triple ::quad))
+(s/def ::statement (s/or ::triple ::triple ::quad ::quad))
 
 (s/def ::statements (s/coll-of ::statement))
