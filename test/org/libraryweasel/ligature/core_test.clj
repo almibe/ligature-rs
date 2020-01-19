@@ -9,7 +9,8 @@
 (ns org.libraryweasel.ligature.core-test
   (:require [clojure.test :refer :all]
             [org.libraryweasel.ligature.core :refer :all]
-            [clojure.spec.alpha :as s]))
+            [clojure.spec.alpha :as s]
+            [org.libraryweasel.ligature.core :as l]))
 
 (deftest identifier?-test
   (testing "Common examples"
@@ -39,21 +40,21 @@
 
 (deftest statement?-test
   (testing "Common examples"
-    (is ((s/valid? ::statement ["hello" "world" "triple"])))
-    (is ((s/valid? ::statement ["hello" "world" "triple" "graph"])))
-    (is (not ((s/valid? ::statement []))))
-    (is (not ((s/valid? ::statement ["g"]))))
-    (is (not ((s/valid? ::statement ["test" "test"]))))
-    (is (not ((s/valid? ::statement ["test" "test" "g" "h" "e"]))))
-    (is (not ((s/valid? ::statement [5 3 66 554]))))
-    (is (not ((s/valid? ::statement ["test" "test" :a]))))
-    (is ((s/valid? ::statement ["test" :a "test" "test"]))))) ; TODO more test cases
+    (is (s/valid? ::l/statement ["hello" "world" "triple"]))
+    (is (s/valid? ::l/statement ["hello" "world" "triple" "graph"]))
+    (is (not (s/valid? ::l/statement [])))
+    (is (not (s/valid? ::l/statement ["g"])))
+    (is (not (s/valid? ::l/statement ["test" "test"])))
+    (is (not (s/valid? ::l/statement ["test" "test" "g" "h" "e"])))
+    (is (not (s/valid? ::l/statement [5 3 66 554])))
+    (is (not (s/valid? ::l/statement ["test" "test" :a])))
+    (is (s/valid? ::l/statement ["test" :a "test" "test"])))) ; TODO more test cases
 
 (deftest statements?-test
   (testing "Common examples"
-    (is ((s/valid? ::statements [["hello" "world" "triple"]])))
-    (is ((s/valid? ::statements #{["hello" "world" "triple"]})))
-    (is ((s/valid? ::statements '(["hello" "world" "triple"])))))) ; TODO more test cases
+    (is (s/valid? ::l/statements [["hello" "world" "triple"]]))
+    (is (s/valid? ::l/statements #{["hello" "world" "triple"]}))
+    (is (s/valid? ::l/statements '(["hello" "world" "triple"]))))) ; TODO more test cases
 
 (deftest lang-tag?-test
   (testing "Common examples"
