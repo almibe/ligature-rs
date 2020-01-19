@@ -8,7 +8,8 @@
 
 (ns org.libraryweasel.ligature.core-test
   (:require [clojure.test :refer :all]
-            [org.libraryweasel.ligature.core :refer :all]))
+            [org.libraryweasel.ligature.core :refer :all]
+            [clojure.spec.alpha :as s]))
 
 (deftest identifier?-test
   (testing "Common examples"
@@ -38,21 +39,21 @@
 
 (deftest statement?-test
   (testing "Common examples"
-    (is (statement? ["hello" "world" "triple"]))
-    (is (statement? ["hello" "world" "triple" "graph"]))
-    (is (not (statement? [])))
-    (is (not (statement? ["g"])))
-    (is (not (statement? ["test" "test"])))
-    (is (not (statement? ["test" "test" "g" "h" "e"])))
-    (is (not (statement? [5 3 66 554])))
-    (is (not (statement? ["test" "test" :a])))
-    (is (statement? ["test" :a "test" "test"])))) ; TODO more test cases
+    (is ((s/valid? ::statement ["hello" "world" "triple"])))
+    (is ((s/valid? ::statement ["hello" "world" "triple" "graph"])))
+    (is (not ((s/valid? ::statement []))))
+    (is (not ((s/valid? ::statement ["g"]))))
+    (is (not ((s/valid? ::statement ["test" "test"]))))
+    (is (not ((s/valid? ::statement ["test" "test" "g" "h" "e"]))))
+    (is (not ((s/valid? ::statement [5 3 66 554]))))
+    (is (not ((s/valid? ::statement ["test" "test" :a]))))
+    (is ((s/valid? ::statement ["test" :a "test" "test"]))))) ; TODO more test cases
 
 (deftest statements?-test
   (testing "Common examples"
-    (is (statements? [["hello" "world" "triple"]]))
-    (is (statements? #{["hello" "world" "triple"]}))
-    (is (statements? '(["hello" "world" "triple"]))))) ; TODO more test cases
+    (is ((s/valid? ::statements [["hello" "world" "triple"]])))
+    (is ((s/valid? ::statements #{["hello" "world" "triple"]})))
+    (is ((s/valid? ::statements '(["hello" "world" "triple"])))))) ; TODO more test cases
 
 (deftest lang-tag?-test
   (testing "Common examples"
