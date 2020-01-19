@@ -124,36 +124,6 @@
   [statement]
   (get statement 3))
 
-(defn triple?
-  [triple]
-  (and (vector? triple)
-       (= (count triple) 3)
-       (subject? (subject triple))
-       (predicate? (predicate triple))
-       (object? (object triple))))
-
-(defn quad?
-  [quad]
-  (and (vector? quad)
-       (= (count quad) 4)
-       (subject? (subject quad))
-       (predicate? (predicate quad))
-       (object? (object quad))
-       (graph? (graph quad))))
-
-(defn statement?
-  "Accepts a Map and returns true or false depending on if it is a valid Statement.
-  A valid Statement contains a :subject, :predicate, :object, and optionally a :graph key with valid values."
-  [statement]
-  (or (triple? statement)
-      (quad? statement)))
-
-(defn statements?
-  "Check that a vector contains valid Statements."
-  [statements]
-  (and (or (set? statements) (vector? statements) (list? statements))
-       (every? statement? statements)))
-
 (defn- expand-predicate
   [predicate]
   (if (= predicate :a) "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" predicate))
