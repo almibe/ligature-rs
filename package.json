@@ -1,0 +1,22 @@
+{
+  "name": "ligature",
+  "version": "0.1.0-SNAPSHOT",
+  "description": "A semantic network library for TypeScript.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/almibe/ligature.git"
+  },
+  "author": "Alex Michael Berry",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/almibe/ligature/issues"
+  },
+  "homepage": "https://github.com/almibe/ligature#readme"
+}
