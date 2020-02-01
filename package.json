@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/almibe/ligature/issues"
   },
-  "homepage": "https://github.com/almibe/ligature#readme"
+  "homepage": "https://github.com/almibe/ligature#readme",
+  "devDependencies": {
+    "typescript": "^3.7.5"
+  }
 }

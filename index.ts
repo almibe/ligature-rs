@@ -1,5 +1,8 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
-export interface LigatureStore {
+ export interface LigatureStore {
   collection(collectionName: Identifier): Promise<LigatureCollection>
   deleteCollection(collectionName: Identifier): Promise<null>
   allCollections(): Promise<IterableIterator<Identifier>>
@@ -12,23 +15,23 @@ export interface LigatureCollection {
   removeStatements(statements: Statements): Promise<null>
   allStatements(): Promise<IterableIterator<Statement>>
   newIdentifier(): Promise<Identifier>
-  matchStatements(pattern): Promise<IterableIterator<Statement>>
+  matchStatements(pattern: Pattern): Promise<IterableIterator<Statement>>
   collectionName(): Promise<Identifier>
   addRules(rules: Rules): Promise<null>
   removeRules(rules: Rules): Promise<null>
   allRules(): Promise<IterableIterator<Rule>>
-  matchRules(pattern): Promise<IterableIterator<Rule>>
-  sparqlQuery(query): Promise<any>
-  wanderQuery(query): Promise<any>
+  matchRules(pattern: Pattern): Promise<IterableIterator<Rule>>
+  sparqlQuery(query: Query): Promise<any>
+  wanderQuery(query: Query): Promise<any>
 }
 
 export type Identifier = string
 export type Literal = LangLiteral | TypedLiteral
-export class LangLiteral {
+export type LangLiteral = {
   readonly value: string
   readonly langTag: string
 }
-export class TypedLiteral {
+export type TypedLiteral = {
   readonly value: string
   readonly type: string
 }
@@ -40,18 +43,20 @@ export type Statement = Readonly<[Subject, Predicate, Object, Graph?]>
 export type Statements = ReadonlyArray<Statement>
 export type Rule = Readonly<[Subject, Predicate, Object]>
 export type Rules = ReadonlyArray<Rule>
+export type Pattern = Readonly<[(Subject | typeof _)?, (Predicate | typeof _)?,
+  (Object | typeof _)?, (Graph | typeof _)?]>
+export type Query = any //TODO replace with real type
 
 export const a = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+export const _ = "*"
 export const validIdentifier = (i: Identifier): boolean => false //TODO copy logic from Clojure impl
 export const validLangTag = (l: string): boolean => false //TODO copy logic from Clojure impl
-export const validLangLiteral = (l: LangLiteral): boolean => validLangTag(l.langTag)
-export const validTypedLiteral = (l: TypedLiteral): boolean => validIdentifier(l.type)
-export const validLiteral = (l: Literal): boolean => {
-  if (l instanceof LangLiteral) {
-    return validLangLiteral(l)
-  } else if (l instanceof TypedLiteral) {
-    return validTypedLiteral(l)
-  } else {
-    return false
-  }
-}
+export const validLangLiteral = (l: Literal): boolean => (l as LangLiteral).langTag != null && 
+  (l as LangLiteral).value != null && 
+  (l as TypedLiteral).type == null && 
+  validLangTag((l as LangLiteral).langTag)
+export const validTypedLiteral = (l: Literal): boolean => (l as TypedLiteral).type != null &&
+  (l as TypedLiteral).value != null &&
+  (l as LangLiteral).langTag == null &&
+  validIdentifier((l as TypedLiteral).type)
+export const validLiteral = (l: Literal): boolean => validLangLiteral(l) || validTypedLiteral(l)
