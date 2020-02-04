@@ -29,7 +29,7 @@ export type Identifier = string
 export type Literal = PlainLiteral | TypedLiteral
 export type PlainLiteral = {
   readonly value: string
-  readonly langTag: string
+  readonly langTag?: string
 }
 export type TypedLiteral = {
   readonly value: string
