@@ -1,4 +1,4 @@
-import { validIdentifier, validPlainLiteral, validTypedLiteral } from "./index";
+import { validIdentifier, validPlainLiteral, validTypedLiteral, validLangTag } from "./index";
 
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -28,43 +28,13 @@ test('Typed literal tests', () => {
   expect(validTypedLiteral({value: "56", type: "number", lang: "en"})).toBe(false) //TODO more test cases
 })
 
-describe('Valid statement tests', () => {
-/*
-(deftest statement?-test
-  (testing "Common examples"
-    (is (s/valid? ::l/statement ["hello" "world" "triple"]))
-    (is (s/valid? ::l/statement ["hello" "world" "triple" "graph"]))
-    (is (not (s/valid? ::l/statement [])))
-    (is (not (s/valid? ::l/statement ["g"])))
-    (is (not (s/valid? ::l/statement ["test" "test"])))
-    (is (not (s/valid? ::l/statement ["test" "test" "g" "h" "e"])))
-    (is (not (s/valid? ::l/statement [5 3 66 554])))
-    (is (not (s/valid? ::l/statement ["test" "test" :a])))
-    (is (s/valid? ::l/statement ["test" :a "test" "test"])))) ; TODO more test cases
-*/
-})
-
-describe('Valid statements tests', () => {
-/*
-(deftest statements?-test
-  (testing "Common examples"
-    (is (s/valid? ::l/statements [["hello" "world" "triple"]]))
-    (is (s/valid? ::l/statements #{["hello" "world" "triple"]}))
-    (is (s/valid? ::l/statements '(["hello" "world" "triple"]))))) ; TODO more test cases
-*/
-})
-
-describe('Valid lang tag tests', () => {
-/*
-(deftest lang-tag?-test
-  (testing "Common examples"
-    (is (not (lang-tag? "")))
-    (is (lang-tag? "en"))
-    (is (not (lang-tag? "en-")))
-    (is (lang-tag? "en-fr"))
-    (is (not (lang-tag? "en-fr-")))
-    (is (lang-tag? "en-fr-sp"))
-    (is (lang-tag? "ennnenefnk-dkfjkjfl-dfakjelfkjalkf-fakjeflkajlkfj"))
-    (is (not (lang-tag? "en-fr-ef ")))))
-*/
+test('Valid lang tag tests', () => {
+  expect(validLangTag("")).toBe(false)
+  expect(validLangTag("en")).toBe(true)
+  expect(validLangTag("en-")).toBe(false)
+  expect(validLangTag("en-fr")).toBe(true)
+  expect(validLangTag("en-fr-")).toBe(false)
+  expect(validLangTag("en-fr-sp")).toBe(true)
+  expect(validLangTag("ennnenefnk-dkfjkjfl-dfakjelfkjalkf-fakjeflkajlkfj")).toBe(true)
+  expect(validLangTag("en-fr-ef ")).toBe(false)
 })
