@@ -49,25 +49,20 @@ export type Query = any //TODO replace with real type
 
 export const a = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
 export const _ = "*"
-export const validIdentifier = (i: Identifier): boolean => false //TODO copy logic from Clojure impl
-export const validLangTag = (l: string): boolean => false //TODO copy logic from Clojure impl
-export const validLangLiteral = (l: Literal): boolean => (l as PlainLiteral).langTag != null && 
-  (l as PlainLiteral).value != null && 
-  (l as TypedLiteral).type == null && 
-  validLangTag((l as PlainLiteral).langTag)
-export const validTypedLiteral = (l: Literal): boolean => (l as TypedLiteral).type != null &&
-  (l as TypedLiteral).value != null &&
-  (l as PlainLiteral).langTag == null &&
-  validIdentifier((l as TypedLiteral).type)
-export const validLiteral = (l: Literal): boolean => validLangLiteral(l) || validTypedLiteral(l)
+const identifierPattern = /^[a-zA-Z_][^\s\(\)\[\]\{\}\'\"`<>\\]*$/
+export const validIdentifier = (i: Identifier): boolean => identifierPattern.test(i)
+//export const validLangTag = (l: string): boolean => false //TODO copy logic from Clojure impl
+//export const validLangLiteral = (l: Literal): boolean => (l as PlainLiteral).langTag != null && 
+//  (l as PlainLiteral).value != null && 
+//  (l as TypedLiteral).type == null && 
+//  validLangTag((l as PlainLiteral).langTag)
+//export const validTypedLiteral = (l: Literal): boolean => (l as TypedLiteral).type != null &&
+//  (l as TypedLiteral).value != null &&
+//  (l as PlainLiteral).langTag == null &&
+//  validIdentifier((l as TypedLiteral).type)
+//export const validLiteral = (l: Literal): boolean => validLangLiteral(l) || validTypedLiteral(l)
 
 /*
-(defn identifier?
-  "Accepts a String representing an identifier and returns true or false depending on if it is valid."
-  [identifier]
-  (and
-    (string? identifier)
-    (not (nil?(re-matches #"[a-zA-Z_][^\s\(\)\[\]\{\}\'\"`<>\\]*" identifier)))))
 
 (defn lang-tag?
   "Accepts a String representing a lang tag and returns true or false depending on if it is valid."

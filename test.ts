@@ -1,38 +1,45 @@
+import { validIdentifier } from "./index";
+
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
-test('adds 1 + 2 to equal 3', () => {
-  expect((1 + 2)).toBe(3);
-});
+test('Valid identifier tests', () => {
+  expect(validIdentifier("")).toBe(false);
+  expect(validIdentifier("http://localhost/people/7")).toBe(true)
+  expect(validIdentifier("http://localhost(/people/7")).toBe(false)
+  expect(validIdentifier("http://localhost /people/7")).toBe(false)
+  expect(validIdentifier("hello")).toBe(true)
+  expect(validIdentifier("_:")).toBe(true)
+  expect(validIdentifier("_:valid")).toBe(true)
+  expect(validIdentifier("_:1")).toBe(true)
+  expect(validIdentifier("_:1344")).toBe(true) //TODO more test cases
+})
 
+describe('Plain literal tests', () => {
 /*
-(deftest identifier?-test
-  (testing "Common examples"
-    (is (not (identifier? "")))
-    (is (identifier? "http://localhost/people/7"))
-    (is (not (identifier? "http://localhost(/people/7")))
-    (is (not (identifier? "http://localhost /people/7")))
-    (is (identifier? "hello"))
-    (is (identifier? "_:"))
-    (is (identifier? "_:valid"))
-    (is (identifier? "_:1"))
-    (is (identifier? "_:1344")))) ; TODO more test cases
-
 (deftest lang-literal?-test
   (testing "Common examples"
     (is (not (lang-literal? "not a lang lit")))
     (is (not (lang-literal? {:value "" :lang ""})))
     (is (lang-literal? {:value "Hello" :lang "en"}))
     (is (not (lang-literal? {:value "Bonjour" :lang "fr" :type "fr"}))))) ; TODO more test cases
+*/
+})
 
+describe('Typed literal tests', () => {
+/*
 (deftest typed-literal?-test
   (testing "Common examples"
     (is (not (typed-literal? "not a typed literal")))
     (is (not (typed-literal? {})))
     (is (typed-literal? {:value "Hello" :type "identifier"}))
     (is (not (typed-literal? {:value "56" :type "number" :lang "en"}))))) ; TODO more test cases
+*/
+})
 
+describe('Valid statement tests', () => {
+/*
 (deftest statement?-test
   (testing "Common examples"
     (is (s/valid? ::l/statement ["hello" "world" "triple"]))
@@ -44,13 +51,21 @@ test('adds 1 + 2 to equal 3', () => {
     (is (not (s/valid? ::l/statement [5 3 66 554])))
     (is (not (s/valid? ::l/statement ["test" "test" :a])))
     (is (s/valid? ::l/statement ["test" :a "test" "test"])))) ; TODO more test cases
+*/
+})
 
+describe('Valid statements tests', () => {
+/*
 (deftest statements?-test
   (testing "Common examples"
     (is (s/valid? ::l/statements [["hello" "world" "triple"]]))
     (is (s/valid? ::l/statements #{["hello" "world" "triple"]}))
     (is (s/valid? ::l/statements '(["hello" "world" "triple"]))))) ; TODO more test cases
+*/
+})
 
+describe('Valid lang tag tests', () => {
+/*
 (deftest lang-tag?-test
   (testing "Common examples"
     (is (not (lang-tag? "")))
@@ -62,3 +77,4 @@ test('adds 1 + 2 to equal 3', () => {
     (is (lang-tag? "ennnenefnk-dkfjkjfl-dfakjelfkjalkf-fakjeflkajlkfj"))
     (is (not (lang-tag? "en-fr-ef ")))))
 */
+})
