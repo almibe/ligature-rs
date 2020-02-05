@@ -29,7 +29,7 @@ export type Identifier = string
 export type Literal = PlainLiteral | TypedLiteral
 export type PlainLiteral = {
   readonly value: string
-  readonly langTag?: string
+  readonly lang?: string
 }
 export type TypedLiteral = {
   readonly value: string
@@ -51,25 +51,18 @@ export const a = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
 export const _ = "*"
 const identifierPattern = /^[a-zA-Z_][^\s\(\)\[\]\{\}\'\"`<>\\]*$/
 export const validIdentifier = (i: Identifier): boolean => identifierPattern.test(i)
-//export const validLangTag = (l: string): boolean => false //TODO copy logic from Clojure impl
-//export const validLangLiteral = (l: Literal): boolean => (l as PlainLiteral).langTag != null && 
-//  (l as PlainLiteral).value != null && 
-//  (l as TypedLiteral).type == null && 
-//  validLangTag((l as PlainLiteral).langTag)
-//export const validTypedLiteral = (l: Literal): boolean => (l as TypedLiteral).type != null &&
-//  (l as TypedLiteral).value != null &&
-//  (l as PlainLiteral).langTag == null &&
-//  validIdentifier((l as TypedLiteral).type)
-//export const validLiteral = (l: Literal): boolean => validLangLiteral(l) || validTypedLiteral(l)
+const langTagPattern = /^[a-zA-Z]+(-[a-zA-Z0-9]+)*$/
+export const validLangTag = (l: string | undefined): boolean => l == undefined ? true : langTagPattern.test(l)
+export const validPlainLiteral = (l: Literal): boolean => (l as PlainLiteral).value != null && 
+  (l as TypedLiteral).type == null && 
+  validLangTag((l as PlainLiteral).lang)
+export const validTypedLiteral = (l: Literal): boolean => (l as TypedLiteral).type != null &&
+  (l as TypedLiteral).value != null &&
+  (l as PlainLiteral).lang == null &&
+  validIdentifier((l as TypedLiteral).type)
+export const validLiteral = (l: Literal): boolean => validPlainLiteral(l) || validTypedLiteral(l)
 
 /*
-
-(defn lang-tag?
-  "Accepts a String representing a lang tag and returns true or false depending on if it is valid."
-  [lang]
-  (and
-    (string? lang)
-    (not (nil?(re-matches #"[a-zA-Z]+(-[a-zA-Z0-9]+)*" lang)))))
 
 (defn lang-literal?
   "Accepts a Map and returns true or false depending on if it is a valid lang literal.

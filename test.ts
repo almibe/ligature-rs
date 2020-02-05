@@ -1,4 +1,4 @@
-import { validIdentifier } from "./index";
+import { validIdentifier, validPlainLiteral } from "./index";
 
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -17,14 +17,10 @@ test('Valid identifier tests', () => {
 })
 
 describe('Plain literal tests', () => {
-/*
-(deftest lang-literal?-test
-  (testing "Common examples"
-    (is (not (lang-literal? "not a lang lit")))
-    (is (not (lang-literal? {:value "" :lang ""})))
-    (is (lang-literal? {:value "Hello" :lang "en"}))
-    (is (not (lang-literal? {:value "Bonjour" :lang "fr" :type "fr"}))))) ; TODO more test cases
-*/
+  expect(validPlainLiteral({value : "plain lit"})).toBe(true)
+  expect(validPlainLiteral({value :"", lang: ""})).toBe(false)
+  expect(validPlainLiteral({value: "Hello", lang: "en"})).toBe(true)
+  expect(validPlainLiteral({value: "Bonjour", lang: "fr", type: "fr"})).toBe(false) //TODO more test cases
 })
 
 describe('Typed literal tests', () => {
