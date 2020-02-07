@@ -2,8 +2,11 @@
   "name": "@almibe/ligature",
   "version": "0.1.0-SNAPSHOT",
   "description": "A semantic network library for TypeScript.",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "directories": {
+    "prepublish": "tsc",
+    "build": "tsc",
     "test": "test"
   },
   "scripts": {
