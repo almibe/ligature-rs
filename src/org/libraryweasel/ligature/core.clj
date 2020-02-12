@@ -29,11 +29,11 @@
   (compute [this f]
     "Accepts a closure that is passed a ReadTx, executes in a read-only transaction, and returns a value.")
   (write [this f]
-    "Accepts a closure that is passed a WriteTx, executes in a read/write transaction, and returns a value.")
-  (sparql-query [this query]
-    "")
-  (wander-query [this query]
-    ""))
+    "Accepts a closure that is passed a WriteTx, executes in a read/write transaction, and returns a value."))
+;  (sparql-query [this query]
+;    "")
+;  (wander-query [this query]
+;    ""))
 
 (defprotocol ReadTx
   (all-statements [this]
