@@ -24,23 +24,31 @@
     "Returns an implementation specific map of details about this Store useful for debugging."))
 
 (defprotocol LigatureCollection
-  "A Collection manages a collection of Statements and supports ontologies and querying."
-  (add-statements [this statements]
-    "Accepts a seq of statement tuples")
-  (remove-statements [this statements]
-    "Accepts a seq of statement tuples")
-  (all-statements [this]
-    "Accepts nothing but returns a seq of all Statements in the Collection.")
-  (new-identifier [this]
-    "Returns a unique, new identifier in the form _:NUMBER")
-  (match-statements [this pattern])
-  (collection-name [this])
-  (add-rules [this rules])
-  (remove-rules [this rules])
-  (all-rules [this])
-  (match-rules [this pattern])
-  (sparql-query [this query])
-  (wander-query [this query]))
+  "Manages a collection of Statements and Rules, supports ontologies, and querying."
+  (collection-name [this])
+  (compute [this f]
+    "Accepts a closure that is passed a ReadTx, executes in a read-only transaction, and returns a value.")
+  (write [this f]
+    "Accepts a closure that is passed a WriteTx, executes in a read/write transaction, and returns a value.")
+  (sparql-query [this query])
+  (wander-query [this query]))
+
+(defprotocol ReadTx
+  (all-statements [this]
+    "Accepts nothing but returns a seq of all Statements in the Collection.")
+  (match-statements [this pattern])
+  (all-rules [this])
+  (match-rules [this pattern]))
+
+(defprotocol WriteTx
+  (new-identifier [this]
+    "Returns a unique, new identifier in the form _:NUMBER")
+  (add-statement [this statement]
+    "Accepts a statement tuple")
+  (remove-statement [this statement]
+    "Accepts a statement tuple")
+  (add-rule [this rule])
+  (remove-rule [this rule]))
 
 (defn identifier?
   "Accepts a String representing an identifier and returns true or false depending on if it is valid."
@@ -87,14 +95,16 @@
   [subject]
   (identifier? subject))
 
-(defn predicate? [predicate]
+(defn predicate?
   "Accepts a String representing a predicate and returns true or false depending on if it is valid."
+  [predicate]
   (or
-    (identifier? predicate)
-    (= :a predicate)))
+   (identifier? predicate)
+   (= :a predicate)))
 
-(defn object? [object]
+(defn object?
   "Accepts a String or Map representing an object and returns true or false depending on if it is valid."
+  [object]
   (or (identifier? object) (literal? object)))
 
 (defn graph?
