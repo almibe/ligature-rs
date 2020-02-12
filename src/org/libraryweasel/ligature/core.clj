@@ -24,31 +24,38 @@
     "Returns an implementation specific map of details about this Store useful for debugging."))
 
 (defprotocol LigatureCollection
-  "Manages a collection of Statements and Rules, supports ontologies, and querying."
-  (collection-name [this])
-  (compute [this f]
-    "Accepts a closure that is passed a ReadTx, executes in a read-only transaction, and returns a value.")
-  (write [this f]
-    "Accepts a closure that is passed a WriteTx, executes in a read/write transaction, and returns a value.")
-  (sparql-query [this query])
-  (wander-query [this query]))
+  "Manages a collection of Statements and Rules, supports ontologies, and querying."
+  (collection-name [this])
+  (compute [this f]
+    "Accepts a closure that is passed a ReadTx, executes in a read-only transaction, and returns a value.")
+  (write [this f]
+    "Accepts a closure that is passed a WriteTx, executes in a read/write transaction, and returns a value.")
+  (sparql-query [this query]
+    "")
+  (wander-query [this query]
+    ""))
 
 (defprotocol ReadTx
-  (all-statements [this]
-    "Accepts nothing but returns a seq of all Statements in the Collection.")
-  (match-statements [this pattern])
-  (all-rules [this])
-  (match-rules [this pattern]))
+  (all-statements [this]
+    "Accepts nothing but returns a seq of all Statements in the Collection.")
+  (match-statements [this pattern]
+    "")
+  (all-rules [this]
+    "")
+  (match-rules [this pattern]
+    ""))
 
 (defprotocol WriteTx
-  (new-identifier [this]
-    "Returns a unique, new identifier in the form _:NUMBER")
-  (add-statement [this statement]
-    "Accepts a statement tuple")
-  (remove-statement [this statement]
-    "Accepts a statement tuple")
-  (add-rule [this rule])
-  (remove-rule [this rule]))
+  (new-identifier [this]
+    "Returns a unique, new identifier in the form _:NUMBER")
+  (add-statement [this statement]
+    "Accepts a statement tuple")
+  (remove-statement [this statement]
+    "Accepts a statement tuple")
+  (add-rule [this rule]
+    "Accepts a rule tuple")
+  (remove-rule [this rule]
+    "Accepts a rule tuple"))
 
 (defn identifier?
   "Accepts a String representing an identifier and returns true or false depending on if it is valid."
