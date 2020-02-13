@@ -23,12 +23,12 @@
     (is (l/identifier? "_:1"))
     (is (l/identifier? "_:1344")))) ; TODO more test cases
 
-(deftest lang-literal?-test
+(deftest plain-literal?-test
   (testing "Common examples"
-    (is (not (l/lang-literal? "not a lang lit")))
-    (is (not (l/lang-literal? {:value "" :lang ""})))
-    (is (l/lang-literal? {:value "Hello" :lang "en"}))
-    (is (not (l/lang-literal? {:value "Bonjour" :lang "fr" :type "fr"}))))) ; TODO more test cases
+    (is (not (l/plain-literal? "not a lang lit")))
+    (is (not (l/plain-literal? {:value "" :lang ""})))
+    (is (l/plain-literal? {:value "Hello" :lang "en"}))
+    (is (not (l/plain-literal? {:value "Bonjour" :lang "fr" :type "fr"}))))) ; TODO more test cases
 
 (deftest typed-literal?-test
   (testing "Common examples"

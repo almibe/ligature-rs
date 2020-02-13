@@ -71,7 +71,7 @@
     (string? lang)
     (not (nil?(re-matches #"[a-zA-Z]+(-[a-zA-Z0-9]+)*" lang)))))
 
-(defn lang-literal?
+(defn plain-literal?
   "Accepts a Map and returns true or false depending on if it is a valid lang literal.
   A lang literal should contain a :value key with a valid string literal and a :lang key with a valid lang code."
   [literal]
@@ -94,7 +94,7 @@
 (defn literal?
   "Accepts a String or Map representing a literal and returns true or false depending on if it is valid."
   [literal]
-  (or (lang-literal? literal) (typed-literal? literal)))
+  (or (plain-literal? literal) (typed-literal? literal)))
 
 (defn subject?
   "Accepts a String representing a subject and returns true or false depending of
@@ -155,7 +155,7 @@
 
 (s/def ::literal literal?)
 
-(s/def ::lang-literal lang-literal?)
+(s/def ::plain-literal plain-literal?)
 
 (s/def ::typed-literal typed-literal?)
 
