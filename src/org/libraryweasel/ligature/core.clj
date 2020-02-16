@@ -14,10 +14,14 @@
   (collection [this collection-name]
     "Returns a collection based on the name passed.
     Calling this function will not create a new collection, it just binds a Store and Collection name.")
+  (create-collection [this collection-name]
+    "Creates a new collection or does nothing if collection already exists.
+    This function returns a future with the created collection.")
   (delete-collection [this collection-name]
-    "Deletes the collection of the name given.")
+    "Deletes the collection of the name given and does nothing if the collection doesn't exist.
+    Returns a future.")
   (all-collections [this]
-    "Returns a seq of all existing collections.")
+    "Returns a channel that outputs of all existing collections.")
   (close [this]
     "Close connection with the Store.")
   (details [this]
@@ -26,10 +30,10 @@
 (defprotocol LigatureCollection
   "Manages a collection of Statements and Rules, supports ontologies, and querying."
   (collection-name [this])
-  (compute [this f]
-    "Accepts a closure that is passed a ReadTx, executes in a read-only transaction, and returns a value.")
+  (readTx [this]
+    "Returns a future with a ReadTx.")
   (write [this f]
-    "Accepts a closure that is passed a WriteTx, executes in a read/write transaction, and returns a value."))
+    "Returns a future with a ReadTx/WriteTx."))
 ;  (sparql-query [this query]
 ;    "")
 ;  (wander-query [this query]
@@ -37,17 +41,17 @@
 
 (defprotocol ReadTx
   (all-statements [this]
-    "Accepts nothing but returns a seq of all Statements in the Collection.")
+    "Accepts nothing but returns a channel of all Statements in the Collection.")
   (match-statements [this pattern]
-    "")
+    "Is passed a pattern and returns a channel with all matching Statements.")
   (all-rules [this]
-    "")
+    "Accepts nothing but returns a channel of all Rules in the Collection.")
   (match-rules [this pattern]
-    ""))
+    "Is passed a pattern and returns a channel with all matching rules."))
 
 (defprotocol WriteTx
   (new-identifier [this]
-    "Returns a unique, new identifier in the form _:NUMBER")
+    "Returns channel with a unique, new identifier in the form _:NUMBER")
   (add-statement [this statement]
     "Accepts a statement tuple")
   (remove-statement [this statement]
