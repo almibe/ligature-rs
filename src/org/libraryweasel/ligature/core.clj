@@ -16,12 +16,11 @@
     Calling this function will not create a new collection, it just binds a Store and Collection name.")
   (create-collection [this collection-name]
     "Creates a new collection or does nothing if collection already exists.
-    This function returns a future with the created collection.")
+    Regardless the collection is returned.")
   (delete-collection [this collection-name]
-    "Deletes the collection of the name given and does nothing if the collection doesn't exist.
-    Returns a future.")
+    "Deletes the collection of the name given and does nothing if the collection doesn't exist.")
   (all-collections [this]
-    "Returns a channel that outputs of all existing collections.")
+    "Returns a seq of all existing collections.")
   (close [this]
     "Close connection with the Store.")
   (details [this]
@@ -31,9 +30,9 @@
   "Manages a collection of Statements and Rules, supports ontologies, and querying."
   (collection-name [this])
   (readTx [this]
-    "Returns a future with a ReadTx.")
+    "Returns a ReadTx.")
   (write [this f]
-    "Returns a future with a ReadTx/WriteTx."))
+    "Returns a ReadTx/WriteTx."))
 ;  (sparql-query [this query]
 ;    "")
 ;  (wander-query [this query]
@@ -47,7 +46,9 @@
   (all-rules [this]
     "Accepts nothing but returns a channel of all Rules in the Collection.")
   (match-rules [this pattern]
-    "Is passed a pattern and returns a channel with all matching rules."))
+    "Is passed a pattern and returns a channel with all matching rules.")
+  (cancel [this]
+    "Cancels this transaction."))
 
 (defprotocol WriteTx
   (new-identifier [this]
@@ -59,7 +60,9 @@
   (add-rule [this rule]
     "Accepts a rule tuple")
   (remove-rule [this rule]
-    "Accepts a rule tuple"))
+    "Accepts a rule tuple")
+  (commit [this]
+    "Commits this transaction."))
 
 (defn identifier?
   "Accepts a String representing an identifier and returns true or false depending on if it is valid."
