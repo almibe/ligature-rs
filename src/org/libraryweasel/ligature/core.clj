@@ -182,4 +182,8 @@
 
 (s/def ::statement (s/or ::triple ::triple ::quad ::quad))
 
+(s/def ::rule (s/or ::triple ::triple))
+
 (s/def ::statements (s/coll-of ::statement))
+
+(s/def ::rules (s/coll-of ::rule))
