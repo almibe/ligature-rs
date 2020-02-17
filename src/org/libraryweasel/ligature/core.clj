@@ -31,7 +31,7 @@
   (collection-name [this])
   (readTx [this]
     "Returns a ReadTx.")
-  (writeTx [this f]
+  (writeTx [this]
     "Returns a ReadTx/WriteTx."))
 
 (defprotocol ReadTx
