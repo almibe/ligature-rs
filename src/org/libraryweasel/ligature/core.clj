@@ -33,10 +33,6 @@
     "Returns a ReadTx.")
   (write [this f]
     "Returns a ReadTx/WriteTx."))
-;  (sparql-query [this query]
-;    "")
-;  (wander-query [this query]
-;    ""))
 
 (defprotocol ReadTx
   (all-statements [this]
@@ -48,7 +44,13 @@
   (match-rules [this pattern]
     "Is passed a pattern and returns a channel with all matching rules.")
   (cancel [this]
-    "Cancels this transaction."))
+    "Cancels this transaction.")
+  (sparql-query [this query]
+    "Runs a SPARQL query in this transaction.
+    If a write is attempted in a read-only transaction and error will occur.")
+  (wander-query [this query]
+    "Runs a Wander query in this transaction.
+    If a write is attempted in a read-only transaction and error will occur."))
 
 (defprotocol WriteTx
   (new-identifier [this]
