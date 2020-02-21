@@ -38,13 +38,13 @@
 
 (defprotocol ReadTx
   (all-statements [this]
-    "Accepts nothing but returns a channel of all Statements in the Collection.")
+    "Accepts nothing but returns a seq of all Statements in the Collection.")
   (match-statements [this pattern]
-    "Is passed a pattern and returns a channel with all matching Statements.")
+    "Is passed a pattern and returns a seq with all matching Statements.")
   (all-rules [this]
-    "Accepts nothing but returns a channel of all Rules in the Collection.")
+    "Accepts nothing but returns a seq of all Rules in the Collection.")
   (match-rules [this pattern]
-    "Is passed a pattern and returns a channel with all matching rules.")
+    "Is passed a pattern and returns a seq with all matching rules.")
   (cancel [this]
     "Cancels this transaction.")
   (sparql-query [this query]
@@ -56,7 +56,7 @@
 
 (defprotocol WriteTx
   (new-identifier [this]
-    "Returns channel with a unique, new identifier in the form _:NUMBER")
+    "Returns a new, unique to this collection identifier in the form _:NUMBER")
   (add-statement [this statement]
     "Accepts a statement tuple")
   (remove-statement [this statement]
