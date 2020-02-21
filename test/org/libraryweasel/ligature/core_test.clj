@@ -46,8 +46,7 @@
     (is (not (s/valid? ::l/statement ["test" "test"])))
     (is (not (s/valid? ::l/statement ["test" "test" "g" "h" "e"])))
     (is (not (s/valid? ::l/statement [5 3 66 554])))
-    (is (not (s/valid? ::l/statement ["test" "test" :a])))
-    (is (s/valid? ::l/statement ["test" :a "test" "test"])))) ; TODO more test cases
+    (is (s/valid? ::l/statement ["test" l/a "test" "test"])))) ; TODO more test cases
 
 (deftest statements?-test
   (testing "Common examples"
