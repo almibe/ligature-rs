@@ -124,11 +124,9 @@
   (or (identifier? object) (literal? object)))
 
 (defn graph?
-  "Checks that a passed String value is either a valid identifier or :default"
+  "Checks that a passed String value is either a valid identifier."
   [graph]
-  (or
-    (= :default graph)
-    (identifier? graph)))
+  (identifier? graph))
 
 (defn subject
   "Accepts a Statement tuple and returns the Subject."
