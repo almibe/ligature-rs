@@ -45,10 +45,10 @@ The form `_:NUMBER` is special in Ligature and only IDs that have been already c
 For example here is some pseudo code.
 
 ```clojure
-(def x (new-identifier collection))  ; x = _:34
-(add-statements collection [[ x :a "company"]]) ; should run fine
-(add-statements collection [[ "_:34" "name" "Pear"]]) ; should run fine since _:34 has been created already
-(add-statements collection [[ "_:34567" :a "bird"]]) ; probably will error out since I doubt that identifer has been created....but it could....but it probably wasn't
+(def x (l/new-identifier collection))  ; x = _:34
+(l/add-statement collection [x l/a "company"]) ; should run fine
+(l/add-statement collection ["_:34" "name" "Pear"]) ; should run fine since _:34 has been created already
+(l/add-statement collection ["_:34567" l/a "bird"]) ; probably will error out since I doubt that identifer has been created....but it could....but it probably wasn't
 ```
 
 ## Building
