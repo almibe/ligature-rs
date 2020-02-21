@@ -9,6 +9,8 @@
 (ns org.libraryweasel.ligature.core
   (:require [clojure.spec.alpha :as s]))
 
+(def ^:const a "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+
 (defprotocol LigatureStore
   "A Store manages many named Collections."
   (collection [this collection-name]
@@ -114,9 +116,7 @@
 (defn predicate?
   "Accepts a String representing a predicate and returns true or false depending on if it is valid."
   [predicate]
-  (or
-   (identifier? predicate)
-   (= :a predicate)))
+  (identifier? predicate))
 
 (defn object?
   "Accepts a String or Map representing an object and returns true or false depending on if it is valid."
@@ -149,31 +149,6 @@
   "Accepts a Statement tuple and returns the Graph."
   [statement]
   (get statement 3))
-
-(defn- expand-predicate
-  [predicate]
-  (if (= predicate :a) "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" predicate))
-
-(defn normalize-statement
-  "This function acts as a helper function for working with Statements.
-  This function validates Statements,
-  allows users to shortcut :a for http://www.w3.org/1999/02/22-rdf-syntax-ns#type in the predicate position,
-  and sets the graph position to :default if it is missing."
-  [statement]
-   (if (s/valid? ::statement statement)
-     (if (= (count statement) 3)
-       [(subject statement) (expand-predicate (predicate statement)) (object statement) :default]
-       [(subject statement) (expand-predicate (predicate statement)) (object statement) (graph statement)])
-     (throw (ex-info "Invalid statement." (s/explain ::statement statement)))))
-
-(defn normalize-rule
-  "This function acts as a helper function for working with Rules.
-  This function validates Rules 
-  and allows users to shortcut :a for http://www.w3.org/1999/02/22-rdf-syntax-ns#type in the predicate position."
-  [rule]
-   (if (s/valid? ::rule rule)
-    [(subject rule) (expand-predicate (predicate rule)) (object rule)]
-    (throw (ex-info "Invalid statement." (s/explain ::rule rule)))))
 
 (s/def ::literal literal?)
 
