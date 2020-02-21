@@ -124,10 +124,10 @@
   (or (identifier? object) (literal? object)))
 
 (defn graph?
-  "Checks that a passed String value is either a valid identifier or nil"
+  "Checks that a passed String value is either a valid identifier or :default"
   [graph]
   (or
-    (nil? graph)
+    (= :default graph)
     (identifier? graph)))
 
 (defn subject
@@ -154,13 +154,26 @@
   [predicate]
   (if (= predicate :a) "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" predicate))
 
-(defn statement
-  "This function acts as a helper function for creating Statement maps.
-  This function allow users to shortcut :a for http://www.w3.org/1999/02/22-rdf-syntax-ns#type in the predicate position."
-  ([subject predicate object]
-   {:subject subject :predicate (expand-predicate predicate) :object object})
-  ([subject predicate object graph]
-   {:subject subject :predicate (expand-predicate predicate) :object object :graph graph}))
+(defn normalize-statement
+  "This function acts as a helper function for working with Statements.
+  This function validates Statements,
+  allows users to shortcut :a for http://www.w3.org/1999/02/22-rdf-syntax-ns#type in the predicate position,
+  and sets the graph position to :default if it is missing."
+  [statement]
+   (if (s/valid? ::statement statement)
+     (if (= (count statement) 3)
+       [(subject statement) (expand-predicate (predicate statement)) (object statement) :default]
+       [(subject statement) (expand-predicate (predicate statement)) (object statement) (graph statement)])
+     (throw (ex-info "Invalid statement." (s/explain ::statement statement)))))
+
+(defn normalize-rule
+  "This function acts as a helper function for working with Rules.
+  This function validates Rules 
+  and allows users to shortcut :a for http://www.w3.org/1999/02/22-rdf-syntax-ns#type in the predicate position."
+  [rule]
+   (if (s/valid? ::rule rule)
+    [(subject rule) (expand-predicate (predicate rule)) (object rule)]
+    (throw (ex-info "Invalid statement." (s/explain ::rule rule)))))
 
 (s/def ::literal literal?)
 
