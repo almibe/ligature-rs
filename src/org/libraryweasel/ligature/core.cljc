@@ -11,6 +11,8 @@
 
 (def ^:const a "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
 
+(def ^:const _ "_")
+
 (defprotocol LigatureStore
   "A Store manages many named Collections."
   (collection [this collection-name]
@@ -166,9 +168,9 @@
 
 (s/def ::quad (s/tuple ::subject ::predicate ::object ::graph))
 
-(s/def ::statement (s/or ::triple ::triple ::quad ::quad))
+(s/def ::statement ::quad)
 
-(s/def ::rule (s/or ::triple ::triple))
+(s/def ::rule ::triple)
 
 (s/def ::statements (s/coll-of ::statement))
 

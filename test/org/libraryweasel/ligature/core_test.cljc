@@ -39,8 +39,9 @@
 
 (deftest statement?-test
   (testing "Common examples"
-    (is (s/valid? ::l/statement ["hello" "world" "triple"]))
+    (is (not (s/valid? ::l/statement ["hello" "world" "triple"])))
     (is (s/valid? ::l/statement ["hello" "world" "triple" "graph"]))
+    (is (s/valid? ::l/statement ["hello" "world" "triple" l/_]))
     (is (not (s/valid? ::l/statement [])))
     (is (not (s/valid? ::l/statement ["g"])))
     (is (not (s/valid? ::l/statement ["test" "test"])))
@@ -50,9 +51,8 @@
 
 (deftest statements?-test
   (testing "Common examples"
-    (is (s/valid? ::l/statements [["hello" "world" "triple"]]))
-    (is (s/valid? ::l/statements #{["hello" "world" "triple"]}))
-    (is (s/valid? ::l/statements '(["hello" "world" "triple"]))))) ; TODO more test cases
+    (is (s/valid? ::l/statements [["hello" "world" "triple" l/_]]))
+    (is (s/valid? ::l/statements #{["hello" "world" "triple" l/_]})))) ; TODO more test cases
 
 (deftest lang-tag?-test
   (testing "Common examples"

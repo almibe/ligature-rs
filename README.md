@@ -1,16 +1,17 @@
 # ligature
+
 Ligature is a Clojure library for working with semantic data.
 This project provides the main protocols for Ligature as well as Spec support and some common helper functions.
 It is based on RDF and related standards but has a more flexible approach to working with semantic data.
 Its main difference is that it is intended to be used in a broader context than strict RDF.
-This means that identifiers do not have to be IRIs and blank nodes only exist in compatibility contexts.
+In practice the main differences are identifiers do not have to be IRIs, blank nodes only exist in compatibility contexts, and quads are used for all data.
 
 ## RDF's Data Model
 
-| Subject    | Predicate  | Object     | Graph      |
+| Subject    | Predicate  | Object     | Graph?     |
 | ---------- | ---------- | ---------- | ---------- |
 | iri        | iri        | iri        | iri        |
-| blank node |            | blank node |            |
+| blank node |            | blank node | blank node |
 |            |            | literal    |            |
 
 ## Ligature's Data Model
@@ -19,6 +20,23 @@ This means that identifiers do not have to be IRIs and blank nodes only exist in
 | ---------- | ---------- | ---------- | ---------- |
 | identifier | identifier | identifier | identifier |
 |            |            | literal    |            |
+
+### Triples and Quads vs Just Quads
+
+Unlike RDF formats like N-Quads where statements can be either a triple or a quad, in Ligature everything is a quad.
+The reason for making this distinction is that in N-Quads there is no way to reference the default graph.
+If something is represented as a triple it's in the default graph and if it's represented as a quad it isn't.
+Relying on arity like this can make things like searching and matching confusing.
+For example do these patterns match the same set of statements?
+
+`[:? :? :?]`
+
+`[:? :? :? :?]`
+
+It isn't immedately clear (to me at least).
+By forcing the use of quads for all statements and making the default namespace explicitly referenceable as the identifier `_` this ambiguity is removed at the cost of a couple extra key presses.
+
+### Identifiers
 
 Identifiers in Ligature are *currently* defined as strings that start with an ASCII letter or an underscore and don't contain any of the following characters:
  * whitespace (space, newline, tabs, carriage returns, etc)
@@ -31,26 +49,29 @@ Identifiers in Ligature are *currently* defined as strings that start with an AS
 
 If for some reason you need any of these characters in your identifier it is suggested that you use standard URL encoding.
 
-Identifiers can be something that is meaningful like an IRI/URL, an id from an existing system, a name, or it can be an incrementing id via the `new-identifier` method.
-Below is an example statement using identifiers in n-triples format.
+Identifiers can be something that is meaningful like an IRI/URL, an id from an existing system, a name, or it can be an incrementing id via the `new-identifier` function.
+Below is an example statement using identifiers in Clojure format.
 
-`<Emily> <loves> <cats>`
+`["Emily" "loves" "cats" "_"]`
 
-The `new-identifier` method returns a unique identifier that probably looks something like this.
+The `new-identifier` function returns a unique identifier that looks something like this.
 
 `_:34622`
 
-The `new-identifier` method runs inside a transaction so it is guarenteed to be unique and to not already exist in the Dataset at the time of creatation.
-The form `_:NUMBER` is special in Ligature and only IDs that have been already created with the `new-identifier` method can be used.
+The `new-identifier` function runs inside a transaction so it is guarenteed to be unique and to not already exist in the Dataset at the time of creatation.
+The form `_:NUMBER` is special in Ligature and only IDs that have been already created with the `new-identifier` function can be used.
 For example here is some pseudo code.
 
 ```clojure
 ; running in a WriteTx with Ligature core required as `l`
-(def x (l/new-identifier collection))  ; creates a new identifer, in this case let's say `x = _:34`
-(l/add-statement collection [x l/a "company"]) ; should run fine
-(l/add-statement collection ["_:34" "name" "Pear"]) ; should run fine since _:34 has been created already
-(l/add-statement collection ["_:34567" l/a "bird"]) ; will erorr out since that identifier hasn't been created yet
+(def x (l/new-identifier tx))  ; creates a new identifer, in this case let's say `x = _:34`
+(l/add-statement tx [x l/a "company" l/_]) ; should run fine
+(l/add-statement tx ["_:34" "name" "Pear" l/_]) ; should run fine since _:34 has been created already
+(l/add-statement tx ["_:34567" l/a "bird" l/_]) ; will erorr out since that identifier hasn't been created yet
 ```
+
+Also worth pointing out in the above code is the use of two defined constants in Ligature.
+`l/a` represents the identifier `http://www.w3.org/1999/02/22-rdf-syntax-ns#type` and `l/_` is used as a namespaced reference for the default graph identifer `_`.
 
 ## Building
 Ligature requires Leiningen to be installed.
