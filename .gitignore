@@ -1,16 +1,5 @@
-/target
-/classes
-/checkouts
-profiles.clj
-pom.xml
-pom.xml.asc
-*.jar
-*.class
-/.lein-*
-/.nrepl-port
-.hgignore
-.hg/
-.idea
-/.gradle/
-/build/
-.vscode/
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
