@@ -111,82 +111,18 @@ interface WriteTx: ReadTx {
     fun commit()
 }
 
-(defn identifier?
-"Accepts a String representing an identifier and returns true or false depending on if it is valid."
-[identifier]
-(and
-(string? identifier)
-(not (nil?(re-matches #"[a-zA-Z_][^\s\(\)\[\]\{\}\'\"`<>\\]*" identifier)))))
+/**
+ * Accepts a String representing an identifier and returns true or false depending on if it is valid.
+ */
+fun validIdentifier(identifier: String): Boolean {
+    //(not (nil?(re-matches #"[a-zA-Z_][^\s\(\)\[\]\{\}\'\"`<>\\]*" identifier)))))
+    TODO()
+}
 
-(defn lang-tag?
-"Accepts a String representing a lang tag and returns true or false depending on if it is valid."
-[lang]
-(and
-(string? lang)
-(not (nil?(re-matches #"[a-zA-Z]+(-[a-zA-Z0-9]+)*" lang)))))
-
-(defn plain-literal?
-"Accepts a Map and returns true or false depending on if it is a valid lang literal.
-A lang literal should contain a :value key with a valid string literal and a :lang key with a valid lang code."
-[literal]
-(and
-(map? literal)
-(= (set (keys literal)) #{:lang :value})
-(lang-tag? (:lang literal))
-(string? (:value literal))))
-
-(defn typed-literal?
-"Accepts a Map and returns true or false depending on if it is a valid typed literal.
-A typed literal should contain a :valud key with a valid string literal and a :type key with a valid identifier."
-[literal]
-(and
-(map? literal)
-(= (set (keys literal)) #{:type :value})
-(identifier? (:type literal))
-(string? (:value literal))))
-
-(defn literal?
-"Accepts a String or Map representing a literal and returns true or false depending on if it is valid."
-[literal]
-(or (plain-literal? literal) (typed-literal? literal)))
-
-(defn subject?
-"Accepts a String representing a subject and returns true or false depending of
-whether or not that String is a valid identifier."
-[subject]
-(identifier? subject))
-
-(defn predicate?
-"Accepts a String representing a predicate and returns true or false depending on if it is valid."
-[predicate]
-(identifier? predicate))
-
-(defn object?
-"Accepts a String or Map representing an object and returns true or false depending on if it is valid."
-[object]
-(or (identifier? object) (literal? object)))
-
-(defn graph?
-"Checks that a passed String value is either a valid identifier."
-[graph]
-(identifier? graph))
-
-(defn subject
-"Accepts a Statement tuple and returns the Subject."
-[statement]
-(get statement 0))
-
-(defn predicate
-"Accepts a Statement tuple and returns the Predicate."
-[statement]
-(get statement 1))
-
-(defn object
-"Accepts a Statement tuple and returns the Object."
-[statement]
-(get statement 2))
-
-(defn graph
-"Accepts a Statement tuple and returns the Graph."
-[statement]
-(get statement 3))
+/**
+ * Accepts a String representing a lang tag and returns true or false depending on if it is valid.
+ */
+fun validLangTag(langTag: String): Boolean {
+    //(not (nil?(re-matches #"[a-zA-Z]+(-[a-zA-Z0-9]+)*" lang)))))
+    TODO()
+}

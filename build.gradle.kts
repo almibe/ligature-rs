@@ -12,3 +12,11 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
 }
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
+
+dependencies {
+    testImplementation("io.kotest:kotest-runner-junit5-jvm:4.0.0-BETA1")
+}
