@@ -4,7 +4,7 @@
 
 package org.libraryweasel.ligature
 
-import java.util.stream.Stream
+import kotlinx.coroutines.flow.Flow
 
 const val a = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
 sealed class Object
@@ -14,6 +14,7 @@ data class PlainLiteral(val value: String, val langTag: String): Literal()
 data class TypedLiteral(val value: String, val type: Identifier): Literal()
 data class Statement(val subject: Identifier, val predicate: Identifier, val `object`: Object, val graph: Identifier)
 data class Rule(val subject: Identifier, val predicate: Identifier, val `object`: Object)
+data class Range(val start: Literal, val end: Literal)
 
 interface LigatureStore {
     /**
@@ -34,9 +35,9 @@ interface LigatureStore {
     fun deleteCollection(collectionName: String)
 
     /**
-     * Returns a Stream of all existing collections.
+     * Returns a Flow of all existing collections.
      */
-    fun allCollections(): Stream<LigatureCollection>
+    fun allCollections(): Flow<LigatureCollection>
 
     /**
      * Close connection with the Store.
@@ -60,24 +61,29 @@ interface LigatureCollection {
 
 interface ReadTx {
     /**
-     * Accepts nothing but returns a Stream of all Statements in the Collection.
+     * Accepts nothing but returns a Flow of all Statements in the Collection.
      */
-    fun allStatements(): Stream<Statement>
+    fun allStatements(): Flow<Statement>
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fun matchStatements(subject: Identifier?, predicate: Identifier?, `object`: Object?, graph: Identifier?): Stream<Statement>
+    fun matchStatements(subject: Identifier? = null, predicate: Identifier? = null, `object`: Object? = null, graph: Identifier? = null): Flow<Statement>
+
+    /**
+     * Is passed a pattern and returns a seq with all matching Statements.
+     */
+    fun matchStatements(subject: Identifier? = null, predicate: Identifier? = null, range: Range, graph: Identifier? = null): Flow<Statement>
 
     /**
      * Accepts nothing but returns a seq of all Rules in the Collection.
      */
-    fun allRules(): Stream<Rule>
+    fun allRules(): Flow<Rule>
 
     /**
      * Is passed a pattern and returns a seq with all matching rules.
      */
-    fun matchRules(subject: Identifier?, predicate: Identifier?, `object`: Object?): Stream<Rule>
+    fun matchRules(subject: Identifier?, predicate: Identifier?, `object`: Object?): Flow<Rule>
 
     /**
      * Cancels this transaction.
@@ -96,7 +102,7 @@ interface ReadTx {
      * If a write is attempted in a read-only transaction and error will occur.
      * TODO shouldn't return Any?
      */
-    fun wanderQuery(): Any?
+    fun wanderQuery(query: String): Any?
 }
 
 interface WriteTx: ReadTx {
