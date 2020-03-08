@@ -6,15 +6,17 @@ package org.libraryweasel.ligature
 
 import kotlinx.coroutines.flow.Flow
 
-const val a = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
 sealed class Object
 data class Identifier(val identifier: String): Object()
 sealed class Literal: Object()
-data class PlainLiteral(val value: String, val langTag: String): Literal()
-data class TypedLiteral(val value: String, val type: Identifier): Literal()
-data class Statement(val subject: Identifier, val predicate: Identifier, val `object`: Object, val graph: Identifier)
-data class Rule(val subject: Identifier, val predicate: Identifier, val `object`: Object)
+data class LangLiteral(val value: String, val langTag: String): Literal()
+data class StringLiteral(val value: String): Literal()
+data class BooleanLiteral(val value: Boolean): Literal()
+data class IntegerLiteral(val value: Integer): Literal()
+data class Statement(val entity: Object, val attribute: Attribute, val value: Object)
+data class Rule(val entity: Object, val attribute: Attribute, val value: Object)
 data class Range(val start: Literal, val end: Literal)
+data class Attribute(val name: Identifier)
 
 interface LigatureStore {
     /**
