@@ -10,15 +10,10 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.4")
+    testImplementation("io.kotlintest:kotlintest-runner-junit5:3.4.2")
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
-}
-
-dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.4")
-    testImplementation("io.kotlintest:kotlintest-runner-junit5:3.4.2")
 }
