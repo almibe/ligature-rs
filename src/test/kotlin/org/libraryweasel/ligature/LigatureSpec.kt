@@ -4,10 +4,10 @@
 
 package org.libraryweasel.ligature
 
-import io.kotest.core.spec.style.StringSpec
-import io.kotest.matchers.shouldBe
+import io.kotlintest.shouldBe
+import io.kotlintest.specs.StringSpec
 
-class MyTests : StringSpec({
+class LigatureSpec : StringSpec({
     "validIdentifier tests" {
         validIdentifier("") shouldBe false
         validIdentifier("http://localhost/people/7") shouldBe true

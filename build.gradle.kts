@@ -1,5 +1,6 @@
 plugins {
     id("org.jetbrains.kotlin.jvm").version("1.3.70")
+    maven
 }
 
 repositories {
@@ -19,5 +20,5 @@ tasks.withType<Test> {
 
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.4")
-    testImplementation("io.kotest:kotest-runner-junit5-jvm:4.0.0-BETA1")
+    testImplementation("io.kotlintest:kotlintest-runner-junit5:3.4.2")
 }

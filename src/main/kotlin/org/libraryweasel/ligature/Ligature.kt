@@ -127,14 +127,12 @@ interface WriteTx: ReadTx {
  * Accepts a String representing an identifier and returns true or false depending on if it is valid.
  */
 fun validIdentifier(identifier: String): Boolean {
-    //(not (nil?(re-matches #"[a-zA-Z_][^\s\(\)\[\]\{\}\'\"`<>\\]*" identifier)))))
-    TODO()
+    return "[a-zA-Z_][^\\s\\(\\)\\[\\]\\{\\}'\"`<>\\\\]*".toRegex().matches(identifier)
 }
 
 /**
  * Accepts a String representing a lang tag and returns true or false depending on if it is valid.
  */
 fun validLangTag(langTag: String): Boolean {
-    //(not (nil?(re-matches #"[a-zA-Z]+(-[a-zA-Z0-9]+)*" lang)))))
-    TODO()
+    return "[a-zA-Z]+(-[a-zA-Z0-9]+)*".toRegex().matches(langTag)
 }
