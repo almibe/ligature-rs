@@ -6,16 +6,20 @@ package org.libraryweasel.ligature
 
 import kotlinx.coroutines.flow.Flow
 
-sealed class Object
-data class Identifier(val identifier: String): Object()
-sealed class Literal: Object()
+sealed class Node
+data class Identifier(val identifier: String): Node()
+sealed class Literal: Node()
 data class LangLiteral(val value: String, val langTag: String): Literal()
 data class StringLiteral(val value: String): Literal()
 data class BooleanLiteral(val value: Boolean): Literal()
-data class IntegerLiteral(val value: Integer): Literal()
-data class Statement(val entity: Object, val attribute: Attribute, val value: Object)
-data class Rule(val entity: Object, val attribute: Attribute, val value: Object)
+data class IntegerLiteral(val value: Int): Literal()
+
+data class Statement(val entity: Node, val attribute: Attribute, val value: Node)
+
+data class Rule(val entity: Node, val attribute: Attribute, val value: Node)
+
 data class Range(val start: Literal, val end: Literal)
+
 data class Attribute(val name: Identifier)
 
 interface LigatureStore {
@@ -70,12 +74,12 @@ interface ReadTx {
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fun matchStatements(subject: Identifier? = null, predicate: Identifier? = null, `object`: Object? = null, graph: Identifier? = null): Flow<Statement>
+    fun matchStatements(entity: Node? = null, attribute: Identifier? = null, value: Node? = null): Flow<Statement>
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fun matchStatements(subject: Identifier? = null, predicate: Identifier? = null, range: Range, graph: Identifier? = null): Flow<Statement>
+    fun matchStatements(entity: Node? = null, attribute: Identifier? = null, range: Range): Flow<Statement>
 
     /**
      * Accepts nothing but returns a seq of all Rules in the Collection.
@@ -85,7 +89,7 @@ interface ReadTx {
     /**
      * Is passed a pattern and returns a seq with all matching rules.
      */
-    fun matchRules(subject: Identifier?, predicate: Identifier?, `object`: Object?): Flow<Rule>
+    fun matchRules(entity: Identifier?, attribute: Identifier?, value: Node?): Flow<Rule>
 
     /**
      * Cancels this transaction.
