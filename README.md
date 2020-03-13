@@ -12,16 +12,17 @@ Ligature is a Kotlin library for working with semantic networks.
 
 ## Ligature's Data Model
 
-| Entity     | Attribute  | Value      |
-| ---------- | ---------- | ---------- |
-| object     | attribute  | object     |
+| Subject | Predicate  | Object | Graph  |
+| ------- | ---------- | ------ | ------ |
+| node    | entity     | node   | entity |
 
-### Objects
+### Nodes
 
-Objects in Ligature can be of two main types, either an identifier or a literal.
+Nodes in Ligature can be of two main types, either an entity or a literal.
 
-#### Identifiers
+#### Entities
 
+An Entity is a Node that is represented by and Identifier.
 Identifiers in Ligature are *currently* defined as strings that start with an ASCII letter or an underscore and don't contain any of the following characters:
  * whitespace (space, newline, tabs, carriage returns, etc)
  * " ' `
@@ -33,29 +34,26 @@ Identifiers in Ligature are *currently* defined as strings that start with an AS
 
 If for some reason you need any of these characters in your identifier it is suggested that you use standard URL encoding.
 
-Identifiers can be something that is meaningful like an IRI/URL, an id from an existing system, a name, or it can be an incrementing id via the `new-identifier` function.
+Identifiers can be something that is meaningful like an IRI/URL, an id from an existing system, a name, or it can be an incrementing id via the `newEntity` method.
 Below is an example statement using identifiers in Kotlin format.
 
-`["Emily" "loves" "cats" "_"]`
+`collection.addStatement(Entity("Emily"), Entity("loves"), Entity("cats"), Entity("_"))`
 
-The `new-identifier` function returns a unique identifier that looks something like this.
+The `newEntity` method returns a unique entity with an identifier that looks something like this.
 
 `_:34622`
 
-The `new-identifier` function runs inside a transaction so it is guarenteed to be unique and to not already exist in the Dataset at the time of creatation.
-The form `_:NUMBER` is special in Ligature and only IDs that have been already created with the `new-identifier` function can be used.
+The `newEntity` method runs inside a transaction so it is guaranteed to be unique and to not already exist in the Dataset at the time of creation.
+The form `_:NUMBER` is special in Ligature and only IDs that have been already created with the `newEntity` method can be used.
 For example here is some pseudo code.
 
-```clojure
-; running in a WriteTx with Ligature core required as `l`
-(def x (l/new-identifier tx))  ; creates a new identifer, in this case let's say `x = _:34`
-(l/add-statement tx [x l/a "company" l/_]) ; should run fine
-(l/add-statement tx ["_:34" "name" "Pear" l/_]) ; should run fine since _:34 has been created already
-(l/add-statement tx ["_:34567" l/a "bird" l/_]) ; will erorr out since that identifier hasn't been created yet
+```kotlin
+//running in a WriteTx
+val newEntity = collection.newEntity() // creates a new identifer, in this case let's say `_:34`
+collection.addStatement(x, a, Entity("company"), Entity("_")) // should run fine
+collection.addStatement(Entity("_:34"), Entity("name"), StringLiteral("Pear"), Entity("_")) // should run fine since _:34 has been created already
+collection.addStatement(Entity("_:34567"), a, Entity("bird"), Entity("_")) // will erorr out since that identifier hasn't been created yet
 ```
-
-Also worth pointing out in the above code is the use of two defined constants in Ligature.
-`l/a` represents the identifier `http://www.w3.org/1999/02/22-rdf-syntax-ns#type` and `l/_` is used as a namespaced reference for the default graph identifer `_`.
 
 #### Literals
 
@@ -66,9 +64,9 @@ TODO
 TODO
 
 ## Building
-Ligature requires Leiningen to be installed.
-See https://leiningen.org for installation instructions.
-Once that is set up use `lein test` to run tests `lein install` to install the artifact locally.
+Ligature requires Gradle to be installed.
+See https://gradle.org for installation instructions.
+Once that is set up use `gradle test` to run tests `gradle install` to install the artifact locally.
 
 ## Related Projects
 
