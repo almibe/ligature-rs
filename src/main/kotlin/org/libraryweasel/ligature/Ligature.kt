@@ -18,13 +18,11 @@ data class ListLiteral(val value: List<Literal>): Literal()
 data class BagLiteral(val value: List<Literal>): Literal()
 data class AltLiteral(val value: List<Literal>): Literal()
 
-data class Statement(val subject: Node, val predicate: Predicate, val `object`: Node, val graph: Entity)
+data class Statement(val subject: Node, val predicate: Entity, val `object`: Node, val graph: Entity)
 
-data class Rule(val subject: Node, val predicate: Predicate, val `object`: Node)
+data class Rule(val subject: Node, val predicate: Entity, val `object`: Node)
 
 data class Range(val start: Literal, val end: Literal)
-
-data class Predicate(val name: Entity)
 
 interface LigatureStore {
     /**
@@ -78,12 +76,12 @@ interface ReadTx {
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fun matchStatements(subject: Node? = null, predicate: Predicate? = null, `object`: Node? = null, graph: Entity? = null): Flow<Statement>
+    fun matchStatements(subject: Node? = null, predicate: Entity? = null, `object`: Node? = null, graph: Entity? = null): Flow<Statement>
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fun matchStatements(subject: Node? = null, predicate: Predicate? = null, `object`: Range, graph: Entity? = null): Flow<Statement>
+    fun matchStatements(subject: Node? = null, predicate: Entity? = null, `object`: Range, graph: Entity? = null): Flow<Statement>
 
     /**
      * Accepts nothing but returns a seq of all Rules in the Collection.
@@ -93,7 +91,7 @@ interface ReadTx {
     /**
      * Is passed a pattern and returns a seq with all matching rules.
      */
-    fun matchRules(subject: Entity?, predicate: Predicate?, `object`: Node?): Flow<Rule>
+    fun matchRules(subject: Entity?, predicate: Entity?, `object`: Node?): Flow<Rule>
 
     /**
      * Cancels this transaction.
