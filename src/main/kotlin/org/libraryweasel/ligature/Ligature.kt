@@ -29,18 +29,18 @@ interface LigatureStore {
      * Returns a collection based on the name passed.
      * Calling this function will not create a new collection, it just binds a Store and Collection name.
      */
-    fun collection(collectionName: String): LigatureCollection
+    fun collection(collectionName: Entity): LigatureCollection
 
     /**
      * Creates a new collection or does nothing if collection already exists.
      * Regardless the collection is returned.
      */
-    fun createCollection(collectionName: String): LigatureCollection
+    fun createCollection(collectionName: Entity): LigatureCollection
 
     /**
      * Deletes the collection of the name given and does nothing if the collection doesn't exist.
      */
-    fun deleteCollection(collectionName: String)
+    fun deleteCollection(collectionName: Entity)
 
     /**
      * Returns a Flow of all existing collections.
@@ -62,7 +62,7 @@ interface LigatureStore {
  * Manages a collection of Statements and Rules, supports ontologies, and querying.
  */
 interface LigatureCollection {
-    val collectionName: String
+    val collectionName: Entity
     fun readTx(): ReadTx
     fun writeTx(): WriteTx
 }
