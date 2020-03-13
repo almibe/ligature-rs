@@ -22,11 +22,11 @@ data class Statement(val subject: Node, val predicate: Entity, val `object`: Nod
 
 data class Rule(val subject: Node, val predicate: Entity, val `object`: Node)
 
-sealed class Range
-data class LangLiteralRange(val start: LangLiteral, val end: LangLiteral): Range()
-data class StringLiteralRange(val start: String, val end: String): Range()
-data class LongLiteralRange(val start: Long, val end: Long): Range()
-data class DoubleLiteralRange(val start: Double, val end: Double): Range()
+sealed class Range<T>(open val start: T, open val end: T)
+data class LangLiteralRange(override val start: LangLiteral, override val end: LangLiteral): Range<LangLiteral>(start, end)
+data class StringLiteralRange(override val start: String, override val end: String): Range<String>(start, end)
+data class LongLiteralRange(override val start: Long, override val end: Long): Range<Long>(start, end)
+data class DoubleLiteralRange(override val start: Double, override val end: Double): Range<Double>(start, end)
 
 interface LigatureStore {
     /**
@@ -85,7 +85,7 @@ interface ReadTx {
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fun matchStatements(subject: Node? = null, predicate: Entity? = null, range: Range, graph: Entity? = null): Flow<Statement>
+    fun matchStatements(subject: Node? = null, predicate: Entity? = null, range: Range<*>, graph: Entity? = null): Flow<Statement>
 
     /**
      * Accepts nothing but returns a seq of all Rules in the Collection.
