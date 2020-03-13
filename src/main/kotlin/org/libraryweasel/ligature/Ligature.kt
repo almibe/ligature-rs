@@ -103,7 +103,7 @@ interface WriteTx: ReadTx {
     /**
      * Returns a new, unique to this collection identifier in the form _:NUMBER"
      */
-    fun newIdentifier(): Entity
+    fun newEntity(): Entity
     fun addStatement(statement: Statement)
     fun removeStatement(statement: Statement)
     fun addRule(rule: Rule)
