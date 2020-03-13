@@ -12,7 +12,11 @@ sealed class Literal: Node()
 data class LangLiteral(val value: String, val langTag: String): Literal()
 data class StringLiteral(val value: String): Literal()
 data class BooleanLiteral(val value: Boolean): Literal()
-data class IntegerLiteral(val value: Int): Literal()
+data class LongLiteral(val value: Long): Literal()
+data class DoubleLiteral(val value: Double): Literal()
+data class ListLiteral(val value: List<Literal>): Literal()
+data class BagLiteral(val value: List<Literal>): Literal()
+data class AltLiteral(val value: List<Literal>): Literal()
 
 data class Statement(val subject: Node, val predicate: Predicate, val `object`: Node, val graph: Entity)
 
