@@ -59,10 +59,6 @@ collection.addStatement(Entity("_:34567"), a, Entity("bird"), Entity("_")) // wi
 
 TODO
 
-### Attributes
-
-TODO
-
 ## Building
 Ligature requires Gradle to be installed.
 See https://gradle.org for installation instructions.
