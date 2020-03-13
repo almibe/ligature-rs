@@ -7,20 +7,20 @@ package org.libraryweasel.ligature
 import kotlinx.coroutines.flow.Flow
 
 sealed class Node
-data class Identifier(val identifier: String): Node()
+data class Entity(val identifier: String): Node()
 sealed class Literal: Node()
 data class LangLiteral(val value: String, val langTag: String): Literal()
 data class StringLiteral(val value: String): Literal()
 data class BooleanLiteral(val value: Boolean): Literal()
 data class IntegerLiteral(val value: Int): Literal()
 
-data class Statement(val entity: Node, val attribute: Attribute, val value: Node)
+data class Statement(val subject: Node, val predicate: Predicate, val `object`: Node, val graph: Entity)
 
-data class Rule(val entity: Node, val attribute: Attribute, val value: Node)
+data class Rule(val subject: Node, val predicate: Predicate, val `object`: Node)
 
 data class Range(val start: Literal, val end: Literal)
 
-data class Attribute(val name: Identifier)
+data class Predicate(val name: Entity)
 
 interface LigatureStore {
     /**
@@ -74,12 +74,12 @@ interface ReadTx {
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fun matchStatements(entity: Node? = null, attribute: Identifier? = null, value: Node? = null): Flow<Statement>
+    fun matchStatements(subject: Node? = null, predicate: Predicate? = null, `object`: Node? = null, graph: Entity? = null): Flow<Statement>
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fun matchStatements(entity: Node? = null, attribute: Identifier? = null, range: Range): Flow<Statement>
+    fun matchStatements(subject: Node? = null, predicate: Predicate? = null, `object`: Range, graph: Entity? = null): Flow<Statement>
 
     /**
      * Accepts nothing but returns a seq of all Rules in the Collection.
@@ -89,33 +89,19 @@ interface ReadTx {
     /**
      * Is passed a pattern and returns a seq with all matching rules.
      */
-    fun matchRules(entity: Identifier?, attribute: Identifier?, value: Node?): Flow<Rule>
+    fun matchRules(subject: Entity?, predicate: Predicate?, `object`: Node?): Flow<Rule>
 
     /**
      * Cancels this transaction.
      */
     fun cancel()
-
-    /**
-     * Runs a SPARQL query in this transaction.
-     * If a write is attempted in a read-only transaction and error will occur.
-     * TODO shouldn't return Any?
-     */
-    fun sparqlQuery(query: String): Any?
-
-    /**
-     * Runs a Wander query in this transaction.
-     * If a write is attempted in a read-only transaction and error will occur.
-     * TODO shouldn't return Any?
-     */
-    fun wanderQuery(query: String): Any?
 }
 
 interface WriteTx: ReadTx {
     /**
      * Returns a new, unique to this collection identifier in the form _:NUMBER"
      */
-    fun newIdentifier(): Identifier
+    fun newIdentifier(): Entity
     fun addStatement(statement: Statement)
     fun removeStatement(statement: Statement)
     fun addRule(rule: Rule)
