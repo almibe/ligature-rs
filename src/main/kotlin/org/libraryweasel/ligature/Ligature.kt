@@ -30,16 +30,9 @@ data class DoubleLiteralRange(override val start: Double, override val end: Doub
 
 interface LigatureStore {
     /**
-     * Returns a collection based on the name passed.
-     * Calling this function will not create a new collection, it just binds a Store and Collection name.
+     * Creates a new collection or does nothing if collection already exists and returns the Collection.
      */
     fun collection(collectionName: Entity): LigatureCollection
-
-    /**
-     * Creates a new collection or does nothing if collection already exists.
-     * Regardless the collection is returned.
-     */
-    fun createCollection(collectionName: Entity): LigatureCollection
 
     /**
      * Deletes the collection of the name given and does nothing if the collection doesn't exist.
@@ -49,7 +42,7 @@ interface LigatureStore {
     /**
      * Returns a Flow of all existing collections.
      */
-    fun allCollections(): Flow<LigatureCollection>
+    fun allCollections(): Flow<Entity>
 
     /**
      * Close connection with the Store.
