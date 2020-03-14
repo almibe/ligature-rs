@@ -18,6 +18,9 @@ data class ListLiteral(val value: List<Literal>): Literal()
 data class BagLiteral(val value: List<Literal>): Literal()
 data class AltLiteral(val value: List<Literal>): Literal()
 
+val a = Entity("_a")
+val default = Entity("_")
+
 data class Statement(val subject: Node, val predicate: Entity, val `object`: Node, val graph: Entity)
 
 data class Rule(val subject: Node, val predicate: Entity, val `object`: Node)
