@@ -7,9 +7,21 @@ package org.libraryweasel.ligature
 import kotlinx.coroutines.flow.Flow
 
 sealed class Node
-data class Entity(val identifier: String): Node()
+data class Entity(val identifier: String): Node() {
+    init {
+        require(validIdentifier(identifier)) {
+            "Invalid identifier: $identifier"
+        }
+    }
+}
 sealed class Literal: Node()
-data class LangLiteral(val value: String, val langTag: String): Literal()
+data class LangLiteral(val value: String, val langTag: String): Literal() {
+    init {
+        require(validLangTag(langTag)) {
+            "Invalid lang tag: $langTag"
+        }
+    }
+}
 data class StringLiteral(val value: String): Literal()
 data class BooleanLiteral(val value: Boolean): Literal()
 data class LongLiteral(val value: Long): Literal()
