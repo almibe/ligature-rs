@@ -110,7 +110,7 @@ interface ReadTx {
     /**
      * Is passed a pattern and returns a seq with all matching rules.
      */
-    fun matchRules(subject: Entity?, predicate: Entity?, `object`: Node?): Flow<Rule>
+    fun matchRules(subject: Node?, predicate: Entity?, `object`: Node?): Flow<Rule>
 
     /**
      * Cancels this transaction.
