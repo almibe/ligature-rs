@@ -1,6 +1,9 @@
 # ligature
 
 Ligature is a Kotlin library for working with semantic networks.
+This project provides the main interfaces used by Ligature as well as some helper functions and constants.
+See relate projects for implementations of these APIs.
+Ligature is heavily influenced by RDF and related standards but attempts to be more general purpose.
 
 ## RDF's Data Model
 
@@ -65,6 +68,7 @@ Several types are currently supported with plans to add more.
 Below is a table with the currently supported types.
 
 | Name/Signature | Description | Range? | Collection? |
+| -------------- | ----------- | ------ | ----------- |
 | LangLiteral(val value: String, val langTag: String) | Similar to a plain literal in RDF.  A text String and a lang tag. | Yes | No |
 | StringLiteral(val value: String) | A simple string type. | Yes | No |
 | BooleanLiteral(val value: Boolean) | A boolean value. | No | No |
