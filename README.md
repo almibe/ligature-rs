@@ -43,7 +43,7 @@ Below is an example statement using identifiers in Kotlin format.
 `tx.addStatement(Entity("Emily"), Entity("loves"), Entity("cats"), default)`
 
 The `default` argument passed is imported as a value from `org.libraryweasel.ligature.default`.
-It is equal to `Entitly("_")` and represents the default graph in Ligature.
+It is equal to `Entity("_")` and represents the default graph in Ligature.
 
 Besides using named entities, the `newEntity` method returns a unique Entity with an Identifier that looks something like this.
 
