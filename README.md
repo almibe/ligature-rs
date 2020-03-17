@@ -29,7 +29,7 @@ An Entity is a Node that is represented by and Identifier.
 Identifiers in Ligature are *currently* defined as strings that start with an ASCII letter or an underscore and don't contain any of the following characters:
  * whitespace (space, newline, tabs, carriage returns, etc)
  * " ' `
- * < >
+ * &lt; &gt;
  * ( )
  * { }
  * \
@@ -74,9 +74,9 @@ Below is a table with the currently supported types.
 | BooleanLiteral(val value: Boolean) | A boolean value. | No | No |
 | LongLiteral(val value: Long) | A value based on Kotlin's Long. | Yes | No |
 | DoubleLiteral(val value: Double) | A value based on Kotlin's Double | Yes | No |
-| ListLiteral(val value: List<Literal>) | A collection type based on RDF's List.  Allows repeats and order matters. | No | Yes |
-| BagLiteral(val value: List<Literal>) | A collection type based on RDF's Bag.  Allows repeats and order doesn't matter. | No | Yes |
-| AltLiteral(val value: List<Literal>) | A collection type based on RDF's Alt.  Allows repeats and order doesn't matter. | No | Yes |
+| ListLiteral(val value: List&lt;Literal&gt;) | A collection type based on RDF's List.  Allows repeats and order matters. | No | Yes |
+| BagLiteral(val value: List&lt;Literal&gt;) | A collection type based on RDF's Bag.  Allows repeats and order doesn't matter. | No | Yes |
+| AltLiteral(val value: List&lt;Literal&gt;) | A collection type based on RDF's Alt.  Allows repeats and order doesn't matter. | No | Yes |
 
 ## Building
 Ligature requires Gradle to be installed.
