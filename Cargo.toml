@@ -6,3 +6,4 @@ edition = "2018"
 license = "MPLv2"
 
 [dependencies]
+futures = "0.3.4"

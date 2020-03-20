@@ -2,8 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-use std::iter::Iterator;
 use std::collections::HashMap;
+use futures::Stream;
 
 struct Statement(Node, Entity, Node, Entity);
 
@@ -78,7 +78,7 @@ trait LigatureStore {
     /**
      * Returns a Iterator of all existing collections.
      */
-    fn all_collections(&self) -> dyn Iterator<Item = dyn LigatureCollection>;
+    fn all_collections(&self) -> dyn Stream<Item = dyn LigatureCollection>;
 
     /**
      * Close connection with the Store.
@@ -102,29 +102,29 @@ trait LigatureCollection {
 
 trait ReadTx {
     /**
-     * Accepts nothing but returns a Iterator of all Statements in the Collection.
+     * Accepts nothing but returns a Stream of all Statements in the Collection.
      */
-    fn all_statements(&self) -> dyn Iterator<Item = Statement>;
+    fn all_statements(&self) -> dyn Stream<Item = Statement>;
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    //fn matchStatements(subject: Node? = null, predicate: Entity? = null, `object`: Node? = null, graph: Entity? = null) -> Iterator<Statement>
+    //fn matchStatements(subject: Node? = null, predicate: Entity? = null, `object`: Node? = null, graph: Entity? = null) -> Stream<Statement>
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    //fn matchStatements(subject: Node? = null, predicate: Entity? = null, range: Range<*>, graph: Entity? = null) -> Iterator<Statement>
+    //fn matchStatements(subject: Node? = null, predicate: Entity? = null, range: Range<*>, graph: Entity? = null) -> Stream<Statement>
 
     /**
      * Accepts nothing but returns a seq of all Rules in the Collection.
      */
-    fn all_rules(&self) -> dyn Iterator<Item = Rule>;
+    fn all_rules(&self) -> dyn Stream<Item = Rule>;
 
     /**
      * Is passed a pattern and returns a seq with all matching rules.
      */
-    //fn matchRules(subject: Node? = null, predicate: Entity? = null, `object`: Node? = null) -> Iterator<Rule>
+    //fn matchRules(subject: Node? = null, predicate: Entity? = null, `object`: Node? = null) -> Stream<Rule>
 
     /**
      * Cancels this transaction.
