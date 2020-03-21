@@ -116,12 +116,12 @@ trait ReadTx {
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    //fn matchStatements(subject: Node? = null, predicate: Entity? = null, `object`: Node? = null, graph: Entity? = null) -> Stream<Statement>
+    fn match_statements(subject: Option<Node>, predicate: Option<Entity>, object: Option<Node>, graph: Optional<Entity>) -> Stream<Item = Statement>;
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    //fn matchStatements(subject: Node? = null, predicate: Entity? = null, range: Range<*>, graph: Entity? = null) -> Stream<Statement>
+    fn match_range(subject: Option<Node>, predicate: Option<Entity>, range: Range, graph: Option<Entity>) -> Stream<Item = Statement>;
 
     /**
      * Accepts nothing but returns a seq of all Rules in the Collection.
@@ -131,7 +131,7 @@ trait ReadTx {
     /**
      * Is passed a pattern and returns a seq with all matching rules.
      */
-    //fn matchRules(subject: Node? = null, predicate: Entity? = null, `object`: Node? = null) -> Stream<Rule>
+    fn match_rules(subject: Option<Node>, predicate: Option<Entity>, object: Option<Node>) -> Stream<Item = Rule>;
 
     /**
      * Cancels this transaction.
