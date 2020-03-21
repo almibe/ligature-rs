@@ -18,32 +18,39 @@ struct Entity {
     identifier: String
 }
 
-const A: &str = "_a";
-const DEFAULT: &str = "_";
+impl Entity {
+    fn a() -> Entity {
+        Entity { identifier: String::from("_a") }
+    }
+    fn default() -> Entity {
+        Entity { identifier: String::from("_") }
+    }
+}
 
 enum Literal {
     StringLiteral(String),
-    LangLiteral(String, LangTag),
-    BooleanLiteral,
-    LongLiteral,
-    DoubleLiteral,
+    LangLiteral(LangLiteral),
+    BooleanLiteral(bool),
+    LongLiteral(i64),
+    DoubleLiteral(f64),
     ListLiteral,
     BagLiteral,
     AltLiteral
 }
 
 enum Range {
-    //LangLiteralRange(Literal::LangLiteral, Literal::LangLiteral),
+    LangLiteralRange(LangLiteral, LangLiteral),
     StringLiteralRange(String, String),
     LongLiteralRange(u64, u64),
     DoubleLiteralRange(f64, f64)
 }
 
-struct LangTag {
+struct LangLiteral {
+    value: String,
     tag: String
 }
 
-impl LangTag {
+impl LangLiteral {
     fn is_valid(&self) -> bool {
         //return "[a-zA-Z]+(-[a-zA-Z0-9]+)*".toRegex().matches(langTag)
         unimplemented!()
