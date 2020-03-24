@@ -19,11 +19,25 @@ struct Entity {
 }
 
 impl Entity {
+    fn is_valid(identifier: &str) -> bool {
+        //return "[a-zA-Z_][^\\s\\(\\)\\[\\]\\{\\}'\"`<>\\\\]*".toRegex().matches(identifier)
+        unimplemented!()
+    }
+    fn from(identifier: &str) -> Result<Entity, String> {
+        if Entity::is_valid(identifier) {
+            Result::Ok(Entity { identifier: String::from(identifier) })
+        } else {
+            unimplemented!()
+        }
+    }
     fn a() -> Entity {
         Entity { identifier: String::from("_a") }
     }
     fn default() -> Entity {
         Entity { identifier: String::from("_") }
+    }
+    fn identifier(&self) -> &String {
+        &self.identifier
     }
 }
 
@@ -51,16 +65,22 @@ struct LangLiteral {
 }
 
 impl LangLiteral {
-    fn is_valid(&self) -> bool {
+    fn valid_tag(tag: &str) -> bool {
         //return "[a-zA-Z]+(-[a-zA-Z0-9]+)*".toRegex().matches(langTag)
         unimplemented!()
     }
-}
-
-impl Entity {
-    fn is_valid(&self) -> bool {
-        //return "[a-zA-Z_][^\\s\\(\\)\\[\\]\\{\\}'\"`<>\\\\]*".toRegex().matches(identifier)
-        unimplemented!()
+    fn from(value: &str, tag: &str) -> Result<LangLiteral, String> {
+        if LangLiteral::valid_tag(tag) {
+            Result::Ok(LangLiteral { value: String::from(value), tag: String::from(tag) })
+        } else {
+            unimplemented!()
+        }
+    }
+    fn value(&self) -> &String {
+        &self.value
+    }
+    fn tag(&self) -> &String {
+        &self.tag
     }
 }
 
@@ -116,12 +136,12 @@ trait ReadTx {
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fn match_statements(subject: Option<Node>, predicate: Option<Entity>, object: Option<Node>, graph: Optional<Entity>) -> Stream<Item = Statement>;
+    fn match_statements(&self, subject: Option<Node>, predicate: Option<Entity>, object: Option<Node>, graph: Option<Entity>) -> dyn Stream<Item = Statement>;
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fn match_range(subject: Option<Node>, predicate: Option<Entity>, range: Range, graph: Option<Entity>) -> Stream<Item = Statement>;
+    fn match_range(&self, subject: Option<Node>, predicate: Option<Entity>, range: Range, graph: Option<Entity>) -> dyn Stream<Item = Statement>;
 
     /**
      * Accepts nothing but returns a seq of all Rules in the Collection.
@@ -131,7 +151,7 @@ trait ReadTx {
     /**
      * Is passed a pattern and returns a seq with all matching rules.
      */
-    fn match_rules(subject: Option<Node>, predicate: Option<Entity>, object: Option<Node>) -> Stream<Item = Rule>;
+    fn match_rules(&self, subject: Option<Node>, predicate: Option<Entity>, object: Option<Node>) -> dyn Stream<Item = Rule>;
 
     /**
      * Cancels this transaction.
