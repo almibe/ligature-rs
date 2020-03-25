@@ -46,10 +46,10 @@ enum Literal {
     LangLiteral(LangLiteral),
     BooleanLiteral(bool),
     LongLiteral(i64),
-    DoubleLiteral(f64),
-    ListLiteral,
-    BagLiteral,
-    AltLiteral
+    DoubleLiteral(f64)//,
+//    ListLiteral,
+//    BagLiteral,
+//    AltLiteral
 }
 
 enum Range {
