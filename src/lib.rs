@@ -111,11 +111,6 @@ trait LigatureStore {
      * Close connection with the Store.
      */
     fn close(&self);
-
-    /**
-     * Returns an implementation specific map of details about this Store useful for debugging.
-     */
-    fn details(&self) -> HashMap<String, String>;
 }
 
 /**
