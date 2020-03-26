@@ -15,13 +15,13 @@ Ligature is heavily influenced by RDF and related standards but attempts to be m
 
 ## Ligature's Data Model
 
-| Subject | Predicate  | Object | Graph  |
-| ------- | ---------- | ------ | ------ |
-| node    | entity     | node   | entity |
+| Subject | Predicate  | Object | Context |
+| ------- | ---------- | ------ | ------  |
+| entity  | predicate  | object | entity  |
 
-### Nodes
+### Objects
 
-Nodes in Ligature can be of two main types, either an Entity or a Literal.
+Objects in Ligature can be of two main types, either an Entity or a Literal.
 
 #### Entities
 
@@ -77,6 +77,10 @@ Below is a table with the currently supported types.
 | ListLiteral(val value: List&lt;Literal&gt;) | A collection type based on RDF's List.  Allows repeats and order matters. | No | Yes |
 | BagLiteral(val value: List&lt;Literal&gt;) | A collection type based on RDF's Bag.  Allows repeats and order doesn't matter. | No | Yes |
 | AltLiteral(val value: List&lt;Literal&gt;) | A collection type based on RDF's Alt.  Allows repeats and order doesn't matter. | No | Yes |
+
+#### Predicates
+
+Predicates are very similar to Entities in that they represent a single Identifier but they are only used in the Predicate position of a Statement or Rule.
 
 ## Building
 Ligature requires Gradle to be installed.

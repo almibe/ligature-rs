@@ -38,7 +38,7 @@ data class Predicate(val identifier: String) {
 val a = Entity("_a")
 val default = Entity("_")
 
-data class Statement(val subject: Entity, val predicate: Predicate, val `object`: Object, val graph: Entity)
+data class Statement(val subject: Entity, val predicate: Predicate, val `object`: Object, val context: Entity)
 
 data class Rule(val subject: Entity, val predicate: Predicate, val `object`: Object)
 
@@ -95,12 +95,12 @@ interface ReadTx {
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fun matchStatements(subject: Entity? = null, predicate: Predicate? = null, `object`: Object? = null, graph: Entity? = null): Flow<Statement>
+    fun matchStatements(subject: Entity? = null, predicate: Predicate? = null, `object`: Object? = null, context: Entity? = null): Flow<Statement>
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fun matchStatements(subject: Entity? = null, predicate: Predicate? = null, range: Range<*>, graph: Entity? = null): Flow<Statement>
+    fun matchStatements(subject: Entity? = null, predicate: Predicate? = null, range: Range<*>, context: Entity? = null): Flow<Statement>
 
     /**
      * Accepts nothing but returns a seq of all Rules in the Collection.
