@@ -74,9 +74,6 @@ Below is a table with the currently supported types.
 | BooleanLiteral(val value: Boolean) | A boolean value. | No | No |
 | LongLiteral(val value: Long) | A value based on Kotlin's Long. | Yes | No |
 | DoubleLiteral(val value: Double) | A value based on Kotlin's Double | Yes | No |
-| ListLiteral(val value: List&lt;Literal&gt;) | A collection type based on RDF's List.  Allows repeats and order matters. | No | Yes |
-| BagLiteral(val value: List&lt;Literal&gt;) | A collection type based on RDF's Bag.  Allows repeats and order doesn't matter. | No | Yes |
-| AltLiteral(val value: List&lt;Literal&gt;) | A collection type based on RDF's Alt.  Allows repeats and order doesn't matter. | No | Yes |
 
 #### Predicates
 
