@@ -3,7 +3,7 @@
 Ligature is a Kotlin library for working with semantic networks.
 This project provides the main interfaces used by Ligature as well as some helper functions and constants.
 See relate projects for implementations of these APIs.
-Ligature is heavily influenced by RDF and related standards but attempts to be more general purpose.
+Ligature is heavily influenced by RDF and related standards but attempts to be more general purpose and easier to use.
 
 ## RDF's Data Model
 
@@ -25,7 +25,7 @@ Objects in Ligature can be of two main types, either an Entity or a Literal.
 
 #### Entities
 
-An Entity is a Node that is represented by and Identifier.
+An Entity is a Object that is represented by and Identifier.
 Identifiers in Ligature are *currently* defined as strings that start with an ASCII letter or an underscore and don't contain any of the following characters:
  * whitespace (space, newline, tabs, carriage returns, etc)
  * " ' `
@@ -77,7 +77,7 @@ Below is a table with the currently supported types.
 
 #### Predicates
 
-Predicates are very similar to Entities in that they represent a single Identifier but they are only used in the Predicate position of a Statement or Rule.
+Predicates are very similar to Entities in that they represented by a single Identifier but they are only used in the Predicate position of a Statement or Rule.
 
 ## Building
 Ligature requires Gradle to be installed.
