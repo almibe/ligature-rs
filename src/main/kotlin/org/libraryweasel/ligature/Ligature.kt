@@ -6,14 +6,15 @@ package org.libraryweasel.ligature
 
 import kotlinx.coroutines.flow.Flow
 
-sealed class Object
-data class Entity(val identifier: String): Object() {
+data class Identifier(val identifier: String) {
     init {
         require(validIdentifier(identifier)) {
             "Invalid identifier: $identifier"
         }
     }
 }
+sealed class Object
+data class Entity(val identifier: Identifier): Object()
 sealed class Literal: Object()
 data class LangLiteral(val value: String, val langTag: String): Literal() {
     init {
@@ -27,16 +28,10 @@ data class BooleanLiteral(val value: Boolean): Literal()
 data class LongLiteral(val value: Long): Literal()
 data class DoubleLiteral(val value: Double): Literal()
 
-data class Predicate(val identifier: String) {
-    init {
-        require(validIdentifier(identifier)) {
-            "Invalid identifier: $identifier"
-        }
-    }
-}
+data class Predicate(val identifier: Identifier)
 
-val a = Entity("_a")
-val default = Entity("_")
+val a = Predicate(Identifier("_a"))
+val default = Entity(Identifier("_"))
 
 data class Statement(val subject: Entity, val predicate: Predicate, val `object`: Object, val context: Entity)
 
