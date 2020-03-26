@@ -6,15 +6,15 @@ package org.libraryweasel.ligature
 
 import kotlinx.coroutines.flow.Flow
 
-sealed class Node
-data class Entity(val identifier: String): Node() {
+sealed class Object
+data class Entity(val identifier: String): Object() {
     init {
         require(validIdentifier(identifier)) {
             "Invalid identifier: $identifier"
         }
     }
 }
-sealed class Literal: Node()
+sealed class Literal: Object()
 data class LangLiteral(val value: String, val langTag: String): Literal() {
     init {
         require(validLangTag(langTag)) {
@@ -26,16 +26,21 @@ data class StringLiteral(val value: String): Literal()
 data class BooleanLiteral(val value: Boolean): Literal()
 data class LongLiteral(val value: Long): Literal()
 data class DoubleLiteral(val value: Double): Literal()
-data class ListLiteral(val value: List<Literal>): Literal()
-data class BagLiteral(val value: List<Literal>): Literal()
-data class AltLiteral(val value: List<Literal>): Literal()
+
+data class Predicate(val identifier: String) {
+    init {
+        require(validIdentifier(identifier)) {
+            "Invalid identifier: $identifier"
+        }
+    }
+}
 
 val a = Entity("_a")
 val default = Entity("_")
 
-data class Statement(val subject: Node, val predicate: Entity, val `object`: Node, val graph: Entity)
+data class Statement(val subject: Entity, val predicate: Predicate, val `object`: Object, val graph: Entity)
 
-data class Rule(val subject: Node, val predicate: Entity, val `object`: Node)
+data class Rule(val subject: Entity, val predicate: Predicate, val `object`: Object)
 
 sealed class Range<T>(open val start: T, open val end: T)
 data class LangLiteralRange(override val start: LangLiteral, override val end: LangLiteral): Range<LangLiteral>(start, end)
@@ -70,11 +75,6 @@ interface LigatureStore {
      * Close connection with the Store.
      */
     fun close()
-
-    /**
-     * Returns an implementation specific map of details about this Store useful for debugging.
-     */
-    fun details(): Map<String, String>
 }
 
 /**
@@ -95,12 +95,12 @@ interface ReadTx {
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fun matchStatements(subject: Node? = null, predicate: Entity? = null, `object`: Node? = null, graph: Entity? = null): Flow<Statement>
+    fun matchStatements(subject: Entity? = null, predicate: Predicate? = null, `object`: Object? = null, graph: Entity? = null): Flow<Statement>
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fun matchStatements(subject: Node? = null, predicate: Entity? = null, range: Range<*>, graph: Entity? = null): Flow<Statement>
+    fun matchStatements(subject: Entity? = null, predicate: Predicate? = null, range: Range<*>, graph: Entity? = null): Flow<Statement>
 
     /**
      * Accepts nothing but returns a seq of all Rules in the Collection.
@@ -110,7 +110,7 @@ interface ReadTx {
     /**
      * Is passed a pattern and returns a seq with all matching rules.
      */
-    fun matchRules(subject: Node? = null, predicate: Entity? = null, `object`: Node? = null): Flow<Rule>
+    fun matchRules(subject: Entity? = null, predicate: Predicate? = null, `object`: Object? = null): Flow<Rule>
 
     /**
      * Cancels this transaction.
