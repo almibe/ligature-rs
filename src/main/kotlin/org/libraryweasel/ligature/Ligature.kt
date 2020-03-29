@@ -40,8 +40,6 @@ val default = Entity("_")
 
 data class Statement(val subject: Entity, val predicate: Predicate, val `object`: Object, val context: Entity)
 
-data class Rule(val subject: Entity, val predicate: Predicate, val `object`: Object)
-
 sealed class Range<T>(open val start: T, open val end: T)
 data class LangLiteralRange(override val start: LangLiteral, override val end: LangLiteral): Range<LangLiteral>(start, end)
 data class StringLiteralRange(override val start: String, override val end: String): Range<String>(start, end)
@@ -103,16 +101,6 @@ interface ReadTx {
     fun matchStatements(subject: Entity? = null, predicate: Predicate? = null, range: Range<*>, context: Entity? = null): Flow<Statement>
 
     /**
-     * Accepts nothing but returns a seq of all Rules in the Collection.
-     */
-    fun allRules(): Flow<Rule>
-
-    /**
-     * Is passed a pattern and returns a seq with all matching rules.
-     */
-    fun matchRules(subject: Entity? = null, predicate: Predicate? = null, `object`: Object? = null): Flow<Rule>
-
-    /**
      * Cancels this transaction.
      */
     fun cancel()
@@ -125,8 +113,6 @@ interface WriteTx: ReadTx {
     fun newEntity(): Entity
     fun addStatement(statement: Statement)
     fun removeStatement(statement: Statement)
-    fun addRule(rule: Rule)
-    fun removeRule(rule: Rule)
     fun commit()
 }
 
