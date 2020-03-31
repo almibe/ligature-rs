@@ -60,7 +60,9 @@ interface BaseTx<T> {
     /**
      * Returns a Flow of all existing collections.
      */
-    fun allCollections(): Flow<Entity>
+    fun collections(): Flow<Entity>
+    fun collections(prefix: Entity): Flow<Entity>
+    fun collections(from: Entity, to: Entity): Flow<Entity>
 
     /**
      * Returns a handle for working with a collection.
