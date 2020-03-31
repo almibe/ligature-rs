@@ -100,7 +100,7 @@ interface WriteTx: BaseTx<CollectionWriteTx> {
     /**
      * Deletes the collection of the name given and does nothing if the collection doesn't exist.
      */
-    fun deleteCollection(collectionName: Entity)
+    fun deleteCollection(collectionName: CollectionName)
 
     /**
      * Commits this transaction.
