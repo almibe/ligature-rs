@@ -56,17 +56,18 @@ interface LigatureStore {
     fun close()
 }
 
-interface ReadTx {
+interface BaseTx<T> {
     /**
      * Returns a Flow of all existing collections.
      */
     fun allCollections(): Flow<Entity>
 
     /**
-     * Returns a collection based on the name passed.
-     * Calling this function will not create a new collection, and will return null if the collection doesn't exist.
+     * Returns a handle for working with a collection.
+     * When in a ReadTx null is returned if the collection doesn't exist.
+     * When in a WriteTx the collection is created if it doesn't exist.
      */
-    fun collectionReadTx(collectionName: Entity): CollectionReadTx?
+    fun collection(collectionName: Entity): T
 
     /**
      * Cancels this transaction.
@@ -74,17 +75,13 @@ interface ReadTx {
     fun cancel()
 }
 
-interface WriteTx: ReadTx {
+interface ReadTx: BaseTx<CollectionReadTx?>
+
+interface WriteTx: BaseTx<CollectionWriteTx> {
     /**
      * Deletes the collection of the name given and does nothing if the collection doesn't exist.
      */
     fun deleteCollection(collectionName: Entity)
-
-    /**
-     * Creates a new collection or does nothing if collection already exists.
-     * Regardless the collection is returned.
-     */
-    fun collectionWriteTx(collectionName: Entity): CollectionWriteTx
 
     /**
      * Commits this transaction.
