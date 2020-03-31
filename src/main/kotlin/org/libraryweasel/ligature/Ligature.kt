@@ -10,7 +10,7 @@ sealed class Object
 data class Entity(val identifier: String): Object() {
     init {
         require(validIdentifier(identifier)) {
-            "Invalid identifier: $identifier"
+            "Invalid Entity: $identifier"
         }
     }
 }
@@ -30,7 +30,7 @@ data class DoubleLiteral(val value: Double): Literal()
 data class Predicate(val identifier: String) {
     init {
         require(validIdentifier(identifier)) {
-            "Invalid identifier: $identifier"
+            "Invalid Predicate: $identifier"
         }
     }
 }
@@ -46,6 +46,14 @@ data class StringLiteralRange(override val start: String, override val end: Stri
 data class LongLiteralRange(override val start: Long, override val end: Long): Range<Long>(start, end)
 data class DoubleLiteralRange(override val start: Double, override val end: Double): Range<Double>(start, end)
 
+data class CollectionName(val name: String) {
+    init {
+        require(validIdentifier(name)) {
+            "Invalid Collection Name: $name"
+        }
+    }
+}
+
 interface LigatureStore {
     fun readTx(): ReadTx
     fun writeTx(): WriteTx
@@ -60,16 +68,25 @@ interface BaseTx<T> {
     /**
      * Returns a Flow of all existing collections.
      */
-    fun collections(): Flow<Entity>
-    fun collections(prefix: Entity): Flow<Entity>
-    fun collections(from: Entity, to: Entity): Flow<Entity>
+    fun collections(): Flow<CollectionName>
 
     /**
-     * Returns a handle for working with a collection.
+     * Returns a Flow of all existing collections that start with the given prefix.
+     */
+    fun collections(prefix: CollectionName): Flow<CollectionName>
+
+    /**
+     * Returns a Flow of all existing collections that are within the given range.
+     * `from` is inclusive and `to` is exclusive.
+     */
+    fun collections(from: CollectionName, to: CollectionName): Flow<CollectionName>
+
+    /**
+     * Returns a handle for working with a collection within a transaction.
      * When in a ReadTx null is returned if the collection doesn't exist.
      * When in a WriteTx the collection is created if it doesn't exist.
      */
-    fun collection(collectionName: Entity): T
+    fun collection(collectionName: CollectionName): T
 
     /**
      * Cancels this transaction.
@@ -92,7 +109,7 @@ interface WriteTx: BaseTx<CollectionWriteTx> {
 }
 
 interface CollectionReadTx {
-    val collectionName: Entity
+    val collectionName: CollectionName
     /**
      * Accepts nothing but returns a Flow of all Statements in the Collection.
      */
@@ -111,7 +128,7 @@ interface CollectionReadTx {
 
 interface CollectionWriteTx: CollectionReadTx {
     /**
-     * Returns a new, unique to this collection identifier in the form _:NUMBER"
+     * Returns a new, unique to this collection identifier in the form _:NUMBER
      */
     fun newEntity(): Entity
     fun addStatement(statement: Statement)
