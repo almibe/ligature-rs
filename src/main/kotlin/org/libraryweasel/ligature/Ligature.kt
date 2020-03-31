@@ -64,9 +64,9 @@ interface ReadTx {
 
     /**
      * Returns a collection based on the name passed.
-     * Calling this function will not create a new collection, it just binds a Store and Collection name.
+     * Calling this function will not create a new collection, and will return null if the collection doesn't exist.
      */
-    fun collectionReadTx(collectionName: Entity): CollectionReadTx
+    fun collectionReadTx(collectionName: Entity): CollectionReadTx?
 
     /**
      * Cancels this transaction.
