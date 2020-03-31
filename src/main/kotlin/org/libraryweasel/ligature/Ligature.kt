@@ -47,8 +47,8 @@ data class LongLiteralRange(override val start: Long, override val end: Long): R
 data class DoubleLiteralRange(override val start: Double, override val end: Double): Range<Double>(start, end)
 
 interface LigatureStore {
-    fun <T>readTx(tx: ((ReadTx) -> T)): T
-    fun <T>writeTx(tx : ((WriteTx) -> T)): T
+    fun readTx(): ReadTx
+    fun writeTx(): WriteTx
 
     /**
      * Close connection with the Store.
