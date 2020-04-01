@@ -112,7 +112,7 @@ interface WriteTx: ReadTx {
     /**
      * Deletes the collection of the name given and does nothing if the collection doesn't exist.
      */
-    fun deleteCollection(collectionName: CollectionName)
+    fun deleteCollection(collection: CollectionName)
 
     /**
      * Returns a new, unique to this collection identifier in the form _:NUMBER
