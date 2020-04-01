@@ -64,7 +64,7 @@ interface LigatureStore {
     fun close()
 }
 
-interface BaseTx<T> {
+interface ReadTx {
     /**
      * Returns a Flow of all existing collections.
      */
@@ -82,11 +82,19 @@ interface BaseTx<T> {
     fun collections(from: CollectionName, to: CollectionName): Flow<CollectionName>
 
     /**
-     * Returns a handle for working with a collection within a transaction.
-     * When in a ReadTx null is returned if the collection doesn't exist.
-     * When in a WriteTx the collection is created if it doesn't exist.
+     * Accepts nothing but returns a Flow of all Statements in the Collection.
      */
-    fun collection(collectionName: CollectionName): T
+    fun allStatements(collection: CollectionName): Flow<Statement>
+
+    /**
+     * Is passed a pattern and returns a seq with all matching Statements.
+     */
+    fun matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, `object`: Object? = null, context: Entity? = null): Flow<Statement>
+
+    /**
+     * Is passed a pattern and returns a seq with all matching Statements.
+     */
+    fun matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, range: Range<*>, context: Entity? = null): Flow<Statement>
 
     /**
      * Cancels this transaction.
@@ -94,45 +102,29 @@ interface BaseTx<T> {
     fun cancel()
 }
 
-interface ReadTx: BaseTx<CollectionReadTx?>
+interface WriteTx: ReadTx {
+    /**
+     * Creates a collection with the given name or does nothing if the collection already exists.
+     * Only useful for creating an empty collection.
+     */
+    fun createCollection(collection: CollectionName)
 
-interface WriteTx: BaseTx<CollectionWriteTx> {
     /**
      * Deletes the collection of the name given and does nothing if the collection doesn't exist.
      */
     fun deleteCollection(collectionName: CollectionName)
 
     /**
+     * Returns a new, unique to this collection identifier in the form _:NUMBER
+     */
+    fun newEntity(collection: CollectionName): Entity
+    fun addStatement(collection: CollectionName, statement: Statement)
+    fun removeStatement(collection: CollectionName, statement: Statement)
+
+    /**
      * Commits this transaction.
      */
     fun commit()
-}
-
-interface CollectionReadTx {
-    val collectionName: CollectionName
-    /**
-     * Accepts nothing but returns a Flow of all Statements in the Collection.
-     */
-    fun allStatements(): Flow<Statement>
-
-    /**
-     * Is passed a pattern and returns a seq with all matching Statements.
-     */
-    fun matchStatements(subject: Entity? = null, predicate: Predicate? = null, `object`: Object? = null, context: Entity? = null): Flow<Statement>
-
-    /**
-     * Is passed a pattern and returns a seq with all matching Statements.
-     */
-    fun matchStatements(subject: Entity? = null, predicate: Predicate? = null, range: Range<*>, context: Entity? = null): Flow<Statement>
-}
-
-interface CollectionWriteTx: CollectionReadTx {
-    /**
-     * Returns a new, unique to this collection identifier in the form _:NUMBER
-     */
-    fun newEntity(): Entity
-    fun addStatement(statement: Statement)
-    fun removeStatement(statement: Statement)
 }
 
 /**
