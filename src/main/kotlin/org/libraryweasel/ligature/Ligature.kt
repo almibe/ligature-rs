@@ -102,7 +102,7 @@ interface ReadTx {
     fun cancel()
 }
 
-interface WriteTx: ReadTx {
+interface WriteTx {
     /**
      * Creates a collection with the given name or does nothing if the collection already exists.
      * Only useful for creating an empty collection.
