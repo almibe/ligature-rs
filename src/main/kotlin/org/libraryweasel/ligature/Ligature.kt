@@ -55,13 +55,36 @@ data class CollectionName(val name: String) {
 }
 
 interface LigatureStore {
-    fun readTx(): ReadTx
-    fun writeTx(): WriteTx
+    suspend fun readTx(): ReadTx
+    suspend fun writeTx(): WriteTx
+    suspend fun <T>compute(fn: suspend (ReadTx) -> T): T {
+        val readTx = this.readTx()
+        try {
+            return fn(readTx)
+        } finally {
+            if (readTx.isOpen()) {
+                readTx.cancel()
+            }
+        }
+    }
+
+    suspend fun write(fn: suspend (WriteTx) -> Unit) {
+        val writeTx = this.writeTx()
+        try {
+            return fn(writeTx)
+        } finally {
+            if (writeTx.isOpen()) {
+                writeTx.commit()
+            }
+        }
+    }
 
     /**
      * Close connection with the Store.
      */
-    fun close()
+    suspend fun close()
+
+    suspend fun isOpen(): Boolean
 }
 
 interface ReadTx {
@@ -100,6 +123,8 @@ interface ReadTx {
      * Cancels this transaction.
      */
     fun cancel()
+
+    fun isOpen(): Boolean
 }
 
 interface WriteTx {
@@ -125,6 +150,13 @@ interface WriteTx {
      * Commits this transaction.
      */
     fun commit()
+
+    /**
+     * Cancels this transaction.
+     */
+    fun cancel()
+
+    fun isOpen(): Boolean
 }
 
 /**
