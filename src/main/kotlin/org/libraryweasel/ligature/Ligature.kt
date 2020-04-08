@@ -7,13 +7,7 @@ package org.libraryweasel.ligature
 import kotlinx.coroutines.flow.Flow
 
 sealed class Object
-data class Entity(val identifier: String): Object() {
-    init {
-        require(validIdentifier(identifier)) {
-            "Invalid Entity: $identifier"
-        }
-    }
-}
+data class Entity(val identifier: Long): Object()
 sealed class Literal: Object()
 data class LangLiteral(val value: String, val langTag: String): Literal() {
     init {
@@ -29,16 +23,16 @@ data class DoubleLiteral(val value: Double): Literal()
 
 data class Predicate(val identifier: String) {
     init {
-        require(validIdentifier(identifier)) {
+        require(validPredicate(identifier)) {
             "Invalid Predicate: $identifier"
         }
     }
 }
 
 val a = Predicate("_a")
-val default = Entity("_")
+val default = Entity(0)
 
-data class Statement(val subject: Entity, val predicate: Predicate, val `object`: Object, val context: Entity)
+data class Statement(val subject: Entity, val predicate: Predicate, val `object`: Object, val context: Entity = default)
 
 sealed class Range<T>(open val start: T, open val end: T)
 data class LangLiteralRange(override val start: LangLiteral, override val end: LangLiteral): Range<LangLiteral>(start, end)
@@ -48,7 +42,7 @@ data class DoubleLiteralRange(override val start: Double, override val end: Doub
 
 data class CollectionName(val name: String) {
     init {
-        require(validIdentifier(name)) {
+        require(validPredicate(name)) {
             "Invalid Collection Name: $name"
         }
     }
@@ -162,7 +156,7 @@ interface WriteTx {
 /**
  * Accepts a String representing an identifier and returns true or false depending on if it is valid.
  */
-fun validIdentifier(identifier: String): Boolean {
+fun validPredicate(identifier: String): Boolean {
     return "[a-zA-Z_][^\\s\\(\\)\\[\\]\\{\\}'\"`<>\\\\]*".toRegex().matches(identifier)
 }
 
