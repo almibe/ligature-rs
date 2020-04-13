@@ -5,6 +5,7 @@
 package org.libraryweasel.ligature
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 sealed class Object
 data class Entity(val identifier: Long): Object()
@@ -85,40 +86,40 @@ interface ReadTx {
     /**
      * Returns a Flow of all existing collections.
      */
-    fun collections(): Flow<CollectionName>
+    suspend fun collections(): Flow<CollectionName>
 
     /**
      * Returns a Flow of all existing collections that start with the given prefix.
      */
-    fun collections(prefix: CollectionName): Flow<CollectionName>
+    suspend fun collections(prefix: CollectionName): Flow<CollectionName>
 
     /**
      * Returns a Flow of all existing collections that are within the given range.
      * `from` is inclusive and `to` is exclusive.
      */
-    fun collections(from: CollectionName, to: CollectionName): Flow<CollectionName>
+    suspend fun collections(from: CollectionName, to: CollectionName): Flow<CollectionName>
 
     /**
      * Accepts nothing but returns a Flow of all Statements in the Collection.
      */
-    fun allStatements(collection: CollectionName): Flow<Statement>
+    suspend fun allStatements(collection: CollectionName): Flow<Statement>
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fun matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, `object`: Object? = null, context: Entity? = null): Flow<Statement>
+    suspend fun matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, `object`: Object? = null, context: Entity? = null): Flow<Statement>
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fun matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, range: Range<*>, context: Entity? = null): Flow<Statement>
+    suspend fun matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, range: Range<*>, context: Entity? = null): Flow<Statement>
 
     /**
      * Cancels this transaction.
      */
-    fun cancel()
+    suspend fun cancel()
 
-    fun isOpen(): Boolean
+    suspend fun isOpen(): Boolean
 }
 
 interface WriteTx {
@@ -126,31 +127,31 @@ interface WriteTx {
      * Creates a collection with the given name or does nothing if the collection already exists.
      * Only useful for creating an empty collection.
      */
-    fun createCollection(collection: CollectionName)
+    suspend fun createCollection(collection: CollectionName)
 
     /**
      * Deletes the collection of the name given and does nothing if the collection doesn't exist.
      */
-    fun deleteCollection(collection: CollectionName)
+    suspend fun deleteCollection(collection: CollectionName)
 
     /**
      * Returns a new, unique to this collection identifier in the form _:NUMBER
      */
-    fun newEntity(collection: CollectionName): Entity
-    fun addStatement(collection: CollectionName, statement: Statement)
-    fun removeStatement(collection: CollectionName, statement: Statement)
+    suspend fun newEntity(collection: CollectionName): Entity
+    suspend fun addStatement(collection: CollectionName, statement: Statement)
+    suspend fun removeStatement(collection: CollectionName, statement: Statement)
 
     /**
      * Commits this transaction.
      */
-    fun commit()
+    suspend fun commit()
 
     /**
      * Cancels this transaction.
      */
-    fun cancel()
+    suspend fun cancel()
 
-    fun isOpen(): Boolean
+    suspend fun isOpen(): Boolean
 }
 
 /**
