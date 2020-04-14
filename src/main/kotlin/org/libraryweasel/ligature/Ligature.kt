@@ -5,7 +5,6 @@
 package org.libraryweasel.ligature
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 
 sealed class Object
 data class Entity(val identifier: Long): Object()
