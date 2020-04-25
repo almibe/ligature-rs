@@ -2,165 +2,189 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-sealed class Object
-data class Entity(val identifier: Long): Object()
-sealed class Literal: Object()
-data class LangLiteral(val value: String, val langTag: String): Literal() {
-init {
-require(validLangTag(langTag)) {
-"Invalid lang tag: $langTag"
-}
-}
-}
-data class StringLiteral(val value: String): Literal()
-data class BooleanLiteral(val value: Boolean): Literal()
-data class LongLiteral(val value: Long): Literal()
-data class DoubleLiteral(val value: Double): Literal()
-
-data class Predicate(val identifier: String) {
-init {
-require(validPredicate(identifier)) {
-"Invalid Predicate: $identifier"
-}
-}
+enum Object<'a> {
+    Entity(u64),
+    Literal(Literal<'a>)
 }
 
-val a = Predicate("_a")
-val default = Entity(0)
-
-data class Statement(val subject: Entity, val predicate: Predicate, val `object`: Object, val context: Entity = default)
-
-sealed class Range<T>(open val start: T, open val end: T)
-data class LangLiteralRange(override val start: LangLiteral, override val end: LangLiteral): Range<LangLiteral>(start, end)
-data class StringLiteralRange(override val start: String, override val end: String): Range<String>(start, end)
-data class LongLiteralRange(override val start: Long, override val end: Long): Range<Long>(start, end)
-data class DoubleLiteralRange(override val start: Double, override val end: Double): Range<Double>(start, end)
-
-data class CollectionName(val name: String) {
-init {
-require(validPredicate(name)) {
-"Invalid Collection Name: $name"
-}
-}
+enum Literal<'a> {
+    LangLiteral(&'a str, LangTag<'a>)
+    // data class LangLiteral(val value: String, val langTag: String): Literal() {
+    // init {
+    // require(validLangTag(langTag)) {
+    // "Invalid lang tag: $langTag"
+    // }
+    // }
+    // }
+    // data class StringLiteral(val value: String): Literal()
+    // data class BooleanLiteral(val value: Boolean): Literal()
+    // data class LongLiteral(val value: Long): Literal()
+    // data class DoubleLiteral(val value: Double): Literal()
 }
 
-interface LigatureStore {
-suspend fun readTx(): ReadTx
-suspend fun writeTx(): WriteTx
-suspend fun <T>compute(fn: suspend (ReadTx) -> T): T {
-val readTx = this.readTx()
-try {
-return fn(readTx)
-} finally {
-if (readTx.isOpen()) {
-readTx.cancel()
-}
-}
+struct LangTag<'a> {
+    langTag: &'a str
 }
 
-suspend fun write(fn: suspend (WriteTx) -> Unit) {
-val writeTx = this.writeTx()
-try {
-return fn(writeTx)
-} finally {
-if (writeTx.isOpen()) {
-writeTx.commit()
-}
-}
-}
+struct Predicate<'a> {
+    predicate: &'a str,
 
-/**
- * Close connection with the Store.
- */
-suspend fun close()
+    // data class Predicate(val identifier: String) {
+    // init {
+    // require(validPredicate(identifier)) {
+    // "Invalid Predicate: $identifier"
+    // }
+    // }
+    // }
 
-suspend fun isOpen(): Boolean
 }
 
-interface ReadTx {
-/**
- * Returns a Flow of all existing collections.
- */
-suspend fun collections(): Flow<CollectionName>
-
-/**
- * Returns a Flow of all existing collections that start with the given prefix.
- */
-suspend fun collections(prefix: CollectionName): Flow<CollectionName>
-
-/**
- * Returns a Flow of all existing collections that are within the given range.
- * `from` is inclusive and `to` is exclusive.
- */
-suspend fun collections(from: CollectionName, to: CollectionName): Flow<CollectionName>
-
-/**
- * Accepts nothing but returns a Flow of all Statements in the Collection.
- */
-suspend fun allStatements(collection: CollectionName): Flow<Statement>
-
-/**
- * Is passed a pattern and returns a seq with all matching Statements.
- */
-suspend fun matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, `object`: Object? = null, context: Entity? = null): Flow<Statement>
-
-/**
- * Is passed a pattern and returns a seq with all matching Statements.
- */
-suspend fun matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, range: Range<*>, context: Entity? = null): Flow<Statement>
-
-/**
- * Cancels this transaction.
- */
-suspend fun cancel()
-
-suspend fun isOpen(): Boolean
+enum Range {
+    // sealed class Range<T>(open val start: T, open val end: T)
+    // data class LangLiteralRange(override val start: LangLiteral, override val end: LangLiteral): Range<LangLiteral>(start, end)
+    // data class StringLiteralRange(override val start: String, override val end: String): Range<String>(start, end)
+    // data class LongLiteralRange(override val start: Long, override val end: Long): Range<Long>(start, end)
+    // data class DoubleLiteralRange(override val start: Double, override val end: Double): Range<Double>(start, end)
 }
 
-interface WriteTx {
-/**
- * Creates a collection with the given name or does nothing if the collection already exists.
- * Only useful for creating an empty collection.
- */
-suspend fun createCollection(collection: CollectionName)
+struct Statement<'a> {
+    subject: Entity,
+    predicate: Predicate<'a>,
+    object: Object<'a>,
+    context: Entity,
+}
 
-/**
- * Deletes the collection of the name given and does nothing if the collection doesn't exist.
- */
-suspend fun deleteCollection(collection: CollectionName)
+const a: Predicate = Predicate("_a");
+const default: Entity = Object::Entity(0);
 
-/**
- * Returns a new, unique to this collection identifier in the form _:NUMBER
- */
-suspend fun newEntity(collection: CollectionName): Entity
-suspend fun addStatement(collection: CollectionName, statement: Statement)
-suspend fun removeStatement(collection: CollectionName, statement: Statement)
+struct CollectionName<'a> {
+    name: &'a str
+// (val name: String) {
+// init {
+// require(validPredicate(name)) {
+// "Invalid Collection Name: $name"
+// }
+// }
+// }
+}
 
-/**
- * Commits this transaction.
- */
-suspend fun commit()
+trait LigatureStore {
+    fn readTx() -> ReadTx;
+    fn writeTx() -> WriteTx;
+//     fn <T>compute(fun: suspend (ReadTx) -> T): T {
+// val readTx = this.readTx()
+// try {
+// return fn(readTx)
+// } finally {
+// if (readTx.isOpen()) {
+// readTx.cancel()
+// }
+// }
+//}
 
-/**
- * Cancels this transaction.
- */
-suspend fun cancel()
+// suspend fun write(fn: suspend (WriteTx) -> Unit) {
+// val writeTx = this.writeTx()
+// try {
+// return fn(writeTx)
+// } finally {
+// if (writeTx.isOpen()) {
+// writeTx.commit()
+// }
+// }
+// }
 
-suspend fun isOpen(): Boolean
+    /**
+     * Close connection with the Store.
+     */
+    fn close();
+
+    fn isOpen() -> Boolean;
+}
+
+trait ReadTx {
+    /**
+     * Returns a Flow of all existing collections.
+     */
+    suspend fun collections(): Flow<CollectionName>
+
+    /**
+     * Returns a Flow of all existing collections that start with the given prefix.
+     */
+    suspend fun collections(prefix: CollectionName): Flow<CollectionName>
+
+    /**
+     * Returns a Flow of all existing collections that are within the given range.
+     * `from` is inclusive and `to` is exclusive.
+     */
+    suspend fun collections(from: CollectionName, to: CollectionName): Flow<CollectionName>
+
+    /**
+     * Accepts nothing but returns a Flow of all Statements in the Collection.
+     */
+    suspend fun allStatements(collection: CollectionName): Flow<Statement>
+
+    /**
+     * Is passed a pattern and returns a seq with all matching Statements.
+     */
+    suspend fun matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, `object`: Object? = null, context: Entity? = null): Flow<Statement>
+
+    /**
+     * Is passed a pattern and returns a seq with all matching Statements.
+     */
+    suspend fun matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, range: Range<*>, context: Entity? = null): Flow<Statement>
+
+    /**
+     * Cancels this transaction.
+     */
+    suspend fun cancel()
+
+    suspend fun isOpen(): Boolean
+}
+
+trait WriteTx {
+    /**
+     * Creates a collection with the given name or does nothing if the collection already exists.
+     * Only useful for creating an empty collection.
+     */
+    suspend fun createCollection(collection: CollectionName)
+
+    /**
+     * Deletes the collection of the name given and does nothing if the collection doesn't exist.
+     */
+    suspend fun deleteCollection(collection: CollectionName)
+
+    /**
+     * Returns a new, unique to this collection identifier in the form _:NUMBER
+     */
+    suspend fun newEntity(collection: CollectionName): Entity
+    suspend fun addStatement(collection: CollectionName, statement: Statement)
+    suspend fun removeStatement(collection: CollectionName, statement: Statement)
+
+    /**
+     * Commits this transaction.
+     */
+    suspend fun commit()
+
+    /**
+     * Cancels this transaction.
+     */
+    suspend fun cancel()
+
+    suspend fun isOpen(): Boolean
 }
 
 /**
  * Accepts a String representing an identifier and returns true or false depending on if it is valid.
  */
 fun validPredicate(identifier: String): Boolean {
-return "[a-zA-Z_][^\\s\\(\\)\\[\\]\\{\\}'\"`<>\\\\]*".toRegex().matches(identifier)
+    return "[a-zA-Z_][^\\s\\(\\)\\[\\]\\{\\}'\"`<>\\\\]*".toRegex().matches(identifier)
 }
 
 /**
  * Accepts a String representing a lang tag and returns true or false depending on if it is valid.
  */
 fun validLangTag(langTag: String): Boolean {
-return "[a-zA-Z]+(-[a-zA-Z0-9]+)*".toRegex().matches(langTag)
+    return "[a-zA-Z]+(-[a-zA-Z0-9]+)*".toRegex().matches(langTag)
 }
 
 ///////TESTS
