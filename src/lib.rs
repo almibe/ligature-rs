@@ -8,18 +8,11 @@ enum Object<'a> {
 }
 
 enum Literal<'a> {
-    LangLiteral(&'a str, LangTag<'a>)
-    // data class LangLiteral(val value: String, val langTag: String): Literal() {
-    // init {
-    // require(validLangTag(langTag)) {
-    // "Invalid lang tag: $langTag"
-    // }
-    // }
-    // }
-    // data class StringLiteral(val value: String): Literal()
-    // data class BooleanLiteral(val value: Boolean): Literal()
-    // data class LongLiteral(val value: Long): Literal()
-    // data class DoubleLiteral(val value: Double): Literal()
+    LangLiteral(&'a str, LangTag<'a>),
+    StringLiteral(&'a str),
+    BooleanLiteral(bool),
+    LongLiteral(i64),
+    DoubleLiteral(f64),
 }
 
 struct LangTag<'a> {
@@ -28,15 +21,6 @@ struct LangTag<'a> {
 
 struct Predicate<'a> {
     predicate: &'a str,
-
-    // data class Predicate(val identifier: String) {
-    // init {
-    // require(validPredicate(identifier)) {
-    // "Invalid Predicate: $identifier"
-    // }
-    // }
-    // }
-
 }
 
 enum Range {
@@ -54,18 +38,11 @@ struct Statement<'a> {
     context: Entity,
 }
 
-const a: Predicate = Predicate("_a");
-const default: Entity = Object::Entity(0);
+pub const A: Predicate = Predicate("_a");
+pub const DEFAULT: Entity = Object::Entity(0);
 
 struct CollectionName<'a> {
     name: &'a str
-// (val name: String) {
-// init {
-// require(validPredicate(name)) {
-// "Invalid Collection Name: $name"
-// }
-// }
-// }
 }
 
 trait LigatureStore {
@@ -82,7 +59,7 @@ trait LigatureStore {
 // }
 //}
 
-// suspend fun write(fn: suspend (WriteTx) -> Unit) {
+// fn write(fn: suspend (WriteTx) -> Unit) {
 // val writeTx = this.writeTx()
 // try {
 // return fn(writeTx)
@@ -98,47 +75,47 @@ trait LigatureStore {
      */
     fn close();
 
-    fn isOpen() -> Boolean;
+    fn isOpen() -> bool;
 }
 
 trait ReadTx {
     /**
      * Returns a Flow of all existing collections.
      */
-    suspend fun collections(): Flow<CollectionName>
+    fn collections() -> Stream<CollectionName>;
 
     /**
      * Returns a Flow of all existing collections that start with the given prefix.
      */
-    suspend fun collections(prefix: CollectionName): Flow<CollectionName>
+    fn collections(prefix: CollectionName) -> Flow<CollectionName>
 
     /**
      * Returns a Flow of all existing collections that are within the given range.
      * `from` is inclusive and `to` is exclusive.
      */
-    suspend fun collections(from: CollectionName, to: CollectionName): Flow<CollectionName>
+    fn collections(from: CollectionName, to: CollectionName) -> Flow<CollectionName>
 
     /**
      * Accepts nothing but returns a Flow of all Statements in the Collection.
      */
-    suspend fun allStatements(collection: CollectionName): Flow<Statement>
+    fn allStatements(collection: CollectionName) -> Flow<Statement>
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    suspend fun matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, `object`: Object? = null, context: Entity? = null): Flow<Statement>
+    fn matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, `object`: Object? = null, context: Entity? = null) -> Flow<Statement>
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    suspend fun matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, range: Range<*>, context: Entity? = null): Flow<Statement>
+    fn matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, range: Range<*>, context: Entity? = null) -> Flow<Statement>
 
     /**
      * Cancels this transaction.
      */
-    suspend fun cancel()
+    fn cancel();
 
-    suspend fun isOpen(): Boolean
+    fn isOpen() -> bool;
 }
 
 trait WriteTx {
@@ -146,44 +123,44 @@ trait WriteTx {
      * Creates a collection with the given name or does nothing if the collection already exists.
      * Only useful for creating an empty collection.
      */
-    suspend fun createCollection(collection: CollectionName)
+    fn createCollection(collection: CollectionName)
 
     /**
      * Deletes the collection of the name given and does nothing if the collection doesn't exist.
      */
-    suspend fun deleteCollection(collection: CollectionName)
+    fn deleteCollection(collection: CollectionName)
 
     /**
      * Returns a new, unique to this collection identifier in the form _:NUMBER
      */
-    suspend fun newEntity(collection: CollectionName): Entity
-    suspend fun addStatement(collection: CollectionName, statement: Statement)
-    suspend fun removeStatement(collection: CollectionName, statement: Statement)
+    fn newEntity(collection: CollectionName) -> Entity
+    fn addStatement(collection: CollectionName, statement: Statement)
+    fn removeStatement(collection: CollectionName, statement: Statement)
 
     /**
      * Commits this transaction.
      */
-    suspend fun commit()
+    fn commit()
 
     /**
      * Cancels this transaction.
      */
-    suspend fun cancel()
+    fn cancel()
 
-    suspend fun isOpen(): Boolean
+    fn isOpen() -> bool
 }
 
 /**
  * Accepts a String representing an identifier and returns true or false depending on if it is valid.
  */
-fun validPredicate(identifier: String): Boolean {
+fn validPredicate(identifier: String) -> bool {
     return "[a-zA-Z_][^\\s\\(\\)\\[\\]\\{\\}'\"`<>\\\\]*".toRegex().matches(identifier)
 }
 
 /**
  * Accepts a String representing a lang tag and returns true or false depending on if it is valid.
  */
-fun validLangTag(langTag: String): Boolean {
+fn validLangTag(langTag: String) -> bool {
     return "[a-zA-Z]+(-[a-zA-Z0-9]+)*".toRegex().matches(langTag)
 }
 
