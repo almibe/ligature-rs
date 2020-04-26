@@ -2,32 +2,39 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+use futures::stream::Stream;
+
+struct Entity {
+    identifier: u64
+}
+
 enum Object<'a> {
-    Entity(u64),
+    Entity(Entity),
     Literal(Literal<'a>)
 }
 
 enum Literal<'a> {
-    LangLiteral(&'a str, LangTag<'a>),
+    LangLiteral(LangLiteral<'a>),
     StringLiteral(&'a str),
     BooleanLiteral(bool),
     LongLiteral(i64),
     DoubleLiteral(f64),
 }
 
-struct LangTag<'a> {
-    lang_tag: &'a str
+struct LangLiteral<'a> {
+    value: &'a str,
+    lang_tag: &'a str,
 }
 
 struct Predicate<'a> {
     predicate: &'a str,
 }
 
-enum Range {
-    LangLiteralRange(Literal::LangLiteral, Literal::LangLiteral),
-    StringLiteralRange(Literal::StringLiteral, Literal::StringLiteral),
-    LongLiteralRange(Literal::LongLiteral, Literal::LongLiteral),
-    DoubleLiteralRange(Literal::DoubleLiteral, Literal::DoubleLiteral),
+enum Range<'a> {
+    LangLiteralRange(LangLiteral<'a>, LangLiteral<'a>),
+    StringLiteralRange(&'a str, &'a str),
+    LongLiteralRange(i64, i64),
+    DoubleLiteralRange(f64, f64),
 }
 
 struct Statement<'a> {
@@ -37,8 +44,8 @@ struct Statement<'a> {
     context: Entity,
 }
 
-pub const A: Predicate = Predicate("_a");
-pub const DEFAULT: Entity = Object::Entity(0);
+pub const A: Predicate = Predicate { predicate: "_a" };
+pub const DEFAULT: Entity = Entity { identifier: 0 };
 
 struct CollectionName<'a> {
     name: &'a str
@@ -81,33 +88,33 @@ trait ReadTx {
     /**
      * Returns a Stream of all existing collections.
      */
-    fn collections() -> Stream<CollectionName>;
+    fn collections() -> dyn Stream<Item = CollectionName>;
 
     /**
      * Returns a Stream of all existing collections that start with the given prefix.
      */
-    fn collections_prefix(prefix: CollectionName) -> Stream<CollectionName>;
+    fn collections_prefix(prefix: CollectionName) -> dyn Stream<Item = CollectionName>;
 
     /**
      * Returns a Stream of all existing collections that are within the given range.
      * `from` is inclusive and `to` is exclusive.
      */
-    fn collections_range(from: CollectionName, to: CollectionName) -> Stream<CollectionName>;
+    fn collections_range(from: CollectionName, to: CollectionName) -> dyn Stream<Item = CollectionName>;
 
     /**
      * Accepts nothing but returns a Stream of all Statements in the Collection.
      */
-    fn all_statements(collection: CollectionName) -> Stream<Statement>;
+    fn all_statements(collection: CollectionName) -> dyn Stream<Item = Statement>;
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fn match_statements(collection: CollectionName, subject: Option<Entity>, predicate: Option<Predicate>, object: Option<Object>, context: Option<Entity>) -> Stream<Statement>;
+    fn match_statements(collection: CollectionName, subject: Option<Entity>, predicate: Option<Predicate>, object: Option<Object>, context: Option<Entity>) -> dyn Stream<Item = Statement>;
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fn match_statements_range(collection: CollectionName, subject: Option<Entity>, predicate: Option<Predicate>, range: Option<Range>, context: Option<Entity>) -> Stream<Statement>;
+    fn match_statements_range(collection: CollectionName, subject: Option<Entity>, predicate: Option<Predicate>, range: Option<Range>, context: Option<Entity>) -> dyn Stream<Item = Statement>;
 
     /**
      * Cancels this transaction.
