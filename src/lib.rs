@@ -16,7 +16,7 @@ enum Literal<'a> {
 }
 
 struct LangTag<'a> {
-    langTag: &'a str
+    lang_tag: &'a str
 }
 
 struct Predicate<'a> {
@@ -45,8 +45,8 @@ struct CollectionName<'a> {
 }
 
 trait LigatureStore {
-    fn readTx() -> ReadTx;
-    fn writeTx() -> WriteTx;
+    fn read_tx() -> dyn ReadTx;
+    fn write_tx() -> dyn WriteTx;
 //     fn <T>compute(fun: suspend (ReadTx) -> T): T {
 // val readTx = this.readTx()
 // try {
@@ -74,7 +74,7 @@ trait LigatureStore {
      */
     fn close();
 
-    fn isOpen() -> bool;
+    fn is_open() -> bool;
 }
 
 trait ReadTx {
@@ -102,12 +102,12 @@ trait ReadTx {
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fn match_statements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, `object`: Object? = null, context: Entity? = null) -> Flow<Statement>
+    fn match_statements(collection: CollectionName, subject: Option<Entity>, predicate: Option<Predicate>, object: Option<Object>, context: Option<Entity>) -> Stream<Statement>
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fn match_statements_range(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, range: Range<*>, context: Entity? = null) -> Flow<Statement>
+    fn match_statements_range(collection: CollectionName, subject: Option<Entity>, predicate: Option<Predicate>, range: Option<Range>, context: Option<Entity>) -> Stream<Statement>
 
     /**
      * Cancels this transaction.
@@ -159,7 +159,7 @@ fn valid_predicate(identifier: String) -> bool {
 /**
  * Accepts a String representing a lang tag and returns true or false depending on if it is valid.
  */
-fn valid_lang_tag(langTag: String) -> bool {
+fn valid_lang_tag(lang_tag: String) -> bool {
     return "[a-zA-Z]+(-[a-zA-Z0-9]+)*".toRegex().matches(langTag)
 }
 
