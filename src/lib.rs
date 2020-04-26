@@ -79,35 +79,35 @@ trait LigatureStore {
 
 trait ReadTx {
     /**
-     * Returns a Flow of all existing collections.
+     * Returns a Stream of all existing collections.
      */
     fn collections() -> Stream<CollectionName>;
 
     /**
-     * Returns a Flow of all existing collections that start with the given prefix.
+     * Returns a Stream of all existing collections that start with the given prefix.
      */
-    fn collections_prefix(prefix: CollectionName) -> Flow<CollectionName>
+    fn collections_prefix(prefix: CollectionName) -> Stream<CollectionName>;
 
     /**
-     * Returns a Flow of all existing collections that are within the given range.
+     * Returns a Stream of all existing collections that are within the given range.
      * `from` is inclusive and `to` is exclusive.
      */
-    fn collections_range(from: CollectionName, to: CollectionName) -> Flow<CollectionName>
+    fn collections_range(from: CollectionName, to: CollectionName) -> Stream<CollectionName>;
 
     /**
-     * Accepts nothing but returns a Flow of all Statements in the Collection.
+     * Accepts nothing but returns a Stream of all Statements in the Collection.
      */
-    fn all_statements(collection: CollectionName) -> Flow<Statement>
-
-    /**
-     * Is passed a pattern and returns a seq with all matching Statements.
-     */
-    fn match_statements(collection: CollectionName, subject: Option<Entity>, predicate: Option<Predicate>, object: Option<Object>, context: Option<Entity>) -> Stream<Statement>
+    fn all_statements(collection: CollectionName) -> Stream<Statement>;
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fn match_statements_range(collection: CollectionName, subject: Option<Entity>, predicate: Option<Predicate>, range: Option<Range>, context: Option<Entity>) -> Stream<Statement>
+    fn match_statements(collection: CollectionName, subject: Option<Entity>, predicate: Option<Predicate>, object: Option<Object>, context: Option<Entity>) -> Stream<Statement>;
+
+    /**
+     * Is passed a pattern and returns a seq with all matching Statements.
+     */
+    fn match_statements_range(collection: CollectionName, subject: Option<Entity>, predicate: Option<Predicate>, range: Option<Range>, context: Option<Entity>) -> Stream<Statement>;
 
     /**
      * Cancels this transaction.
@@ -152,41 +152,43 @@ trait WriteTx {
 /**
  * Accepts a String representing an identifier and returns true or false depending on if it is valid.
  */
-fn valid_predicate(identifier: String) -> bool {
+fn valid_predicate(identifier: &str) -> bool {
     return "[a-zA-Z_][^\\s\\(\\)\\[\\]\\{\\}'\"`<>\\\\]*".toRegex().matches(identifier)
 }
 
 /**
  * Accepts a String representing a lang tag and returns true or false depending on if it is valid.
  */
-fn valid_lang_tag(lang_tag: String) -> bool {
+fn valid_lang_tag(lang_tag: &str) -> bool {
     return "[a-zA-Z]+(-[a-zA-Z0-9]+)*".toRegex().matches(langTag)
 }
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     #[test]
     fn valid_identifier_tests() {
-        assert_eq(valid_predicate(""), false);
-        assert_eq(valid_predicate("http://localhost/people/7"), true);
-        assert_eq(valid_predicate("http://localhost(/people/7"), false);
-        assert_eq(valid_predicate("http://localhost /people/7"), false);
-        assert_eq(valid_predicate("hello"), true);
-        assert_eq(valid_predicate("_:"), true);
-        assert_eq(valid_predicate("_:valid"), true);
-        assert_eq(valid_predicate("_:1"), true);
-        assert_eq(valid_predicate("_:1344"), true);
+        assert_eq!(valid_predicate(""), false);
+        assert_eq!(valid_predicate("http://localhost/people/7"), true);
+        assert_eq!(valid_predicate("http://localhost(/people/7"), false);
+        assert_eq!(valid_predicate("http://localhost /people/7"), false);
+        assert_eq!(valid_predicate("hello"), true);
+        assert_eq!(valid_predicate("_:"), true);
+        assert_eq!(valid_predicate("_:valid"), true);
+        assert_eq!(valid_predicate("_:1"), true);
+        assert_eq!(valid_predicate("_:1344"), true);
     }
 
     #[test]
     fn valid_lang_tag_tests() {
-        assert_eq(valid_lang_tag(""), false);
-        assert_eq(valid_lang_tag("en"), true);
-        assert_eq(valid_lang_tag("en-"), false);
-        assert_eq(valid_lang_tag("en-fr"), true);
-        assert_eq(valid_lang_tag("en-fr-"), false);
-        assert_eq(valid_lang_tag("en-fr-sp"), true);
-        assert_eq(valid_lang_tag("ennnenefnk-dkfjkjfl-dfakjelfkjalkf-fakjeflkajlkfj"), true);
-        assert_eq(valid_lang_tag("en-fr-ef "), false);
+        assert_eq!(valid_lang_tag(""), false);
+        assert_eq!(valid_lang_tag("en"), true);
+        assert_eq!(valid_lang_tag("en-"), false);
+        assert_eq!(valid_lang_tag("en-fr"), true);
+        assert_eq!(valid_lang_tag("en-fr-"), false);
+        assert_eq!(valid_lang_tag("en-fr-sp"), true);
+        assert_eq!(valid_lang_tag("ennnenefnk-dkfjkjfl-dfakjelfkjalkf-fakjeflkajlkfj"), true);
+        assert_eq!(valid_lang_tag("en-fr-ef "), false);
     }
 }
