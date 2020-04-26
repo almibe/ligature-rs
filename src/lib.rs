@@ -24,11 +24,10 @@ struct Predicate<'a> {
 }
 
 enum Range {
-    // sealed class Range<T>(open val start: T, open val end: T)
-    // data class LangLiteralRange(override val start: LangLiteral, override val end: LangLiteral): Range<LangLiteral>(start, end)
-    // data class StringLiteralRange(override val start: String, override val end: String): Range<String>(start, end)
-    // data class LongLiteralRange(override val start: Long, override val end: Long): Range<Long>(start, end)
-    // data class DoubleLiteralRange(override val start: Double, override val end: Double): Range<Double>(start, end)
+    LangLiteralRange(Literal::LangLiteral, Literal::LangLiteral),
+    StringLiteralRange(Literal::StringLiteral, Literal::StringLiteral),
+    LongLiteralRange(Literal::LongLiteral, Literal::LongLiteral),
+    DoubleLiteralRange(Literal::DoubleLiteral, Literal::DoubleLiteral),
 }
 
 struct Statement<'a> {
@@ -53,7 +52,7 @@ trait LigatureStore {
 // try {
 // return fn(readTx)
 // } finally {
-// if (readTx.isOpen()) {
+// if (readTx.is_open()) {
 // readTx.cancel()
 // }
 // }
@@ -64,7 +63,7 @@ trait LigatureStore {
 // try {
 // return fn(writeTx)
 // } finally {
-// if (writeTx.isOpen()) {
+// if (writeTx.is_open()) {
 // writeTx.commit()
 // }
 // }
@@ -87,35 +86,35 @@ trait ReadTx {
     /**
      * Returns a Flow of all existing collections that start with the given prefix.
      */
-    fn collections(prefix: CollectionName) -> Flow<CollectionName>
+    fn collections_prefix(prefix: CollectionName) -> Flow<CollectionName>
 
     /**
      * Returns a Flow of all existing collections that are within the given range.
      * `from` is inclusive and `to` is exclusive.
      */
-    fn collections(from: CollectionName, to: CollectionName) -> Flow<CollectionName>
+    fn collections_range(from: CollectionName, to: CollectionName) -> Flow<CollectionName>
 
     /**
      * Accepts nothing but returns a Flow of all Statements in the Collection.
      */
-    fn allStatements(collection: CollectionName) -> Flow<Statement>
+    fn all_statements(collection: CollectionName) -> Flow<Statement>
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fn matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, `object`: Object? = null, context: Entity? = null) -> Flow<Statement>
+    fn match_statements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, `object`: Object? = null, context: Entity? = null) -> Flow<Statement>
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fn matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, range: Range<*>, context: Entity? = null) -> Flow<Statement>
+    fn match_statements_range(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, range: Range<*>, context: Entity? = null) -> Flow<Statement>
 
     /**
      * Cancels this transaction.
      */
     fn cancel();
 
-    fn isOpen() -> bool;
+    fn is_open() -> bool;
 }
 
 trait WriteTx {
@@ -123,70 +122,71 @@ trait WriteTx {
      * Creates a collection with the given name or does nothing if the collection already exists.
      * Only useful for creating an empty collection.
      */
-    fn createCollection(collection: CollectionName)
+    fn create_collection(collection: CollectionName);
 
     /**
      * Deletes the collection of the name given and does nothing if the collection doesn't exist.
      */
-    fn deleteCollection(collection: CollectionName)
+    fn delete_collection(collection: CollectionName);
 
     /**
      * Returns a new, unique to this collection identifier in the form _:NUMBER
      */
-    fn newEntity(collection: CollectionName) -> Entity
-    fn addStatement(collection: CollectionName, statement: Statement)
-    fn removeStatement(collection: CollectionName, statement: Statement)
+    fn new_entity(collection: CollectionName) -> Entity;
+    fn add_statement(collection: CollectionName, statement: Statement);
+    fn remove_statement(collection: CollectionName, statement: Statement);
 
     /**
      * Commits this transaction.
      */
-    fn commit()
+    fn commit();
 
     /**
      * Cancels this transaction.
      */
-    fn cancel()
+    fn cancel();
 
-    fn isOpen() -> bool
+    fn is_open() -> bool;
 }
 
 /**
  * Accepts a String representing an identifier and returns true or false depending on if it is valid.
  */
-fn validPredicate(identifier: String) -> bool {
+fn valid_predicate(identifier: String) -> bool {
     return "[a-zA-Z_][^\\s\\(\\)\\[\\]\\{\\}'\"`<>\\\\]*".toRegex().matches(identifier)
 }
 
 /**
  * Accepts a String representing a lang tag and returns true or false depending on if it is valid.
  */
-fn validLangTag(langTag: String) -> bool {
+fn valid_lang_tag(langTag: String) -> bool {
     return "[a-zA-Z]+(-[a-zA-Z0-9]+)*".toRegex().matches(langTag)
 }
 
-///////TESTS
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn valid_identifier_tests() {
+        assert_eq(valid_predicate(""), false);
+        assert_eq(valid_predicate("http://localhost/people/7"), true);
+        assert_eq(valid_predicate("http://localhost(/people/7"), false);
+        assert_eq(valid_predicate("http://localhost /people/7"), false);
+        assert_eq(valid_predicate("hello"), true);
+        assert_eq(valid_predicate("_:"), true);
+        assert_eq(valid_predicate("_:valid"), true);
+        assert_eq(valid_predicate("_:1"), true);
+        assert_eq(valid_predicate("_:1344"), true);
+    }
 
-class LigatureSpec : StringSpec({
-"validIdentifier tests" {
-validPredicate("") shouldBe false
-validPredicate("http://localhost/people/7") shouldBe true
-validPredicate("http://localhost(/people/7") shouldBe false
-validPredicate("http://localhost /people/7") shouldBe false
-validPredicate("hello") shouldBe true
-validPredicate("_:") shouldBe true
-validPredicate("_:valid") shouldBe true
-validPredicate("_:1") shouldBe true
-validPredicate("_:1344") shouldBe true
+    #[test]
+    fn valid_lang_tag_tests() {
+        assert_eq(valid_lang_tag(""), false);
+        assert_eq(valid_lang_tag("en"), true);
+        assert_eq(valid_lang_tag("en-"), false);
+        assert_eq(valid_lang_tag("en-fr"), true);
+        assert_eq(valid_lang_tag("en-fr-"), false);
+        assert_eq(valid_lang_tag("en-fr-sp"), true);
+        assert_eq(valid_lang_tag("ennnenefnk-dkfjkjfl-dfakjelfkjalkf-fakjeflkajlkfj"), true);
+        assert_eq(valid_lang_tag("en-fr-ef "), false);
+    }
 }
-
-"validLangTag tests" {
-validLangTag("") shouldBe false
-validLangTag("en") shouldBe true
-validLangTag("en-") shouldBe false
-validLangTag("en-fr") shouldBe true
-validLangTag("en-fr-") shouldBe false
-validLangTag("en-fr-sp") shouldBe true
-validLangTag("ennnenefnk-dkfjkjfl-dfakjelfkjalkf-fakjeflkajlkfj") shouldBe true
-validLangTag("en-fr-ef ") shouldBe false
-}
-})
