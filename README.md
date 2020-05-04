@@ -1,6 +1,6 @@
 # ligature
 
-Ligature is a Kotlin library for working with semantic networks.
+Ligature is a Rust library for working with semantic networks.
 This project provides the main interfaces used by Ligature as well as some helper functions and constants.
 See relate projects for implementations of these APIs.
 Ligature is heavily influenced by RDF and related standards but attempts to be more general purpose and easier to use.
@@ -15,9 +15,10 @@ Ligature is heavily influenced by RDF and related standards but attempts to be m
 
 ## Ligature's Data Model
 
-| Subject | Predicate  | Object | Context |
-| ------- | ---------- | ------ | ------  |
-| entity  | predicate  | object | entity  |
+| Subject | Predicate  | Object  | Context |
+| ------- | ---------- | ------  | ------  |
+| entity  | predicate  | entity  | entity  |
+|         |            | literal |         |
 
 ### Objects
 
@@ -38,7 +39,7 @@ Identifiers in Ligature are *currently* defined as strings that start with an AS
 If for some reason you need any of these characters in your identifier it is suggested that you use standard URL encoding.
 
 Identifiers can be something that is meaningful like an IRI/URL, an id from an existing system, a name, or it can be an incrementing id via the `newEntity` method.
-Below is an example statement using identifiers in Kotlin format.
+Below is an example statement using identifiers in Rust format.
 
 `tx.addStatement(Entity("Emily"), Entity("loves"), Entity("cats"), default)`
 
@@ -72,12 +73,12 @@ Below is a table with the currently supported types.
 | LangLiteral(val value: String, val langTag: String) | Similar to a plain literal in RDF.  A text String and a lang tag. | Yes | No |
 | StringLiteral(val value: String) | A simple string type. | Yes | No |
 | BooleanLiteral(val value: Boolean) | A boolean value. | No | No |
-| LongLiteral(val value: Long) | A value based on Kotlin's Long. | Yes | No |
-| DoubleLiteral(val value: Double) | A value based on Kotlin's Double | Yes | No |
+| LongLiteral(val value: Long) | A value based on Rust's u64. | Yes | No |
+| DoubleLiteral(val value: Double) | A value based on Rust's f64 | Yes | No |
 
 #### Predicates
 
-Predicates are very similar to Entities in that they represented by a single Identifier but they are only used in the Predicate position of a Statement or Rule.
+Predicates are very similar to Entities in that they represented by a single Identifier, but they are only used in the Predicate position of a Statement or Rule.
 
 ## Building
 Ligature requires Gradle to be installed.
@@ -88,12 +89,24 @@ Once that is set up use `gradle test` to run tests `gradle install` to install t
 
 | Name | Description | URL |
 | ---- | ----------- | --- |
-| ligature-in-memory | In-memory implementation of the Ligature API in Kotlin | https://github.com/almibe/ligature-in-memory |
-| ligature-xodus | Implementation of Ligature for the JVM that uses the Xodus data store. | https://github.com/almibe/ligature-xodus |
+| ligature-in-memory | In-memory implementation of the Ligature API in Rust | https://github.com/almibe/ligature-in-memory |
+| ligature-rocksdb | Implementation of Ligature that uses the RocksDB data store. | https://github.com/almibe/ligature-rocksdb |
 | wander | A scripting language for working with Ligature. | https://github.com/almibe/wander |
 | ligature-ontology | Ontology/OWL support for Ligature. | https://github.com/almibe/ligature-ontology |
 | ligature-test-suite | A common test suite for Ligature implementations. | https://github.com/almibe/ligature-test-suite |
 | ligature-foundationdb | Implementation of Ligature for the JVM that uses FoundationDB as its data store. | https://github.com/almibe/ligature-foundationdb |
-| ligature-indexdb | Implementation for Kotlin.js that uses IndexDB as its data store. | https://github.com/almibe/ligature-indexdb |
 | ligature-formats | Support for various RDF serializations with Ligature | https://github.com/almibe/ligature-formats |
 | ligature-sparql | SPARQL support for Ligature. | https://github.com/almibe/ligature-sparql |
+
+## Ligature-Ex
+
+Ligature-Ex is a version of Ligature that is written in TypeScript and targets the npm, node, browser, electron, etc. family of environments.
+
+| Name | Description | URL |
+| ---- | ----------- | --- |
+| ligature-ex | A TypeScript implementation of Ligature | https://github.com/almibe/ligature-ex |
+| ligature-ex-in-memory | In-memory implementation of the Ligature API in TypeScript using Immutable.js | https://github.com/almibe/ligature-ex-in-memory |
+| ligature-ex-test-suite | A common test suite for Ligature implementations. | https://github.com/almibe/ligature-ex-test-suite |
+| ligature-ex-level | Implementation for Ligature-Ex that uses Level as its data store. | https://github.com/almibe/ligature-ex-level |
+| ligature-ex-wander | Wander support for Ligature-Ex. | https://github.com/almibe/ligature-ex-wander |
+| ligature-ex-ontology | Ontology support for Ligature-Ex. | https://github.com/almibe/ligature-ex-wander |
