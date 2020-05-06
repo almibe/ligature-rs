@@ -15,18 +15,15 @@ Ligature is heavily influenced by RDF and related standards but attempts to be m
 
 ## Ligature's Data Model
 
-| Subject | Predicate  | Object  | Context |
-| ------- | ---------- | ------  | ------  |
-| entity  | predicate  | entity  | entity  |
-|         |            | literal |         |
-
-### Objects
-
-Objects in Ligature can be of two main types, either an Entity or a Literal.
+| Subject | Predicate | Object  | Context |
+| ------- | --------- | ------- | ------- |
+| entity  | entity    | entity  | entity  |
+|         |           | literal |         |
 
 #### Entities
 
-An Entity is a Object that is represented by and Identifier.
+Ligature has two types of entities.
+A named entity is represented by an identifier given by the user and an anonymous entity is represented by an identifier that is automatically generated.
 Identifiers in Ligature are *currently* defined as strings that start with an ASCII letter or an underscore and don't contain any of the following characters:
  * whitespace (space, newline, tabs, carriage returns, etc)
  * " ' `
