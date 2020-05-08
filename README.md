@@ -34,6 +34,7 @@ Identifiers in Ligature are *currently* defined as strings that start with an AS
  * [ ]
 
 If for some reason you need any of these characters in your identifier it is suggested that you use standard URL encoding.
+Note that identifiers with underscores are reserved for internal use and end users cannot create them by themselves.
 
 Identifiers can be something that is meaningful like an IRI/URL, an id from an existing system, a name, or it can be an incrementing id via the `newEntity` method.
 Below is an example statement using identifiers in Rust format.
