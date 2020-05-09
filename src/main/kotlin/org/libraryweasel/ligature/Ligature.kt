@@ -7,7 +7,13 @@ package org.libraryweasel.ligature
 import kotlinx.coroutines.flow.Flow
 
 sealed class Object
-data class Entity(val identifier: Long): Object()
+data class Entity(val identifier: String): Object() {
+    init {
+        require(validPredicate(identifier)) {
+            "Invalid Predicate: $identifier"
+        }
+    }
+}
 sealed class Literal: Object()
 data class LangLiteral(val value: String, val langTag: String): Literal() {
     init {
@@ -29,8 +35,8 @@ data class Predicate(val identifier: String) {
     }
 }
 
-val a = Predicate("_a")
-val default = Entity(0)
+val a = Predicate("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+val default = Entity("_")
 
 data class Statement(val subject: Entity, val predicate: Predicate, val `object`: Object, val context: Entity = default)
 
