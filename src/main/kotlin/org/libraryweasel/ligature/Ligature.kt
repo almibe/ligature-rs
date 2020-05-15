@@ -145,6 +145,7 @@ interface WriteTx {
     suspend fun newEntity(collection: CollectionName): Entity
     suspend fun addStatement(collection: CollectionName, statement: Statement)
     suspend fun removeStatement(collection: CollectionName, statement: Statement)
+    suspend fun removeEntity(entity: Entity)
 
     /**
      * Commits this transaction.
