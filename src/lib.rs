@@ -8,47 +8,44 @@ pub struct Entity {
     identifier: u64
 }
 
-pub enum Object<'a> {
+pub enum Object {
     Entity(Entity),
-    Literal(Literal<'a>)
+    Literal(Literal)
 }
 
-pub enum Literal<'a> {
-    LangLiteral(LangLiteral<'a>),
-    StringLiteral(&'a str),
+pub enum Literal {
+    LangLiteral(LangLiteral),
+    StringLiteral(String),
     BooleanLiteral(bool),
     LongLiteral(i64),
     DoubleLiteral(f64),
 }
 
-pub struct LangLiteral<'a> {
-    value: &'a str,
-    lang_tag: &'a str,
+pub struct LangLiteral {
+    value: String,
+    lang_tag: String,
 }
 
-pub struct Predicate<'a> {
-    predicate: &'a str,
+pub struct Predicate {
+    predicate: String,
 }
 
-pub enum Range<'a> {
-    LangLiteralRange(LangLiteral<'a>, LangLiteral<'a>),
-    StringLiteralRange(&'a str, &'a str),
+pub enum Range {
+    LangLiteralRange(LangLiteral, LangLiteral),
+    StringLiteralRange(String, String),
     LongLiteralRange(i64, i64),
     DoubleLiteralRange(f64, f64),
 }
 
-pub struct Statement<'a> {
+pub struct Statement {
     subject: Entity,
-    predicate: Predicate<'a>,
-    object: Object<'a>,
+    predicate: Predicate,
+    object: Object,
     context: Entity,
 }
 
-pub const A: Predicate = Predicate { predicate: "_a" };
-pub const DEFAULT: Entity = Entity { identifier: 0 };
-
-pub struct CollectionName<'a> {
-    name: &'a str
+pub struct CollectionName {
+    name: String
 }
 
 pub trait LigatureStore<R, W> where R: ReadTxTrait, W: WriteTxTrait {
@@ -96,33 +93,33 @@ pub trait ReadTxTrait {
     /**
      * Returns a Stream of all existing collections.
      */
-    fn collections<'a>() -> dyn Stream<Item = CollectionName<'a>>;
+    fn collections() -> dyn Stream<Item = CollectionName>;
 
     /**
      * Returns a Stream of all existing collections that start with the given prefix.
      */
-    fn collections_prefix<'a>(prefix: CollectionName) -> dyn Stream<Item = CollectionName<'a>>;
+    fn collections_prefix(prefix: CollectionName) -> dyn Stream<Item = CollectionName>;
 
     /**
      * Returns a Stream of all existing collections that are within the given range.
      * `from` is inclusive and `to` is exclusive.
      */
-    fn collections_range<'a>(from: CollectionName, to: CollectionName) -> dyn Stream<Item = CollectionName<'a>>;
+    fn collections_range(from: CollectionName, to: CollectionName) -> dyn Stream<Item = CollectionName>;
 
     /**
      * Accepts nothing but returns a Stream of all Statements in the Collection.
      */
-    fn all_statements<'a>(collection: CollectionName) -> dyn Stream<Item = Statement<'a>>;
+    fn all_statements(collection: CollectionName) -> dyn Stream<Item = Statement>;
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fn match_statements<'a>(collection: CollectionName, subject: Option<Entity>, predicate: Option<Predicate>, object: Option<Object>, context: Option<Entity>) -> dyn Stream<Item = Statement<'a>>;
+    fn match_statements(collection: CollectionName, subject: Option<Entity>, predicate: Option<Predicate>, object: Option<Object>, context: Option<Entity>) -> dyn Stream<Item = Statement>;
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fn match_statements_range<'a>(collection: CollectionName, subject: Option<Entity>, predicate: Option<Predicate>, range: Option<Range>, context: Option<Entity>) -> dyn Stream<Item = Statement<'a>>;
+    fn match_statements_range(collection: CollectionName, subject: Option<Entity>, predicate: Option<Predicate>, range: Option<Range>, context: Option<Entity>) -> dyn Stream<Item = Statement>;
 
     /**
      * Cancels this transaction.
@@ -148,6 +145,7 @@ pub trait WriteTxTrait {
      * Returns a new, unique to this collection identifier in the form _:NUMBER
      */
     fn new_entity(collection: CollectionName) -> Entity;
+    fn remove_entity(collection: CollectionName, entity: Entity);
     fn add_statement(collection: CollectionName, statement: Statement);
     fn remove_statement(collection: CollectionName, statement: Statement);
 
