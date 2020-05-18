@@ -52,7 +52,7 @@ The `newEntity` method runs inside a transaction so it is guaranteed to be uniqu
 The form `_:NUMBER` is special in Ligature and only IDs that have been already created with the `newEntity` method can be used.
 For example here is some pseudo code.
 
-```kotlin
+```rust
 val tx = collection.writeTx()
 val newEntity = tx.newEntity() // creates a new identifer, in this case let's say `_:42`
 tx.addStatement(x, a, Entity("company"), Entity("_")) // should run fine
@@ -79,15 +79,15 @@ Below is a table with the currently supported types.
 Predicates are very similar to Entities in that they represented by a single Identifier, but they are only used in the Predicate position of a Statement or Rule.
 
 ## Building
-Ligature requires Gradle to be installed.
-See https://gradle.org for installation instructions.
-Once that is set up use `gradle test` to run tests `gradle install` to install the artifact locally.
+Ligature requires `cargo` to be installed.
+See https://rustup.rs for installation instructions.
+Once that is set up use `cargo test` to run tests `cargo build` to build the artifact locally.
 
 ## Related Projects
 
 | Name | Description | URL |
 | ---- | ----------- | --- |
-| ligature-in-memory | In-memory implementation of the Ligature API in Rust | https://github.com/almibe/ligature-in-memory |
+| ligature-in-memory | In-memory implementation of the Ligature API in Rust using im | https://github.com/almibe/ligature-in-memory |
 | ligature-rocksdb | Implementation of Ligature that uses the RocksDB data store. | https://github.com/almibe/ligature-rocksdb |
 | wander | A scripting language for working with Ligature. | https://github.com/almibe/wander |
 | ligature-ontology | Ontology/OWL support for Ligature. | https://github.com/almibe/ligature-ontology |
