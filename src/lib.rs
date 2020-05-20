@@ -51,27 +51,27 @@ pub struct CollectionName {
 pub trait LigatureStore<R, W> where R: ReadTxTrait, W: WriteTxTrait {
     fn read_tx() -> ReadTx<R>;
     fn write_tx() -> WriteTx<W>;
-//     fn <T>compute(fun: suspend (ReadTx) -> T): T {
-// val readTx = this.readTx()
-// try {
-// return fn(readTx)
-// } finally {
-// if (readTx.is_open()) {
-// readTx.cancel()
-// }
-// }
-//}
+    fn <T>compute(fun: suspend (ReadTx) -> T): T {
+        val readTx = this.readTx()
+        try {
+            return fn(readTx)
+        } finally {
+            if (readTx.is_open()) {
+                readTx.cancel()
+            }
+        }
+    }
 
-// fn write(fn: suspend (WriteTx) -> Unit) {
-// val writeTx = this.writeTx()
-// try {
-// return fn(writeTx)
-// } finally {
-// if (writeTx.is_open()) {
-// writeTx.commit()
-// }
-// }
-// }
+    fn write(fn: suspend (WriteTx) -> Unit) {
+        val writeTx = this.writeTx()
+        try {
+            return fn(writeTx)
+        } finally {
+            if (writeTx.is_open()) {
+                writeTx.commit()
+            }
+        }
+    }
 
     /**
      * Close connection with the Store.
@@ -162,46 +162,46 @@ pub trait WriteTxTrait {
     fn is_open() -> bool;
 }
 
-// /**
-//  * Accepts a String representing an identifier and returns true or false depending on if it is valid.
-//  */
-// fn valid_predicate(identifier: &str) -> bool {
-//     return "[a-zA-Z_][^\\s\\(\\)\\[\\]\\{\\}'\"`<>\\\\]*".toRegex().matches(identifier)
-// }
+/**
+ * Accepts a String representing an identifier and returns true or false depending on if it is valid.
+ */
+fn valid_predicate(identifier: &str) -> bool {
+    return "[a-zA-Z_][^\\s\\(\\)\\[\\]\\{\\}'\"`<>\\\\]*".toRegex().matches(identifier)
+}
 
-// /**
-//  * Accepts a String representing a lang tag and returns true or false depending on if it is valid.
-//  */
-// fn valid_lang_tag(lang_tag: &str) -> bool {
-//     return "[a-zA-Z]+(-[a-zA-Z0-9]+)*".toRegex().matches(lang_tag)
-// }
+/**
+ * Accepts a String representing a lang tag and returns true or false depending on if it is valid.
+ */
+fn valid_lang_tag(lang_tag: &str) -> bool {
+    return "[a-zA-Z]+(-[a-zA-Z0-9]+)*".toRegex().matches(lang_tag)
+}
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-//
-//     #[test]
-//     fn valid_identifier_tests() {
-//         assert_eq!(valid_predicate(""), false);
-//         assert_eq!(valid_predicate("http://localhost/people/7"), true);
-//         assert_eq!(valid_predicate("http://localhost(/people/7"), false);
-//         assert_eq!(valid_predicate("http://localhost /people/7"), false);
-//         assert_eq!(valid_predicate("hello"), true);
-//         assert_eq!(valid_predicate("_:"), true);
-//         assert_eq!(valid_predicate("_:valid"), true);
-//         assert_eq!(valid_predicate("_:1"), true);
-//         assert_eq!(valid_predicate("_:1344"), true);
-//     }
-//
-//     #[test]
-//     fn valid_lang_tag_tests() {
-//         assert_eq!(valid_lang_tag(""), false);
-//         assert_eq!(valid_lang_tag("en"), true);
-//         assert_eq!(valid_lang_tag("en-"), false);
-//         assert_eq!(valid_lang_tag("en-fr"), true);
-//         assert_eq!(valid_lang_tag("en-fr-"), false);
-//         assert_eq!(valid_lang_tag("en-fr-sp"), true);
-//         assert_eq!(valid_lang_tag("ennnenefnk-dkfjkjfl-dfakjelfkjalkf-fakjeflkajlkfj"), true);
-//         assert_eq!(valid_lang_tag("en-fr-ef "), false);
-//     }
-// }
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn valid_identifier_tests() {
+        assert_eq!(valid_predicate(""), false);
+        assert_eq!(valid_predicate("http://localhost/people/7"), true);
+        assert_eq!(valid_predicate("http://localhost(/people/7"), false);
+        assert_eq!(valid_predicate("http://localhost /people/7"), false);
+        assert_eq!(valid_predicate("hello"), true);
+        assert_eq!(valid_predicate("_:"), true);
+        assert_eq!(valid_predicate("_:valid"), true);
+        assert_eq!(valid_predicate("_:1"), true);
+        assert_eq!(valid_predicate("_:1344"), true);
+    }
+
+    #[test]
+    fn valid_lang_tag_tests() {
+        assert_eq!(valid_lang_tag(""), false);
+        assert_eq!(valid_lang_tag("en"), true);
+        assert_eq!(valid_lang_tag("en-"), false);
+        assert_eq!(valid_lang_tag("en-fr"), true);
+        assert_eq!(valid_lang_tag("en-fr-"), false);
+        assert_eq!(valid_lang_tag("en-fr-sp"), true);
+        assert_eq!(valid_lang_tag("ennnenefnk-dkfjkjfl-dfakjelfkjalkf-fakjeflkajlkfj"), true);
+        assert_eq!(valid_lang_tag("en-fr-ef "), false);
+    }
+}
