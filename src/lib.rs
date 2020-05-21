@@ -3,6 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 use futures::stream::Stream;
+use regex::Regex;
+use lazy_static::lazy_static;
 
 pub struct Entity {
     identifier: u64
@@ -166,14 +168,22 @@ pub trait WriteTxTrait {
  * Accepts a String representing an identifier and returns true or false depending on if it is valid.
  */
 fn valid_predicate(identifier: &str) -> bool {
-    return "[a-zA-Z_][^\\s\\(\\)\\[\\]\\{\\}'\"`<>\\\\]*".toRegex().matches(identifier)
+    lazy_static! {
+        static ref RE: Regex = Regex::new("^[a-zA-Z_][^\\s\\(\\)\\[\\]\\{\\}'\"`<>\\\\]*$").unwrap();
+    }
+
+    return RE.is_match(identifier)
 }
 
 /**
  * Accepts a String representing a lang tag and returns true or false depending on if it is valid.
  */
 fn valid_lang_tag(lang_tag: &str) -> bool {
-    return "[a-zA-Z]+(-[a-zA-Z0-9]+)*".toRegex().matches(lang_tag)
+    lazy_static! {
+        static ref RE: Regex = Regex::new("^[a-zA-Z]+(-[a-zA-Z0-9]+)*$").unwrap();
+    }
+
+    return RE.is_match(lang_tag)
 }
 
 #[cfg(test)]
