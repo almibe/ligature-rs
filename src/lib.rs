@@ -50,118 +50,106 @@ pub struct CollectionName {
     name: String
 }
 
-pub trait LigatureStore<R, W> where R: ReadTxTrait, W: WriteTxTrait {
-    fn read_tx() -> ReadTx<R>;
-    fn write_tx() -> WriteTx<W>;
-    fn <T>compute(fun: suspend (ReadTx) -> T): T {
-        val readTx = this.readTx()
-        try {
-            return fn(readTx)
-        } finally {
-            if (readTx.is_open()) {
-                readTx.cancel()
-            }
+pub trait LigatureStore {
+    fn read_tx(&self) -> Box<dyn ReadTx>;
+    fn write_tx(&self) -> Box<dyn WriteTx>;
+
+    fn compute<F : FnOnce(&Box<dyn ReadTx>) -> T, T>(&self, fun: F) -> T {
+        let read_tx = self.read_tx();
+        let result = fun(&read_tx);
+        if read_tx.is_open() {
+            read_tx.cancel();
         }
+        result
     }
 
-    fn write(fn: suspend (WriteTx) -> Unit) {
-        val writeTx = this.writeTx()
-        try {
-            return fn(writeTx)
-        } finally {
-            if (writeTx.is_open()) {
-                writeTx.commit()
-            }
+    fn write<F : FnOnce(&Box<dyn WriteTx>)>(&self, fun: F) {
+        let write_tx = self.write_tx();
+        fun(&write_tx);
+        if write_tx.is_open() {
+            write_tx.commit();
         }
     }
 
     /**
      * Close connection with the Store.
      */
-    fn close();
+    fn close(&self);
 
-    fn is_open() -> bool;
+    fn is_open(&self) -> bool;
 }
 
-pub struct ReadTx<T> where T: ReadTxTrait {
-    pub read_tx: T,
-}
-
-pub struct WriteTx<T> where T: WriteTxTrait {
-    pub write_tx: T,
-}
-
-pub trait ReadTxTrait {
+pub trait ReadTx {
     /**
      * Returns a Stream of all existing collections.
      */
-    fn collections() -> dyn Stream<Item = CollectionName>;
+    fn collections(&self) -> dyn Stream<Item = CollectionName>;
 
     /**
      * Returns a Stream of all existing collections that start with the given prefix.
      */
-    fn collections_prefix(prefix: CollectionName) -> dyn Stream<Item = CollectionName>;
+    fn collections_prefix(&self, prefix: CollectionName) -> dyn Stream<Item = CollectionName>;
 
     /**
      * Returns a Stream of all existing collections that are within the given range.
      * `from` is inclusive and `to` is exclusive.
      */
-    fn collections_range(from: CollectionName, to: CollectionName) -> dyn Stream<Item = CollectionName>;
+    fn collections_range(&self, from: CollectionName, to: CollectionName) -> dyn Stream<Item = CollectionName>;
 
     /**
      * Accepts nothing but returns a Stream of all Statements in the Collection.
      */
-    fn all_statements(collection: CollectionName) -> dyn Stream<Item = Statement>;
+    fn all_statements(&self, collection: CollectionName) -> dyn Stream<Item = Statement>;
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fn match_statements(collection: CollectionName, subject: Option<Entity>, predicate: Option<Predicate>, object: Option<Object>, context: Option<Entity>) -> dyn Stream<Item = Statement>;
+    fn match_statements(&self, collection: CollectionName, subject: Option<Entity>, predicate: Option<Predicate>, object: Option<Object>, context: Option<Entity>) -> dyn Stream<Item = Statement>;
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fn match_statements_range(collection: CollectionName, subject: Option<Entity>, predicate: Option<Predicate>, range: Option<Range>, context: Option<Entity>) -> dyn Stream<Item = Statement>;
+    fn match_statements_range(&self, collection: CollectionName, subject: Option<Entity>, predicate: Option<Predicate>, range: Option<Range>, context: Option<Entity>) -> dyn Stream<Item = Statement>;
 
     /**
      * Cancels this transaction.
      */
-    fn cancel();
+    fn cancel(&self);
 
-    fn is_open() -> bool;
+    fn is_open(&self) -> bool;
 }
 
-pub trait WriteTxTrait {
+pub trait WriteTx {
     /**
      * Creates a collection with the given name or does nothing if the collection already exists.
      * Only useful for creating an empty collection.
      */
-    fn create_collection(collection: CollectionName);
+    fn create_collection(&self, collection: CollectionName);
 
     /**
      * Deletes the collection of the name given and does nothing if the collection doesn't exist.
      */
-    fn delete_collection(collection: CollectionName);
+    fn delete_collection(&self, collection: CollectionName);
 
     /**
      * Returns a new, unique to this collection identifier in the form _:NUMBER
      */
-    fn new_entity(collection: CollectionName) -> Entity;
-    fn remove_entity(collection: CollectionName, entity: Entity);
-    fn add_statement(collection: CollectionName, statement: Statement);
-    fn remove_statement(collection: CollectionName, statement: Statement);
+    fn new_entity(&self, collection: CollectionName) -> Entity;
+    fn remove_entity(&self, collection: CollectionName, entity: Entity);
+    fn add_statement(&self, collection: CollectionName, statement: Statement);
+    fn remove_statement(&self, collection: CollectionName, statement: Statement);
 
     /**
      * Commits this transaction.
      */
-    fn commit();
+    fn commit(&self);
 
     /**
      * Cancels this transaction.
      */
-    fn cancel();
+    fn cancel(&self);
 
-    fn is_open() -> bool;
+    fn is_open(&self) -> bool;
 }
 
 /**
