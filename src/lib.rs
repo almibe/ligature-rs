@@ -3,16 +3,16 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 use futures::stream::Stream;
-use regex::Regex;
 use lazy_static::lazy_static;
+use regex::Regex;
 
 pub struct Entity {
-    pub identifier: String
+    pub identifier: String,
 }
 
 pub enum Object {
     Entity(Entity),
-    Literal(Literal)
+    Literal(Literal),
 }
 
 pub enum Literal {
@@ -47,14 +47,14 @@ pub struct Statement {
 }
 
 pub struct CollectionName {
-    pub name: String
+    pub name: String,
 }
 
 pub trait LigatureStore {
     fn read_tx(&self) -> Box<dyn ReadTx>;
     fn write_tx(&self) -> Box<dyn WriteTx>;
 
-    fn compute<F : FnOnce(&Box<dyn ReadTx>) -> T, T>(&self, fun: F) -> T {
+    fn compute<F: FnOnce(&Box<dyn ReadTx>) -> T, T>(&self, fun: F) -> T {
         let read_tx = self.read_tx();
         let result = fun(&read_tx);
         if read_tx.is_open() {
@@ -63,7 +63,7 @@ pub trait LigatureStore {
         result
     }
 
-    fn write<F : FnOnce(&Box<dyn WriteTx>)>(&self, fun: F) {
+    fn write<F: FnOnce(&Box<dyn WriteTx>)>(&self, fun: F) {
         let write_tx = self.write_tx();
         fun(&write_tx);
         if write_tx.is_open() {
@@ -94,7 +94,11 @@ pub trait ReadTx {
      * Returns a Stream of all existing collections that are within the given range.
      * `from` is inclusive and `to` is exclusive.
      */
-    fn collections_range(&self, from: CollectionName, to: CollectionName) -> dyn Stream<Item = CollectionName>;
+    fn collections_range(
+        &self,
+        from: CollectionName,
+        to: CollectionName,
+    ) -> dyn Stream<Item = CollectionName>;
 
     /**
      * Accepts nothing but returns a Stream of all Statements in the Collection.
@@ -104,12 +108,26 @@ pub trait ReadTx {
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fn match_statements(&self, collection: CollectionName, subject: Option<Entity>, predicate: Option<Predicate>, object: Option<Object>, context: Option<Entity>) -> dyn Stream<Item = Statement>;
+    fn match_statements(
+        &self,
+        collection: CollectionName,
+        subject: Option<Entity>,
+        predicate: Option<Predicate>,
+        object: Option<Object>,
+        context: Option<Entity>,
+    ) -> dyn Stream<Item = Statement>;
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    fn match_statements_range(&self, collection: CollectionName, subject: Option<Entity>, predicate: Option<Predicate>, range: Option<Range>, context: Option<Entity>) -> dyn Stream<Item = Statement>;
+    fn match_statements_range(
+        &self,
+        collection: CollectionName,
+        subject: Option<Entity>,
+        predicate: Option<Predicate>,
+        range: Option<Range>,
+        context: Option<Entity>,
+    ) -> dyn Stream<Item = Statement>;
 
     /**
      * Cancels this transaction.
@@ -157,10 +175,11 @@ pub trait WriteTx {
  */
 pub fn valid_predicate(identifier: &str) -> bool {
     lazy_static! {
-        static ref RE: Regex = Regex::new("^[a-zA-Z_][^\\s\\(\\)\\[\\]\\{\\}'\"`<>\\\\]*$").unwrap();
+        static ref RE: Regex =
+            Regex::new("^[a-zA-Z_][^\\s\\(\\)\\[\\]\\{\\}'\"`<>\\\\]*$").unwrap();
     }
 
-    return RE.is_match(identifier)
+    return RE.is_match(identifier);
 }
 
 /**
@@ -171,7 +190,7 @@ pub fn valid_lang_tag(lang_tag: &str) -> bool {
         static ref RE: Regex = Regex::new("^[a-zA-Z]+(-[a-zA-Z0-9]+)*$").unwrap();
     }
 
-    return RE.is_match(lang_tag)
+    return RE.is_match(lang_tag);
 }
 
 #[cfg(test)]
@@ -199,7 +218,10 @@ mod tests {
         assert_eq!(valid_lang_tag("en-fr"), true);
         assert_eq!(valid_lang_tag("en-fr-"), false);
         assert_eq!(valid_lang_tag("en-fr-sp"), true);
-        assert_eq!(valid_lang_tag("ennnenefnk-dkfjkjfl-dfakjelfkjalkf-fakjeflkajlkfj"), true);
+        assert_eq!(
+            valid_lang_tag("ennnenefnk-dkfjkjfl-dfakjelfkjalkf-fakjeflkajlkfj"),
+            true
+        );
         assert_eq!(valid_lang_tag("en-fr-ef "), false);
     }
 }
