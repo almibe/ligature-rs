@@ -7,7 +7,7 @@ use regex::Regex;
 use lazy_static::lazy_static;
 
 pub struct Entity {
-    identifier: u64
+    pub identifier: String
 }
 
 pub enum Object {
@@ -24,12 +24,12 @@ pub enum Literal {
 }
 
 pub struct LangLiteral {
-    value: String,
-    lang_tag: String,
+    pub value: String,
+    pub lang_tag: String,
 }
 
 pub struct Predicate {
-    predicate: String,
+    pub predicate: String,
 }
 
 pub enum Range {
@@ -40,14 +40,14 @@ pub enum Range {
 }
 
 pub struct Statement {
-    subject: Entity,
-    predicate: Predicate,
-    object: Object,
-    context: Entity,
+    pub subject: Entity,
+    pub predicate: Predicate,
+    pub object: Object,
+    pub context: Entity,
 }
 
 pub struct CollectionName {
-    name: String
+    pub name: String
 }
 
 pub trait LigatureStore {
@@ -155,7 +155,7 @@ pub trait WriteTx {
 /**
  * Accepts a String representing an identifier and returns true or false depending on if it is valid.
  */
-fn valid_predicate(identifier: &str) -> bool {
+pub fn valid_predicate(identifier: &str) -> bool {
     lazy_static! {
         static ref RE: Regex = Regex::new("^[a-zA-Z_][^\\s\\(\\)\\[\\]\\{\\}'\"`<>\\\\]*$").unwrap();
     }
@@ -166,7 +166,7 @@ fn valid_predicate(identifier: &str) -> bool {
 /**
  * Accepts a String representing a lang tag and returns true or false depending on if it is valid.
  */
-fn valid_lang_tag(lang_tag: &str) -> bool {
+pub fn valid_lang_tag(lang_tag: &str) -> bool {
     lazy_static! {
         static ref RE: Regex = Regex::new("^[a-zA-Z]+(-[a-zA-Z0-9]+)*$").unwrap();
     }
