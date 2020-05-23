@@ -54,23 +54,6 @@ pub trait LigatureStore {
     fn read_tx(&self) -> Box<dyn ReadTx>;
     fn write_tx(&self) -> Box<dyn WriteTx>;
 
-    fn compute<F: FnOnce(&Box<dyn ReadTx>) -> T, T>(&self, fun: F) -> T {
-        let read_tx = self.read_tx();
-        let result = fun(&read_tx);
-        if read_tx.is_open() {
-            read_tx.cancel();
-        }
-        result
-    }
-
-    fn write<F: FnOnce(&Box<dyn WriteTx>)>(&self, fun: F) {
-        let write_tx = self.write_tx();
-        fun(&write_tx);
-        if write_tx.is_open() {
-            write_tx.commit();
-        }
-    }
-
     /**
      * Close connection with the Store.
      */
