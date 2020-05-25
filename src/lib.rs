@@ -51,8 +51,8 @@ pub struct CollectionName {
 }
 
 pub trait LigatureStore {
-    fn read_tx(&self) -> Box<dyn ReadTx>;
-    fn write_tx(&self) -> Box<dyn WriteTx>;
+    fn read_tx(&self) -> &dyn ReadTx;
+    fn write_tx(&self) -> &dyn WriteTx;
 
     /**
      * Close connection with the Store.
@@ -66,12 +66,12 @@ pub trait ReadTx {
     /**
      * Returns a Stream of all existing collections.
      */
-    fn collections(&self) -> dyn Stream<Item = CollectionName>;
+    fn collections(&self) -> &dyn Stream<Item = CollectionName>;
 
     /**
      * Returns a Stream of all existing collections that start with the given prefix.
      */
-    fn collections_prefix(&self, prefix: CollectionName) -> dyn Stream<Item = CollectionName>;
+    fn collections_prefix(&self, prefix: CollectionName) -> &dyn Stream<Item = CollectionName>;
 
     /**
      * Returns a Stream of all existing collections that are within the given range.
@@ -81,12 +81,12 @@ pub trait ReadTx {
         &self,
         from: CollectionName,
         to: CollectionName,
-    ) -> dyn Stream<Item = CollectionName>;
+    ) -> &dyn Stream<Item = CollectionName>;
 
     /**
      * Accepts nothing but returns a Stream of all Statements in the Collection.
      */
-    fn all_statements(&self, collection: CollectionName) -> dyn Stream<Item = Statement>;
+    fn all_statements(&self, collection: CollectionName) -> &dyn Stream<Item = Statement>;
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
@@ -98,7 +98,7 @@ pub trait ReadTx {
         predicate: Option<Predicate>,
         object: Option<Object>,
         context: Option<Entity>,
-    ) -> dyn Stream<Item = Statement>;
+    ) -> &dyn Stream<Item = Statement>;
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
@@ -110,7 +110,7 @@ pub trait ReadTx {
         predicate: Option<Predicate>,
         range: Option<Range>,
         context: Option<Entity>,
-    ) -> dyn Stream<Item = Statement>;
+    ) -> &dyn Stream<Item = Statement>;
 
     /**
      * Cancels this transaction.
@@ -161,8 +161,7 @@ pub fn valid_predicate(identifier: &str) -> bool {
         static ref RE: Regex =
             Regex::new("^[a-zA-Z_][^\\s\\(\\)\\[\\]\\{\\}'\"`<>\\\\]*$").unwrap();
     }
-
-    return RE.is_match(identifier);
+    RE.is_match(identifier)
 }
 
 /**
@@ -172,8 +171,7 @@ pub fn valid_lang_tag(lang_tag: &str) -> bool {
     lazy_static! {
         static ref RE: Regex = Regex::new("^[a-zA-Z]+(-[a-zA-Z0-9]+)*$").unwrap();
     }
-
-    return RE.is_match(lang_tag);
+    RE.is_match(lang_tag)
 }
 
 #[cfg(test)]
