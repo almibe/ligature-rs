@@ -57,7 +57,7 @@ pub trait LigatureStore {
     /**
      * Close connection with the Store.
      */
-    fn close(&self);
+    fn close(&mut self);
 
     fn is_open(&self) -> bool;
 }
