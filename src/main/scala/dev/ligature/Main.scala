@@ -4,10 +4,12 @@
 
 package dev.ligature
 
+import scala.util.Try
+import zio.stream._
 
 sealed trait Entity
-final case class NamedEntity(val name: String)
-final case class AnonymousEntity(val id: Long)
+final case class NamedEntity(val name: String) extends Entity
+final case class AnonymousEntity(val id: Long) extends Entity
 
 final case class LangLiteral(val value: String, val langTag: String)
 
@@ -63,35 +65,35 @@ trait LigatureStore {
  
 trait ReadTx {
   /**
-   * Returns a Flow of all existing collections.
+   * Returns a Stream of all existing collections.
    */
-  def collections(): Flow<CollectionName>
+  def collections(): Stream[Throwable, CollectionName]
 
   /**
-   * Returns a Flow of all existing collections that start with the given prefix.
+   * Returns a Stream of all existing collections that start with the given prefix.
    */
-  def collections(prefix: CollectionName): Flow<CollectionName>
+  def collections(prefix: CollectionName): Stream[Throwable, CollectionName]
 
   /**
-   * Returns a Flow of all existing collections that are within the given range.
+   * Returns a Stream of all existing collections that are within the given range.
    * `from` is inclusive and `to` is exclusive.
    */
-  def collections(from: CollectionName, to: CollectionName): Flow<CollectionName>
+  def collections(from: CollectionName, to: CollectionName): Stream[Throwable, CollectionName]
 
   /**
-   * Accepts nothing but returns a Flow of all Statements in the Collection.
+   * Accepts nothing but returns a Stream of all Statements in the Collection.
    */
-  def allStatements(collection: CollectionName): Flow<Statement>
+  def allStatements(collection: CollectionName): Stream[Throwable, Statement]
 
   /**
    * Is passed a pattern and returns a seq with all matching Statements.
    */
-  def matchStatements(collection: CollectionName, subject: Entity | null = null, predicate: NamedEntity | null = null, `object`: Object? = null, context: Entity? = null): Flow<Statement>
+  def matchStatements(collection: CollectionName, subject: Entity | Null = null, predicate: NamedEntity | Null = null, `object`: Object | Null = null, context: Entity | Null = null): Stream[Throwable, Statement]
 
 //   /**
 //    * Is passed a pattern and returns a seq with all matching Statements.
 //    */
-//   def matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, range: Range<*>, context: Entity? = null): Flow<Statement>
+//   def matchStatements(collection: CollectionName, subject: Entity | Null = null, predicate: NamedEntity | Null = null, range: Range<*>, context: Entity | Null = null): Stream[Thorwable, Statement]
 
   /**
    * Cancels this transaction.
@@ -106,30 +108,30 @@ trait WriteTx {
    * Creates a collection with the given name or does nothing if the collection already exists.
    * Only useful for creating an empty collection.
    */
-  def createCollection(collection: CollectionName)
+  def createCollection(collection: CollectionName): Either[Throwable, CollectionName]
 
   /**
    * Deletes the collection of the name given and does nothing if the collection doesn't exist.
    */
-  def deleteCollection(collection: CollectionName)
+  def deleteCollection(collection: CollectionName): Either[Throwable, CollectionName]
 
   /**
    * Returns a new, unique to this collection identifier in the form _:NUMBER
    */
-  def newEntity(collection: CollectionName): Entity
-  def addStatement(collection: CollectionName, statement: Statement)
-  def removeStatement(collection: CollectionName, statement: Statement)
-  def removeEntity(entity: Entity)
+  def newEntity(collection: CollectionName): Either[Throwable, Entity]
+  def addStatement(collection: CollectionName, statement: Statement): Either[Throwable, Statement]
+  def removeStatement(collection: CollectionName, statement: Statement): Either[Throwable, Statement]
+  def removeEntity(entity: Entity): Either[Throwable, Entity]
 
   /**
    * Commits this transaction.
    */
-  def commit(): Unit
+  def commit(): Try[Throwable]
 
   /**
    * Cancels this transaction.
    */
-  def cancel(): Unit
+  def cancel(): Try[Throwable]
 
   def isOpen(): Boolean
 }
