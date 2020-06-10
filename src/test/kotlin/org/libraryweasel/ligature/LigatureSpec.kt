@@ -2,16 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package dev.ligature
+package org.libraryweasel.ligature
 
-import org.junit.Test
-import org.junit.Assert._
-
-class Test {
-  @Test def test(): Unit = {
-    assertEquals("I was compiled by dotty :)", Main.msg)
-  }
-}
+import io.kotlintest.shouldBe
+import io.kotlintest.specs.StringSpec
 
 class LigatureSpec : StringSpec({
     "validIdentifier tests" {

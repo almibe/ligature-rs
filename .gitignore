@@ -1,30 +1,6 @@
-.DS_Store
-*.class
-*.log
-*~
+# Ignore Gradle project-specific cache directory
+.gradle
 
-# sbt specific
-dist/*
-target/
-lib_managed/
-src_managed/
-project/boot/
-project/plugins/project/
-project/local-plugins.sbt
-.history
-
-# Scala-IDE specific
-.scala_dependencies
-.cache
-.classpath
-.project
-.settings
-classes/
-
-# idea
+# Ignore Gradle build output directory
+build
 .idea
-.idea_modules
-/.worksheet/
-
-.dotty-ide.json
-.dotty-ide-artifact
