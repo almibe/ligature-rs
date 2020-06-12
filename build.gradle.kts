@@ -3,7 +3,7 @@ plugins {
     maven
 }
 
-project.group = "org.libraryweasel.ligature"
+project.group = "dev.ligature"
 project.version = "0.1.0-SNAPSHOT"
 
 repositories {

@@ -1,6 +1,6 @@
 # ligature
 
-Ligature is a Kotlin library for working with semantic networks.
+Ligature is a Knowledge Base library for the JVM written in Kotlin.
 This project provides the main interfaces used by Ligature as well as some helper functions and constants.
 See relate projects for implementations of these APIs.
 Ligature is heavily influenced by RDF and related standards but attempts to be more general purpose and easier to use.
@@ -15,16 +15,16 @@ Ligature is heavily influenced by RDF and related standards but attempts to be m
 
 ## Ligature's Data Model
 
-| Subject | Predicate | Object  | Context |
-| ------- | --------- | ------- | ------- |
-| entity  | entity    | entity  | entity  |
-|         |           | literal |         |
-
+| Subject          | Predicate    | Object           | Context       |
+| ---------------- | ------------ | ---------------- | ------------- |
+| named entity     | named entity | named entity     | named entity  |
+| anonymous entity |              | anonymous entity |               |
+|                  |              | literal          |               |
 #### Entities
 
 Ligature has two types of entities.
-A named entity is represented by an identifier given by the user and an anonymous entity is represented by an identifier that is automatically generated.
-Identifiers in Ligature are *currently* defined as strings that start with an ASCII letter or an underscore and don't contain any of the following characters:
+A named entity is represented by an identifier given by the user and an anonymous entity is represented by a numeric identifier that is automatically generated.
+Named entity identifiers in Ligature are *currently* defined as strings that start with an ASCII letter or an underscore and don't contain any of the following characters:
  * whitespace (space, newline, tabs, carriage returns, etc)
  * " ' `
  * &lt; &gt;
@@ -34,30 +34,27 @@ Identifiers in Ligature are *currently* defined as strings that start with an AS
  * [ ]
 
 If for some reason you need any of these characters in your identifier it is suggested that you use standard URL encoding.
-Note that identifiers with underscores are reserved for internal use and end users cannot create them by themselves.
+Note that identifiers with underscores are reserved for internal use and end users cannot create them themselves.
 
 Identifiers can be something that is meaningful like an IRI/URL, an id from an existing system, a name, or it can be an incrementing id via the `newEntity` method.
 Below is an example statement using identifiers in Kotlin format.
 
 `tx.addStatement(Entity("Emily"), Entity("loves"), Entity("cats"), default)`
 
-The `default` argument passed is imported as a value from `org.libraryweasel.ligature.default`.
+The `default` argument passed is imported as a value from `dev.ligature.default`.
 It is equal to `Entity("_")` and represents the default graph in Ligature.
 
-Besides using named entities, the `newEntity` method returns a unique Entity with an Identifier that looks something like this.
-
-`_:24601`
-
+Besides using named entities, the `newEntity` method returns a unique Anonymous Entity with an Identifier that is automatically generated.
 The `newEntity` method runs inside a transaction so it is guaranteed to be unique and to not already exist in the Dataset at the time of creation.
-The form `_:NUMBER` is special in Ligature and only IDs that have been already created with the `newEntity` method can be used.
 For example here is some pseudo code.
 
 ```kotlin
 val tx = collection.writeTx()
-val newEntity = tx.newEntity() // creates a new identifer, in this case let's say `_:42`
-tx.addStatement(x, a, Entity("company"), Entity("_")) // should run fine
-tx.addStatement(Entity("_:42"), Entity("name"), StringLiteral("Pear"), Entity("_")) // should run fine since _:42 has been created already
-tx.addStatement(Entity("_:24601"), a, Entity("bird"), Entity("_")) // will erorr out since that identifier hasn't been created yet
+val newEntity = tx.newEntity() // creates a new identifer, in this case let's say `42`
+tx.addStatement(x, a, NamedEntity("company")) // should run fine
+tx.addStatement(newEntity, NamedEntity("name"), StringLiteral("Pear")) // should run fine
+tx.addStatement(AnonymousEntity(newEntity.identifer), NamedEntity("name"), StringLiteral("Pear")) // will run fine since it's just another way of writing the above line
+tx.addStatement(AnonyMousEntity(24601), a, NamedEntity("bird")) // will erorr out since that identifier hasn't been created yet
 ```
 
 #### Literals
@@ -87,7 +84,7 @@ Once that is set up use `gradle test` to run tests `gradle install` to install t
 
 | Name | Description | URL |
 | ---- | ----------- | --- |
-| ligature-in-memory | In-memory implementation of the Ligature API in Kotlin | https://github.com/almibe/ligature-in-memory |
+| ligature-in-memory | In-memory implementation of the Ligature API in Kotlin using Vavr | https://github.com/almibe/ligature-in-memory |
 | ligature-rocksdb | Implementation of Ligature that uses the RocksDB data store. | https://github.com/almibe/ligature-rocksdb |
 | wander | A scripting language for working with Ligature. | https://github.com/almibe/wander |
 | ligature-ontology | Ontology/OWL support for Ligature. | https://github.com/almibe/ligature-ontology |
@@ -99,6 +96,7 @@ Once that is set up use `gradle test` to run tests `gradle install` to install t
 ## Ligature-Ex
 
 Ligature-Ex is a version of Ligature that is written in Rust.
+It currently isn't very active, but I plan on working on it after the main version Ligature is stable.
 
 | Name | Description | URL |
 | ---- | ----------- | --- |
