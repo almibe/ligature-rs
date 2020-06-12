@@ -7,13 +7,17 @@ package org.libraryweasel.ligature
 import kotlinx.coroutines.flow.Flow
 
 sealed class Object
-data class Entity(val identifier: String): Object() {
+
+sealed class Entity: Object()
+data class NamedEntity(val identifier: String): Entity() {
     init {
-        require(validPredicate(identifier)) {
-            "Invalid Predicate: $identifier"
+        require(validNamedEntity(identifier)) {
+            "Invalid NamedEntity: $identifier"
         }
     }
 }
+data class AnonymousEntity(val identifier: Long): Entity()
+
 sealed class Literal: Object()
 data class LangLiteral(val value: String, val langTag: String): Literal() {
     init {
@@ -27,18 +31,10 @@ data class BooleanLiteral(val value: Boolean): Literal()
 data class LongLiteral(val value: Long): Literal()
 data class DoubleLiteral(val value: Double): Literal()
 
-data class Predicate(val identifier: String) {
-    init {
-        require(validPredicate(identifier)) {
-            "Invalid Predicate: $identifier"
-        }
-    }
-}
+val a = NamedEntity("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+val default = NamedEntity("_")
 
-val a = Predicate("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
-val default = Entity("_")
-
-data class Statement(val subject: Entity, val predicate: Predicate, val `object`: Object, val context: Entity = default)
+data class Statement(val subject: Entity, val predicate: NamedEntity, val `object`: Object, val context: Entity = default)
 
 sealed class Range<T>(open val start: T, open val end: T)
 data class LangLiteralRange(override val start: LangLiteral, override val end: LangLiteral): Range<LangLiteral>(start, end)
@@ -48,7 +44,7 @@ data class DoubleLiteralRange(override val start: Double, override val end: Doub
 
 data class CollectionName(val name: String) {
     init {
-        require(validPredicate(name)) {
+        require(validNamedEntity(name)) {
             "Invalid Collection Name: $name"
         }
     }
@@ -112,12 +108,12 @@ interface ReadTx {
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    suspend fun matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, `object`: Object? = null, context: Entity? = null): Flow<Statement>
+    suspend fun matchStatements(collection: CollectionName, subject: Entity? = null, predicate: NamedEntity? = null, `object`: Object? = null, context: Entity? = null): Flow<Statement>
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    suspend fun matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, range: Range<*>, context: Entity? = null): Flow<Statement>
+    suspend fun matchStatements(collection: CollectionName, subject: Entity? = null, predicate: NamedEntity? = null, range: Range<*>, context: Entity? = null): Flow<Statement>
 
     /**
      * Cancels this transaction.
@@ -163,7 +159,7 @@ interface WriteTx {
 /**
  * Accepts a String representing an identifier and returns true or false depending on if it is valid.
  */
-fun validPredicate(identifier: String): Boolean {
+fun validNamedEntity(identifier: String): Boolean {
     return "[a-zA-Z_][^\\s\\(\\)\\[\\]\\{\\}'\"`<>\\\\]*".toRegex().matches(identifier)
 }
 
