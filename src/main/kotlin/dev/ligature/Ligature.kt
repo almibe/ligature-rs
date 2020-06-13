@@ -32,23 +32,14 @@ data class LongLiteral(val value: Long): Literal()
 data class DoubleLiteral(val value: Double): Literal()
 
 val a = NamedEntity("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
-val default = NamedEntity("_")
 
-data class Statement(val subject: Entity, val predicate: NamedEntity, val `object`: Object, val context: Entity = default)
+data class Statement(val subject: Entity, val predicate: NamedEntity, val `object`: Object)
 
 sealed class Range<T>(open val start: T, open val end: T)
 data class LangLiteralRange(override val start: LangLiteral, override val end: LangLiteral): Range<LangLiteral>(start, end)
 data class StringLiteralRange(override val start: String, override val end: String): Range<String>(start, end)
 data class LongLiteralRange(override val start: Long, override val end: Long): Range<Long>(start, end)
 data class DoubleLiteralRange(override val start: Double, override val end: Double): Range<Double>(start, end)
-
-data class CollectionName(val name: String) {
-    init {
-        require(validNamedEntity(name)) {
-            "Invalid Collection Name: $name"
-        }
-    }
-}
 
 interface LigatureStore {
     suspend fun readTx(): ReadTx
@@ -87,33 +78,33 @@ interface ReadTx {
     /**
      * Returns a Flow of all existing collections.
      */
-    suspend fun collections(): Flow<CollectionName>
+    suspend fun collections(): Flow<NamedEntity>
 
     /**
      * Returns a Flow of all existing collections that start with the given prefix.
      */
-    suspend fun collections(prefix: CollectionName): Flow<CollectionName>
+    suspend fun collections(prefix: NamedEntity): Flow<NamedEntity>
 
     /**
      * Returns a Flow of all existing collections that are within the given range.
      * `from` is inclusive and `to` is exclusive.
      */
-    suspend fun collections(from: CollectionName, to: CollectionName): Flow<CollectionName>
+    suspend fun collections(from: NamedEntity, to: NamedEntity): Flow<NamedEntity>
 
     /**
      * Accepts nothing but returns a Flow of all Statements in the Collection.
      */
-    suspend fun allStatements(collection: CollectionName): Flow<Statement>
+    suspend fun allStatements(collection: NamedEntity): Flow<Statement>
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    suspend fun matchStatements(collection: CollectionName, subject: Entity? = null, predicate: NamedEntity? = null, `object`: Object? = null, context: Entity? = null): Flow<Statement>
+    suspend fun matchStatements(collection: NamedEntity, subject: Entity? = null, predicate: NamedEntity? = null, `object`: Object? = null): Flow<Statement>
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    suspend fun matchStatements(collection: CollectionName, subject: Entity? = null, predicate: NamedEntity? = null, range: Range<*>, context: Entity? = null): Flow<Statement>
+    suspend fun matchStatements(collection: NamedEntity, subject: Entity? = null, predicate: NamedEntity? = null, range: Range<*>): Flow<Statement>
 
     /**
      * Cancels this transaction.
@@ -128,20 +119,20 @@ interface WriteTx {
      * Creates a collection with the given name or does nothing if the collection already exists.
      * Only useful for creating an empty collection.
      */
-    suspend fun createCollection(collection: CollectionName)
+    suspend fun createCollection(collection: NamedEntity)
 
     /**
      * Deletes the collection of the name given and does nothing if the collection doesn't exist.
      */
-    suspend fun deleteCollection(collection: CollectionName)
+    suspend fun deleteCollection(collection: NamedEntity)
 
     /**
-     * Returns a new, unique to this collection identifier in the form _:NUMBER
+     * Returns a new, unique to this collection, AnonymousEntity
      */
-    suspend fun newEntity(collection: CollectionName): Entity
-    suspend fun addStatement(collection: CollectionName, statement: Statement)
-    suspend fun removeStatement(collection: CollectionName, statement: Statement)
-    suspend fun removeEntity(entity: Entity)
+    suspend fun newEntity(collection: NamedEntity): AnonymousEntity
+    suspend fun addStatement(collection: NamedEntity, statement: Statement)
+    suspend fun removeStatement(collection: NamedEntity, statement: Statement)
+    suspend fun removeEntity(collection: NamedEntity, entity: Entity)
 
     /**
      * Commits this transaction.

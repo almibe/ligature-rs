@@ -7,7 +7,7 @@ Ligature is heavily influenced by RDF and related standards but attempts to be m
 
 ## RDF's Data Model
 
-| Subject    | Predicate  | Object     | Graph?     |
+| Subject    | Predicate  | Object     | Graph      |
 | ---------- | ---------- | ---------- | ---------- |
 | iri        | iri        | iri        | iri        |
 | blank node |            | blank node | blank node |
@@ -15,11 +15,12 @@ Ligature is heavily influenced by RDF and related standards but attempts to be m
 
 ## Ligature's Data Model
 
-| Subject          | Predicate    | Object           | Context       |
-| ---------------- | ------------ | ---------------- | ------------- |
-| named entity     | named entity | named entity     | named entity  |
-| anonymous entity |              | anonymous entity |               |
-|                  |              | literal          |               |
+| Collection   | Subject          | Predicate    | Object           | Context          |
+| ------------ | ---------------- | ------------ | ---------------- | ---------------- |
+| named entity | named entity     | named entity | named entity     | anonymous entity |
+|              | anonymous entity |              | anonymous entity |                  |
+|              |                  |              | literal          |                  |
+
 #### Entities
 
 Ligature has two types of entities.
@@ -39,7 +40,9 @@ Note that identifiers with underscores are reserved for internal use and end use
 Identifiers can be something that is meaningful like an IRI/URL, an id from an existing system, a name, or it can be an incrementing id via the `newEntity` method.
 Below is an example statement using identifiers in Kotlin format.
 
-`tx.addStatement(Entity("Emily"), Entity("loves"), Entity("cats"), default)`
+```kotlin
+tx.addStatement(Entity("Emily"), Entity("loves"), Entity("cats"))
+```
 
 The `default` argument passed is imported as a value from `dev.ligature.default`.
 It is equal to `Entity("_")` and represents the default graph in Ligature.
@@ -54,7 +57,7 @@ val newEntity = tx.newEntity() // creates a new identifer, in this case let's sa
 tx.addStatement(x, a, NamedEntity("company")) // should run fine
 tx.addStatement(newEntity, NamedEntity("name"), StringLiteral("Pear")) // should run fine
 tx.addStatement(AnonymousEntity(newEntity.identifer), NamedEntity("name"), StringLiteral("Pear")) // will run fine since it's just another way of writing the above line
-tx.addStatement(AnonyMousEntity(24601), a, NamedEntity("bird")) // will erorr out since that identifier hasn't been created yet
+tx.addStatement(AnonymousEntity(24601), a, NamedEntity("bird")) // will erorr out since that identifier hasn't been created yet
 ```
 
 #### Literals
