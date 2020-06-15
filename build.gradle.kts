@@ -1,6 +1,6 @@
 plugins {
     id("org.jetbrains.kotlin.jvm").version("1.3.70")
-    maven
+    `maven-publish`
 }
 
 project.group = "dev.ligature"
@@ -14,6 +14,7 @@ repositories {
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.4")
+    implementation("io.arrow-kt:arrow-core:0.10.4")
     testImplementation("io.kotlintest:kotlintest-runner-junit5:3.4.2")
 }
 
