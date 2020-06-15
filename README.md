@@ -15,11 +15,11 @@ Ligature is heavily influenced by RDF and related standards but attempts to be m
 
 ## Ligature's Data Model
 
-| Collection   | Subject          | Predicate | Object           | Context          |
-| ------------ | ---------------- | --------- | ---------------- | ---------------- |
-| named entity | named entity     | predicate | named entity     | anonymous entity |
-|              | anonymous entity |           | anonymous entity |                  |
-|              |                  |           | literal          |                  |
+| Collection      | Subject          | Predicate | Object           | Context          |
+| --------------- | ---------------- | --------- | ---------------- | ---------------- |
+| collection name | named entity     | predicate | named entity     | anonymous entity |
+|                 | anonymous entity |           | anonymous entity |                  |
+|                 |                  |           | literal          |                  |
 
 #### Entities
 

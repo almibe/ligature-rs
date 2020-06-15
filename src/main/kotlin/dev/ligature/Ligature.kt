@@ -8,6 +8,14 @@ import kotlinx.coroutines.flow.Flow
 
 sealed class Object
 
+data class CollectionName(val identifier: String) {
+    init {
+        require(validNamedEntity(identifier)) {
+            "Invalid NamedEntity: $identifier"
+        }
+    }
+}
+
 sealed class Entity: Object()
 data class NamedEntity(val identifier: String): Entity() {
     init {
@@ -91,28 +99,28 @@ interface ReadTx {
     /**
      * Returns a Flow of all existing collections that start with the given prefix.
      */
-    suspend fun collections(prefix: NamedEntity): Flow<NamedEntity>
+    suspend fun collections(prefix: CollectionName): Flow<CollectionName>
 
     /**
      * Returns a Flow of all existing collections that are within the given range.
      * `from` is inclusive and `to` is exclusive.
      */
-    suspend fun collections(from: NamedEntity, to: NamedEntity): Flow<NamedEntity>
+    suspend fun collections(from: CollectionName, to: CollectionName): Flow<CollectionName>
 
     /**
      * Accepts nothing but returns a Flow of all Statements in the Collection.
      */
-    suspend fun allStatements(collection: NamedEntity): Flow<Statement>
+    suspend fun allStatements(collection: CollectionName): Flow<Statement>
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    suspend fun matchStatements(collection: NamedEntity, subject: Entity? = null, predicate: Predicate? = null, `object`: Object? = null): Flow<Statement>
+    suspend fun matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, `object`: Object? = null): Flow<Statement>
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    suspend fun matchStatements(collection: NamedEntity, subject: Entity? = null, predicate: Predicate? = null, range: Range<*>): Flow<Statement>
+    suspend fun matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, range: Range<*>): Flow<Statement>
 
     /**
      * Cancels this transaction.
@@ -127,21 +135,21 @@ interface WriteTx {
      * Creates a collection with the given name or does nothing if the collection already exists.
      * Only useful for creating an empty collection.
      */
-    suspend fun createCollection(collection: NamedEntity)
+    suspend fun createCollection(collection: CollectionName)
 
     /**
      * Deletes the collection of the name given and does nothing if the collection doesn't exist.
      */
-    suspend fun deleteCollection(collection: NamedEntity)
+    suspend fun deleteCollection(collection: CollectionName)
 
     /**
      * Returns a new, unique to this collection, AnonymousEntity
      */
-    suspend fun newEntity(collection: NamedEntity): AnonymousEntity
-    suspend fun addStatement(collection: NamedEntity, statement: Statement)
-    suspend fun removeStatement(collection: NamedEntity, statement: Statement)
-    suspend fun removeEntity(collection: NamedEntity, entity: Entity)
-    suspend fun removePredicate(collection: NamedEntity, predicate: Predicate)
+    suspend fun newEntity(collection: CollectionName): AnonymousEntity
+    suspend fun addStatement(collection: CollectionName, statement: Statement)
+    suspend fun removeStatement(collection: CollectionName, statement: Statement)
+    suspend fun removeEntity(collection: CollectionName, entity: Entity)
+    suspend fun removePredicate(collection: CollectionName, predicate: Predicate)
 
     /**
      * Commits this transaction.
