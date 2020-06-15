@@ -21,3 +21,11 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+        }
+    }
+}

@@ -9,15 +9,15 @@ import io.kotlintest.specs.StringSpec
 
 class LigatureSpec : StringSpec({
     "validIdentifier tests" {
-        validPredicate("") shouldBe false
-        validPredicate("http://localhost/people/7") shouldBe true
-        validPredicate("http://localhost(/people/7") shouldBe false
-        validPredicate("http://localhost /people/7") shouldBe false
-        validPredicate("hello") shouldBe true
-        validPredicate("_:") shouldBe true
-        validPredicate("_:valid") shouldBe true
-        validPredicate("_:1") shouldBe true
-        validPredicate("_:1344") shouldBe true
+        validNamedEntity("") shouldBe false
+        validNamedEntity("http://localhost/people/7") shouldBe true
+        validNamedEntity("http://localhost(/people/7") shouldBe false
+        validNamedEntity("http://localhost /people/7") shouldBe false
+        validNamedEntity("hello") shouldBe true
+        validNamedEntity("_:") shouldBe true
+        validNamedEntity("_:valid") shouldBe true
+        validNamedEntity("_:1") shouldBe true
+        validNamedEntity("_:1344") shouldBe true
     }
 
     "validLangTag tests" {

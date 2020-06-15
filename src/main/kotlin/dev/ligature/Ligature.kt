@@ -47,7 +47,7 @@ data class BooleanLiteral(val value: Boolean): Literal()
 data class LongLiteral(val value: Long): Literal()
 data class DoubleLiteral(val value: Double): Literal()
 
-val a = NamedEntity("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+val a = Predicate("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
 
 data class Statement(val subject: Entity, val predicate: Predicate, val `object`: Object)
 
