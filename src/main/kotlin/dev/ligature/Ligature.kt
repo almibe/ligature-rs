@@ -18,6 +18,14 @@ data class NamedEntity(val identifier: String): Entity() {
 }
 data class AnonymousEntity(val identifier: Long): Entity()
 
+data class Predicate(val identifier: String) {
+    init {
+        require(validNamedEntity(identifier)) {
+            "Invalid NamedEntity: $identifier"
+        }
+    }
+}
+
 sealed class Literal: Object()
 data class LangLiteral(val value: String, val langTag: String): Literal() {
     init {
@@ -33,7 +41,7 @@ data class DoubleLiteral(val value: Double): Literal()
 
 val a = NamedEntity("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
 
-data class Statement(val subject: Entity, val predicate: NamedEntity, val `object`: Object)
+data class Statement(val subject: Entity, val predicate: Predicate, val `object`: Object)
 
 sealed class Range<T>(open val start: T, open val end: T)
 data class LangLiteralRange(override val start: LangLiteral, override val end: LangLiteral): Range<LangLiteral>(start, end)
@@ -99,12 +107,12 @@ interface ReadTx {
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    suspend fun matchStatements(collection: NamedEntity, subject: Entity? = null, predicate: NamedEntity? = null, `object`: Object? = null): Flow<Statement>
+    suspend fun matchStatements(collection: NamedEntity, subject: Entity? = null, predicate: Predicate? = null, `object`: Object? = null): Flow<Statement>
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    suspend fun matchStatements(collection: NamedEntity, subject: Entity? = null, predicate: NamedEntity? = null, range: Range<*>): Flow<Statement>
+    suspend fun matchStatements(collection: NamedEntity, subject: Entity? = null, predicate: Predicate? = null, range: Range<*>): Flow<Statement>
 
     /**
      * Cancels this transaction.
@@ -133,6 +141,7 @@ interface WriteTx {
     suspend fun addStatement(collection: NamedEntity, statement: Statement)
     suspend fun removeStatement(collection: NamedEntity, statement: Statement)
     suspend fun removeEntity(collection: NamedEntity, entity: Entity)
+    suspend fun removePredicate(collection: NamedEntity, predicate: Predicate)
 
     /**
      * Commits this transaction.
