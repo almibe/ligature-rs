@@ -94,7 +94,7 @@ interface ReadTx {
     /**
      * Returns a Flow of all existing collections.
      */
-    suspend fun collections(): Flow<NamedEntity>
+    suspend fun collections(): Flow<CollectionName>
 
     /**
      * Returns a Flow of all existing collections that start with the given prefix.
