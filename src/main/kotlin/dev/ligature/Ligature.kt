@@ -50,6 +50,7 @@ data class DoubleLiteral(val value: Double): Literal()
 val a = Predicate("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
 
 data class Statement(val subject: Entity, val predicate: Predicate, val `object`: Object)
+data class PersistedStatement(val collection: CollectionName, val statement: Statement, val context: AnonymousEntity)
 
 sealed class Range<T>(open val start: T, open val end: T)
 data class LangLiteralRange(override val start: LangLiteral, override val end: LangLiteral): Range<LangLiteral>(start, end)
@@ -110,17 +111,17 @@ interface ReadTx {
     /**
      * Accepts nothing but returns a Flow of all Statements in the Collection.
      */
-    suspend fun allStatements(collection: CollectionName): Flow<Statement>
+    suspend fun allStatements(collection: CollectionName): Flow<PersistedStatement>
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    suspend fun matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, `object`: Object? = null): Flow<Statement>
+    suspend fun matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, `object`: Object? = null): Flow<PersistedStatement>
 
     /**
      * Is passed a pattern and returns a seq with all matching Statements.
      */
-    suspend fun matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, range: Range<*>): Flow<Statement>
+    suspend fun matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, range: Range<*>): Flow<PersistedStatement>
 
     /**
      * Cancels this transaction.
@@ -146,7 +147,7 @@ interface WriteTx {
      * Returns a new, unique to this collection, AnonymousEntity
      */
     suspend fun newEntity(collection: CollectionName): AnonymousEntity
-    suspend fun addStatement(collection: CollectionName, statement: Statement)
+    suspend fun addStatement(collection: CollectionName, statement: Statement): PersistedStatement
     suspend fun removeStatement(collection: CollectionName, statement: Statement)
     suspend fun removeEntity(collection: CollectionName, entity: Entity)
     suspend fun removePredicate(collection: CollectionName, predicate: Predicate)
