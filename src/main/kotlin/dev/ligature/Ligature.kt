@@ -8,40 +8,13 @@ import kotlinx.coroutines.flow.Flow
 
 sealed class Object
 
-data class CollectionName(val identifier: String) {
-    init {
-        require(validNamedEntity(identifier)) {
-            "Invalid NamedEntity: $identifier"
-        }
-    }
-}
-
+data class CollectionName(val identifier: String)
 sealed class Entity: Object()
-data class NamedEntity(val identifier: String): Entity() {
-    init {
-        require(validNamedEntity(identifier)) {
-            "Invalid NamedEntity: $identifier"
-        }
-    }
-}
+data class NamedEntity(val identifier: String): Entity()
 data class AnonymousEntity(val identifier: Long): Entity()
-
-data class Predicate(val identifier: String) {
-    init {
-        require(validNamedEntity(identifier)) {
-            "Invalid NamedEntity: $identifier"
-        }
-    }
-}
-
+data class Predicate(val identifier: String)
 sealed class Literal: Object()
-data class LangLiteral(val value: String, val langTag: String): Literal() {
-    init {
-        require(validLangTag(langTag)) {
-            "Invalid lang tag: $langTag"
-        }
-    }
-}
+data class LangLiteral(val value: String, val langTag: String): Literal()
 data class StringLiteral(val value: String): Literal()
 data class BooleanLiteral(val value: Boolean): Literal()
 data class LongLiteral(val value: Long): Literal()
