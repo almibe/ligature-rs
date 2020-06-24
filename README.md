@@ -1,6 +1,6 @@
 # ligature
 
-Ligature is a Knowledge Base library for the JVM written in Kotlin.
+Ligature is a Knowledge Base library for the JVM written in Scala.
 This project provides the main interfaces used by Ligature as well as some helper functions and constants.
 See relate projects for implementations of these APIs.
 Ligature is heavily influenced by RDF and related standards but attempts to be more general purpose and easier to use.
