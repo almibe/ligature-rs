@@ -4,148 +4,149 @@
 
 package dev.ligature
 
-sealed class Object
+import fs2.Stream
 
-data class CollectionName(val identifier: String)
-sealed class Entity: Object()
-data class NamedEntity(val identifier: String): Entity()
-data class AnonymousEntity(val identifier: Long): Entity()
-data class Predicate(val identifier: String)
-sealed class Literal: Object()
-data class LangLiteral(val value: String, val langTag: String): Literal()
-data class StringLiteral(val value: String): Literal()
-data class BooleanLiteral(val value: Boolean): Literal()
-data class LongLiteral(val value: Long): Literal()
-data class DoubleLiteral(val value: Double): Literal()
+sealed trait Object
+sealed trait Entity extends Object
+case class NamedEntity(identifier: String) extends Entity
+case class AnonymousEntity(identifier: Long) extends Entity
+case class Predicate(identifier: String)
+sealed trait Literal extends Object
+case class LangLiteral(value: String, langTag: String) extends Literal
+case class StringLiteral(value: String) extends Literal
+case class BooleanLiteral(value: Boolean) extends Literal
+case class LongLiteral(value: Long) extends Literal
+case class DoubleLiteral(value: Double) extends Literal
 
-val a = Predicate("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+object Ligature {
+  val a = Predicate("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
 
-data class Statement(val subject: Entity, val predicate: Predicate, val `object`: Object)
-data class PersistedStatement(val collection: CollectionName, val statement: Statement, val context: AnonymousEntity)
+  /**
+   * Accepts a String representing an identifier and returns true or false depending on if it is valid.
+   */
+  def validNamedEntity(identifier: String): Boolean =
+    "[a-zA-Z_][^\\s\\(\\)\\[\\]\\{\\}'\"`<>\\\\]*".r.matches(identifier)
 
-sealed class Range<T>(open val start: T, open val end: T)
-data class LangLiteralRange(override val start: LangLiteral, override val end: LangLiteral): Range<LangLiteral>(start, end)
-data class StringLiteralRange(override val start: String, override val end: String): Range<String>(start, end)
-data class LongLiteralRange(override val start: Long, override val end: Long): Range<Long>(start, end)
-data class DoubleLiteralRange(override val start: Double, override val end: Double): Range<Double>(start, end)
-
-interface LigatureStore {
-suspend fun readTx(): ReadTx
-suspend fun writeTx(): WriteTx
-suspend fun <T>compute(fn: suspend (ReadTx) -> T): T {
-val readTx = this.readTx()
-try {
-return fn(readTx)
-} finally {
-if (readTx.isOpen()) {
-readTx.cancel()
-}
-}
+  /**
+   * Accepts a String representing a lang tag and returns true or false depending on if it is valid.
+   */
+  def validLangTag(langTag: String): Boolean =
+    "[a-zA-Z]+(-[a-zA-Z0-9]+)*".r.matches(langTag)
 }
 
-suspend fun write(fn: suspend (WriteTx) -> Unit) {
-val writeTx = this.writeTx()
-try {
-return fn(writeTx)
-} finally {
-if (writeTx.isOpen()) {
-writeTx.commit()
-}
-}
-}
+case class Statement(subject: Entity, predicate: Predicate, `object`: Object)
+case class PersistedStatement(collection: NamedEntity, statement: Statement, context: AnonymousEntity)
 
-/**
-* Close connection with the Store.
-*/
-suspend fun close()
+sealed class Range[T](val start: T, val end: T)
+case class LangLiteralRange(override val start: LangLiteral, override val end: LangLiteral) extends Range[LangLiteral](start, end)
+case class StringLiteralRange(override val start: String, override val end: String) extends Range[String](start, end)
+case class LongLiteralRange(override val start: Long, override val end: Long) extends Range[Long](start, end)
+case class DoubleLiteralRange(override val start: Double, override val end: Double) extends Range[Double](start, end)
 
-suspend fun isOpen(): Boolean
-}
+trait LigatureStore {
+  def readTx(): ReadTx
+  def writeTx(): WriteTx
 
-interface ReadTx {
-/**
- * Returns a Flow of all existing collections.
- */
-suspend fun collections(): Flow<CollectionName>
+//  def [T]compute(fn: (ReadTx) -> T): T {
+//    val readTx = this.readTx()
+//    try {
+//      return fn(readTx)
+//    } finally {
+//      if (readTx.isOpen()) {
+//        readTx.cancel()
+//      }
+//    }
+//  }
+//
+//  def write(fn: (WriteTx) -> Unit) {
+//    val writeTx = this.writeTx()
+//    try {
+//      return fn(writeTx)
+//    } finally {
+//      if (writeTx.isOpen()) {
+//        writeTx.commit()
+//      }
+//    }
+//  }
 
-/**
- * Returns a Flow of all existing collections that start with the given prefix.
- */
-suspend fun collections(prefix: CollectionName): Flow<CollectionName>
+  /**
+  * Close connection with the Store.
+  */
+  def close()
 
-/**
- * Returns a Flow of all existing collections that are within the given range.
- * `from` is inclusive and `to` is exclusive.
- */
-suspend fun collections(from: CollectionName, to: CollectionName): Flow<CollectionName>
-
-/**
- * Accepts nothing but returns a Flow of all Statements in the Collection.
- */
-suspend fun allStatements(collection: CollectionName): Flow<PersistedStatement>
-
-/**
- * Is passed a pattern and returns a seq with all matching Statements.
- */
-suspend fun matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, `object`: Object? = null): Flow<PersistedStatement>
-
-/**
- * Is passed a pattern and returns a seq with all matching Statements.
- */
-suspend fun matchStatements(collection: CollectionName, subject: Entity? = null, predicate: Predicate? = null, range: Range<*>): Flow<PersistedStatement>
-
-/**
- * Cancels this transaction.
- */
-suspend fun cancel()
-
-suspend fun isOpen(): Boolean
+  def isOpen: Boolean
 }
 
-interface WriteTx {
-/**
- * Creates a collection with the given name or does nothing if the collection already exists.
- * Only useful for creating an empty collection.
- */
-suspend fun createCollection(collection: CollectionName)
+trait ReadTx {
+  /**
+   * Returns a Stream of all existing collections.
+   */
+  def collections(): Stream[_, NamedEntity]
 
-/**
- * Deletes the collection of the name given and does nothing if the collection doesn't exist.
- */
-suspend fun deleteCollection(collection: CollectionName)
+  /**
+   * Returns a Stream of all existing collections that start with the given prefix.
+   */
+  def collections(prefix: NamedEntity): Stream[_, NamedEntity]
 
-/**
- * Returns a new, unique to this collection, AnonymousEntity
- */
-suspend fun newEntity(collection: CollectionName): AnonymousEntity
-suspend fun addStatement(collection: CollectionName, statement: Statement): PersistedStatement
-suspend fun removeStatement(collection: CollectionName, statement: Statement)
-suspend fun removeEntity(collection: CollectionName, entity: Entity)
-suspend fun removePredicate(collection: CollectionName, predicate: Predicate)
+  /**
+   * Returns a Stream of all existing collections that are within the given range.
+   * `from` is inclusive and `to` is exclusive.
+   */
+  def collections(from: NamedEntity, to: NamedEntity): Stream[_, NamedEntity]
 
-/**
- * Commits this transaction.
- */
-suspend fun commit()
+  /**
+   * Accepts nothing but returns a Stream of all Statements in the Collection.
+   */
+  def allStatements(collection: NamedEntity): Stream[_, PersistedStatement]
 
-/**
- * Cancels this transaction.
- */
-suspend fun cancel()
+  /**
+   * Is passed a pattern and returns a seq with all matching Statements.
+   */
+  def matchStatements(collection: NamedEntity, subject: Entity = null, predicate: Predicate = null, `object`: Object = null): Stream[_, PersistedStatement]
 
-suspend fun isOpen(): Boolean
+  /**
+   * Is passed a pattern and returns a seq with all matching Statements.
+   */
+  def matchStatements(collection: NamedEntity, subject: Entity = null, predicate: Predicate = null, range: Range[_]): Stream[_, PersistedStatement]
+
+  /**
+   * Cancels this transaction.
+   */
+  def cancel()
+
+  def isOpen: Boolean
 }
 
-/**
-* Accepts a String representing an identifier and returns true or false depending on if it is valid.
-*/
-fun validNamedEntity(identifier: String): Boolean {
-return "[a-zA-Z_][^\\s\\(\\)\\[\\]\\{\\}'\"`<>\\\\]*".toRegex().matches(identifier)
-}
+trait WriteTx {
+  /**
+   * Creates a collection with the given name or does nothing if the collection already exists.
+   * Only useful for creating an empty collection.
+   */
+  def createCollection(collection: NamedEntity)
 
-/**
-* Accepts a String representing a lang tag and returns true or false depending on if it is valid.
-*/
-fun validLangTag(langTag: String): Boolean {
-return "[a-zA-Z]+(-[a-zA-Z0-9]+)*".toRegex().matches(langTag)
+  /**
+   * Deletes the collection of the name given and does nothing if the collection doesn't exist.
+   */
+  def deleteCollection(collection: NamedEntity)
+
+  /**
+   * Returns a new, unique to this collection, AnonymousEntity
+   */
+  def newEntity(collection: NamedEntity): AnonymousEntity
+  def addStatement(collection: NamedEntity, statement: Statement): PersistedStatement
+  def removeStatement(collection: NamedEntity, statement: Statement)
+  def removeEntity(collection: NamedEntity, entity: Entity)
+  def removePredicate(collection: NamedEntity, predicate: Predicate)
+
+  /**
+   * Commits this transaction.
+   */
+  def commit()
+
+  /**
+   * Cancels this transaction.
+   */
+  def cancel()
+
+  def isOpen: Boolean
 }

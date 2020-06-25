@@ -4,36 +4,31 @@
 
 package dev.ligature
 
+import dev.ligature.Ligature._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 class LigatureSpec extends AnyFlatSpec with Matchers {
-}
+  "validIdentifier tests" should "return properly" in {
+    validNamedEntity("") shouldBe false
+    validNamedEntity("http://localhost/people/7") shouldBe true
+    validNamedEntity("http://localhost(/people/7") shouldBe false
+    validNamedEntity("http://localhost /people/7") shouldBe false
+    validNamedEntity("hello") shouldBe true
+    validNamedEntity("_:") shouldBe true
+    validNamedEntity("_:valid") shouldBe true
+    validNamedEntity("_:1") shouldBe true
+    validNamedEntity("_:1344") shouldBe true
+  }
 
-import io.kotlintest.shouldBe
-import io.kotlintest.specs.StringSpec
-
-class LigatureSpec : StringSpec({
-"validIdentifier tests" {
-validNamedEntity("") shouldBe false
-validNamedEntity("http://localhost/people/7") shouldBe true
-validNamedEntity("http://localhost(/people/7") shouldBe false
-validNamedEntity("http://localhost /people/7") shouldBe false
-validNamedEntity("hello") shouldBe true
-validNamedEntity("_:") shouldBe true
-validNamedEntity("_:valid") shouldBe true
-validNamedEntity("_:1") shouldBe true
-validNamedEntity("_:1344") shouldBe true
+  "validLangTag tests" should "return properly" in {
+    validLangTag("") shouldBe false
+    validLangTag("en") shouldBe true
+    validLangTag("en-") shouldBe false
+    validLangTag("en-fr") shouldBe true
+    validLangTag("en-fr-") shouldBe false
+    validLangTag("en-fr-sp") shouldBe true
+    validLangTag("ennnenefnk-dkfjkjfl-dfakjelfkjalkf-fakjeflkajlkfj") shouldBe true
+    validLangTag("en-fr-ef ") shouldBe false
+  }
 }
-
-"validLangTag tests" {
-validLangTag("") shouldBe false
-validLangTag("en") shouldBe true
-validLangTag("en-") shouldBe false
-validLangTag("en-fr") shouldBe true
-validLangTag("en-fr-") shouldBe false
-validLangTag("en-fr-sp") shouldBe true
-validLangTag("ennnenefnk-dkfjkjfl-dfakjelfkjalkf-fakjeflkajlkfj") shouldBe true
-validLangTag("en-fr-ef ") shouldBe false
-}
-})

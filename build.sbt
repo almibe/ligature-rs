@@ -8,6 +8,7 @@ ThisBuild / organizationName := "Ligature"
 lazy val root = (project in file("."))
   .settings(
     name := "ligature",
+    libraryDependencies += "co.fs2" %% "fs2-core" % "2.4.0",
     libraryDependencies += scalaTest % Test
   )
 
