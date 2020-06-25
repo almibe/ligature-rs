@@ -4,7 +4,7 @@
 
 package dev.ligature
 
-import fs2.Stream
+import monix.reactive.Observable
 
 sealed trait Object
 sealed trait Entity extends Object
@@ -79,35 +79,35 @@ trait LigatureStore {
 
 trait ReadTx {
   /**
-   * Returns a Stream of all existing collections.
+   * Returns a Observable of all existing collections.
    */
-  def collections(): Stream[_, NamedEntity]
+  def collections(): Observable[NamedEntity]
 
   /**
-   * Returns a Stream of all existing collections that start with the given prefix.
+   * Returns a Observable of all existing collections that start with the given prefix.
    */
-  def collections(prefix: NamedEntity): Stream[_, NamedEntity]
+  def collections(prefix: NamedEntity): Observable[NamedEntity]
 
   /**
-   * Returns a Stream of all existing collections that are within the given range.
+   * Returns a Observable of all existing collections that are within the given range.
    * `from` is inclusive and `to` is exclusive.
    */
-  def collections(from: NamedEntity, to: NamedEntity): Stream[_, NamedEntity]
+  def collections(from: NamedEntity, to: NamedEntity): Observable[NamedEntity]
 
   /**
-   * Accepts nothing but returns a Stream of all Statements in the Collection.
+   * Accepts nothing but returns a Observable of all Statements in the Collection.
    */
-  def allStatements(collection: NamedEntity): Stream[_, PersistedStatement]
-
-  /**
-   * Is passed a pattern and returns a seq with all matching Statements.
-   */
-  def matchStatements(collection: NamedEntity, subject: Entity = null, predicate: Predicate = null, `object`: Object = null): Stream[_, PersistedStatement]
+  def allStatements(collection: NamedEntity): Observable[PersistedStatement]
 
   /**
    * Is passed a pattern and returns a seq with all matching Statements.
    */
-  def matchStatements(collection: NamedEntity, subject: Entity = null, predicate: Predicate = null, range: Range[_]): Stream[_, PersistedStatement]
+  def matchStatements(collection: NamedEntity, subject: Entity = null, predicate: Predicate = null, `object`: Object = null): Observable[PersistedStatement]
+
+  /**
+   * Is passed a pattern and returns a seq with all matching Statements.
+   */
+  def matchStatements(collection: NamedEntity, subject: Entity, predicate: Predicate, range: Range[_]): Observable[PersistedStatement]
 
   /**
    * Cancels this transaction.
