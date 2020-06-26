@@ -9,7 +9,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 class LigatureSpec extends AnyFlatSpec with Matchers {
-  "validIdentifier tests" should "return properly" in {
+  it should "validIdentifier tests" in {
     validNamedEntity("") shouldBe false
     validNamedEntity("http://localhost/people/7") shouldBe true
     validNamedEntity("http://localhost(/people/7") shouldBe false
@@ -21,7 +21,7 @@ class LigatureSpec extends AnyFlatSpec with Matchers {
     validNamedEntity("_:1344") shouldBe true
   }
 
-  "validLangTag tests" should "return properly" in {
+  it should "validLangTag tests" in {
     validLangTag("") shouldBe false
     validLangTag("en") shouldBe true
     validLangTag("en-") shouldBe false

@@ -72,7 +72,7 @@ trait LigatureStore {
   /**
   * Close connection with the Store.
   */
-  def close()
+  def close(): Unit
 
   def isOpen: Boolean
 }
@@ -112,7 +112,7 @@ trait ReadTx {
   /**
    * Cancels this transaction.
    */
-  def cancel()
+  def cancel(): Unit
 
   def isOpen: Boolean
 }
@@ -122,31 +122,31 @@ trait WriteTx {
    * Creates a collection with the given name or does nothing if the collection already exists.
    * Only useful for creating an empty collection.
    */
-  def createCollection(collection: NamedEntity)
+  def createCollection(collection: NamedEntity): Unit
 
   /**
    * Deletes the collection of the name given and does nothing if the collection doesn't exist.
    */
-  def deleteCollection(collection: NamedEntity)
+  def deleteCollection(collection: NamedEntity): Unit
 
   /**
    * Returns a new, unique to this collection, AnonymousEntity
    */
   def newEntity(collection: NamedEntity): AnonymousEntity
   def addStatement(collection: NamedEntity, statement: Statement): PersistedStatement
-  def removeStatement(collection: NamedEntity, statement: Statement)
-  def removeEntity(collection: NamedEntity, entity: Entity)
-  def removePredicate(collection: NamedEntity, predicate: Predicate)
+  def removeStatement(collection: NamedEntity, statement: Statement): Unit
+  def removeEntity(collection: NamedEntity, entity: Entity): Unit
+  def removePredicate(collection: NamedEntity, predicate: Predicate): Unit
 
   /**
    * Commits this transaction.
    */
-  def commit()
+  def commit(): Unit
 
   /**
    * Cancels this transaction.
    */
-  def cancel()
+  def cancel(): Unit
 
   def isOpen: Boolean
 }
