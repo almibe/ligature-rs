@@ -4,7 +4,10 @@
 
 package dev.ligature
 
+import monix.eval.Task
 import monix.reactive.Observable
+
+import scala.util.Try
 
 sealed trait Object
 sealed trait Entity extends Object
@@ -44,8 +47,8 @@ case class LongLiteralRange(override val start: Long, override val end: Long) ex
 case class DoubleLiteralRange(override val start: Double, override val end: Double) extends Range[Double](start, end)
 
 trait LigatureStore {
-  def readTx(): ReadTx
-  def writeTx(): WriteTx
+  def readTx(): Task[ReadTx]
+  def writeTx(): Task[WriteTx]
 
 //  def [T]compute(fn: (ReadTx) -> T): T {
 //    val readTx = this.readTx()
@@ -122,26 +125,26 @@ trait WriteTx {
    * Creates a collection with the given name or does nothing if the collection already exists.
    * Only useful for creating an empty collection.
    */
-  def createCollection(collection: NamedEntity): Unit
+  def createCollection(collection: NamedEntity): Try[NamedEntity]
 
   /**
    * Deletes the collection of the name given and does nothing if the collection doesn't exist.
    */
-  def deleteCollection(collection: NamedEntity): Unit
+  def deleteCollection(collection: NamedEntity): Try[NamedEntity]
 
   /**
    * Returns a new, unique to this collection, AnonymousEntity
    */
-  def newEntity(collection: NamedEntity): AnonymousEntity
-  def addStatement(collection: NamedEntity, statement: Statement): PersistedStatement
-  def removeStatement(collection: NamedEntity, statement: Statement): Unit
-  def removeEntity(collection: NamedEntity, entity: Entity): Unit
-  def removePredicate(collection: NamedEntity, predicate: Predicate): Unit
+  def newEntity(collection: NamedEntity): Try[AnonymousEntity]
+  def addStatement(collection: NamedEntity, statement: Statement): Try[PersistedStatement]
+  def removeStatement(collection: NamedEntity, statement: Statement): Try[Statement]
+  def removeEntity(collection: NamedEntity, entity: Entity): Try[Entity]
+  def removePredicate(collection: NamedEntity, predicate: Predicate): Try[Predicate]
 
   /**
    * Commits this transaction.
    */
-  def commit(): Unit
+  def commit(): Try[Unit]
 
   /**
    * Cancels this transaction.
