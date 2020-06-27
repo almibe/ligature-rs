@@ -4,6 +4,7 @@
 
 package dev.ligature
 
+import cats.effect.Resource
 import monix.eval.Task
 import monix.reactive.Observable
 
@@ -47,8 +48,8 @@ case class LongLiteralRange(override val start: Long, override val end: Long) ex
 case class DoubleLiteralRange(override val start: Double, override val end: Double) extends Range[Double](start, end)
 
 trait LigatureStore {
-  def readTx(): Task[ReadTx]
-  def writeTx(): Task[WriteTx]
+  def readTx(): Resource[Task, ReadTx]
+  def writeTx(): Resource[Task, WriteTx]
 
 //  def [T]compute(fn: (ReadTx) -> T): T {
 //    val readTx = this.readTx()
