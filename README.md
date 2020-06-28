@@ -79,9 +79,9 @@ Below is a table with the currently supported types.
 Predicates are very similar to Entities in that they represented by a single Identifier, but they are only used in the Predicate position of a Statement or Rule.
 
 ## Building
-Ligature requires Gradle to be installed.
-See https://gradle.org for installation instructions.
-Once that is set up use `gradle test` to run tests `gradle install` to install the artifact locally.
+This project requires SBT to be installed.
+I recommend using https://sdkman.io/ to manage SBT installs.
+Once that is set up use `sbt test` to run tests `sbt publishM2` to install the artifact locally.
 
 ## Related Projects
 

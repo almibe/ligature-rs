@@ -23,13 +23,13 @@ case class LongLiteral(value: Long) extends Literal
 case class DoubleLiteral(value: Double) extends Literal
 
 object Ligature {
-  val a = Predicate("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+  val a: Predicate = Predicate("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
 
   /**
    * Accepts a String representing an identifier and returns true or false depending on if it is valid.
    */
   def validNamedEntity(identifier: String): Boolean =
-    "[a-zA-Z_][^\\s\\(\\)\\[\\]\\{\\}'\"`<>\\\\]*".r.matches(identifier)
+    "[a-zA-Z_][^\\s()\\[\\]{}'\"`<>\\\\]*".r.matches(identifier)
 
   /**
    * Accepts a String representing a lang tag and returns true or false depending on if it is valid.

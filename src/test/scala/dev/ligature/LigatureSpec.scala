@@ -13,6 +13,17 @@ class LigatureSpec extends AnyFlatSpec with Matchers {
     validNamedEntity("") shouldBe false
     validNamedEntity("http://localhost/people/7") shouldBe true
     validNamedEntity("http://localhost(/people/7") shouldBe false
+    validNamedEntity("http://localhost{/people/7") shouldBe false
+    validNamedEntity("http://localhost\\/people/7") shouldBe false
+    validNamedEntity("http://localhost</people/7") shouldBe false
+    validNamedEntity("http://localhost>/people/7") shouldBe false
+    validNamedEntity("http://localhost[/people/7") shouldBe false
+    validNamedEntity("http://localhost]/people/7") shouldBe false
+    validNamedEntity("http://localhost\"/people/7") shouldBe false
+    validNamedEntity("http://localhost'/people/7") shouldBe false
+    validNamedEntity("http://localhost`/people/7") shouldBe false
+    validNamedEntity("http://localhost\t/people/7") shouldBe false
+    validNamedEntity("http://localhost\n/people/7") shouldBe false
     validNamedEntity("http://localhost /people/7") shouldBe false
     validNamedEntity("hello") shouldBe true
     validNamedEntity("_:") shouldBe true
