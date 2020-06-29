@@ -85,33 +85,33 @@ trait ReadTx {
   /**
    * Returns a Observable of all existing collections.
    */
-  def collections(): Observable[NamedEntity]
+  def collections(): Task[Observable[NamedEntity]]
 
   /**
    * Returns a Observable of all existing collections that start with the given prefix.
    */
-  def collections(prefix: NamedEntity): Observable[NamedEntity]
+  def collections(prefix: NamedEntity): Task[Observable[NamedEntity]]
 
   /**
    * Returns a Observable of all existing collections that are within the given range.
    * `from` is inclusive and `to` is exclusive.
    */
-  def collections(from: NamedEntity, to: NamedEntity): Observable[NamedEntity]
+  def collections(from: NamedEntity, to: NamedEntity): Task[Observable[NamedEntity]]
 
   /**
    * Accepts nothing but returns a Observable of all Statements in the Collection.
    */
-  def allStatements(collection: NamedEntity): Observable[PersistedStatement]
+  def allStatements(collection: NamedEntity): Task[Observable[PersistedStatement]]
 
   /**
    * Is passed a pattern and returns a seq with all matching Statements.
    */
-  def matchStatements(collection: NamedEntity, subject: Entity = null, predicate: Predicate = null, `object`: Object = null): Observable[PersistedStatement]
+  def matchStatements(collection: NamedEntity, subject: Entity = null, predicate: Predicate = null, `object`: Object = null): Task[Observable[PersistedStatement]]
 
   /**
    * Is passed a pattern and returns a seq with all matching Statements.
    */
-  def matchStatements(collection: NamedEntity, subject: Entity, predicate: Predicate, range: Range[_]): Observable[PersistedStatement]
+  def matchStatements(collection: NamedEntity, subject: Entity, predicate: Predicate, range: Range[_]): Task[Observable[PersistedStatement]]
 
   /**
    * Cancels this transaction.
@@ -126,21 +126,21 @@ trait WriteTx {
    * Creates a collection with the given name or does nothing if the collection already exists.
    * Only useful for creating an empty collection.
    */
-  def createCollection(collection: NamedEntity): Try[NamedEntity]
+  def createCollection(collection: NamedEntity): Task[Try[NamedEntity]]
 
   /**
    * Deletes the collection of the name given and does nothing if the collection doesn't exist.
    */
-  def deleteCollection(collection: NamedEntity): Try[NamedEntity]
+  def deleteCollection(collection: NamedEntity): Task[Try[NamedEntity]]
 
   /**
    * Returns a new, unique to this collection, AnonymousEntity
    */
-  def newEntity(collection: NamedEntity): Try[AnonymousEntity]
-  def addStatement(collection: NamedEntity, statement: Statement): Try[PersistedStatement]
-  def removeStatement(collection: NamedEntity, statement: Statement): Try[Statement]
-  def removeEntity(collection: NamedEntity, entity: Entity): Try[Entity]
-  def removePredicate(collection: NamedEntity, predicate: Predicate): Try[Predicate]
+  def newEntity(collection: NamedEntity): Task[Try[AnonymousEntity]]
+  def addStatement(collection: NamedEntity, statement: Statement): Task[Try[PersistedStatement]]
+  def removeStatement(collection: NamedEntity, statement: Statement): Task[Try[Statement]]
+  def removeEntity(collection: NamedEntity, entity: Entity): Task[Try[Entity]]
+  def removePredicate(collection: NamedEntity, predicate: Predicate): Task[Try[Predicate]]
 
   /**
    * Commits this transaction.
