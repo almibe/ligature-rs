@@ -107,16 +107,16 @@ trait ReadTx {
    * Is passed a pattern and returns a seq with all matching Statements.
    */
   def matchStatements(collection: NamedEntity,
-                      subject: Entity = null,
-                      predicate: Predicate = null,
-                      `object`: Object = null): Task[Observable[PersistedStatement]]
+                      subject: Option[Entity] = None,
+                      predicate: Option[Predicate] = None,
+                      `object`: Option[Object] = None): Task[Observable[PersistedStatement]]
 
   /**
    * Is passed a pattern and returns a seq with all matching Statements.
    */
   def matchStatements(collection: NamedEntity,
-                      subject: Entity,
-                      predicate: Predicate,
+                      subject: Option[Entity],
+                      predicate: Option[Predicate],
                       range: Range[_]): Task[Observable[PersistedStatement]]
 
   /**
