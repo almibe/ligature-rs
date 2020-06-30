@@ -51,28 +51,6 @@ trait LigatureStore {
   def readTx(): Resource[Task, ReadTx]
   def writeTx(): Resource[Task, WriteTx]
 
-//  def [T]compute(fn: (ReadTx) -> T): T {
-//    val readTx = this.readTx()
-//    try {
-//      return fn(readTx)
-//    } finally {
-//      if (readTx.isOpen()) {
-//        readTx.cancel()
-//      }
-//    }
-//  }
-//
-//  def write(fn: (WriteTx) -> Unit) {
-//    val writeTx = this.writeTx()
-//    try {
-//      return fn(writeTx)
-//    } finally {
-//      if (writeTx.isOpen()) {
-//        writeTx.commit()
-//      }
-//    }
-//  }
-
   /**
   * Close connection with the Store.
   */
