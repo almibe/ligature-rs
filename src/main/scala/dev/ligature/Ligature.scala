@@ -101,7 +101,7 @@ trait ReadTx {
    * Returns the Statement with the given context.
    * Returns None if the context doesn't exist.
    */
-  def statementByContext(context: AnonymousEntity): Task[Option[PersistedStatement]]
+  def statementByContext(collection: NamedEntity, context: AnonymousEntity): Task[Option[PersistedStatement]]
 
   /**
    * Cancels this transaction.
