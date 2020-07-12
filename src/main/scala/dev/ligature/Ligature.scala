@@ -60,23 +60,23 @@ trait ReadTx {
   /**
    * Returns a Iterable of all existing collections.
    */
-  def collections(): Iterable[NamedEntity]
+  def collections(): IO[Iterable[NamedEntity]]
 
   /**
    * Returns a Iterable of all existing collections that start with the given prefix.
    */
-  def collections(prefix: NamedEntity): Iterable[NamedEntity]
+  def collections(prefix: NamedEntity): IO[Iterable[NamedEntity]]
 
   /**
    * Returns a Iterable of all existing collections that are within the given range.
    * `from` is inclusive and `to` is exclusive.
    */
-  def collections(from: NamedEntity, to: NamedEntity): Iterable[NamedEntity]
+  def collections(from: NamedEntity, to: NamedEntity): IO[Iterable[NamedEntity]]
 
   /**
    * Accepts nothing but returns a Iterable of all Statements in the Collection.
    */
-  def allStatements(collection: NamedEntity): Iterable[PersistedStatement]
+  def allStatements(collection: NamedEntity): IO[Iterable[PersistedStatement]]
 
   /**
    * Is passed a pattern and returns a seq with all matching Statements.
@@ -84,7 +84,7 @@ trait ReadTx {
   def matchStatements(collection: NamedEntity,
                       subject: Option[Entity] = None,
                       predicate: Option[Predicate] = None,
-                      `object`: Option[Object] = None): Iterable[PersistedStatement]
+                      `object`: Option[Object] = None): IO[Iterable[PersistedStatement]]
 
   /**
    * Is passed a pattern and returns a seq with all matching Statements.
@@ -92,13 +92,13 @@ trait ReadTx {
   def matchStatements(collection: NamedEntity,
                       subject: Option[Entity],
                       predicate: Option[Predicate],
-                      range: Range[_]): Iterable[PersistedStatement]
+                      range: Range[_]): IO[Iterable[PersistedStatement]]
 
   /**
    * Returns the Statement with the given context.
    * Returns None if the context doesn't exist.
    */
-  def statementByContext(collection: NamedEntity, context: AnonymousEntity): Option[PersistedStatement]
+  def statementByContext(collection: NamedEntity, context: AnonymousEntity): IO[Option[PersistedStatement]]
 
   /**
    * Cancels this transaction.
@@ -113,21 +113,21 @@ trait WriteTx {
    * Creates a collection with the given name or does nothing if the collection already exists.
    * Only useful for creating an empty collection.
    */
-  def createCollection(collection: NamedEntity): Try[NamedEntity]
+  def createCollection(collection: NamedEntity): IO[Try[NamedEntity]]
 
   /**
    * Deletes the collection of the name given and does nothing if the collection doesn't exist.
    */
-  def deleteCollection(collection: NamedEntity): Try[NamedEntity]
+  def deleteCollection(collection: NamedEntity): IO[Try[NamedEntity]]
 
   /**
    * Returns a new, unique to this collection, AnonymousEntity
    */
-  def newEntity(collection: NamedEntity): Try[AnonymousEntity]
-  def addStatement(collection: NamedEntity, statement: Statement): Try[PersistedStatement]
-  def removeStatement(collection: NamedEntity, statement: Statement): Try[Statement]
-  def removeEntity(collection: NamedEntity, entity: Entity): Try[Entity]
-  def removePredicate(collection: NamedEntity, predicate: Predicate): Try[Predicate]
+  def newEntity(collection: NamedEntity): IO[Try[AnonymousEntity]]
+  def addStatement(collection: NamedEntity, statement: Statement): IO[Try[PersistedStatement]]
+  def removeStatement(collection: NamedEntity, statement: Statement): IO[Try[Statement]]
+  def removeEntity(collection: NamedEntity, entity: Entity): IO[Try[Entity]]
+  def removePredicate(collection: NamedEntity, predicate: Predicate): IO[Try[Predicate]]
 
   /**
    * Commits this transaction.
