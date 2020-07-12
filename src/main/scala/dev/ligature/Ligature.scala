@@ -45,8 +45,8 @@ case class LongLiteralRange(override val start: Long, override val end: Long) ex
 case class DoubleLiteralRange(override val start: Double, override val end: Double) extends Range[Double](start, end)
 
 trait LigatureStore {
-  def compute[T](fun: (ReadTx) => Try[T]): Future[Try[T]]
-  def write[T](fun: (WriteTx) => Try[Unit]): Future[Try[Unit]]
+  def compute[T](fun: (ReadTx) => T): Future[Try[T]]
+  def write[T](fun: (WriteTx) => Unit): Future[Try[Unit]]
 
   /**
   * Close connection with the Store.
