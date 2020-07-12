@@ -46,7 +46,7 @@ case class DoubleLiteralRange(override val start: Double, override val end: Doub
 
 trait LigatureStore {
   def compute[T](fun: (ReadTx) => T): Future[Try[T]]
-  def write[T](fun: (WriteTx) => Unit): Future[Try[Unit]]
+  def write(fun: (WriteTx) => Unit): Future[Try[Unit]]
 
   /**
   * Close connection with the Store.
