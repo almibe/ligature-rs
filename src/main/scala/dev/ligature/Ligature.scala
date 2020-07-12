@@ -4,8 +4,8 @@
 
 package dev.ligature
 
-import scala.concurrent.Future
 import scala.util.Try
+import cats.effect.IO
 
 sealed trait Object
 sealed trait Entity extends Object
@@ -45,8 +45,8 @@ case class LongLiteralRange(override val start: Long, override val end: Long) ex
 case class DoubleLiteralRange(override val start: Double, override val end: Double) extends Range[Double](start, end)
 
 trait LigatureStore {
-  def compute[T](fun: (ReadTx) => T): Future[Try[T]]
-  def write(fun: (WriteTx) => Unit): Future[Try[Unit]]
+  def compute[T](fun: (ReadTx) => T): IO[Try[T]]
+  def write(fun: (WriteTx) => Unit): IO[Try[Unit]]
 
   /**
   * Close connection with the Store.

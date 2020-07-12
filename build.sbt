@@ -10,5 +10,6 @@ scalacOptions ++= Seq("-deprecation", "-feature")
 lazy val root = (project in file("."))
   .settings(
     name := "ligature",
+    libraryDependencies += "org.typelevel" %% "cats-effect" % "2.1.3",
     libraryDependencies += scalaTest % Test
   )
