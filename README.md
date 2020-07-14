@@ -21,7 +21,7 @@ Ligature is heavily influenced by RDF and related standards but attempts to be m
 |              | anonymous entity |           | anonymous entity |                  |
 |              |                  |           | literal          |                  |
 
-#### Entities
+### Entities
 
 Ligature has two types of entities.
 A named entity is represented by an identifier given by the user
@@ -64,7 +64,7 @@ tx.addStatement(AnonymousEntity(newEntity.identifer), NamedEntity("name"), Strin
 tx.addStatement(AnonymousEntity(24601), a, NamedEntity("bird")) // will erorr out since that identifier hasn't been created yet
 ```
 
-#### Literals
+### Literals
 
 Literals in Ligature represent an immutable value.
 Several types are currently supported with plans to add more.
@@ -78,7 +78,7 @@ Below is a table with the currently supported types.
 | LongLiteral(val value: Long) | A value based on Kotlin's u64. | Yes |
 | DoubleLiteral(val value: Double) | A value based on Kotlin's f64 | Yes |
 
-#### Predicates
+### Predicates
 
 Predicates are very similar to Entities in that they represented by a single Identifier,
 but they are only used in the Predicate position of a Statement or Rule.
