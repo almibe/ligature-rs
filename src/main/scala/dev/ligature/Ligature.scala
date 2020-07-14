@@ -45,13 +45,13 @@ case class LongLiteralRange(override val start: Long, override val end: Long) ex
 case class DoubleLiteralRange(override val start: Double, override val end: Double) extends Range[Double](start, end)
 
 trait Ligature {
-  def compute(): Resource[IO, ReadTx]
-  def write(): Resource[IO, WriteTx]
+  def compute: Resource[IO, ReadTx]
+  def write: Resource[IO, WriteTx]
 
   /**
   * Close connection with the Store.
   */
-  def close(): Unit
+  def close: Unit
 
   def isOpen: Boolean
 }
@@ -60,7 +60,7 @@ trait ReadTx {
   /**
    * Returns a Iterable of all existing collections.
    */
-  def collections(): IO[Iterable[NamedEntity]]
+  def collections: IO[Iterable[NamedEntity]]
 
   /**
    * Returns a Iterable of all existing collections that start with the given prefix.
@@ -103,7 +103,7 @@ trait ReadTx {
   /**
    * Cancels this transaction.
    */
-  def cancel(): Unit
+  def cancel: Unit
 
   def isOpen: Boolean
 }
@@ -132,12 +132,12 @@ trait WriteTx {
   /**
    * Commits this transaction.
    */
-  def commit(): Try[Unit]
+  def commit: Try[Unit]
 
   /**
    * Cancels this transaction.
    */
-  def cancel(): Unit
+  def cancel: Unit
 
   def isOpen: Boolean
 }
