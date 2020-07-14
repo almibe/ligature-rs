@@ -2,7 +2,7 @@
 
 Ligature is a library for working with knowledge graphs on the JVM written in Scala.
 This project provides the main interfaces used by Ligature as well as some helper functions and constants.
-See relate projects for implementations of these APIs.
+See related projects for implementations of these APIs.
 Ligature is heavily influenced by RDF and related standards but attempts to be more general purpose and easier to use.
 
 ## RDF's Data Model
@@ -24,8 +24,10 @@ Ligature is heavily influenced by RDF and related standards but attempts to be m
 #### Entities
 
 Ligature has two types of entities.
-A named entity is represented by an identifier given by the user and an anonymous entity is represented by a numeric identifier that is automatically generated.
-Named entity identifiers in Ligature are *currently* defined as strings that start with an ASCII letter or an underscore and don't contain any of the following characters:
+A named entity is represented by an identifier given by the user
+and an anonymous entity is represented by a numeric identifier that is automatically generated.
+Named entity identifiers in Ligature are *currently* defined as strings that start with an ASCII letter
+or an underscore and don't contain any of the following characters:
  * whitespace (space, newline, tabs, carriage returns, etc)
  * " ' `
  * &lt; &gt;
@@ -35,23 +37,25 @@ Named entity identifiers in Ligature are *currently* defined as strings that sta
  * [ ]
 
 If for some reason you need any of these characters in your identifier it is suggested that you use standard URL encoding.
-Note that identifiers with underscores are reserved for internal use and end users cannot create them themselves.
+Note that identifiers that start with underscores are reserved for internal use and end users cannot create them themselves.
 
-Identifiers can be something that is meaningful like an IRI/URL, an id from an existing system, a name, or it can be an incrementing id via the `newEntity` method.
+Identifiers can be something that is meaningful like an IRI/URL, an id from an existing system, a name,
+or it can be an incrementing id via the `newEntity` method.
 Below is an example statement using identifiers in Kotlin format.
 
-```kotlin
+```scala
 tx.addStatement(Entity("Emily"), Entity("loves"), Entity("cats"))
 ```
 
 The `default` argument passed is imported as a value from `dev.ligature.default`.
 It is equal to `Entity("_")` and represents the default graph in Ligature.
 
-Besides using named entities, the `newEntity` method returns a unique Anonymous Entity with an Identifier that is automatically generated.
-The `newEntity` method runs inside a transaction so it is guaranteed to be unique and to not already exist in the Dataset at the time of creation.
-For example here is some pseudo code.
+Besides using named entities, the `newEntity` method returns a unique Anonymous Entity with an Identifier
+that is automatically generated.
+The `newEntity` method runs inside a transaction so it is guaranteed to be unique and at the time of creation.
+For example here is some pseudocode.
 
-```kotlin
+```scala
 val tx = collection.writeTx()
 val newEntity = tx.newEntity() // creates a new identifer, in this case let's say `42`
 tx.addStatement(x, a, NamedEntity("company")) // should run fine
@@ -76,7 +80,8 @@ Below is a table with the currently supported types.
 
 #### Predicates
 
-Predicates are very similar to Entities in that they represented by a single Identifier, but they are only used in the Predicate position of a Statement or Rule.
+Predicates are very similar to Entities in that they represented by a single Identifier,
+but they are only used in the Predicate position of a Statement or Rule.
 
 ## Building
 This project requires SBT to be installed.
