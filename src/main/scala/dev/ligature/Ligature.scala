@@ -44,7 +44,7 @@ case class StringLiteralRange(override val start: String, override val end: Stri
 case class LongLiteralRange(override val start: Long, override val end: Long) extends Range[Long](start, end)
 case class DoubleLiteralRange(override val start: Double, override val end: Double) extends Range[Double](start, end)
 
-trait LigatureStore {
+trait Ligature {
   def compute(): Resource[IO, ReadTx]
   def write(): Resource[IO, WriteTx]
 
