@@ -44,11 +44,8 @@ or it can be an incrementing id via the `newEntity` method.
 Below is an example statement using identifiers in Kotlin format.
 
 ```scala
-tx.addStatement(Entity("Emily"), Entity("loves"), Entity("cats"))
+tx.addStatement(NamedEntity("Emily"), Preidcate("loves"), NamedEntity("cats"))
 ```
-
-The `default` argument passed is imported as a value from `dev.ligature.default`.
-It is equal to `Entity("_")` and represents the default graph in Ligature.
 
 Besides using named entities, the `newEntity` method returns a unique Anonymous Entity with an Identifier
 that is automatically generated.
@@ -56,12 +53,13 @@ The `newEntity` method runs inside a transaction so it is guaranteed to be uniqu
 For example here is some pseudocode.
 
 ```scala
-val tx = collection.writeTx()
-val newEntity = tx.newEntity() // creates a new identifer, in this case let's say `42`
-tx.addStatement(x, a, NamedEntity("company")) // should run fine
-tx.addStatement(newEntity, NamedEntity("name"), StringLiteral("Pear")) // should run fine
-tx.addStatement(AnonymousEntity(newEntity.identifer), NamedEntity("name"), StringLiteral("Pear")) // will run fine since it's just another way of writing the above line
-tx.addStatement(AnonymousEntity(24601), a, NamedEntity("bird")) // will erorr out since that identifier hasn't been created yet
+collection.write { tx =>
+  val newEntity = tx.newEntity() // creates a new identifer, in this case let's say `42`
+  tx.addStatement(x, a, NamedEntity("company")) // should run fine
+  tx.addStatement(newEntity, NamedEntity("name"), StringLiteral("Pear")) // should run fine
+  tx.addStatement(AnonymousEntity(newEntity.identifer), NamedEntity("name"), StringLiteral("Pear")) // will run fine since it's just another way of writing the above line
+  tx.addStatement(AnonymousEntity(24601), a, NamedEntity("bird")) // will erorr out since that identifier hasn't been created yet
+}
 ```
 
 ### Literals
