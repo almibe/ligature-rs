@@ -51,7 +51,7 @@ trait Ligature {
   /**
   * Close connection with the Store.
   */
-  def close: Unit
+  def close(): Unit
 
   def isOpen: Boolean
 }
@@ -103,7 +103,7 @@ trait ReadTx {
   /**
    * Cancels this transaction.
    */
-  def cancel: Unit
+  def cancel(): Unit
 
   def isOpen: Boolean
 }
@@ -132,12 +132,12 @@ trait WriteTx {
   /**
    * Commits this transaction.
    */
-  def commit: Try[Unit]
+  def commit(): Try[Unit]
 
   /**
    * Cancels this transaction.
    */
-  def cancel: Unit
+  def cancel(): Unit
 
   def isOpen: Boolean
 }
