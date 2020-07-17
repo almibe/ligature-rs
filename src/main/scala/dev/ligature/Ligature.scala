@@ -125,11 +125,6 @@ trait WriteTx {
   def removePredicate(collection: NamedEntity, predicate: Predicate): IO[Try[Predicate]]
 
   /**
-   * Commits this transaction.
-   */
-  def commit(): Try[Unit]
-
-  /**
    * Cancels this transaction.
    */
   def cancel(): Unit
