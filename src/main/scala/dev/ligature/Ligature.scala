@@ -100,11 +100,6 @@ trait ReadTx {
    */
   def statementByContext(collection: NamedEntity, context: AnonymousEntity): IO[Option[PersistedStatement]]
 
-  /**
-   * Cancels this transaction.
-   */
-  def cancel(): Unit
-
   def isOpen: Boolean
 }
 
