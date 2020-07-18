@@ -90,13 +90,13 @@ Once that is set up use `sbt test` to run tests `sbt publishM2` to install the a
 
 | Name | Description | URL |
 | ---- | ----------- | --- |
-| ligature-in-memory | In-memory implementation of the Ligature API in Kotlin using Vavr | https://github.com/almibe/ligature-in-memory |
+| ligature-keyvalue | A library for storing Ligature data in a key-value store and an in-memory implementation. | https://github.com/almibe/ligature-keyvalue |
 | ligature-rocksdb | Implementation of Ligature that uses the RocksDB data store. | https://github.com/almibe/ligature-rocksdb |
 | wander | A scripting language for working with Ligature. | https://github.com/almibe/wander |
 | ligature-ontology | Ontology/OWL support for Ligature. | https://github.com/almibe/ligature-ontology |
 | ligature-test-suite | A common test suite for Ligature implementations. | https://github.com/almibe/ligature-test-suite |
 | ligature-foundationdb | Implementation of Ligature for the JVM that uses FoundationDB as its data store. | https://github.com/almibe/ligature-foundationdb |
-| ligature-formats | Support for various RDF serializations with Ligature | https://github.com/almibe/ligature-formats |
+| ligature-formats | Support for various RDF serializations with Ligature. | https://github.com/almibe/ligature-formats |
 | ligature-sparql | SPARQL support for Ligature. | https://github.com/almibe/ligature-sparql |
 
 ## Ligature-Ex
