@@ -13,11 +13,13 @@ case class NamedEntity(identifier: String) extends Entity
 case class AnonymousEntity(identifier: Long) extends Entity
 case class Predicate(identifier: String)
 sealed trait Literal extends Object
-case class LangLiteral(value: String, langTag: String) extends Literal
-case class StringLiteral(value: String) extends Literal
+sealed trait RangeLiteral extends Literal
+case class Range[T <: RangeLiteral, U <: RangeLiteral](start: T, end: U)(implicit ev: T =:= U)
+case class LangLiteral(value: String, langTag: String) extends RangeLiteral
+case class StringLiteral(value: String) extends RangeLiteral
 case class BooleanLiteral(value: Boolean) extends Literal
-case class LongLiteral(value: Long) extends Literal
-case class DoubleLiteral(value: Double) extends Literal
+case class LongLiteral(value: Long) extends RangeLiteral
+case class DoubleLiteral(value: Double) extends RangeLiteral
 
 object Ligature {
   val a: Predicate = Predicate("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
@@ -37,12 +39,6 @@ object Ligature {
 
 case class Statement(subject: Entity, predicate: Predicate, `object`: Object)
 case class PersistedStatement(collection: NamedEntity, statement: Statement, context: AnonymousEntity)
-
-sealed class Range[T](val start: T, val end: T)
-case class LangLiteralRange(override val start: LangLiteral, override val end: LangLiteral) extends Range[LangLiteral](start, end)
-case class StringLiteralRange(override val start: String, override val end: String) extends Range[String](start, end)
-case class LongLiteralRange(override val start: Long, override val end: Long) extends Range[Long](start, end)
-case class DoubleLiteralRange(override val start: Double, override val end: Double) extends Range[Double](start, end)
 
 trait Ligature {
   def compute: Resource[IO, ReadTx]
