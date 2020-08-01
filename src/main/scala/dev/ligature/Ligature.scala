@@ -82,13 +82,13 @@ trait ReadTx {
                       predicate: Option[Predicate] = None,
                       `object`: Option[Object] = None): IO[Iterable[PersistedStatement]]
 
-  /**
-   * Is passed a pattern and returns a seq with all matching Statements.
-   */
-  def matchStatements(collection: NamedEntity,
-                      subject: Option[Entity],
-                      predicate: Option[Predicate],
-                      range: Range[_, _]): IO[Iterable[PersistedStatement]]
+//  /**
+//   * Is passed a pattern and returns a seq with all matching Statements.
+//   */
+//  def matchStatements(collection: NamedEntity,
+//                      subject: Option[Entity],
+//                      predicate: Option[Predicate],
+//                      range: Range[_, _]): IO[Iterable[PersistedStatement]]
 
   /**
    * Returns the Statement with the given context.
