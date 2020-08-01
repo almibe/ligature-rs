@@ -88,7 +88,7 @@ trait ReadTx {
   def matchStatements(collection: NamedEntity,
                       subject: Option[Entity],
                       predicate: Option[Predicate],
-                      range: Range[_]): IO[Iterable[PersistedStatement]]
+                      range: Range[_, _]): IO[Iterable[PersistedStatement]]
 
   /**
    * Returns the Statement with the given context.
