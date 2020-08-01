@@ -120,9 +120,10 @@ trait WriteTx {
    */
   def newEntity(collection: NamedEntity): IO[Try[AnonymousEntity]]
   def addStatement(collection: NamedEntity, statement: Statement): IO[Try[PersistedStatement]]
-  def removeStatement(collection: NamedEntity, statement: Statement): IO[Try[Statement]]
-  def removeEntity(collection: NamedEntity, entity: Entity): IO[Try[Entity]]
-  def removePredicate(collection: NamedEntity, predicate: Predicate): IO[Try[Predicate]]
+//  Commenting out the below as part of #125
+//  def removeStatement(collection: NamedEntity, statement: Statement): IO[Try[Statement]]
+//  def removeEntity(collection: NamedEntity, entity: Entity): IO[Try[Entity]]
+//  def removePredicate(collection: NamedEntity, predicate: Predicate): IO[Try[Predicate]]
 
   /**
    * Cancels this transaction.
