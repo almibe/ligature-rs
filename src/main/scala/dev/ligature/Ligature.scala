@@ -41,15 +41,12 @@ case class Statement(subject: Entity, predicate: Predicate, `object`: Object)
 case class PersistedStatement(collection: NamedEntity, statement: Statement, context: AnonymousEntity)
 
 trait Ligature {
+  def start(): Resource[IO, LigatureSession]
+}
+
+trait LigatureSession {
   def compute: Resource[IO, ReadTx]
   def write: Resource[IO, WriteTx]
-
-  /**
-  * Close connection with the Store.
-  */
-  def close(): Unit
-
-  def isOpen: Boolean
 }
 
 trait ReadTx {
