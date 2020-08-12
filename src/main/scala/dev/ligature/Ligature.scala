@@ -4,7 +4,7 @@
 
 package dev.ligature
 
-import zio.Runtime.Managed
+import zio.Managed
 import zio.ZIO
 
 import scala.util.Try
@@ -43,12 +43,12 @@ case class Statement(subject: Entity, predicate: Predicate, `object`: Object)
 case class PersistedStatement(collection: NamedEntity, statement: Statement, context: AnonymousEntity)
 
 trait Ligature {
-  def start(): Managed[LigatureSession]
+  def start(): Managed[Throwable, LigatureSession]
 }
 
 trait LigatureSession {
-  def compute: Managed[ReadTx]
-  def write: Managed[WriteTx]
+  def compute: Managed[Throwable, ReadTx]
+  def write: Managed[Throwable, WriteTx]
 }
 
 trait ReadTx {
