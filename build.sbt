@@ -10,6 +10,6 @@ scalacOptions ++= Seq("-deprecation", "-feature")
 lazy val root = (project in file("."))
   .settings(
     name := "ligature",
-    libraryDependencies += "dev.zio" %% "zio" % "1.0.0",
+    libraryDependencies += "io.monix" %% "monix" % "3.2.2",
     libraryDependencies += scalaTest % Test
   )
