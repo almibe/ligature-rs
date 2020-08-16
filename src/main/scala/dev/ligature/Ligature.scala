@@ -4,6 +4,7 @@
 
 package dev.ligature
 
+import cats.effect.Resource
 import monix.eval.Task
 import monix.reactive.Observable
 
@@ -43,12 +44,12 @@ case class Statement(subject: Entity, predicate: Predicate, `object`: Object)
 case class PersistedStatement(collection: NamedEntity, statement: Statement, context: AnonymousEntity)
 
 trait Ligature {
-  def start(): Observable[LigatureSession]
+  def start(): Resource[Task, LigatureSession]
 }
 
 trait LigatureSession {
-  def compute: Observable[ReadTx]
-  def write: Observable[WriteTx]
+  def compute: Resource[Task, ReadTx]
+  def write: Resource[Task, WriteTx]
 }
 
 trait ReadTx {
