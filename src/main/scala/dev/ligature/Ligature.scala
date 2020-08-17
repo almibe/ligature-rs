@@ -14,6 +14,7 @@ sealed trait Object
 sealed trait Entity extends Object
 case class NamedEntity(identifier: String) extends Entity
 case class AnonymousEntity(identifier: Long) extends Entity
+case class Context(identifier: Long) extends Entity
 case class Predicate(identifier: String)
 sealed trait Literal extends Object
 sealed trait RangeLiteral extends Literal
@@ -41,7 +42,7 @@ object Ligature {
 }
 
 case class Statement(subject: Entity, predicate: Predicate, `object`: Object)
-case class PersistedStatement(collection: NamedEntity, statement: Statement, context: AnonymousEntity)
+case class PersistedStatement(collection: NamedEntity, statement: Statement, context: Context)
 
 trait Ligature {
   def start(): Resource[Task, LigatureSession]
@@ -94,7 +95,7 @@ trait ReadTx {
    * Returns the Statement with the given context.
    * Returns None if the context doesn't exist.
    */
-  def statementByContext(collection: NamedEntity, context: AnonymousEntity): Task[Option[PersistedStatement]]
+  def statementByContext(collection: NamedEntity, context: Context): Task[Option[PersistedStatement]]
 
   def isOpen: Boolean
 }

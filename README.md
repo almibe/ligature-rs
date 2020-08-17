@@ -15,11 +15,12 @@ Ligature is heavily influenced by RDF and related standards but attempts to be m
 
 ## Ligature's Data Model
 
-| Collection   | Subject          | Predicate | Object           | Context          |
-| ------------ | ---------------- | --------- | ---------------- | ---------------- |
-| named entity | named entity     | predicate | named entity     | anonymous entity |
-|              | anonymous entity |           | anonymous entity |                  |
-|              |                  |           | literal          |                  |
+| Collection   | Subject          | Predicate | Object           | Context |
+| ------------ | ---------------- | --------- | ---------------- | ------- |
+| named entity | named entity     | predicate | named entity     | content |
+| context      | anonymous entity |           | anonymous entity |         |
+|              |                  |           | literal          |         |
+|              |                  | context   |                  |         |
 
 ### Entities
 
@@ -80,6 +81,10 @@ Below is a table with the currently supported types.
 
 Predicates are very similar to Entities in that they represented by a single Identifier,
 but they are only used in the Predicate position of a Statement or Rule.
+
+### Context
+
+TODO
 
 ## Building
 This project requires SBT to be installed.
