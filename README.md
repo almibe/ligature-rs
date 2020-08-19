@@ -17,10 +17,10 @@ Ligature is heavily influenced by RDF and related standards but attempts to be m
 
 | Collection   | Subject          | Predicate | Object           | Context |
 | ------------ | ---------------- | --------- | ---------------- | ------- |
-| named entity | named entity     | predicate | named entity     | content |
-| context      | anonymous entity |           | anonymous entity |         |
-|              |                  |           | literal          |         |
-|              |                  | context   |                  |         |
+| named entity | named entity     | predicate | named entity     | context |
+|              | anonymous entity |           | anonymous entity |         |
+|              | context          |           | literal          |         |
+|              |                  |           | context          |         |
 
 ### Entities
 
