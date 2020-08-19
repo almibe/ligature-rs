@@ -55,23 +55,23 @@ trait ReadTx {
   /**
    * Returns a Iterable of all existing collections.
    */
-  def collections: Iterator[NamedEntity]
+  def collections: IO[Iterator[NamedEntity]]
 
   /**
    * Returns a Iterable of all existing collections that start with the given prefix.
    */
-  def collections(prefix: NamedEntity): Iterator[NamedEntity]
+  def collections(prefix: NamedEntity): IO[Iterator[NamedEntity]]
 
   /**
    * Returns a Iterable of all existing collections that are within the given range.
    * `from` is inclusive and `to` is exclusive.
    */
-  def collections(from: NamedEntity, to: NamedEntity): Iterator[NamedEntity]
+  def collections(from: NamedEntity, to: NamedEntity): IO[Iterator[NamedEntity]]
 
   /**
    * Accepts nothing but returns a Iterable of all Statements in the Collection.
    */
-  def allStatements(collection: NamedEntity): Iterator[PersistedStatement]
+  def allStatements(collection: NamedEntity): IO[Iterator[PersistedStatement]]
 
   /**
    * Is passed a pattern and returns a seq with all matching Statements.
@@ -79,7 +79,7 @@ trait ReadTx {
   def matchStatements(collection: NamedEntity,
                       subject: Option[Entity] = None,
                       predicate: Option[Predicate] = None,
-                      `object`: Option[Object] = None): Iterator[PersistedStatement]
+                      `object`: Option[Object] = None): IO[Iterator[PersistedStatement]]
 
 //  /**
 //   * Is passed a pattern and returns a seq with all matching Statements.
