@@ -4,9 +4,7 @@
 
 package dev.ligature
 
-import cats.effect.Resource
-import monix.eval.Task
-import monix.reactive.Observable
+import cats.effect.{IO, Resource}
 
 import scala.util.Try
 
@@ -45,35 +43,35 @@ case class Statement(subject: Entity, predicate: Predicate, `object`: Object)
 case class PersistedStatement(collection: NamedEntity, statement: Statement, context: Context)
 
 trait Ligature {
-  def start(): Resource[Task, LigatureSession]
+  def start(): Resource[IO, LigatureSession]
 }
 
 trait LigatureSession {
-  def compute: Resource[Task, ReadTx]
-  def write: Resource[Task, WriteTx]
+  def compute: Resource[IO, ReadTx]
+  def write: Resource[IO, WriteTx]
 }
 
 trait ReadTx {
   /**
    * Returns a Iterable of all existing collections.
    */
-  def collections: Observable[NamedEntity]
+  def collections: Iterator[NamedEntity]
 
   /**
    * Returns a Iterable of all existing collections that start with the given prefix.
    */
-  def collections(prefix: NamedEntity): Observable[NamedEntity]
+  def collections(prefix: NamedEntity): Iterator[NamedEntity]
 
   /**
    * Returns a Iterable of all existing collections that are within the given range.
    * `from` is inclusive and `to` is exclusive.
    */
-  def collections(from: NamedEntity, to: NamedEntity): Observable[NamedEntity]
+  def collections(from: NamedEntity, to: NamedEntity): Iterator[NamedEntity]
 
   /**
    * Accepts nothing but returns a Iterable of all Statements in the Collection.
    */
-  def allStatements(collection: NamedEntity): Observable[PersistedStatement]
+  def allStatements(collection: NamedEntity): Iterator[PersistedStatement]
 
   /**
    * Is passed a pattern and returns a seq with all matching Statements.
@@ -81,7 +79,7 @@ trait ReadTx {
   def matchStatements(collection: NamedEntity,
                       subject: Option[Entity] = None,
                       predicate: Option[Predicate] = None,
-                      `object`: Option[Object] = None): Observable[PersistedStatement]
+                      `object`: Option[Object] = None): Iterator[PersistedStatement]
 
 //  /**
 //   * Is passed a pattern and returns a seq with all matching Statements.
@@ -89,13 +87,13 @@ trait ReadTx {
 //  def matchStatements(collection: NamedEntity,
 //                      subject: Option[Entity],
 //                      predicate: Option[Predicate],
-//                      range: Range[_, _]): Task[Any, Throwable, Iterable[PersistedStatement]]
+//                      range: Range[_, _]): IO[Any, Throwable, Iterable[PersistedStatement]]
 
   /**
    * Returns the Statement with the given context.
    * Returns None if the context doesn't exist.
    */
-  def statementByContext(collection: NamedEntity, context: Context): Task[Option[PersistedStatement]]
+  def statementByContext(collection: NamedEntity, context: Context): IO[Option[PersistedStatement]]
 
   def isOpen: Boolean
 }
@@ -105,22 +103,22 @@ trait WriteTx {
    * Creates a collection with the given name or does nothing if the collection already exists.
    * Only useful for creating an empty collection.
    */
-  def createCollection(collection: NamedEntity): Task[Try[NamedEntity]]
+  def createCollection(collection: NamedEntity): IO[Try[NamedEntity]]
 
   /**
    * Deletes the collection of the name given and does nothing if the collection doesn't exist.
    */
-  def deleteCollection(collection: NamedEntity): Task[Try[NamedEntity]]
+  def deleteCollection(collection: NamedEntity): IO[Try[NamedEntity]]
 
   /**
    * Returns a new, unique to this collection, AnonymousEntity
    */
-  def newEntity(collection: NamedEntity): Task[Try[AnonymousEntity]]
-  def addStatement(collection: NamedEntity, statement: Statement): Task[Try[PersistedStatement]]
+  def newEntity(collection: NamedEntity): IO[Try[AnonymousEntity]]
+  def addStatement(collection: NamedEntity, statement: Statement): IO[Try[PersistedStatement]]
 //  Commenting out the below as part of #125
-//  def removeStatement(collection: NamedEntity, statement: Statement): Task[Any, Throwable, Try[Statement]]
-//  def removeEntity(collection: NamedEntity, entity: Entity): Task[Any, Throwable, Try[Entity]]
-//  def removePredicate(collection: NamedEntity, predicate: Predicate): Task[Any, Throwable, Try[Predicate]]
+//  def removeStatement(collection: NamedEntity, statement: Statement): IO[Any, Throwable, Try[Statement]]
+//  def removeEntity(collection: NamedEntity, entity: Entity): IO[Any, Throwable, Try[Entity]]
+//  def removePredicate(collection: NamedEntity, predicate: Predicate): IO[Any, Throwable, Try[Predicate]]
 
   /**
    * Cancels this transaction.
