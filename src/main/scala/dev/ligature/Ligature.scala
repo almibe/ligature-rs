@@ -8,13 +8,11 @@ import cats.effect.{IO, Resource}
 
 import scala.util.Try
 
-sealed trait Object
-sealed trait Entity extends Object
-case class NamedEntity(identifier: String) extends Entity
+sealed trait Element
+sealed trait Entity extends Element
+case class NamedElement(identifier: String) extends Entity
 case class AnonymousEntity(identifier: Long) extends Entity
-case class Context(identifier: Long) extends Entity
-case class Predicate(identifier: String)
-sealed trait Literal extends Object
+sealed trait Literal extends Element
 sealed trait RangeLiteral extends Literal
 case class Range[T <: RangeLiteral, U <: RangeLiteral](start: T, end: U)(implicit ev: T =:= U)
 case class LangLiteral(value: String, langTag: String) extends RangeLiteral
@@ -24,7 +22,7 @@ case class LongLiteral(value: Long) extends RangeLiteral
 case class DoubleLiteral(value: Double) extends RangeLiteral
 
 object Ligature {
-  val a: Predicate = Predicate("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+  val a: NamedElement = NamedElement("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
 
   /**
    * Accepts a String representing an identifier and returns true or false depending on if it is valid.
@@ -39,8 +37,8 @@ object Ligature {
     "[a-zA-Z]+(-[a-zA-Z0-9]+)*".r.matches(langTag)
 }
 
-case class Statement(subject: Entity, predicate: Predicate, `object`: Object)
-case class PersistedStatement(collection: NamedEntity, statement: Statement, context: Context)
+case class Statement(subject: Entity, predicate: NamedElement, `object`: Element)
+case class PersistedStatement(collection: NamedElement, statement: Statement, context: AnonymousEntity)
 
 trait Ligature {
   def start(): Resource[IO, LigatureSession]
@@ -55,31 +53,31 @@ trait ReadTx {
   /**
    * Returns a Iterable of all existing collections.
    */
-  def collections: IO[Iterator[NamedEntity]]
+  def collections: IO[Iterator[NamedElement]]
 
   /**
    * Returns a Iterable of all existing collections that start with the given prefix.
    */
-  def collections(prefix: NamedEntity): IO[Iterator[NamedEntity]]
+  def collections(prefix: NamedElement): IO[Iterator[NamedElement]]
 
   /**
    * Returns a Iterable of all existing collections that are within the given range.
    * `from` is inclusive and `to` is exclusive.
    */
-  def collections(from: NamedEntity, to: NamedEntity): IO[Iterator[NamedEntity]]
+  def collections(from: NamedElement, to: NamedElement): IO[Iterator[NamedElement]]
 
   /**
    * Accepts nothing but returns a Iterable of all Statements in the Collection.
    */
-  def allStatements(collection: NamedEntity): IO[Iterator[PersistedStatement]]
+  def allStatements(collection: NamedElement): IO[Iterator[PersistedStatement]]
 
   /**
    * Is passed a pattern and returns a seq with all matching Statements.
    */
-  def matchStatements(collection: NamedEntity,
+  def matchStatements(collection: NamedElement,
                       subject: Option[Entity] = None,
-                      predicate: Option[Predicate] = None,
-                      `object`: Option[Object] = None): IO[Iterator[PersistedStatement]]
+                      predicate: Option[NamedElement] = None,
+                      `object`: Option[Element] = None): IO[Iterator[PersistedStatement]]
 
 //  /**
 //   * Is passed a pattern and returns a seq with all matching Statements.
@@ -93,7 +91,7 @@ trait ReadTx {
    * Returns the Statement with the given context.
    * Returns None if the context doesn't exist.
    */
-  def statementByContext(collection: NamedEntity, context: Context): IO[Option[PersistedStatement]]
+  def statementByContext(collection: NamedElement, context: AnonymousEntity): IO[Option[PersistedStatement]]
 
   def isOpen: Boolean
 }
@@ -103,18 +101,18 @@ trait WriteTx {
    * Creates a collection with the given name or does nothing if the collection already exists.
    * Only useful for creating an empty collection.
    */
-  def createCollection(collection: NamedEntity): IO[Try[NamedEntity]]
+  def createCollection(collection: NamedElement): IO[Try[NamedElement]]
 
   /**
    * Deletes the collection of the name given and does nothing if the collection doesn't exist.
    */
-  def deleteCollection(collection: NamedEntity): IO[Try[NamedEntity]]
+  def deleteCollection(collection: NamedElement): IO[Try[NamedElement]]
 
   /**
    * Returns a new, unique to this collection, AnonymousEntity
    */
-  def newEntity(collection: NamedEntity): IO[Try[AnonymousEntity]]
-  def addStatement(collection: NamedEntity, statement: Statement): IO[Try[PersistedStatement]]
+  def newEntity(collection: NamedElement): IO[Try[AnonymousEntity]]
+  def addStatement(collection: NamedElement, statement: Statement): IO[Try[PersistedStatement]]
 //  Commenting out the below as part of #125
 //  def removeStatement(collection: NamedEntity, statement: Statement): IO[Any, Throwable, Try[Statement]]
 //  def removeEntity(collection: NamedEntity, entity: Entity): IO[Any, Throwable, Try[Entity]]
