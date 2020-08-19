@@ -9,9 +9,9 @@ import cats.effect.{IO, Resource}
 import scala.util.Try
 
 sealed trait Element
-sealed trait Entity extends Element
-case class NamedElement(identifier: String) extends Entity
-case class AnonymousEntity(identifier: Long) extends Entity
+sealed trait Subject extends Element
+case class NamedElement(identifier: String) extends Subject
+case class AnonymousElement(identifier: Long) extends Subject
 sealed trait Literal extends Element
 sealed trait RangeLiteral extends Literal
 case class Range[T <: RangeLiteral, U <: RangeLiteral](start: T, end: U)(implicit ev: T =:= U)
@@ -27,7 +27,7 @@ object Ligature {
   /**
    * Accepts a String representing an identifier and returns true or false depending on if it is valid.
    */
-  def validNamedEntity(identifier: String): Boolean =
+  def validNamedElement(identifier: String): Boolean =
     "[a-zA-Z_][^\\s()\\[\\]{}'\"`<>\\\\]*".r.matches(identifier)
 
   /**
@@ -37,8 +37,8 @@ object Ligature {
     "[a-zA-Z]+(-[a-zA-Z0-9]+)*".r.matches(langTag)
 }
 
-case class Statement(subject: Entity, predicate: NamedElement, `object`: Element)
-case class PersistedStatement(collection: NamedElement, statement: Statement, context: AnonymousEntity)
+case class Statement(subject: Subject, predicate: NamedElement, `object`: Element)
+case class PersistedStatement(collection: NamedElement, statement: Statement, context: AnonymousElement)
 
 trait Ligature {
   def start(): Resource[IO, LigatureSession]
@@ -75,7 +75,7 @@ trait ReadTx {
    * Is passed a pattern and returns a seq with all matching Statements.
    */
   def matchStatements(collection: NamedElement,
-                      subject: Option[Entity] = None,
+                      subject: Option[Subject] = None,
                       predicate: Option[NamedElement] = None,
                       `object`: Option[Element] = None): IO[Iterator[PersistedStatement]]
 
@@ -91,7 +91,7 @@ trait ReadTx {
    * Returns the Statement with the given context.
    * Returns None if the context doesn't exist.
    */
-  def statementByContext(collection: NamedElement, context: AnonymousEntity): IO[Option[PersistedStatement]]
+  def statementByContext(collection: NamedElement, context: AnonymousElement): IO[Option[PersistedStatement]]
 
   def isOpen: Boolean
 }
@@ -111,7 +111,7 @@ trait WriteTx {
   /**
    * Returns a new, unique to this collection, AnonymousEntity
    */
-  def newEntity(collection: NamedElement): IO[Try[AnonymousEntity]]
+  def newEntity(collection: NamedElement): IO[Try[AnonymousElement]]
   def addStatement(collection: NamedElement, statement: Statement): IO[Try[PersistedStatement]]
 //  Commenting out the below as part of #125
 //  def removeStatement(collection: NamedEntity, statement: Statement): IO[Any, Throwable, Try[Statement]]

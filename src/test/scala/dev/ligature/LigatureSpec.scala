@@ -10,26 +10,26 @@ import org.scalatest.matchers.should.Matchers
 
 class LigatureSpec extends AnyFlatSpec with Matchers {
   it should "validIdentifier tests" in {
-    validNamedEntity("") shouldBe false
-    validNamedEntity("http://localhost/people/7") shouldBe true
-    validNamedEntity("http://localhost(/people/7") shouldBe false
-    validNamedEntity("http://localhost{/people/7") shouldBe false
-    validNamedEntity("http://localhost\\/people/7") shouldBe false
-    validNamedEntity("http://localhost</people/7") shouldBe false
-    validNamedEntity("http://localhost>/people/7") shouldBe false
-    validNamedEntity("http://localhost[/people/7") shouldBe false
-    validNamedEntity("http://localhost]/people/7") shouldBe false
-    validNamedEntity("http://localhost\"/people/7") shouldBe false
-    validNamedEntity("http://localhost'/people/7") shouldBe false
-    validNamedEntity("http://localhost`/people/7") shouldBe false
-    validNamedEntity("http://localhost\t/people/7") shouldBe false
-    validNamedEntity("http://localhost\n/people/7") shouldBe false
-    validNamedEntity("http://localhost /people/7") shouldBe false
-    validNamedEntity("hello") shouldBe true
-    validNamedEntity("_:") shouldBe true
-    validNamedEntity("_:valid") shouldBe true
-    validNamedEntity("_:1") shouldBe true
-    validNamedEntity("_:1344") shouldBe true
+    validNamedElement("") shouldBe false
+    validNamedElement("http://localhost/people/7") shouldBe true
+    validNamedElement("http://localhost(/people/7") shouldBe false
+    validNamedElement("http://localhost{/people/7") shouldBe false
+    validNamedElement("http://localhost\\/people/7") shouldBe false
+    validNamedElement("http://localhost</people/7") shouldBe false
+    validNamedElement("http://localhost>/people/7") shouldBe false
+    validNamedElement("http://localhost[/people/7") shouldBe false
+    validNamedElement("http://localhost]/people/7") shouldBe false
+    validNamedElement("http://localhost\"/people/7") shouldBe false
+    validNamedElement("http://localhost'/people/7") shouldBe false
+    validNamedElement("http://localhost`/people/7") shouldBe false
+    validNamedElement("http://localhost\t/people/7") shouldBe false
+    validNamedElement("http://localhost\n/people/7") shouldBe false
+    validNamedElement("http://localhost /people/7") shouldBe false
+    validNamedElement("hello") shouldBe true
+    validNamedElement("_:") shouldBe true
+    validNamedElement("_:valid") shouldBe true
+    validNamedElement("_:1") shouldBe true
+    validNamedElement("_:1344") shouldBe true
   }
 
   it should "validLangTag tests" in {
