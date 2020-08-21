@@ -3,30 +3,30 @@
 Ligature is a library for working with knowledge graphs on the JVM written in Scala.
 This project provides the main interfaces used by Ligature as well as some helper functions and constants.
 See related projects for implementations of these APIs.
+Ligature is heavily influenced by RDF and related standards but attempts to be more general purpose and easier to use.
+
+## RDF's Data Model
+
+| Subject    | Predicate  | Object     | Graph      |
+| ---------- | ---------- | ---------- | ---------- |
+| iri        | iri        | iri        | iri        |
+| blank node |            | blank node | blank node |
+|            |            | literal    |            |
 
 ## Ligature's Data Model
 
-| Collection | Source | Edge | Destination | Context |
-| ---------- | ------ | ---- | ----------- | ------- |
-| String     | Vertex | Edge | Vertex      | Context |
+| Collection    | Subject           | Predicate     | Object            | Context           |
+| ------------- | ----------------- | ------------- | ----------------- | ----------------- |
+| named element | named element     | named element | named element     | anonymous element |
+|               | anonymous element |               | anonymous element |                   |
+|               |                   |               | literal           |                   |
 
-### Vertices
+### Entities
 
-A vertex in Ligature can be one of many kinds.
-A node is a vertex with a literal as an id.
-An anonymous node is a vertex with a generated id.
-Currently, anonymous nodes are given a long for an id but `AnonymousNode(42L)` is different from `Node(LongLiteral(42L))`.
-A vertex can simply represent a literal value.
-A literal is different than a node with a literal identifier.
-For example `StringLiteral("Hello")` is different from `Node(StringLiteral("Hello"))`.
-Finally, a vertex can represent a triple and is called a context.
-Each triple added to a collection gets a unique context that can be used to refer to that particular triple.
-
-### Edges
-
-An edge connects two vertices together or a single vertex to itself.
-An edge simply consists of a label.
-Edge labels in Ligature are *currently* defined as strings that start with an ASCII letter
+Ligature has two types of entities.
+A named entity is represented by an identifier given by the user
+and an anonymous entity is represented by a numeric identifier that is automatically generated.
+Named entity identifiers in Ligature are *currently* defined as strings that start with an ASCII letter
 or an underscore and don't contain any of the following characters:
  * whitespace (space, newline, tabs, carriage returns, etc)
  * " ' `
@@ -35,23 +35,32 @@ or an underscore and don't contain any of the following characters:
  * { }
  * \
  * [ ]
- 
+
 If for some reason you need any of these characters in your identifier it is suggested that you use standard URL encoding.
-Labels can be something that is meaningful like an IRI/URL, an id from an existing system, or just a name.
-Edges with labels that start with `@@` are internal edges and can't be created by users as they aren't valid names.
+Note that identifiers that start with underscores are reserved for internal use and end users cannot create them themselves.
 
-### Triples
-
-A triple is a set of a source vertex, an edge, and a destination vertex.
+Identifiers can be something that is meaningful like an IRI/URL, an id from an existing system, a name,
+or it can be an incrementing id via the `newEntity` method.
 Below is an example statement using identifiers in Kotlin format.
 
 ```scala
-tx.addTriple(Node(StringLiteral("Emily")), Edge("loves"), Node(StringLiteral("cats")))
+tx.addStatement(NamedEntity("Emily"), Preidcate("loves"), NamedEntity("cats"))
 ```
 
-### Contexts
+Besides using named entities, the `newEntity` method returns a unique Anonymous Entity with an Identifier
+that is automatically generated.
+The `newEntity` method runs inside a transaction so it is guaranteed to be unique and at the time of creation.
+For example here is some pseudocode.
 
-TODO
+```scala
+collection.write { tx =>
+  val newEntity = tx.newEntity() // creates a new identifer, in this case let's say `42`
+  tx.addStatement(x, a, NamedEntity("company")) // should run fine
+  tx.addStatement(newEntity, NamedEntity("name"), StringLiteral("Pear")) // should run fine
+  tx.addStatement(AnonymousEntity(newEntity.identifer), NamedEntity("name"), StringLiteral("Pear")) // will run fine since it's just another way of writing the above line
+  tx.addStatement(AnonymousEntity(24601), a, NamedEntity("bird")) // will erorr out since that identifier hasn't been created yet
+}
+```
 
 ### Literals
 
@@ -66,6 +75,15 @@ Below is a table with the currently supported types.
 | BooleanLiteral(val value: Boolean) | A boolean value. | No |
 | LongLiteral(val value: Long) | A value based on Kotlin's u64. | Yes |
 | DoubleLiteral(val value: Double) | A value based on Kotlin's f64 | Yes |
+
+### Predicates
+
+Predicates are very similar to Entities in that they represented by a single Identifier,
+but they are only used in the Predicate position of a Statement or Rule.
+
+### Context
+
+TODO
 
 ## Building
 This project requires SBT to be installed.
