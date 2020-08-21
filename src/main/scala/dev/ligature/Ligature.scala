@@ -87,7 +87,7 @@ trait ReadTx {
    * Returns the Triple with the given context.
    * Returns None if the context doesn't exist.
    */
-  def statementByContext(collection: CollectionName, context: Node): IO[Option[PersistedTriple]]
+  def tripleByContext(collection: CollectionName, context: Node): IO[Option[PersistedTriple]]
 
   def isOpen: Boolean
 }
