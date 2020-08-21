@@ -8,11 +8,10 @@ import cats.effect.{IO, Resource}
 
 import scala.util.Try
 
-sealed trait Element
-sealed trait Subject extends Element
-case class NamedElement(identifier: String) extends Subject
-case class AnonymousElement(identifier: Long) extends Subject
-sealed trait Literal extends Element
+sealed trait Vertex
+case class Node(identifier: Literal) extends Vertex
+case class AnonymousNode(identifier: Long) extends Vertex
+sealed trait Literal extends Vertex
 sealed trait RangeLiteral extends Literal
 case class Range[T <: RangeLiteral, U <: RangeLiteral](start: T, end: U)(implicit ev: T =:= U)
 case class LangLiteral(value: String, langTag: String) extends RangeLiteral
@@ -21,24 +20,18 @@ case class BooleanLiteral(value: Boolean) extends Literal
 case class LongLiteral(value: Long) extends RangeLiteral
 case class DoubleLiteral(value: Double) extends RangeLiteral
 
-object Ligature {
-  val a: NamedElement = NamedElement("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+case class Edge(label: String)
 
+object Ligature {
   /**
    * Accepts a String representing an identifier and returns true or false depending on if it is valid.
    */
-  def validNamedElement(identifier: String): Boolean =
-    "[a-zA-Z_][^\\s()\\[\\]{}'\"`<>\\\\]*".r.matches(identifier)
-
-  /**
-   * Accepts a String representing a lang tag and returns true or false depending on if it is valid.
-   */
-  def validLangTag(langTag: String): Boolean =
-    "[a-zA-Z]+(-[a-zA-Z0-9]+)*".r.matches(langTag)
+  def validLabel(label: String): Boolean =
+    "[a-zA-Z_][^\\s()\\[\\]{}'\"`<>\\\\]*".r.matches(label)
 }
 
-case class Statement(subject: Subject, predicate: NamedElement, `object`: Element)
-case class PersistedStatement(collection: NamedElement, statement: Statement, context: AnonymousElement)
+case class Triple(source: Vertex, edge: Edge, destination: Vertex)
+case class PersistedTriple(collection: String, triple: Triple, context: Node)
 
 trait Ligature {
   def start(): Resource[IO, LigatureSession]
@@ -53,45 +46,45 @@ trait ReadTx {
   /**
    * Returns a Iterable of all existing collections.
    */
-  def collections: IO[Iterator[NamedElement]]
+  def collections: IO[Iterator[String]]
 
   /**
    * Returns a Iterable of all existing collections that start with the given prefix.
    */
-  def collections(prefix: NamedElement): IO[Iterator[NamedElement]]
+  def collections(prefix: String): IO[Iterator[String]]
 
   /**
    * Returns a Iterable of all existing collections that are within the given range.
    * `from` is inclusive and `to` is exclusive.
    */
-  def collections(from: NamedElement, to: NamedElement): IO[Iterator[NamedElement]]
+  def collections(from: String, to: String): IO[Iterator[String]]
 
   /**
    * Accepts nothing but returns a Iterable of all Statements in the Collection.
    */
-  def allStatements(collection: NamedElement): IO[Iterator[PersistedStatement]]
+  def allTriples(collection: String): IO[Iterator[PersistedTriple]]
 
   /**
-   * Is passed a pattern and returns a seq with all matching Statements.
+   * Is passed a pattern and returns a seq with all matching Triples.
    */
-  def matchStatements(collection: NamedElement,
-                      subject: Option[Subject] = None,
-                      predicate: Option[NamedElement] = None,
-                      `object`: Option[Element] = None): IO[Iterator[PersistedStatement]]
+  def matchTriples(collection: String,
+                      subject: Option[Vertex] = None,
+                      predicate: Option[Edge] = None,
+                      `object`: Option[Vertex] = None): IO[Iterator[PersistedTriple]]
 
 //  /**
-//   * Is passed a pattern and returns a seq with all matching Statements.
+//   * Is passed a pattern and returns a seq with all matching Triples.
 //   */
-//  def matchStatements(collection: NamedEntity,
+//  def matchTriples(collection: NamedEntity,
 //                      subject: Option[Entity],
 //                      predicate: Option[Predicate],
-//                      range: Range[_, _]): IO[Any, Throwable, Iterable[PersistedStatement]]
+//                      range: Range[_, _]): IO[Any, Throwable, Iterable[PersistedTriple]]
 
   /**
-   * Returns the Statement with the given context.
+   * Returns the Triple with the given context.
    * Returns None if the context doesn't exist.
    */
-  def statementByContext(collection: NamedElement, context: AnonymousElement): IO[Option[PersistedStatement]]
+  def statementByContext(collection: String, context: Node): IO[Option[PersistedTriple]]
 
   def isOpen: Boolean
 }
@@ -101,20 +94,20 @@ trait WriteTx {
    * Creates a collection with the given name or does nothing if the collection already exists.
    * Only useful for creating an empty collection.
    */
-  def createCollection(collection: NamedElement): IO[Try[NamedElement]]
+  def createCollection(collection: String): IO[Try[String]]
 
   /**
    * Deletes the collection of the name given and does nothing if the collection doesn't exist.
    */
-  def deleteCollection(collection: NamedElement): IO[Try[NamedElement]]
+  def deleteCollection(collection: String): IO[Try[String]]
 
   /**
    * Returns a new, unique to this collection, AnonymousEntity
    */
-  def newEntity(collection: NamedElement): IO[Try[AnonymousElement]]
-  def addStatement(collection: NamedElement, statement: Statement): IO[Try[PersistedStatement]]
+  def newEntity(collection: String): IO[Try[AnonymousNode]]
+  def addTriple(collection: String, statement: Triple): IO[Try[PersistedTriple]]
 //  Commenting out the below as part of #125
-//  def removeStatement(collection: NamedEntity, statement: Statement): IO[Any, Throwable, Try[Statement]]
+//  def removeTriple(collection: NamedEntity, statement: Triple): IO[Any, Throwable, Try[Triple]]
 //  def removeEntity(collection: NamedEntity, entity: Entity): IO[Any, Throwable, Try[Entity]]
 //  def removePredicate(collection: NamedEntity, predicate: Predicate): IO[Any, Throwable, Try[Predicate]]
 
