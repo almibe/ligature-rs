@@ -6,9 +6,9 @@ See related projects for implementations of these APIs.
 
 ## Ligature's Data Model
 
-| Collection | Source | Edge | Destination | Context        |
-| ---------- | ------ | ---- | ----------- | -------------- |
-| string     | vertex | edge | vertex      | anonymous node |
+| Collection | Source | Edge | Destination | Context |
+| ---------- | ------ | ---- | ----------- | ------- |
+| String     | Vertex | Edge | Vertex      | Context |
 
 ### Vertices
 
@@ -16,9 +16,11 @@ A vertex in Ligature can be one of many kinds.
 A node is a vertex with a literal as an id.
 An anonymous node is a vertex with a generated id.
 Currently, anonymous nodes are given a long for an id but `AnonymousNode(42L)` is different from `Node(LongLiteral(42L))`.
-A vertex can also simply represent a literal value.
+A vertex can simply represent a literal value.
 A literal is different than a node with a literal identifier.
 For example `StringLiteral("Hello")` is different from `Node(StringLiteral("Hello"))`.
+Finally, a vertex can represent a triple and is called a context.
+Each triple added to a collection gets a unique context that can be used to refer to that particular triple.
 
 ### Edges
 

@@ -19,6 +19,7 @@ case class StringLiteral(value: String) extends RangeLiteral
 case class BooleanLiteral(value: Boolean) extends Literal
 case class LongLiteral(value: Long) extends RangeLiteral
 case class DoubleLiteral(value: Double) extends RangeLiteral
+case class Context(identifier: Long) extends Vertex
 
 case class Edge(label: String)
 
