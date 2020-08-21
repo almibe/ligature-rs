@@ -8,6 +8,8 @@ import cats.effect.{IO, Resource}
 
 import scala.util.Try
 
+case class CollectionName(name: String)
+
 sealed trait Vertex
 case class Node(identifier: Literal) extends Vertex
 case class AnonymousNode(identifier: Long) extends Vertex
@@ -32,7 +34,7 @@ object Ligature {
 }
 
 case class Triple(source: Vertex, edge: Edge, destination: Vertex)
-case class PersistedTriple(collection: String, triple: Triple, context: Node)
+case class PersistedTriple(collection: CollectionName, triple: Triple, context: Node)
 
 trait Ligature {
   def start(): Resource[IO, LigatureSession]
@@ -47,28 +49,28 @@ trait ReadTx {
   /**
    * Returns a Iterable of all existing collections.
    */
-  def collections: IO[Iterator[String]]
+  def collections: IO[Iterator[CollectionName]]
 
   /**
    * Returns a Iterable of all existing collections that start with the given prefix.
    */
-  def collections(prefix: String): IO[Iterator[String]]
+  def collections(prefix: CollectionName): IO[Iterator[CollectionName]]
 
   /**
    * Returns a Iterable of all existing collections that are within the given range.
    * `from` is inclusive and `to` is exclusive.
    */
-  def collections(from: String, to: String): IO[Iterator[String]]
+  def collections(from: CollectionName, to: CollectionName): IO[Iterator[CollectionName]]
 
   /**
    * Accepts nothing but returns a Iterable of all Statements in the Collection.
    */
-  def allTriples(collection: String): IO[Iterator[PersistedTriple]]
+  def allTriples(collection: CollectionName): IO[Iterator[PersistedTriple]]
 
   /**
    * Is passed a pattern and returns a seq with all matching Triples.
    */
-  def matchTriples(collection: String,
+  def matchTriples(collection: CollectionName,
                       subject: Option[Vertex] = None,
                       predicate: Option[Edge] = None,
                       `object`: Option[Vertex] = None): IO[Iterator[PersistedTriple]]
@@ -85,7 +87,7 @@ trait ReadTx {
    * Returns the Triple with the given context.
    * Returns None if the context doesn't exist.
    */
-  def statementByContext(collection: String, context: Node): IO[Option[PersistedTriple]]
+  def statementByContext(collection: CollectionName, context: Node): IO[Option[PersistedTriple]]
 
   def isOpen: Boolean
 }
@@ -95,18 +97,18 @@ trait WriteTx {
    * Creates a collection with the given name or does nothing if the collection already exists.
    * Only useful for creating an empty collection.
    */
-  def createCollection(collection: String): IO[Try[String]]
+  def createCollection(collection: CollectionName): IO[Try[CollectionName]]
 
   /**
    * Deletes the collection of the name given and does nothing if the collection doesn't exist.
    */
-  def deleteCollection(collection: String): IO[Try[String]]
+  def deleteCollection(collection: CollectionName): IO[Try[CollectionName]]
 
   /**
    * Returns a new, unique to this collection, AnonymousEntity
    */
-  def newEntity(collection: String): IO[Try[AnonymousNode]]
-  def addTriple(collection: String, statement: Triple): IO[Try[PersistedTriple]]
+  def newEntity(collection: CollectionName): IO[Try[AnonymousNode]]
+  def addTriple(collection: CollectionName, statement: Triple): IO[Try[PersistedTriple]]
 //  Commenting out the below as part of #125
 //  def removeTriple(collection: NamedEntity, statement: Triple): IO[Any, Throwable, Try[Triple]]
 //  def removeEntity(collection: NamedEntity, entity: Entity): IO[Any, Throwable, Try[Entity]]
