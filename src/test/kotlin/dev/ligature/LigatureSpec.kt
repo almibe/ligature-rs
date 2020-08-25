@@ -4,10 +4,6 @@
 
 package dev.ligature
 
-import dev.ligature.Ligature._
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
-
 class LigatureSpec extends AnyFlatSpec with Matchers {
   it should "validIdentifier tests" in {
     validNamedElement("") shouldBe false
