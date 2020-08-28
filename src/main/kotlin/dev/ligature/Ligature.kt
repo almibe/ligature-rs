@@ -34,55 +34,55 @@ data class Statement(val subject: Subject, val predicate: NamedElement, val `obj
 data class PersistedStatement(val collection: NamedElement, val statement: Statement, val context: AnonymousElement)
 
 interface Ligature {
-  fun compute: Resource[IO, ReadTx]
-  fun write: Resource[IO, WriteTx]
+  suspend fun compute(): ReadTx
+  suspend fun write(): WriteTx
 }
 
 interface ReadTx {
   /**
    * Returns a Iterable of all existing collections.
    */
-  fun collections: IO[Iterator[NamedElement]]
+  suspend fun collections(): Flow<NamedElement>
 
   /**
    * Returns a Iterable of all existing collections that start with the given prefix.
    */
-  fun collections(prefix: NamedElement): IO[Iterator[NamedElement]]
+  suspend fun collections(prefix: NamedElement): Flow<NamedElement>
 
   /**
    * Returns a Iterable of all existing collections that are within the given range.
    * `from` is inclusive and `to` is exclusive.
    */
-  fun collections(from: NamedElement, to: NamedElement): IO[Iterator[NamedElement]]
+  suspend fun collections(from: NamedElement, to: NamedElement): Flow<NamedElement>
 
   /**
    * Accepts nothing but returns a Iterable of all Statements in the Collection.
    */
-  fun allStatements(collection: NamedElement): IO[Iterator[PersistedStatement]]
+  suspend fun allStatements(collection: NamedElement): Flow<PersistedStatement>
 
   /**
    * Is passed a pattern and returns a seq with all matching Statements.
    */
-  fun matchStatements(collection: NamedElement,
-                      subject: Option[Subject] = None,
-                      predicate: Option[NamedElement] = None,
-                      `object`: Option[Element] = None): IO[Iterator[PersistedStatement]]
+  suspend fun matchStatements(collection: NamedElement,
+                      subject: Option<Subject> = None,
+                      predicate: Option<NamedElement> = None,
+                      `object`: Option<Element> = None): Flow<PersistedStatement>
 
 //  /**
 //   * Is passed a pattern and returns a seq with all matching Statements.
 //   */
 //  fun matchStatements(collection: NamedEntity,
-//                      subject: Option[Entity],
-//                      predicate: Option[Predicate],
-//                      range: ClosedRange<RangeLiteral>): IO[Any, Throwable, Iterable[PersistedStatement]]
+//                      subject: Option<Entity>,
+//                      predicate: Option<Predicate>,
+//                      range: ClosedRange<RangeLiteral>): Any, Throwable, Iterable<PersistedStatement>>
 
   /**
    * Returns the Statement with the given context.
    * Returns None if the context doesn't exist.
    */
-  fun statementByContext(collection: NamedElement, context: AnonymousElement): IO[Option[PersistedStatement]]
+  suspend fun statementByContext(collection: NamedElement, context: AnonymousElement): Option<PersistedStatement>>
 
-  fun isOpen: Boolean
+  suspend fun isOpen: Boolean
 }
 
 interface WriteTx {
@@ -90,27 +90,27 @@ interface WriteTx {
    * Creates a collection with the given name or does nothing if the collection already exists.
    * Only useful for creating an empty collection.
    */
-  fun createCollection(collection: NamedElement): IO[Try[NamedElement]]
+  suspend fun createCollection(collection: NamedElement): NamedElement
 
   /**
    * Deletes the collection of the name given and does nothing if the collection doesn't exist.
    */
-  fun deleteCollection(collection: NamedElement): IO[Try[NamedElement]]
+  suspend fun deleteCollection(collection: NamedElement): NamedElement
 
   /**
    * Returns a new, unique to this collection, AnonymousEntity
    */
-  fun newEntity(collection: NamedElement): IO[Try[AnonymousElement]]
-  fun addStatement(collection: NamedElement, statement: Statement): IO[Try[PersistedStatement]]
+  suspend fun newEntity(collection: NamedElement): AnonymousElement
+  suspend fun addStatement(collection: NamedElement, statement: Statement): PersistedStatement
 //  Commenting out the below as part of #125
-//  fun removeStatement(collection: NamedEntity, statement: Statement): IO[Any, Throwable, Try[Statement]]
-//  fun removeEntity(collection: NamedEntity, entity: Entity): IO[Any, Throwable, Try[Entity]]
-//  fun removePredicate(collection: NamedEntity, predicate: Predicate): IO[Any, Throwable, Try[Predicate]]
+//  fun removeStatement(collection: NamedEntity, statement: Statement): Any, Throwable, Statement>>
+//  fun removeEntity(collection: NamedEntity, entity: Entity): Any, Throwable, Entity>>
+//  fun removePredicate(collection: NamedEntity, predicate: Predicate): Any, Throwable, Predicate>>
 
   /**
    * Cancels this transaction.
    */
-  fun cancel(): Unit
+  suspend fun cancel()
 
-  fun isOpen(): Boolean
+  suspend fun isOpen(): Boolean
 }
