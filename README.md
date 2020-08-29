@@ -89,7 +89,7 @@ They can be accessed from PersistedStatement objects.
 ## Building
 This project requires gradle to be installed.
 I recommend using https://sdkman.io/ to manage gradle installs on Linux.
-Once that is set up use `gradle test` to run tests `gradle install` to install the artifact locally.
+Once that is set up use `gradle test` to run tests `gradle publishToMavenLocal` to install the artifact locally.
 
 ## Related Projects
 
