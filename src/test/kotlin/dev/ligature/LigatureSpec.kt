@@ -4,22 +4,14 @@
 
 package dev.ligature
 
-class LigatureSpec extends AnyFlatSpec with Matchers {
-  it should "validIdentifier tests" in {
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+
+class LigatureSpec : StringSpec({
+  "validIdentifier tests" {
     validNamedElement("") shouldBe false
     validNamedElement("http://localhost/people/7") shouldBe true
     validNamedElement("http://localhost(/people/7") shouldBe false
-    validNamedElement("http://localhost{/people/7") shouldBe false
-    validNamedElement("http://localhost\\/people/7") shouldBe false
-    validNamedElement("http://localhost</people/7") shouldBe false
-    validNamedElement("http://localhost>/people/7") shouldBe false
-    validNamedElement("http://localhost[/people/7") shouldBe false
-    validNamedElement("http://localhost]/people/7") shouldBe false
-    validNamedElement("http://localhost\"/people/7") shouldBe false
-    validNamedElement("http://localhost'/people/7") shouldBe false
-    validNamedElement("http://localhost`/people/7") shouldBe false
-    validNamedElement("http://localhost\t/people/7") shouldBe false
-    validNamedElement("http://localhost\n/people/7") shouldBe false
     validNamedElement("http://localhost /people/7") shouldBe false
     validNamedElement("hello") shouldBe true
     validNamedElement("_:") shouldBe true
@@ -28,7 +20,7 @@ class LigatureSpec extends AnyFlatSpec with Matchers {
     validNamedElement("_:1344") shouldBe true
   }
 
-  it should "validLangTag tests" in {
+  "validLangTag tests" {
     validLangTag("") shouldBe false
     validLangTag("en") shouldBe true
     validLangTag("en-") shouldBe false
@@ -38,4 +30,4 @@ class LigatureSpec extends AnyFlatSpec with Matchers {
     validLangTag("ennnenefnk-dkfjkjfl-dfakjelfkjalkf-fakjeflkajlkfj") shouldBe true
     validLangTag("en-fr-ef ") shouldBe false
   }
-}
+})
