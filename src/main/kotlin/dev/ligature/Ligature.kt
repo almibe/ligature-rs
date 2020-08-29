@@ -4,38 +4,43 @@
 
 package dev.ligature
 
+import arrow.core.None
+import arrow.core.Option
+import kotlinx.coroutines.flow.Flow
+
 sealed class Element
 sealed class Subject: Element()
 data class NamedElement(val identifier: String): Subject()
 data class AnonymousElement(val identifier: Long): Subject()
 sealed class Literal: Element()
-sealed class RangeLiteral: Literal()
-data class LangLiteral(val value: String, val langTag: String): RangeLiteral()
-data class StringLiteral(val value: String): RangeLiteral()
+data class LangLiteral(val value: String, val langTag: String): Literal()
+data class StringLiteral(val value: String): Literal()
 data class BooleanLiteral(val value: Boolean): Literal()
-data class LongLiteral(val value: Long): RangeLiteral()
-data class DoubleLiteral(val value: Double): RangeLiteral()
+data class LongLiteral(val value: Long): Literal()
+data class DoubleLiteral(val value: Double): Literal()
 
 val a: NamedElement = NamedElement("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
 
 /**
  * Accepts a String representing an identifier and returns true or false depending on if it is valid.
  */
-fun validNamedElement(identifier: String): Boolean =
-  "[a-zA-Z_][^\\s()\\[\\]{}'\"`<>\\\\]*".r.matches(identifier)
+fun validNamedElement(identifier: String): Boolean {
+  return "[a-zA-Z_][^\\s\\(\\)\\[\\]\\{\\}'\"`<>\\\\]*".toRegex().matches(identifier)
+}
 
 /**
  * Accepts a String representing a lang tag and returns true or false depending on if it is valid.
  */
-fun validLangTag(langTag: String): Boolean =
-  "[a-zA-Z]+(-[a-zA-Z0-9]+)*".r.matches(langTag)
+fun validLangTag(langTag: String): Boolean {
+  return "[a-zA-Z]+(-[a-zA-Z0-9]+)*".toRegex().matches(langTag)
+}
 
 data class Statement(val subject: Subject, val predicate: NamedElement, val `object`: Element)
 data class PersistedStatement(val collection: NamedElement, val statement: Statement, val context: AnonymousElement)
 
 interface Ligature {
-  suspend fun compute(): ReadTx
-  suspend fun write(): WriteTx
+  suspend fun <T>read(fn: (ReadTx)->T): T
+  suspend fun write(fn: (WriteTx)->Unit)
 }
 
 interface ReadTx {
@@ -64,9 +69,9 @@ interface ReadTx {
    * Is passed a pattern and returns a seq with all matching Statements.
    */
   suspend fun matchStatements(collection: NamedElement,
-                      subject: Option<Subject> = None,
-                      predicate: Option<NamedElement> = None,
-                      `object`: Option<Element> = None): Flow<PersistedStatement>
+                              subject: Option<Subject> = None,
+                              predicate: Option<NamedElement> = None,
+                              `object`: Option<Element> = None): Flow<PersistedStatement>
 
 //  /**
 //   * Is passed a pattern and returns a seq with all matching Statements.
@@ -80,9 +85,7 @@ interface ReadTx {
    * Returns the Statement with the given context.
    * Returns None if the context doesn't exist.
    */
-  suspend fun statementByContext(collection: NamedElement, context: AnonymousElement): Option<PersistedStatement>>
-
-  suspend fun isOpen: Boolean
+  suspend fun statementByContext(collection: NamedElement, context: AnonymousElement): Option<PersistedStatement>
 }
 
 interface WriteTx {
@@ -111,6 +114,4 @@ interface WriteTx {
    * Cancels this transaction.
    */
   suspend fun cancel()
-
-  suspend fun isOpen(): Boolean
 }
