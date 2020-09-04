@@ -15,20 +15,21 @@ Ligature is heavily influenced by RDF and related standards but attempts to be m
 
 ## Ligature's Data Model
 
-| Collection    | Subject           | Predicate     | Object            | Context           |
-| ------------- | ----------------- | ------------- | ----------------- | ----------------- |
-| named element | named element     | named element | named element     | anonymous element |
-|               | anonymous element |               | anonymous element |                   |
-|               |                   |               | literal           |                   |
+| Collection | Subject | Predicate | Object | Context       |
+| ---------- | ------- | --------- | ------ | ------------- |
+| LocalNode  | Node    | NamedNode | Object | AnonymousNode |
 
-### Entities
+### Nodes
 
-Ligature has three types of elements.
-A named element is represented by an identifier given by the user
-and an anonymous element is represented by a numeric identifier that is automatically generated.
-Finally, a literal is one of several types of elements that represents a value of a specific type see below for a list
+Ligature has four types of nodes.
+A NamedNode is represented by an identifier given by the user
+and an AnonymousNode is represented by a numeric identifier that is automatically generated.
+A NamedNode can be either a LocalNode or an IRINode.
+A LocalNode is given a name that only is relevent in this collection.
+An IRINode is 
+Finally, a literal is one of several types of nodes that represents a value of a specific type see below for a list
 of current literal types.
-Named element identifiers in Ligature are *currently* defined as strings that start with an ASCII letter
+Named node identifiers in Ligature are *currently* defined as strings that start with an ASCII letter
 or an underscore and don't contain any of the following characters:
  * whitespace (space, newline, tabs, carriage returns, etc)
  * " ' `
@@ -45,21 +46,21 @@ Identifiers can be something that is meaningful like an IRI/URL, an id from an e
 Below is an example statement using identifiers in Scala format.
 
 ```scala
-tx.addStatement(NamedElement("Emily"), NamedElement("loves"), NamedElement("cats"))
+tx.addStatement(NamedNode("Emily"), NamedNode("loves"), NamedNode("cats"))
 ```
 
-Besides using named elements, the `newElement` method returns a unique Anonymous Element with an Identifier
+Besides using named nodes, the `newNode` method returns a unique Anonymous Node with an Identifier
 that is automatically generated.
-The `newElement` method runs inside a transaction so it is guaranteed to be unique and at the time of creation.
+The `newNode` method runs inside a transaction so it is guaranteed to be unique and at the time of creation.
 For example here is some pseudocode.
 
 ```scala
 collection.write { tx =>
-  val e = tx.newElement() // creates a new identifer, in this case let's say `42`
-  tx.addStatement(e, a, NamedElement("company")) // should run fine
-  tx.addStatement(e, NamedElement("name"), StringLiteral("Pear")) // should run fine
-  tx.addStatement(AnonymousElement(newElement.identifer), NamedElement("name"), StringLiteral("Pear")) // will run fine since it's just another way of writing the above line
-  tx.addStatement(AnonymousElement(24601), a, NamedElement("bird")) // will erorr out since that identifier hasn't been created yet
+  val e = tx.newNode() // creates a new identifer, in this case let's say `42`
+  tx.addStatement(e, a, NamedNode("company")) // should run fine
+  tx.addStatement(e, NamedNode("name"), StringLiteral("Pear")) // should run fine
+  tx.addStatement(AnonymousNode(newNode.identifer), NamedNode("name"), StringLiteral("Pear")) // will run fine since it's just another way of writing the above line
+  tx.addStatement(AnonymousNode(24601), a, NamedNode("bird")) // will erorr out since that identifier hasn't been created yet
 }
 ```
 
@@ -79,11 +80,11 @@ Below is a table with the currently supported types.
 
 ### Predicates
 
-Predicates are just NamedElements in the predicate position of the triple.
+Predicates are just NamedNodes in the predicate position of the triple.
 
 ### Context
 
-Contexts are unique AnonymousElements that are created for every Statement.
+Contexts are unique AnonymousNodes that are created for every Statement.
 They can be accessed from PersistedStatement objects.
 
 ## Building

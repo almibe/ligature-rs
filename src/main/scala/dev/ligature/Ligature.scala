@@ -4,23 +4,25 @@
 
 package dev.ligature
 
-sealed trait Element
-sealed trait Subject extends Element
-case class NamedElement(val identifier: String) extends Subject()
-case class AnonymousElement(val identifier: Long) extends Subject()
-sealed trait Literal extends Element
+sealed trait Object
+sealed trait Node extends Object
+sealed trait NamedNode extends Node
+case class LocalNode(name: String) extends NamedNode
+case class IRINode(iri: String) extends NamedNode
+case class AnonymousNode(val identifier: Long) extends Node()
+sealed trait Literal extends Object
 case class LangLiteral(val value: String, val langTag: String) extends Literal()
 case class StringLiteral(val value: String) extends Literal()
 case class BooleanLiteral(val value: Boolean) extends Literal()
 case class LongLiteral(val value: Long) extends Literal()
 case class DoubleLiteral(val value: Double) extends Literal()
 
-val a: NamedElement = NamedElement("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+val a: IRIElement = IRIElement("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
 
 /**
  * Accepts a String representing an identifier and returns true or false depending on if it is valid.
  */
-def validNamedElement(identifier: String): Boolean =
+def validNamedElement(identifier: NamedElement): Boolean =
   "[a-zA-Z_][^\\s()\\[\\]{}'\"`<>\\\\]*".r.matches(identifier)
 
 /**
@@ -29,8 +31,8 @@ def validNamedElement(identifier: String): Boolean =
 def validLangTag(langTag: String): Boolean =
   "[a-zA-Z]+(-[a-zA-Z0-9]+)*".r.matches(langTag)
 
-case class Statement(val subject: Subject, val predicate: NamedElement, val `object`: Element)
-case class PersistedStatement(val collection: NamedElement, val statement: Statement, val context: AnonymousElement)
+case class Statement(val subject: Node, val predicate: NamedNode, val `object`: Object)
+case class PersistedStatement(val collection: LocalNode, val statement: Statement, val context: AnonymousNode)
 
 //trait Ligature
 //  def use(fn: (LigatureStore) -> Unit)
