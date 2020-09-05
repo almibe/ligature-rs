@@ -24,7 +24,7 @@ val a: IRINode = IRINode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
 /**
  * Accepts a String representing an identifier and returns true or false depending on if it is valid.
  */
-def validNamedElement(identifier: NamedElement): Boolean =
+def validNamedNode(identifier: NamedNode): Boolean =
   "[a-zA-Z_][^\\s()\\[\\]{}'\"`<>\\\\]*".r.matches(identifier)
 
 /**
@@ -47,30 +47,30 @@ trait ReadTx
   /**
    * Returns a Iterable of all existing collections.
    */
-  def collections(): Stream[IO, NamedElement]
+  def collections(): Stream[IO, LocalNode]
 
   /**
    * Returns a Iterable of all existing collections that start with the given prefix.
    */
-  def collections(prefix: NamedElement): Stream[IO, NamedElement]
+  def collections(prefix: LocalNode): Stream[IO, LocalNode]
 
   /**
    * Returns a Iterable of all existing collections that are within the given range.
    * `from` is inclusive and `to` is exclusive.
    */
-  def collections(from: NamedElement, to: NamedElement): Stream[IO, NamedElement]
+  def collections(from: LocalNode, to: LocalNode): Stream[IO, LocalNode]
 
   /**
    * Accepts nothing but returns a Iterable of all Statements in the Collection.
    */
-  def allStatements(collection: NamedElement): Stream[IO, PersistedStatement]
+  def allStatements(collection: LocalNode): Stream[IO, PersistedStatement]
 
   /**
    * Is passed a pattern and returns a seq with all matching Statements.
    */
-  def matchStatements(collection: NamedElement,
+  def matchStatements(collection: LocalNode,
     subject: Option<Subject> = None,
-    predicate: Option<NamedElement> = None,
+    predicate: Option<NamedNode> = None,
     `object`: Option<Element> = None): Stream[IO, PersistedStatement]
 
 //  /**
@@ -85,25 +85,25 @@ trait ReadTx
    * Returns the Statement with the given context.
    * Returns None if the context doesn't exist.
    */
-  def statementByContext(collection: NamedElement, context: AnonymousElement): IO[Option[PersistedStatement]]
+  def statementByContext(collection: LocalNode, context: AnonymousElement): IO[Option[PersistedStatement]]
 
 trait WriteTx {
   /**
    * Creates a collection with the given name or does nothing if the collection already exists.
    * Only useful for creating an empty collection.
    */
-  def createCollection(collection: NamedElement): IO[NamedElement]
+  def createCollection(collection: LocalNode): IO[LocalNode]
 
   /**
    * Deletes the collection of the name given and does nothing if the collection doesn't exist.
    */
-  def deleteCollection(collection: NamedElement): IO[NamedElement]
+  def deleteCollection(collection: LocalNode): IO[LocalNode]
 
   /**
    * Returns a new, unique to this collection, AnonymousEntity
    */
-  def newEntity(collection: NamedElement): IO[AnonymousElement]
-  def addStatement(collection: NamedElement, statement: Statement): IO[PersistedStatement]
+  def newEntity(collection: LocalNode): IO[AnonymousElement]
+  def addStatement(collection: LocalNode, statement: Statement): IO[PersistedStatement]
   //  Commenting out the below as part of #125
   //  fun removeStatement(collection: NamedEntity, statement: Statement): Any, Throwable, Statement>>
   //  fun removeEntity(collection: NamedEntity, entity: Entity): Any, Throwable, Entity>>
