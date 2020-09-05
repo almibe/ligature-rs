@@ -5,11 +5,12 @@
 package dev.ligature
 
 import cats.effect.{IO, Resource}
+import fs2.Stream
 
 sealed trait Object
 sealed trait Node extends Object
 sealed trait NamedNode extends Node
-case class LocalNode(name: String) extends NamedNode
+case class LocalNode(identifier: String) extends NamedNode
 case class IRINode(iri: String) extends NamedNode
 case class AnonymousNode(val identifier: Long) extends Node()
 sealed trait Literal extends Object
@@ -24,8 +25,10 @@ val a: IRINode = IRINode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
 /**
  * Accepts a String representing an identifier and returns true or false depending on if it is valid.
  */
-def validNamedNode(identifier: NamedNode): Boolean =
-  "[a-zA-Z_][^\\s()\\[\\]{}'\"`<>\\\\]*".r.matches(identifier)
+def validNamedNode(namedNode: NamedNode): Boolean =
+  namedNode match
+    case local: LocalNode => "[a-zA-Z_][^\\s()\\[\\]{}'\"`<>\\\\]*".r.matches(local.identifier)
+    case iri: IRINode => ???
 
 /**
  * Accepts a String representing a lang tag and returns true or false depending on if it is valid.
@@ -36,14 +39,14 @@ def validLangTag(langTag: String): Boolean =
 case class Statement(val subject: Node, val predicate: NamedNode, val `object`: Object)
 case class PersistedStatement(val collection: LocalNode, val statement: Statement, val context: AnonymousNode)
 
-trait Ligature
+trait Ligature:
   def store(): Resource[IO, LigatureStore]
 
-trait LigatureStore
+trait LigatureStore:
   def read(): Resource[IO, ReadTx]
   def write(): Resource[IO, WriteTx]
 
-trait ReadTx
+trait ReadTx:
   /**
    * Returns a Iterable of all existing collections.
    */
@@ -69,25 +72,25 @@ trait ReadTx
    * Is passed a pattern and returns a seq with all matching Statements.
    */
   def matchStatements(collection: LocalNode,
-    subject: Option<Subject> = None,
-    predicate: Option<NamedNode> = None,
-    `object`: Option<Element> = None): Stream[IO, PersistedStatement]
+    subject: Option[Node] = None,
+    predicate: Option[NamedNode] = None,
+    `object`: Option[Object] = None): Stream[IO, PersistedStatement]
 
 //  /**
 //   * Is passed a pattern and returns a seq with all matching Statements.
 //   */
 //  fun matchStatements(collection: NamedEntity,
-//                      subject: Option<Entity>,
-//                      predicate: Option<Predicate>,
-//                      range: ClosedRange<RangeLiteral>): Any, Throwable, Iterable<PersistedStatement>>
+//                      subject: Option[Entity],
+//                      predicate: Option[Predicate],
+//                      range: ClosedRange[RangeLiteral]): Any, Throwable, Stream[IO, PersistedStatement]
 
   /**
    * Returns the Statement with the given context.
    * Returns None if the context doesn't exist.
    */
-  def statementByContext(collection: LocalNode, context: AnonymousElement): IO[Option[PersistedStatement]]
+  def statementByContext(collection: LocalNode, context: AnonymousNode): IO[Option[PersistedStatement]]
 
-trait WriteTx {
+trait WriteTx:
   /**
    * Creates a collection with the given name or does nothing if the collection already exists.
    * Only useful for creating an empty collection.
@@ -102,7 +105,7 @@ trait WriteTx {
   /**
    * Returns a new, unique to this collection, AnonymousEntity
    */
-  def newEntity(collection: LocalNode): IO[AnonymousElement]
+  def newEntity(collection: LocalNode): IO[AnonymousNode]
   def addStatement(collection: LocalNode, statement: Statement): IO[PersistedStatement]
   //  Commenting out the below as part of #125
   //  fun removeStatement(collection: NamedEntity, statement: Statement): Any, Throwable, Statement>>
@@ -112,4 +115,4 @@ trait WriteTx {
   /**
    * Cancels this transaction.
    */
-  def cancel()
+  def cancel(): Unit
