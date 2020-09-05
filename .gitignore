@@ -1,6 +1,3 @@
 target/
-
-# Ignore Gradle build output directory
-build
 .idea
 _site
