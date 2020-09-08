@@ -9,7 +9,7 @@ lazy val root = project
   .in(file("."))
   .settings(
     name := "ligature",
-    libraryDependencies += "co.fs2" %% "fs2-core" % "3.0-64069b9",
+    libraryDependencies += ("io.monix" %% "monix" % "3.2.2").withDottyCompat(scalaVersion.value),
     libraryDependencies += "org.scalameta" %% "munit" % "0.7.12" % Test,
     testFrameworks += new TestFramework("munit.Framework")
   )

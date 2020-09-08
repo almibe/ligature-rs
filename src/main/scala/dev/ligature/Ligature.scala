@@ -4,8 +4,9 @@
 
 package dev.ligature
 
-import cats.effect.{IO, Resource}
-import fs2.Stream
+import cats.effect.Resource
+import monix.eval.Task
+import monix.reactive.Observable
 
 sealed trait Object
 sealed trait Node extends Object
@@ -40,33 +41,33 @@ case class Statement(val subject: Node, val predicate: NamedNode, val `object`: 
 case class PersistedStatement(val collection: LocalNode, val statement: Statement, val context: AnonymousNode)
 
 trait Ligature:
-  def store(): Resource[IO, LigatureStore]
+  def session(): Resource[Task, LigatureSession]
 
-trait LigatureStore:
-  def read(): Resource[IO, ReadTx]
-  def write(): Resource[IO, WriteTx]
+trait LigatureSession:
+  def read(): Resource[Task, ReadTx]
+  def write(): Resource[Task, WriteTx]
 
 trait ReadTx:
   /**
    * Returns a Iterable of all existing collections.
    */
-  def collections(): Stream[IO, LocalNode]
+  def collections(): Observable[LocalNode]
 
   /**
    * Returns a Iterable of all existing collections that start with the given prefix.
    */
-  def collections(prefix: LocalNode): Stream[IO, LocalNode]
+  def collections(prefix: LocalNode): Observable[LocalNode]
 
   /**
    * Returns a Iterable of all existing collections that are within the given range.
    * `from` is inclusive and `to` is exclusive.
    */
-  def collections(from: LocalNode, to: LocalNode): Stream[IO, LocalNode]
+  def collections(from: LocalNode, to: LocalNode): Observable[LocalNode]
 
   /**
    * Accepts nothing but returns a Iterable of all Statements in the Collection.
    */
-  def allStatements(collection: LocalNode): Stream[IO, PersistedStatement]
+  def allStatements(collection: LocalNode): Observable[PersistedStatement]
 
   /**
    * Is passed a pattern and returns a seq with all matching Statements.
@@ -74,7 +75,7 @@ trait ReadTx:
   def matchStatements(collection: LocalNode,
     subject: Option[Node] = None,
     predicate: Option[NamedNode] = None,
-    `object`: Option[Object] = None): Stream[IO, PersistedStatement]
+    `object`: Option[Object] = None): Observable[PersistedStatement]
 
 //  /**
 //   * Is passed a pattern and returns a seq with all matching Statements.
@@ -82,31 +83,31 @@ trait ReadTx:
 //  fun matchStatements(collection: NamedEntity,
 //                      subject: Option[Entity],
 //                      predicate: Option[Predicate],
-//                      range: ClosedRange[RangeLiteral]): Any, Throwable, Stream[IO, PersistedStatement]
+//                      range: ClosedRange[RangeLiteral]): Any, Throwable, Observable[PersistedStatement]
 
   /**
    * Returns the Statement with the given context.
    * Returns None if the context doesn't exist.
    */
-  def statementByContext(collection: LocalNode, context: AnonymousNode): IO[Option[PersistedStatement]]
+  def statementByContext(collection: LocalNode, context: AnonymousNode): Task[Option[PersistedStatement]]
 
 trait WriteTx:
   /**
    * Creates a collection with the given name or does nothing if the collection already exists.
    * Only useful for creating an empty collection.
    */
-  def createCollection(collection: LocalNode): IO[LocalNode]
+  def createCollection(collection: LocalNode): Task[LocalNode]
 
   /**
    * Deletes the collection of the name given and does nothing if the collection doesn't exist.
    */
-  def deleteCollection(collection: LocalNode): IO[LocalNode]
+  def deleteCollection(collection: LocalNode): Task[LocalNode]
 
   /**
    * Returns a new, unique to this collection, AnonymousEntity
    */
-  def newEntity(collection: LocalNode): IO[AnonymousNode]
-  def addStatement(collection: LocalNode, statement: Statement): IO[PersistedStatement]
+  def newEntity(collection: LocalNode): Task[AnonymousNode]
+  def addStatement(collection: LocalNode, statement: Statement): Task[PersistedStatement]
   //  Commenting out the below as part of #125
   //  fun removeStatement(collection: NamedEntity, statement: Statement): Any, Throwable, Statement>>
   //  fun removeEntity(collection: NamedEntity, entity: Entity): Any, Throwable, Entity>>
