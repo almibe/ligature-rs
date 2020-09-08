@@ -4,31 +4,33 @@
 
 package dev.ligature
 
-import dev.ligature._
+import dev.ligature.Ligature.{validLangTag, validNamedNode}
 import munit.FunSuite
 
 class LigatureSpec extends FunSuite {
   test("validIdentifier tests") {
-    assert(validNamedElement("") == false)
-    assert(validNamedElement("http://localhost/people/7") == true)
-    assert(validNamedElement("http://localhost(/people/7") == false)
-    assert(validNamedElement("http://localhost{/people/7") == false)
-    assert(validNamedElement("http://localhost\\/people/7") == false)
-    assert(validNamedElement("http://localhost</people/7") == false)
-    assert(validNamedElement("http://localhost>/people/7") == false)
-    assert(validNamedElement("http://localhost[/people/7") == false)
-    assert(validNamedElement("http://localhost]/people/7") == false)
-    assert(validNamedElement("http://localhost\"/people/7") == false)
-    assert(validNamedElement("http://localhost'/people/7") == false)
-    assert(validNamedElement("http://localhost`/people/7") == false)
-    assert(validNamedElement("http://localhost\t/people/7") == false)
-    assert(validNamedElement("http://localhost\n/people/7") == false)
-    assert(validNamedElement("http://localhost /people/7") == false)
-    assert(validNamedElement("hello") == true)
-    assert(validNamedElement("_:") == true)
-    assert(validNamedElement("_:valid") == true)
-    assert(validNamedElement("_:1") == true)
-    assert(validNamedElement("_:1344") == true)
+    assert(validNamedNode(LocalNode("")) == false)
+    assert(validNamedNode(LocalNode("http://localhost/people/7")) == true)
+    assert(validNamedNode(LocalNode("http://localhost(/people/7")) == false)
+    assert(validNamedNode(LocalNode("http://localhost{/people/7")) == false)
+    assert(validNamedNode(LocalNode("http://localhost\\/people/7")) == false)
+    assert(validNamedNode(LocalNode("http://localhost</people/7")) == false)
+    assert(validNamedNode(LocalNode("http://localhost>/people/7")) == false)
+    assert(validNamedNode(LocalNode("http://localhost[/people/7")) == false)
+    assert(validNamedNode(LocalNode("http://localhost]/people/7")) == false)
+    assert(validNamedNode(LocalNode("http://localhost\"/people/7")) == false)
+    assert(validNamedNode(LocalNode("http://localhost'/people/7")) == false)
+    assert(validNamedNode(LocalNode("http://localhost`/people/7")) == false)
+    assert(validNamedNode(LocalNode("http://localhost\t/people/7")) == false)
+    assert(validNamedNode(LocalNode("http://localhost\n/people/7")) == false)
+    assert(validNamedNode(LocalNode("http://localhost /people/7")) == false)
+    assert(validNamedNode(LocalNode("hello")) == true)
+    assert(validNamedNode(LocalNode("_:")) == true)
+    assert(validNamedNode(LocalNode("_:valid")) == true)
+    assert(validNamedNode(LocalNode("_:1")) == true)
+    assert(validNamedNode(LocalNode("_:1344")) == true)
+
+    //TODO add set of tests for IRINode
   }
 
   test("validLangTag tests") {
