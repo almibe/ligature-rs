@@ -21,33 +21,39 @@ case class BooleanLiteral(val value: Boolean) extends Literal()
 case class LongLiteral(val value: Long) extends Literal()
 case class DoubleLiteral(val value: Double) extends Literal()
 
-val a: IRINode = IRINode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+object Ligature {
+  val a: IRINode = IRINode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
 
-/**
- * Accepts a String representing an identifier and returns true or false depending on if it is valid.
- */
-def validNamedNode(namedNode: NamedNode): Boolean =
-  namedNode match
-    case local: LocalNode => "[a-zA-Z_][^\\s()\\[\\]{}'\"`<>\\\\]*".r.matches(local.identifier)
-    case iri: IRINode => ???
+  /**
+   * Accepts a String representing an identifier and returns true or false depending on if it is valid.
+   */
+  def validNamedNode(namedNode: NamedNode): Boolean = {
+    namedNode match {
+      case local: LocalNode => "[a-zA-Z_][^\\s()\\[\\]{}'\"`<>\\\\]*".r.matches(local.identifier)
+      case iri: IRINode => ???
+    }
+  }
 
-/**
- * Accepts a String representing a lang tag and returns true or false depending on if it is valid.
- */
-def validLangTag(langTag: String): Boolean =
-  "[a-zA-Z]+(-[a-zA-Z0-9]+)*".r.matches(langTag)
+  /**
+   * Accepts a String representing a lang tag and returns true or false depending on if it is valid.
+   */
+  def validLangTag(langTag: String): Boolean =
+    "[a-zA-Z]+(-[a-zA-Z0-9]+)*".r.matches(langTag)
+}
 
 case class Statement(val subject: Node, val predicate: NamedNode, val `object`: Object)
 case class PersistedStatement(val collection: LocalNode, val statement: Statement, val context: AnonymousNode)
 
-trait Ligature:
+trait Ligature {
   def session(): Resource[Task, LigatureSession]
+}
 
-trait LigatureSession:
+trait LigatureSession {
   def read(): Resource[Task, ReadTx]
   def write(): Resource[Task, WriteTx]
+}
 
-trait ReadTx:
+trait ReadTx {
   /**
    * Returns a Iterable of all existing collections.
    */
@@ -73,25 +79,26 @@ trait ReadTx:
    * Is passed a pattern and returns a seq with all matching Statements.
    */
   def matchStatements(collection: LocalNode,
-    subject: Option[Node] = None,
-    predicate: Option[NamedNode] = None,
-    `object`: Option[Object] = None): Observable[PersistedStatement]
+                      subject: Option[Node] = None,
+                      predicate: Option[NamedNode] = None,
+                      `object`: Option[Object] = None): Observable[PersistedStatement]
 
-//  /**
-//   * Is passed a pattern and returns a seq with all matching Statements.
-//   */
-//  fun matchStatements(collection: NamedEntity,
-//                      subject: Option[Entity],
-//                      predicate: Option[Predicate],
-//                      range: ClosedRange[RangeLiteral]): Any, Throwable, Observable[PersistedStatement]
+  //  /**
+  //   * Is passed a pattern and returns a seq with all matching Statements.
+  //   */
+  //  fun matchStatements(collection: NamedEntity,
+  //                      subject: Option[Entity],
+  //                      predicate: Option[Predicate],
+  //                      range: ClosedRange[RangeLiteral]): Any, Throwable, Observable[PersistedStatement]
 
   /**
    * Returns the Statement with the given context.
    * Returns None if the context doesn't exist.
    */
   def statementByContext(collection: LocalNode, context: AnonymousNode): Task[Option[PersistedStatement]]
+}
 
-trait WriteTx:
+trait WriteTx {
   /**
    * Creates a collection with the given name or does nothing if the collection already exists.
    * Only useful for creating an empty collection.
@@ -107,7 +114,9 @@ trait WriteTx:
    * Returns a new, unique to this collection, AnonymousEntity
    */
   def newEntity(collection: LocalNode): Task[AnonymousNode]
+
   def addStatement(collection: LocalNode, statement: Statement): Task[PersistedStatement]
+
   //  Commenting out the below as part of #125
   //  fun removeStatement(collection: NamedEntity, statement: Statement): Any, Throwable, Statement>>
   //  fun removeEntity(collection: NamedEntity, entity: Entity): Any, Throwable, Entity>>
@@ -117,3 +126,4 @@ trait WriteTx:
    * Cancels this transaction.
    */
   def cancel(): Unit
+}
