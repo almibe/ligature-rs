@@ -13,13 +13,13 @@ sealed trait Node extends Object
 sealed trait NamedNode extends Node
 case class LocalNode(identifier: String) extends NamedNode
 case class IRINode(iri: String) extends NamedNode
-case class AnonymousNode(val identifier: Long) extends Node()
+case class AnonymousNode(identifier: Long) extends Node()
 sealed trait Literal extends Object
-case class LangLiteral(val value: String, val langTag: String) extends Literal()
-case class StringLiteral(val value: String) extends Literal()
-case class BooleanLiteral(val value: Boolean) extends Literal()
-case class LongLiteral(val value: Long) extends Literal()
-case class DoubleLiteral(val value: Double) extends Literal()
+case class LangLiteral(value: String, langTag: String) extends Literal()
+case class StringLiteral(value: String) extends Literal()
+case class BooleanLiteral(value: Boolean) extends Literal()
+case class LongLiteral(value: Long) extends Literal()
+case class DoubleLiteral(value: Double) extends Literal()
 
 object Ligature {
   val a: IRINode = IRINode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
