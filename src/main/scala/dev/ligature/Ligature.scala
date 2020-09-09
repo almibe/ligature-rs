@@ -41,8 +41,8 @@ object Ligature {
     "[a-zA-Z]+(-[a-zA-Z0-9]+)*".r.matches(langTag)
 }
 
-case class Statement(val subject: Node, val predicate: NamedNode, val `object`: Object)
-case class PersistedStatement(val collection: LocalNode, val statement: Statement, val context: AnonymousNode)
+case class Statement(subject: Node, predicate: NamedNode, `object`: Object)
+case class PersistedStatement(collection: LocalNode, statement: Statement, context: AnonymousNode)
 
 trait Ligature {
   def session(): Resource[Task, LigatureSession]
