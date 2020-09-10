@@ -4,31 +4,31 @@
 
 package dev.ligature
 
-import dev.ligature.Ligature.{validLangTag, validIdNode}
+import dev.ligature.Ligature.{validLangTag, validNamedNode}
 import munit.FunSuite
 
 class LigatureSpec extends FunSuite {
   test("validIdentifier tests") {
-    assert(!validIdNode(IdNode("")))
-    assert(validIdNode(IdNode("http://localhost/people/7")))
-    assert(!validIdNode(IdNode("http://localhost(/people/7")))
-    assert(!validIdNode(IdNode("http://localhost{/people/7")))
-    assert(!validIdNode(IdNode("http://localhost\\/people/7")))
-    assert(!validIdNode(IdNode("http://localhost</people/7")))
-    assert(!validIdNode(IdNode("http://localhost>/people/7")))
-    assert(!validIdNode(IdNode("http://localhost[/people/7")))
-    assert(!validIdNode(IdNode("http://localhost]/people/7")))
-    assert(!validIdNode(IdNode("http://localhost\"/people/7")))
-    assert(!validIdNode(IdNode("http://localhost'/people/7")))
-    assert(!validIdNode(IdNode("http://localhost`/people/7")))
-    assert(!validIdNode(IdNode("http://localhost\t/people/7")))
-    assert(!validIdNode(IdNode("http://localhost\n/people/7")))
-    assert(!validIdNode(IdNode("http://localhost /people/7")))
-    assert(validIdNode(IdNode("hello")))
-    assert(validIdNode(IdNode("_:")))
-    assert(validIdNode(IdNode("_:valid")))
-    assert(validIdNode(IdNode("_:1")))
-    assert(validIdNode(IdNode("_:1344")))
+    assert(!validNamedNode(NamedNode("")))
+    assert(validNamedNode(NamedNode("http://localhost/people/7")))
+    assert(!validNamedNode(NamedNode("http://localhost(/people/7")))
+    assert(!validNamedNode(NamedNode("http://localhost{/people/7")))
+    assert(!validNamedNode(NamedNode("http://localhost\\/people/7")))
+    assert(!validNamedNode(NamedNode("http://localhost</people/7")))
+    assert(!validNamedNode(NamedNode("http://localhost>/people/7")))
+    assert(!validNamedNode(NamedNode("http://localhost[/people/7")))
+    assert(!validNamedNode(NamedNode("http://localhost]/people/7")))
+    assert(!validNamedNode(NamedNode("http://localhost\"/people/7")))
+    assert(!validNamedNode(NamedNode("http://localhost'/people/7")))
+    assert(!validNamedNode(NamedNode("http://localhost`/people/7")))
+    assert(!validNamedNode(NamedNode("http://localhost\t/people/7")))
+    assert(!validNamedNode(NamedNode("http://localhost\n/people/7")))
+    assert(!validNamedNode(NamedNode("http://localhost /people/7")))
+    assert(validNamedNode(NamedNode("hello")))
+    assert(validNamedNode(NamedNode("_:")))
+    assert(validNamedNode(NamedNode("_:valid")))
+    assert(validNamedNode(NamedNode("_:1")))
+    assert(validNamedNode(NamedNode("_:1344")))
   }
 
   test("validLangTag tests") {
