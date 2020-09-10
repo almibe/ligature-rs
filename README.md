@@ -17,16 +17,13 @@ Ligature is heavily influenced by RDF and related standards but attempts to be m
 
 | Collection | Subject | Predicate | Object | Context       |
 | ---------- | ------- | --------- | ------ | ------------- |
-| LocalNode  | Node    | NamedNode | Object | AnonymousNode |
+| NamedNode     | Node    | NamedNode    | Object | AnonymousNode |
 
 ### Nodes
 
-Ligature has four types of nodes.
-A NamedNode is represented by an identifier given by the user
+Ligature has two types of nodes.
+An NamedNode is represented by an identifier given by the user
 and an AnonymousNode is represented by a numeric identifier that is automatically generated.
-A NamedNode can be either a LocalNode or an IRINode.
-A LocalNode is given a name that only is relevent in this collection.
-An IRINode is 
 Finally, a literal is one of several types of nodes that represents a value of a specific type see below for a list
 of current literal types.
 Named node identifiers in Ligature are *currently* defined as strings that start with an ASCII letter
@@ -46,7 +43,7 @@ Identifiers can be something that is meaningful like an IRI/URL, an id from an e
 Below is an example statement using identifiers in Scala format.
 
 ```scala
-tx.addStatement(LocalNode("collection"), Statement(LocalNode("Emily"), LocalNode("loves"), LocalNode("cats")))
+tx.addStatement(NamedNode("collection"), Statement(NamedNode("Emily"), NamedNode("loves"), NamedNode("cats")))
 ```
 
 Besides using named nodes, the `newNode` method returns a unique Anonymous Node with an Identifier
@@ -55,13 +52,13 @@ The `newNode` method runs inside a transaction so it is guaranteed to be unique 
 For example here is some pseudocode.
 
 ```scala
-val col = LocalNode("collection")
+val col = NamedNode("collection")
 collection.write.use { tx =>
   val e: AnonymousNode = tx.newNode() // creates a new identifer, in this case let's say `42`
-  tx.addStatement(col, Statement(e, a, LocalNode("company"))) // should run fine
-  tx.addStatement(col, Statement(e, LocalNode("name"), StringLiteral("Pear"))) // should run fine
-  tx.addStatement(col, Statement(AnonymousNode(newNode.identifer), LocalNode("name"), StringLiteral("Pear"))) // will run fine since it's just another way of writing the above line
-  tx.addStatement(col, Statement(AnonymousNode(24601), a, LocalNode("bird"))) // will erorr out since that identifier hasn't been created yet
+  tx.addStatement(col, Statement(e, a, NamedNode("company"))) // should run fine
+  tx.addStatement(col, Statement(e, NamedNode("name"), StringLiteral("Pear"))) // should run fine
+  tx.addStatement(col, Statement(AnonymousNode(newNode.identifer), NamedNode("name"), StringLiteral("Pear"))) // will run fine since it's just another way of writing the above line
+  tx.addStatement(col, Statement(AnonymousNode(24601), a, NamedNode("bird"))) // will erorr out since that identifier hasn't been created yet
 }
 ```
 
