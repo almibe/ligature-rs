@@ -81,8 +81,8 @@ trait ReadTx {
   //  /**
   //   * Is passed a pattern and returns a seq with all matching Statements.
   //   */
-  //  fun matchStatements(collection: NamedEntity,
-  //                      subject: Option[Entity],
+  //  fun matchStatements(collection: NamedNode,
+  //                      subject: Option[Node],
   //                      predicate: Option[Predicate],
   //                      range: ClosedRange[RangeLiteral]): Any, Throwable, Observable[PersistedStatement]
 
@@ -106,16 +106,16 @@ trait WriteTx {
   def deleteCollection(collection: NamedNode): Task[NamedNode]
 
   /**
-   * Returns a new, unique to this collection, AnonymousEntity
+   * Returns a new, unique to this collection, AnonymousNode
    */
-  def newEntity(collection: NamedNode): Task[AnonymousNode]
+  def newNode(collection: NamedNode): Task[AnonymousNode]
 
   def addStatement(collection: NamedNode, statement: Statement): Task[PersistedStatement]
 
   //  Commenting out the below as part of #125
-  //  fun removeStatement(collection: NamedEntity, statement: Statement): Any, Throwable, Statement>>
-  //  fun removeEntity(collection: NamedEntity, entity: Entity): Any, Throwable, Entity>>
-  //  fun removePredicate(collection: NamedEntity, predicate: Predicate): Any, Throwable, Predicate>>
+  //  fun removeStatement(collection: NamedNode, statement: Statement): Any, Throwable, Statement>>
+  //  fun removeNode(collection: NamedNode, node: Node): Any, Throwable, Node>>
+  //  fun removePredicate(collection: NamedNode, predicate: Predicate): Any, Throwable, Predicate>>
 
   /**
    * Cancels this transaction.
