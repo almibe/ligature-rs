@@ -11,13 +11,18 @@ import monix.reactive.Observable
 sealed trait Object
 sealed trait Node extends Object
 case class NamedNode(name: String) extends Node
-case class AnonymousNode(identifier: Long) extends Node()
+case class AnonymousNode(identifier: Long) extends Node
 sealed trait Literal extends Object
-case class LangLiteral(value: String, langTag: String) extends Literal()
-case class StringLiteral(value: String) extends Literal()
-case class BooleanLiteral(value: Boolean) extends Literal()
-case class LongLiteral(value: Long) extends Literal()
-case class DoubleLiteral(value: Double) extends Literal()
+case class LangLiteral(value: String, langTag: String) extends Literal
+case class StringLiteral(value: String) extends Literal
+case class BooleanLiteral(value: Boolean) extends Literal
+case class LongLiteral(value: Long) extends Literal
+case class DoubleLiteral(value: Double) extends Literal
+sealed trait Range
+case class LangLiteralRange(start: LangLiteral, stop: LangLiteral) extends Range
+case class StringLiteralRange(start: StringLiteral, stop: StringLiteral) extends Range
+case class LongLiteralRange(start: LongLiteral, stop: LongLiteral) extends Range
+case class DoubleLiteralRange(start: DoubleLiteral, stop: DoubleLiteral) extends Range
 
 object Ligature {
   val a: NamedNode = NamedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
@@ -71,20 +76,20 @@ trait ReadTx {
   def allStatements(collection: NamedNode): Observable[PersistedStatement]
 
   /**
-   * Is passed a pattern and returns a seq with all matching Statements.
+   * Is passed a pattern and returns an Observable with all matching Statements.
    */
   def matchStatements(collection: NamedNode,
                       subject: Option[Node] = None,
                       predicate: Option[NamedNode] = None,
                       `object`: Option[Object] = None): Observable[PersistedStatement]
 
-  //  /**
-  //   * Is passed a pattern and returns a seq with all matching Statements.
-  //   */
-  //  fun matchStatements(collection: NamedNode,
-  //                      subject: Option[Node],
-  //                      predicate: Option[Predicate],
-  //                      range: ClosedRange[RangeLiteral]): Any, Throwable, Observable[PersistedStatement]
+  /**
+   * Is passed a pattern and returns an Observable with all matching Statements.
+   */
+  def matchStatements(collection: NamedNode,
+                      subject: Option[Node],
+                      predicate: Option[NamedNode],
+                      range: Range): Observable[PersistedStatement]
 
   /**
    * Returns the Statement with the given context.
@@ -112,10 +117,7 @@ trait WriteTx {
 
   def addStatement(collection: NamedNode, statement: Statement): Task[PersistedStatement]
 
-  //  Commenting out the below as part of #125
-  //  fun removeStatement(collection: NamedNode, statement: Statement): Any, Throwable, Statement>>
-  //  fun removeNode(collection: NamedNode, node: Node): Any, Throwable, Node>>
-  //  fun removePredicate(collection: NamedNode, predicate: Predicate): Any, Throwable, Predicate>>
+  def removeStatement(collection: NamedNode, statement: Statement): Task[Statement]
 
   /**
    * Cancels this transaction.
