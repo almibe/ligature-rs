@@ -39,16 +39,16 @@ object Ligature {
 }
 
 trait Ligature {
-  def session(): Resource[Task, LigatureSession]
+  def session: Resource[Task, LigatureSession]
 }
 
 trait LigatureSession {
-  def read(): Resource[Task, ReadTx]
-  def write(): Resource[Task, WriteTx]
+  def read: Resource[Task, ReadTx]
+  def write: Resource[Task, WriteTx]
 }
 
 trait ReadTx {
-  def collections(): Observable[NamedNode]
+  def collections: Observable[NamedNode]
   def collections(prefix: NamedNode): Observable[NamedNode]
   def collections(from: NamedNode, to: NamedNode): Observable[NamedNode]
   def allStatements(collection: NamedNode): Observable[PersistedStatement]
