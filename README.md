@@ -86,25 +86,25 @@ On Linux/Mac I recommend using https://sdkman.io/ to manage SBT installs.
 Once that is set up use `sbt test` to run tests `sbt publishLocal` to install the artifact locally.
 
 ## Related Projects
-| Name                | Description                                                                          | URL                                           |
-| ------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------- |
-| ligature-test-suite | A common test suite for Ligature implementations.                                    | https://github.com/almibe/ligature-test-suite |
-| ligature-keyvalue   | A library for storing Ligature data in a key-value store using the `slonky` library. | https://github.com/almibe/ligature-keyvalue   |
-| ligature-benchmark  | An internal benchmark for Ligature.                                                  | https://github.com/almibe/ligature-benchmark  |
-| wander              | A scripting language for working with Ligature.                                      | https://github.com/almibe/wander              |
-| ligature-ontology   | Ontology/OWL support for Ligature.                                                   | https://github.com/almibe/ligature-ontology   |
-| ligature-formats    | Support for various RDF serializations with Ligature.                                | https://github.com/almibe/ligature-formats    |
-| ligature-sparql     | SPARQL support for Ligature.                                                         | https://github.com/almibe/ligature-sparql     |
+| Name                                                                 | Description                                                                          |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| [ligature-test-suite](https://github.com/almibe/ligature-test-suite) | A common test suite for Ligature implementations.                                    |
+| [ligature-key-value](https://github.com/almibe/ligature-key-value)   | A library for storing Ligature data in a key-value store using the `slonky` library. |
+| [ligature-benchmark](https://github.com/almibe/ligature-benchmark)   | An internal benchmark for Ligature.                                                  |
+| [wander](https://github.com/almibe/wander)                           | A scripting language for working with Ligature.                                      |
+| [ligature-ontology](https://github.com/almibe/ligature-ontology)     | Ontology/OWL support for Ligature.                                                   |
+| [ligature-formats](https://github.com/almibe/ligature-formats)       | Support for various RDF serializations with Ligature.                                |
+| [ligature-sparql](https://github.com/almibe/ligature-sparql)         | SPARQL support for Ligature.                                                         |
 
 ## Ligature-Ex
 Ligature-Ex is a version of Ligature that is written in Rust.
 It currently isn't very active, but I plan on working on it after the main version Ligature is stable.
 
-| Name                   | Description                                                       | URL                                              |
-| ---------------------- | ----------------------------------------------------------------- | ------------------------------------------------ |
-| ligature-ex            | A Rust implementation of Ligature API.                            | https://github.com/almibe/ligature-ex            |
-| ligature-ex-in-memory  | In-memory implementation of the Ligature API in Rust using im.    | https://github.com/almibe/ligature-ex-in-memory  |
-| ligature-ex-test-suite | A common test suite for Ligature-Ex implementations.              | https://github.com/almibe/ligature-ex-test-suite |
-| ligature-ex-level      | Implementation for Ligature-Ex that uses Level as its data store. | https://github.com/almibe/ligature-ex-level      |
-| ligature-ex-wander     | Wander support for Ligature-Ex.                                   | https://github.com/almibe/ligature-ex-wander     |
-| ligature-ex-ontology   | Ontology support for Ligature-Ex.                                 | https://github.com/almibe/ligature-ex-wander     |
+| Name                                                                       | Description                                                       |
+| -------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| [ligature-ex](https://github.com/almibe/ligature-ex)                       | A Rust implementation of Ligature API.                            |
+| [ligature-ex-in-memory](https://github.com/almibe/ligature-ex-in-memory)   | In-memory implementation of the Ligature API in Rust using im.    |
+| [ligature-ex-test-suite](https://github.com/almibe/ligature-ex-test-suite) | A common test suite for Ligature-Ex implementations.              |
+| [ligature-ex-level](https://github.com/almibe/ligature-ex-level)           | Implementation for Ligature-Ex that uses Level as its data store. |
+| [ligature-ex-wander](https://github.com/almibe/ligature-ex-wander)         | Wander support for Ligature-Ex.                                   |
+| [ligature-ex-ontology](https://github.com/almibe/ligature-ex-wander)       | Ontology support for Ligature-Ex.                                 |
