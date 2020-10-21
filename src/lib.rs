@@ -39,44 +39,38 @@ struct PersistedStatement {
     context: AnonymousNode
 }
 
-let a = NamedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+//fn validNamedNode(node: NamedNode) -> bool = "[a-zA-Z_][^\\s()\\[\\]{}'\"`<>\\\\]*".r.matches(node.name)
 
-fn validNamedNode(node: NamedNode): Boolean = "[a-zA-Z_][^\\s()\\[\\]{}'\"`<>\\\\]*".r.matches(node.name)
-
-fn validLangTag(langTag: String): Boolean = "[a-zA-Z]+(-[a-zA-Z0-9]+)*".r.matches(langTag)
+//fn validLangTag(langTag: String) -> bool = "[a-zA-Z]+(-[a-zA-Z0-9]+)*".r.matches(langTag)
 
 trait Ligature {
-  fn session: Resource[Task, LigatureSession]
-}
-
-trait LigatureSession {
-  fn read: Resource[Task, ReadTx]
-  fn write: Resource[Task, WriteTx]
+    async fn read() -> Result<T, String>;
+    async fn write() -> Result<Unit, String>;
 }
 
 trait ReadTx {
-  fn collections: Observable[NamedNode]
-  fn collections(prefix: NamedNode): Observable[NamedNode]
-  fn collections(from: NamedNode, to: NamedNode): Observable[NamedNode]
-  fn allStatements(collection: NamedNode): Observable[PersistedStatement]
-  fn matchStatements(collection: NamedNode,
-    subject: Option[Node] = None,
-    predicate: Option[NamedNode] = None,
-    `object`: Option[Object] = None): Observable[PersistedStatement]
-  fn matchStatements(collection: NamedNode,
-    subject: Option[Node],
-    predicate: Option[NamedNode],
-    range: Range): Observable[PersistedStatement]
-  fn statementByContext(collection: NamedNode, context: AnonymousNode): Task[Option[PersistedStatement]]
+    fn collections() -> Stream<NamedNode>;
+    fn collections_prefix(prefix: NamedNode) -> Stream<NamedNode>;
+    fn collections_range(from: NamedNode, to: NamedNode) -> Stream<NamedNode>;
+    fn all_statements(collection: NamedNode) -> Stream<PersistedStatement>;
+    fn match_statements(collection: NamedNode,
+        subject: Option<Node>,
+        predicate: Option<NamedNode>,
+        object: Option<Object>) -> Stream<PersistedStatement>;
+    fn match_range(collection: NamedNode,
+        subject: Option<Node>,
+        predicate: Option<NamedNode>,
+        range: Range) -> Stream<PersistedStatement>;
+    fn statement_by_context(collection: NamedNode, context: AnonymousNode) -> Option<PersistedStatement>;
 }
 
 trait WriteTx {
-    fn createCollection(collection: NamedNode): Task[NamedNode]
-    fn deleteCollection(collection: NamedNode): Task[NamedNode]
-    fn newNode(collection: NamedNode): Task[AnonymousNode]
-    fn addStatement(collection: NamedNode, statement: Statement): Task[PersistedStatement]
-    fn removeStatement(collection: NamedNode, statement: Statement): Task[Statement]
-    fn cancel(): Unit
+    fn create_collection(collection: NamedNode) -> NamedNode;
+    fn delete_collection(collection: NamedNode) -> NamedNode;
+    fn new_node(collection: NamedNode) -> AnonymousNode;
+    fn add_statement(collection: NamedNode, statement: Statement) -> PersistedStatement;
+    fn remove_statement(collection: NamedNode, statement: Statement) -> Statement;
+    fn cancel() -> Unit;
 }
 
 #[cfg(test)]
