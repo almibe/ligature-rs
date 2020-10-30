@@ -38,15 +38,15 @@ object Ligature {
 }
 
 trait Ligature {
-  def session: Resource[IO, LigatureSession]
+  def session: Resource[IO, LigatureInstance]
 }
 
-trait LigatureSession {
-  def read: Resource[IO, ReadTx]
-  def write: Resource[IO, WriteTx]
+trait LigatureInstance {
+  def read: Resource[IO, LigatureReadTx]
+  def write: Resource[IO, LigatureWriteTx]
 }
 
-trait ReadTx {
+trait LigatureReadTx {
   def collections: Stream[IO, NamedNode]
   def collections(prefix: NamedNode): Stream[IO, NamedNode]
   def collections(from: NamedNode, to: NamedNode): Stream[IO, NamedNode]
@@ -62,7 +62,7 @@ trait ReadTx {
   def statementByContext(collection: NamedNode, context: AnonymousNode): IO[Option[PersistedStatement]]
 }
 
-trait WriteTx {
+trait LigatureWriteTx {
   def createCollection(collection: NamedNode): IO[NamedNode]
   def deleteCollection(collection: NamedNode): IO[NamedNode]
   def newNode(collection: NamedNode): IO[AnonymousNode]
