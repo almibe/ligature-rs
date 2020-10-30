@@ -4,9 +4,8 @@
 
 package dev.ligature
 
-import cats.effect.Resource
-import monix.eval.Task
-import monix.reactive.Observable
+import cats.effect.{IO, Resource}
+import fs2.Stream
 
 sealed trait Object
 sealed trait Node extends Object
@@ -39,35 +38,35 @@ object Ligature {
 }
 
 trait Ligature {
-  def session: Resource[Task, LigatureSession]
+  def session: Resource[IO, LigatureSession]
 }
 
 trait LigatureSession {
-  def read: Resource[Task, ReadTx]
-  def write: Resource[Task, WriteTx]
+  def read: Resource[IO, ReadTx]
+  def write: Resource[IO, WriteTx]
 }
 
 trait ReadTx {
-  def collections: Observable[NamedNode]
-  def collections(prefix: NamedNode): Observable[NamedNode]
-  def collections(from: NamedNode, to: NamedNode): Observable[NamedNode]
-  def allStatements(collection: NamedNode): Observable[PersistedStatement]
+  def collections: Stream[IO, NamedNode]
+  def collections(prefix: NamedNode): Stream[IO, NamedNode]
+  def collections(from: NamedNode, to: NamedNode): Stream[IO, NamedNode]
+  def allStatements(collection: NamedNode): Stream[IO, PersistedStatement]
   def matchStatements(collection: NamedNode,
                       subject: Option[Node] = None,
                       predicate: Option[NamedNode] = None,
-                      `object`: Option[Object] = None): Observable[PersistedStatement]
+                      `object`: Option[Object] = None): Stream[IO, PersistedStatement]
   def matchStatements(collection: NamedNode,
                       subject: Option[Node],
                       predicate: Option[NamedNode],
-                      range: Range): Observable[PersistedStatement]
-  def statementByContext(collection: NamedNode, context: AnonymousNode): Task[Option[PersistedStatement]]
+                      range: Range): Stream[IO, PersistedStatement]
+  def statementByContext(collection: NamedNode, context: AnonymousNode): IO[Option[PersistedStatement]]
 }
 
 trait WriteTx {
-  def createCollection(collection: NamedNode): Task[NamedNode]
-  def deleteCollection(collection: NamedNode): Task[NamedNode]
-  def newNode(collection: NamedNode): Task[AnonymousNode]
-  def addStatement(collection: NamedNode, statement: Statement): Task[PersistedStatement]
-  def removeStatement(collection: NamedNode, statement: Statement): Task[Statement]
+  def createCollection(collection: NamedNode): IO[NamedNode]
+  def deleteCollection(collection: NamedNode): IO[NamedNode]
+  def newNode(collection: NamedNode): IO[AnonymousNode]
+  def addStatement(collection: NamedNode, statement: Statement): IO[PersistedStatement]
+  def removeStatement(collection: NamedNode, statement: Statement): IO[Statement]
   def cancel(): Unit
 }
