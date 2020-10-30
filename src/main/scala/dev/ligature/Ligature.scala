@@ -38,7 +38,7 @@ object Ligature {
 }
 
 trait Ligature {
-  def session: Resource[IO, LigatureInstance]
+  def instance: Resource[IO, LigatureInstance]
 }
 
 trait LigatureInstance {
