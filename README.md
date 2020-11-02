@@ -89,6 +89,7 @@ Once that is set up use `sbt test` to run tests `sbt publishLocal` to install th
 | Name                                                                 | Description                                                                          |
 | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
 | [ligature-test-suite](https://github.com/almibe/ligature-test-suite) | A common test suite for Ligature implementations.                                    |
+| [ligature-mock](https://github.com/almibe/ligature-mock)             | A painfully simple (yet working) mock implementation of Ligature.                    |
 | [ligature-key-value](https://github.com/almibe/ligature-key-value)   | A library for storing Ligature data in a key-value store using the `slonky` library. |
 | [ligature-benchmark](https://github.com/almibe/ligature-benchmark)   | An internal benchmark for Ligature.                                                  |
 | [wander](https://github.com/almibe/wander)                           | A scripting language for working with Ligature.                                      |
