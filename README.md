@@ -88,8 +88,10 @@ Once that is set up use `sbt test` to run tests `sbt publishLocal` to install th
 ## Related Projects
 | Name                                                                 | Description                                                                          |
 | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| [ligature-server](https://github.com/almibe/ligature-server)         | An HTTP server for working with Ligature.                                            |
+| [ligature-lab](https://github.com/almibe/ligature-lab)               | A front-end for experimenting with Ligature.                                         |
 | [ligature-test-suite](https://github.com/almibe/ligature-test-suite) | A common test suite for Ligature implementations.                                    |
-| [ligature-mock](https://github.com/almibe/ligature-mock)             | A painfully simple (yet working) mock implementation of Ligature.                    |
+| [ligature-xodus](https://github.com/almibe/ligature-xodus)           | An implementation of Ligature based on Xodus's EntityStore api.                      |
 | [ligature-key-value](https://github.com/almibe/ligature-key-value)   | A library for storing Ligature data in a key-value store using the `slonky` library. |
 | [ligature-benchmark](https://github.com/almibe/ligature-benchmark)   | An internal benchmark for Ligature.                                                  |
 | [wander](https://github.com/almibe/wander)                           | A scripting language for working with Ligature.                                      |
