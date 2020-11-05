@@ -98,16 +98,3 @@ Once that is set up use `sbt test` to run tests `sbt publishLocal` to install th
 | [ligature-ontology](https://github.com/almibe/ligature-ontology)     | Ontology/OWL support for Ligature.                                                   |
 | [ligature-formats](https://github.com/almibe/ligature-formats)       | Support for various RDF serializations with Ligature.                                |
 | [ligature-sparql](https://github.com/almibe/ligature-sparql)         | SPARQL support for Ligature.                                                         |
-
-## Ligature-Ex
-Ligature-Ex is a version of Ligature that is written in Rust.
-It currently isn't very active, but I plan on working on it after the main version Ligature is stable.
-
-| Name                                                                       | Description                                                       |
-| -------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| [ligature-ex](https://github.com/almibe/ligature-ex)                       | A Rust implementation of Ligature API.                            |
-| [ligature-ex-in-memory](https://github.com/almibe/ligature-ex-in-memory)   | In-memory implementation of the Ligature API in Rust using im.    |
-| [ligature-ex-test-suite](https://github.com/almibe/ligature-ex-test-suite) | A common test suite for Ligature-Ex implementations.              |
-| [ligature-ex-level](https://github.com/almibe/ligature-ex-level)           | Implementation for Ligature-Ex that uses Level as its data store. |
-| [ligature-ex-wander](https://github.com/almibe/ligature-ex-wander)         | Wander support for Ligature-Ex.                                   |
-| [ligature-ex-ontology](https://github.com/almibe/ligature-ex-wander)       | Ontology support for Ligature-Ex.                                 |
