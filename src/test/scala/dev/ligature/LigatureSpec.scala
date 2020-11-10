@@ -4,10 +4,39 @@
 
 package dev.ligature
 
-import dev.ligature.Ligature.{validLangTag, validNamedNode}
+import dev.ligature.Ligature.{validLangTag, validNamedNode, validDataset}
 import munit.FunSuite
 
 class LigatureSpec extends FunSuite {
+  test("validDataset tests") {
+    assert(!validDataset(Dataset("")))
+    assert(!validDataset(Dataset("http://localhost/people/7")))
+    assert(!validDataset(Dataset("http://localhost(/people/7")))
+    assert(!validDataset(Dataset("http://localhost{/people/7")))
+    assert(!validDataset(Dataset("http://localhost\\/people/7")))
+    assert(!validDataset(Dataset("http://localhost</people/7")))
+    assert(!validDataset(Dataset("http://localhost>/people/7")))
+    assert(!validDataset(Dataset("http://localhost[/people/7")))
+    assert(!validDataset(Dataset("http://localhost]/people/7")))
+    assert(!validDataset(Dataset("http://localhost\"/people/7")))
+    assert(!validDataset(Dataset("http://localhost'/people/7")))
+    assert(!validDataset(Dataset("http://localhost`/people/7")))
+    assert(!validDataset(Dataset("http://localhost\t/people/7")))
+    assert(!validDataset(Dataset("http://localhost\n/people/7")))
+    assert(!validDataset(Dataset("http://localhost /people/7")))
+    assert(validDataset(Dataset("hello")))
+    assert(!validDataset(Dataset("_:")))
+    assert(!validDataset(Dataset("_:valid")))
+    assert(!validDataset(Dataset("_:1")))
+    assert(!validDataset(Dataset("_:1344")))
+    assert(validDataset(Dataset("test/test")))
+    assert(!validDataset(Dataset("/test/test")))
+    assert(!validDataset(Dataset("test/test/")))
+    assert(!validDataset(Dataset("tEst/test")))
+    assert(!validDataset(Dataset("test//test")))
+    assert(validDataset(Dataset("test/test_/_/_")))
+  }
+
   test("validIdentifier tests") {
     assert(!validNamedNode(NamedNode("")))
     assert(validNamedNode(NamedNode("http://localhost/people/7")))

@@ -12,11 +12,23 @@ Ligature is heavily influenced by RDF and related standards but attempts to be m
 |            |            | literal    |            |
 
 ## Ligature's Data Model
-| Collection | Subject       | Predicate | Object        | Context       |
-| ---------- | ------------- | --------- | ------------- | ------------- |
-| NamedNode  | NamedNode     | NamedNode | NamedNode     | AnonymousNode |
-|            | AnonymousNode |           | AnonymousNode |               |
-|            |               |           | Literal       |               |
+| Dataset | Subject       | Predicate | Object        | Context       |
+| ------- | ------------- | --------- | ------------- | ------------- |
+| Dataset | NamedNode     | NamedNode | NamedNode     | AnonymousNode |
+|         | AnonymousNode |           | AnonymousNode |               |
+|         |               |           | Literal       |               |
+
+### Datasets
+A dataset in Ligature is a named collection of statements.
+A dataset's name must be a valid URL path (not a full URL just the path part).
+Currently, naming is even more restrictive and must contain only lower case ASCII characters, underscores, and forward-slashes.
+This is likely to change to be more flexible but seems like a good starting point.
+
+It's important to note that currently, Ligature doesn't support named graphs like quad-stores support, and datasets are very different from named graphs.
+Even though dataset names might seem like they nest (`test/test` looks like it is under `test`) this isn't the case.
+A dataset is its own unique entity and stands alone from all other datasets.
+For example with named graphs blank nodes are shared across graphs in a dataset, but in Ligature AnonymousNodes are unique to their dataset.
+When Ligature supports named graphs within datasets it will be the case that AnonymousNodes are shared across named graphs in a single dataset.
 
 ### Nodes
 Ligature has two types of nodes.
@@ -41,7 +53,7 @@ Identifiers can be something that is meaningful like an IRI/URL, an id from an e
 Below is an example statement using identifiers in Scala format.
 
 ```scala
-tx.addStatement(NamedNode("collection"), Statement(NamedNode("Emily"), NamedNode("loves"), NamedNode("cats")))
+tx.addStatement(Dataset("dataset"), Statement(NamedNode("Emily"), NamedNode("loves"), NamedNode("cats")))
 ```
 
 Besides using named nodes, the `newNode` method returns a unique Anonymous Node with an Identifier
@@ -50,13 +62,13 @@ The `newNode` method runs inside a transaction so it is guaranteed to be unique 
 For example here is some pseudocode.
 
 ```scala
-val col = NamedNode("collection")
-collection.write.use { tx =>
-  val e: AnonymousNode = tx.newNode() // creates a new identifer, in this case let's say `42`
-  tx.addStatement(col, Statement(e, a, NamedNode("company"))) // should run fine
-  tx.addStatement(col, Statement(e, NamedNode("name"), StringLiteral("Pear"))) // should run fine
-  tx.addStatement(col, Statement(AnonymousNode(newNode.identifer), NamedNode("name"), StringLiteral("Pear"))) // will run fine since it's just another way of writing the above line
-  tx.addStatement(col, Statement(AnonymousNode(24601), a, NamedNode("bird"))) // will erorr out since that identifier hasn't been created yet
+val ds = Dataset("dataset")
+instance.write.use { tx =>
+  val e: AnonymousNode = tx.newNode(ds) // creates a new identifer, in this case let's say `42`
+  tx.addStatement(ds, Statement(e, a, NamedNode("company"))) // should run fine
+  tx.addStatement(ds, Statement(e, NamedNode("name"), StringLiteral("Pear"))) // should run fine
+  tx.addStatement(ds, Statement(AnonymousNode(newNode.identifer), NamedNode("name"), StringLiteral("Pear"))) // will run fine since it's just another way of writing the above line
+  tx.addStatement(ds, Statement(AnonymousNode(24601), a, NamedNode("bird"))) // will erorr out since that identifier hasn't been created yet
 }
 ```
 
