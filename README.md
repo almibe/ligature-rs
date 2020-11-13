@@ -77,13 +77,13 @@ Literals in Ligature represent an immutable value.
 Several types are currently supported with plans to add more.
 Below is a table with the currently supported types.
 
-| Name/Signature | Description | Range? |
-| -------------- | ----------- | ------ |
-| LangLiteral(val value: String, val langTag: String) | Similar to a plain literal in RDF.  A text String and a lang tag. | Yes |
-| StringLiteral(val value: String) | A simple string type. | Yes |
-| BooleanLiteral(val value: Boolean) | A boolean value. | No |
-| LongLiteral(val value: Long) | A value based on Scala's Long. | Yes |
-| DoubleLiteral(val value: Double) | A value based on Scala's Double. | Yes |
+| Name/Signature                                      | Description                                                       | Range? |
+| --------------------------------------------------- | ----------------------------------------------------------------- | ------ |
+| LangLiteral(val value: String, val langTag: String) | Similar to a plain literal in RDF.  A text String and a lang tag. | Yes    |
+| StringLiteral(val value: String)                    | A simple string type.                                             | Yes    |
+| BooleanLiteral(val value: Boolean)                  | A boolean value.                                                  | No     |
+| LongLiteral(val value: Long)                        | A value based on Scala's Long.                                    | Yes    |
+| DoubleLiteral(val value: Double)                    | A value based on Scala's Double.                                  | Yes    |
 
 ### Predicates
 Predicates are just NamedNodes in the predicate position of the triple.
