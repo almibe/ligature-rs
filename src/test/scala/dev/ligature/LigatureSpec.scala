@@ -4,7 +4,7 @@
 
 package dev.ligature
 
-import dev.ligature.Ligature.{validLangTag, validNamedNode, validDataset}
+import dev.ligature.Ligature.{validLangTag, validAttribute, validDataset}
 import munit.FunSuite
 
 class LigatureSpec extends FunSuite {
@@ -37,27 +37,27 @@ class LigatureSpec extends FunSuite {
     assert(validDataset(Dataset("test/test_/_/_")))
   }
 
-  test("validIdentifier tests") {
-    assert(!validNamedNode(NamedNode("")))
-    assert(validNamedNode(NamedNode("http://localhost/people/7")))
-    assert(!validNamedNode(NamedNode("http://localhost(/people/7")))
-    assert(!validNamedNode(NamedNode("http://localhost{/people/7")))
-    assert(!validNamedNode(NamedNode("http://localhost\\/people/7")))
-    assert(!validNamedNode(NamedNode("http://localhost</people/7")))
-    assert(!validNamedNode(NamedNode("http://localhost>/people/7")))
-    assert(!validNamedNode(NamedNode("http://localhost[/people/7")))
-    assert(!validNamedNode(NamedNode("http://localhost]/people/7")))
-    assert(!validNamedNode(NamedNode("http://localhost\"/people/7")))
-    assert(!validNamedNode(NamedNode("http://localhost'/people/7")))
-    assert(!validNamedNode(NamedNode("http://localhost`/people/7")))
-    assert(!validNamedNode(NamedNode("http://localhost\t/people/7")))
-    assert(!validNamedNode(NamedNode("http://localhost\n/people/7")))
-    assert(!validNamedNode(NamedNode("http://localhost /people/7")))
-    assert(validNamedNode(NamedNode("hello")))
-    assert(validNamedNode(NamedNode("_:")))
-    assert(validNamedNode(NamedNode("_:valid")))
-    assert(validNamedNode(NamedNode("_:1")))
-    assert(validNamedNode(NamedNode("_:1344")))
+  test("validAttribute tests") {
+    assert(!validAttribute(Predicate("")))
+    assert(validAttribute(Predicate("http://localhost/people/7")))
+    assert(!validAttribute(Predicate("http://localhost(/people/7")))
+    assert(!validAttribute(Predicate("http://localhost{/people/7")))
+    assert(!validAttribute(Predicate("http://localhost\\/people/7")))
+    assert(!validAttribute(Predicate("http://localhost</people/7")))
+    assert(!validAttribute(Predicate("http://localhost>/people/7")))
+    assert(!validAttribute(Predicate("http://localhost[/people/7")))
+    assert(!validAttribute(Predicate("http://localhost]/people/7")))
+    assert(!validAttribute(Predicate("http://localhost\"/people/7")))
+    assert(!validAttribute(Predicate("http://localhost'/people/7")))
+    assert(!validAttribute(Predicate("http://localhost`/people/7")))
+    assert(!validAttribute(Predicate("http://localhost\t/people/7")))
+    assert(!validAttribute(Predicate("http://localhost\n/people/7")))
+    assert(!validAttribute(Predicate("http://localhost /people/7")))
+    assert(validAttribute(Predicate("hello")))
+    assert(validAttribute(Predicate("_:")))
+    assert(validAttribute(Predicate("_:valid")))
+    assert(validAttribute(Predicate("_:1")))
+    assert(validAttribute(Predicate("_:1344")))
   }
 
   test("validLangTag tests") {

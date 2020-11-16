@@ -10,33 +10,31 @@ import fs2.Stream
 final case class Dataset(name: String)
 
 sealed trait Object
-sealed trait Node extends Object
-case class NamedNode(name: String) extends Node
-case class AnonymousNode(identifier: Long) extends Node
+final case class Subject(identifier: Long) extends Object
+final case class Predicate(identifier: String)
 
 sealed trait Literal extends Object
-case class LangLiteral(value: String, langTag: String) extends Literal
-case class StringLiteral(value: String) extends Literal
-case class BooleanLiteral(value: Boolean) extends Literal
-case class LongLiteral(value: Long) extends Literal
-case class DoubleLiteral(value: Double) extends Literal
+final case class LangLiteral(value: String, langTag: String) extends Literal
+final case class StringLiteral(value: String) extends Literal
+final case class BooleanLiteral(value: Boolean) extends Literal
+final case class LongLiteral(value: Long) extends Literal
+final case class DoubleLiteral(value: Double) extends Literal
 
 sealed trait Range
-case class LangLiteralRange(start: LangLiteral, stop: LangLiteral) extends Range
-case class StringLiteralRange(start: StringLiteral, stop: StringLiteral) extends Range
-case class LongLiteralRange(start: LongLiteral, stop: LongLiteral) extends Range
-case class DoubleLiteralRange(start: DoubleLiteral, stop: DoubleLiteral) extends Range
+final case class LangLiteralRange(start: LangLiteral, stop: LangLiteral) extends Range
+final case class StringLiteralRange(start: StringLiteral, stop: StringLiteral) extends Range
+final case class LongLiteralRange(start: LongLiteral, stop: LongLiteral) extends Range
+final case class DoubleLiteralRange(start: DoubleLiteral, stop: DoubleLiteral) extends Range
 
-case class Statement(subject: Node, predicate: NamedNode, `object`: Object)
-case class PersistedStatement(dataset: Dataset, statement: Statement, context: AnonymousNode)
+final case class Statement(subject: Subject, predicate: Predicate, value: Object)
+final case class PersistedStatement(dataset: Dataset, statement: Statement, context: Subject)
 
 object Ligature {
-  val a: NamedNode = NamedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
   def validDataset(dataset: Dataset): Boolean = {
     "[a-z_]+(/[a-z_]+)*".r.matches(dataset.name)
   }
-  def validNamedNode(node: NamedNode): Boolean = {
-    "[a-zA-Z_][^\\s()\\[\\]{}'\"`<>\\\\]*".r.matches(node.name)
+  def validAttribute(attribute: Predicate): Boolean = {
+    "[a-zA-Z_][^\\s()\\[\\]{}'\"`<>\\\\]*".r.matches(attribute.identifier)
   }
   def validLangTag(langTag: String): Boolean =
     "[a-zA-Z]+(-[a-zA-Z0-9]+)*".r.matches(langTag)
@@ -57,20 +55,20 @@ trait LigatureReadTx {
   def datasets(from: Dataset, to: Dataset): Stream[IO, Dataset]
   def allStatements(dataset: Dataset): Stream[IO, PersistedStatement]
   def matchStatements(dataset: Dataset,
-                      subject: Option[Node] = None,
-                      predicate: Option[NamedNode] = None,
+                      subject: Option[Subject] = None,
+                      predicate: Option[Predicate] = None,
                       `object`: Option[Object] = None): Stream[IO, PersistedStatement]
   def matchStatements(dataset: Dataset,
-                      subject: Option[Node],
-                      predicate: Option[NamedNode],
+                      subject: Option[Subject],
+                      predicate: Option[Predicate],
                       range: Range): Stream[IO, PersistedStatement]
-  def statementByContext(dataset: Dataset, context: AnonymousNode): IO[Option[PersistedStatement]]
+  def statementByContext(dataset: Dataset, context: Subject): IO[Option[PersistedStatement]]
 }
 
 trait LigatureWriteTx {
   def createDataset(dataset: Dataset): IO[Dataset]
   def deleteDataset(dataset: Dataset): IO[Dataset]
-  def newNode(dataset: Dataset): IO[AnonymousNode]
+  def newSubject(dataset: Dataset): IO[Subject]
   def addStatement(dataset: Dataset, statement: Statement): IO[PersistedStatement]
   def removeStatement(dataset: Dataset, statement: Statement): IO[Statement]
   def cancel(): Unit
