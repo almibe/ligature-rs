@@ -4,7 +4,7 @@
 
 package dev.ligature
 
-import dev.ligature.Ligature.{validLangTag, validAttribute, validDataset}
+import dev.ligature.Ligature.{validLangTag, validPredicate, validDataset}
 import munit.FunSuite
 
 class LigatureSpec extends FunSuite {
@@ -38,26 +38,26 @@ class LigatureSpec extends FunSuite {
   }
 
   test("validAttribute tests") {
-    assert(!validAttribute(Predicate("")))
-    assert(validAttribute(Predicate("http://localhost/people/7")))
-    assert(!validAttribute(Predicate("http://localhost(/people/7")))
-    assert(!validAttribute(Predicate("http://localhost{/people/7")))
-    assert(!validAttribute(Predicate("http://localhost\\/people/7")))
-    assert(!validAttribute(Predicate("http://localhost</people/7")))
-    assert(!validAttribute(Predicate("http://localhost>/people/7")))
-    assert(!validAttribute(Predicate("http://localhost[/people/7")))
-    assert(!validAttribute(Predicate("http://localhost]/people/7")))
-    assert(!validAttribute(Predicate("http://localhost\"/people/7")))
-    assert(!validAttribute(Predicate("http://localhost'/people/7")))
-    assert(!validAttribute(Predicate("http://localhost`/people/7")))
-    assert(!validAttribute(Predicate("http://localhost\t/people/7")))
-    assert(!validAttribute(Predicate("http://localhost\n/people/7")))
-    assert(!validAttribute(Predicate("http://localhost /people/7")))
-    assert(validAttribute(Predicate("hello")))
-    assert(validAttribute(Predicate("_:")))
-    assert(validAttribute(Predicate("_:valid")))
-    assert(validAttribute(Predicate("_:1")))
-    assert(validAttribute(Predicate("_:1344")))
+    assert(!validPredicate(Predicate("")))
+    assert(validPredicate(Predicate("http://localhost/people/7")))
+    assert(!validPredicate(Predicate("http://localhost(/people/7")))
+    assert(!validPredicate(Predicate("http://localhost{/people/7")))
+    assert(!validPredicate(Predicate("http://localhost\\/people/7")))
+    assert(!validPredicate(Predicate("http://localhost</people/7")))
+    assert(!validPredicate(Predicate("http://localhost>/people/7")))
+    assert(!validPredicate(Predicate("http://localhost[/people/7")))
+    assert(!validPredicate(Predicate("http://localhost]/people/7")))
+    assert(!validPredicate(Predicate("http://localhost\"/people/7")))
+    assert(!validPredicate(Predicate("http://localhost'/people/7")))
+    assert(!validPredicate(Predicate("http://localhost`/people/7")))
+    assert(!validPredicate(Predicate("http://localhost\t/people/7")))
+    assert(!validPredicate(Predicate("http://localhost\n/people/7")))
+    assert(!validPredicate(Predicate("http://localhost /people/7")))
+    assert(validPredicate(Predicate("hello")))
+    assert(validPredicate(Predicate("_:")))
+    assert(validPredicate(Predicate("_:valid")))
+    assert(validPredicate(Predicate("_:1")))
+    assert(validPredicate(Predicate("_:1344")))
   }
 
   test("validLangTag tests") {

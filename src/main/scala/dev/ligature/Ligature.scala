@@ -33,8 +33,8 @@ object Ligature {
   def validDataset(dataset: Dataset): Boolean = {
     "[a-z_]+(/[a-z_]+)*".r.matches(dataset.name)
   }
-  def validAttribute(attribute: Predicate): Boolean = {
-    "[a-zA-Z_][^\\s()\\[\\]{}'\"`<>\\\\]*".r.matches(attribute.identifier)
+  def validPredicate(predicate: Predicate): Boolean = {
+    "[a-zA-Z_][^\\s()\\[\\]{}'\"`<>\\\\]*".r.matches(predicate.identifier)
   }
   def validLangTag(langTag: String): Boolean =
     "[a-zA-Z]+(-[a-zA-Z0-9]+)*".r.matches(langTag)

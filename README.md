@@ -12,11 +12,10 @@ Ligature is heavily influenced by RDF and related standards but attempts to be m
 |            |            | literal    |            |
 
 ## Ligature's Data Model
-| Dataset | Subject       | Predicate | Object        | Context       |
-| ------- | ------------- | --------- | ------------- | ------------- |
-| Dataset | NamedNode     | NamedNode | NamedNode     | AnonymousNode |
-|         | AnonymousNode |           | AnonymousNode |               |
-|         |               |           | Literal       |               |
+| Dataset | Subject | Predicate | Object  | Context |
+| ------- | ------- | --------- | --------| ------- |
+| Dataset | Subject | Predicate | Subject | Subject |
+|         |         |           | Literal |         |
 
 ### Datasets
 A dataset in Ligature is a named collection of statements.
@@ -27,16 +26,17 @@ This is likely to change to be more flexible but seems like a good starting poin
 It's important to note that currently, Ligature doesn't support named graphs like quad-stores support, and datasets are very different from named graphs.
 Even though dataset names might seem like they nest (`test/test` looks like it is under `test`) this isn't the case.
 A dataset is its own unique entity and stands alone from all other datasets.
-For example with named graphs blank nodes are shared across graphs in a dataset, but in Ligature AnonymousNodes are unique to their dataset.
-When Ligature supports named graphs within datasets it will be the case that AnonymousNodes are shared across named graphs in a single dataset.
+For example with named graphs blank nodes are shared across graphs in a dataset, but in Ligature Subjects are unique to their dataset.
+If/When Ligature supports named graphs within datasets it will be the case that Subjects are shared across named graphs in a single dataset.
 
-### Nodes
-Ligature has two types of nodes.
-An NamedNode is represented by an identifier given by the user
-and an AnonymousNode is represented by a numeric identifier that is automatically generated.
-Finally, a literal is one of several types of nodes that represents a value of a specific type see below for a list
-of current literal types.
-Named node identifiers in Ligature are *currently* defined as strings that start with an ASCII letter
+### Subjects
+Subjects in Ligature are similar to blank nodes in RDF.
+Ligature doesn't support IRIs as first class entities like RDF does.
+Instead, Subjects are assigned a unique id by the system when they are created (currently ids are represented by Longs but they might be UUIDs in the future).
+
+### Predicates
+Unlike RDF Predicates in Ligature are their own entity and not just an IRI.
+A Predicate has a user defied identifier in Ligature that is *currently* defined as strings that start with an ASCII letter
 or an underscore and don't contain any of the following characters:
  * whitespace (space, newline, tabs, carriage returns, etc)
  * " ' `
@@ -50,27 +50,6 @@ If for some reason you need any of these characters in your identifier it is sug
 Note that identifiers that start with underscores are reserved for internal use and end users cannot create them themselves.
 
 Identifiers can be something that is meaningful like an IRI/URL, an id from an existing system, or a common name for the domain.
-Below is an example statement using identifiers in Scala format.
-
-```scala
-tx.addStatement(Dataset("dataset"), Statement(NamedNode("Emily"), NamedNode("loves"), NamedNode("cats")))
-```
-
-Besides using named nodes, the `newNode` method returns a unique Anonymous Node with an Identifier
-that is automatically generated.
-The `newNode` method runs inside a transaction so it is guaranteed to be unique and at the time of creation.
-For example here is some pseudocode.
-
-```scala
-val ds = Dataset("dataset")
-instance.write.use { tx =>
-  val e: AnonymousNode = tx.newNode(ds) // creates a new identifer, in this case let's say `42`
-  tx.addStatement(ds, Statement(e, a, NamedNode("company"))) // should run fine
-  tx.addStatement(ds, Statement(e, NamedNode("name"), StringLiteral("Pear"))) // should run fine
-  tx.addStatement(ds, Statement(AnonymousNode(newNode.identifer), NamedNode("name"), StringLiteral("Pear"))) // will run fine since it's just another way of writing the above line
-  tx.addStatement(ds, Statement(AnonymousNode(24601), a, NamedNode("bird"))) // will erorr out since that identifier hasn't been created yet
-}
-```
 
 ### Literals
 Literals in Ligature represent an immutable value.
@@ -85,12 +64,26 @@ Below is a table with the currently supported types.
 | LongLiteral(val value: Long)                        | A value based on Scala's Long.                                    | Yes    |
 | DoubleLiteral(val value: Double)                    | A value based on Scala's Double.                                  | Yes    |
 
-### Predicates
-Predicates are just NamedNodes in the predicate position of the triple.
-
 ### Context
-Contexts are unique AnonymousNodes that are created for every Statement.
+Contexts are unique Subjects that are created for every Statement.
 They can be accessed from PersistedStatement objects.
+
+### Example
+
+Below is an example statement using identifiers in Scala format.
+Notice that the `newSubject` method returns a unique Subject that is automatically generated.
+The `newSubject` method runs inside a transaction, so it is guaranteed to be unique and at the time of creation.
+
+```scala
+val ds = Dataset("dataset")
+instance.write.use { tx => //start a write transaction assuming we already have a LigatureInstance object
+  tx.createDataset(ds) //make a new Dataset
+  val subject: Subject = tx.newSubject(ds) //create a new Subject in the given Dataset
+  tx.addStatement(ds, Statement(e, Predicate("name"), StringLiteral("Lycus")))
+  //if you know an id you can directly instantiate a Subject, but you usually won't so this example is silly
+  tx.addStatement(ds, Statement(Subject(newNode.identifer), Predicate("favoriteFruit"), StringLiteral("pear")))
+}
+```
 
 ## Building
 This project requires SBT to be installed.
