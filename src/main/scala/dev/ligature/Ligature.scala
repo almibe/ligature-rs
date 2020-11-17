@@ -26,7 +26,7 @@ final case class StringLiteralRange(start: StringLiteral, stop: StringLiteral) e
 final case class LongLiteralRange(start: LongLiteral, stop: LongLiteral) extends Range
 final case class DoubleLiteralRange(start: DoubleLiteral, stop: DoubleLiteral) extends Range
 
-final case class Statement(subject: Subject, predicate: Predicate, value: Object)
+final case class Statement(subject: Subject, predicate: Predicate, `object`: Object)
 final case class PersistedStatement(dataset: Dataset, statement: Statement, context: Subject)
 
 object Ligature {
