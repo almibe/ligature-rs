@@ -4,6 +4,9 @@
 
 package dev.ligature
 
+import arrow.core.Either
+import kotlinx.coroutines.flow.Flow
+
 data class Dataset(val name: String)
 
 sealed class Object
@@ -38,35 +41,31 @@ fun validLangTag(langTag: String): Boolean =
   "[a-zA-Z]+(-[a-zA-Z0-9]+)*".r.matches(langTag)
 
 interface Ligature {
-  fun instance: Resource[IO, LigatureInstance]
-}
-
-interface LigatureInstance {
-  fun read: Resource[IO, LigatureReadTx]
-  fun write: Resource[IO, LigatureWriteTx]
+  suspend fun <T>read(fn: (readTx: LigatureReadTx) -> Either<Throwable, T>): Either<Throwable, T>
+  suspend fun write(fn: (writeTx: LigatureWriteTx) -> Either<Throwable, Unit>): Either<Throwable, Unit>
 }
 
 interface LigatureReadTx {
-  fun datasets: Stream[IO, Dataset]
-  fun datasets(prefix: Dataset): Stream[IO, Dataset]
-  fun datasets(from: Dataset, to: Dataset): Stream[IO, Dataset]
-  fun allStatements(dataset: Dataset): Stream[IO, PersistedStatement]
-  fun matchStatements(dataset: Dataset,
-                      subject: Option[Node] = None,
-                      predicate: Option[NamedNode] = None,
-                      `object`: Option[Object] = None): Stream[IO, PersistedStatement]
-  fun matchStatements(dataset: Dataset,
-                      subject: Option[Node],
-                      predicate: Option[NamedNode],
-                      range: Range): Stream[IO, PersistedStatement]
-  fun statementByContext(dataset: Dataset, context: AnonymousNode): IO[Option[PersistedStatement]]
+  suspend fun datasets(): Flow<IO, Dataset>
+  suspend fun datasets(prefix: Dataset): Flow<IO, Dataset>
+  suspend fun datasets(from: Dataset, to: Dataset): Flow<IO, Dataset>
+  suspend fun allStatements(dataset: Dataset): Flow<IO, PersistedStatement>
+  suspend fun matchStatements(dataset: Dataset,
+                      subject: Option<Node> = None,
+                      predicate: Option<NamedNode> = None,
+                      `object`: Option<Object> = None): Flow<IO, PersistedStatement>
+  suspend fun matchStatements(dataset: Dataset,
+                      subject: Option<Node>,
+                      predicate: Option<NamedNode>,
+                      range: Range): Flow<IO, PersistedStatement>
+  suspend fun statementByContext(dataset: Dataset, context: AnonymousNode): IO<Option<PersistedStatement>>
 }
 
 interface LigatureWriteTx {
-  fun createDataset(dataset: Dataset): IO[Dataset]
-  fun deleteDataset(dataset: Dataset): IO[Dataset]
-  fun newNode(dataset: Dataset): IO[AnonymousNode]
-  fun addStatement(dataset: Dataset, statement: Statement): IO[PersistedStatement]
-  fun removeStatement(dataset: Dataset, statement: Statement): IO[Statement]
-  fun cancel(): Unit
+  suspend fun createDataset(dataset: Dataset): Either<Throwable, Dataset>
+  suspend fun deleteDataset(dataset: Dataset): Either<Throwable, Dataset>
+  suspend fun newNode(dataset: Dataset): Either<Throwable, AnonymousNode>
+  suspend fun addStatement(dataset: Dataset, statement: Statement): Either<Throwable, PersistedStatement>
+  suspend fun removeStatement(dataset: Dataset, statement: Statement): Either<Throwable, Statement>
+  suspend fun cancel(): Unit
 }
