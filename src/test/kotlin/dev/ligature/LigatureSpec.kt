@@ -4,70 +4,70 @@
 
 package dev.ligature
 
-import dev.ligature.Ligature.{validLangTag, validNamedNode, validDataset}
-import munit.FunSuite
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
 
-class LigatureSpec extends FunSuite {
-  test("validDataset tests") {
-    assert(!validDataset(Dataset("")))
-    assert(!validDataset(Dataset("http://localhost/people/7")))
-    assert(!validDataset(Dataset("http://localhost(/people/7")))
-    assert(!validDataset(Dataset("http://localhost{/people/7")))
-    assert(!validDataset(Dataset("http://localhost\\/people/7")))
-    assert(!validDataset(Dataset("http://localhost</people/7")))
-    assert(!validDataset(Dataset("http://localhost>/people/7")))
-    assert(!validDataset(Dataset("http://localhost[/people/7")))
-    assert(!validDataset(Dataset("http://localhost]/people/7")))
-    assert(!validDataset(Dataset("http://localhost\"/people/7")))
-    assert(!validDataset(Dataset("http://localhost'/people/7")))
-    assert(!validDataset(Dataset("http://localhost`/people/7")))
-    assert(!validDataset(Dataset("http://localhost\t/people/7")))
-    assert(!validDataset(Dataset("http://localhost\n/people/7")))
-    assert(!validDataset(Dataset("http://localhost /people/7")))
-    assert(validDataset(Dataset("hello")))
-    assert(!validDataset(Dataset("_:")))
-    assert(!validDataset(Dataset("_:valid")))
-    assert(!validDataset(Dataset("_:1")))
-    assert(!validDataset(Dataset("_:1344")))
-    assert(validDataset(Dataset("test/test")))
-    assert(!validDataset(Dataset("/test/test")))
-    assert(!validDataset(Dataset("test/test/")))
-    assert(!validDataset(Dataset("tEst/test")))
-    assert(!validDataset(Dataset("test//test")))
-    assert(validDataset(Dataset("test/test_/_/_")))
+class LigatureSpec : StringSpec ({
+  "validDataset tests" {
+    validDataset(Dataset("")) shouldBe false
+    validDataset(Dataset("http://localhost/people/7")) shouldBe false
+    validDataset(Dataset("http://localhost(/people/7")) shouldBe false
+    validDataset(Dataset("http://localhost{/people/7")) shouldBe false
+    validDataset(Dataset("http://localhost\\/people/7")) shouldBe false
+    validDataset(Dataset("http://localhost</people/7")) shouldBe false
+    validDataset(Dataset("http://localhost>/people/7")) shouldBe false
+    validDataset(Dataset("http://localhost[/people/7")) shouldBe false
+    validDataset(Dataset("http://localhost]/people/7")) shouldBe false
+    validDataset(Dataset("http://localhost\"/people/7")) shouldBe false
+    validDataset(Dataset("http://localhost'/people/7")) shouldBe false
+    validDataset(Dataset("http://localhost`/people/7")) shouldBe false
+    validDataset(Dataset("http://localhost\t/people/7")) shouldBe false
+    validDataset(Dataset("http://localhost\n/people/7")) shouldBe false
+    validDataset(Dataset("http://localhost /people/7")) shouldBe false
+    validDataset(Dataset("hello")) shouldBe true
+    validDataset(Dataset("_:")) shouldBe false
+    validDataset(Dataset("_:valid")) shouldBe false
+    validDataset(Dataset("_:1")) shouldBe false
+    validDataset(Dataset("_:1344")) shouldBe false
+    validDataset(Dataset("test/test")) shouldBe true
+    validDataset(Dataset("/test/test")) shouldBe false
+    validDataset(Dataset("test/test/")) shouldBe false
+    validDataset(Dataset("tEst/test")) shouldBe false
+    validDataset(Dataset("test//test")) shouldBe false
+    validDataset(Dataset("test/test_/_/_")) shouldBe true
   }
 
-  test("validIdentifier tests") {
-    assert(!validNamedNode(NamedNode("")))
-    assert(validNamedNode(NamedNode("http://localhost/people/7")))
-    assert(!validNamedNode(NamedNode("http://localhost(/people/7")))
-    assert(!validNamedNode(NamedNode("http://localhost{/people/7")))
-    assert(!validNamedNode(NamedNode("http://localhost\\/people/7")))
-    assert(!validNamedNode(NamedNode("http://localhost</people/7")))
-    assert(!validNamedNode(NamedNode("http://localhost>/people/7")))
-    assert(!validNamedNode(NamedNode("http://localhost[/people/7")))
-    assert(!validNamedNode(NamedNode("http://localhost]/people/7")))
-    assert(!validNamedNode(NamedNode("http://localhost\"/people/7")))
-    assert(!validNamedNode(NamedNode("http://localhost'/people/7")))
-    assert(!validNamedNode(NamedNode("http://localhost`/people/7")))
-    assert(!validNamedNode(NamedNode("http://localhost\t/people/7")))
-    assert(!validNamedNode(NamedNode("http://localhost\n/people/7")))
-    assert(!validNamedNode(NamedNode("http://localhost /people/7")))
-    assert(validNamedNode(NamedNode("hello")))
-    assert(validNamedNode(NamedNode("_:")))
-    assert(validNamedNode(NamedNode("_:valid")))
-    assert(validNamedNode(NamedNode("_:1")))
-    assert(validNamedNode(NamedNode("_:1344")))
+  "validIdentifier tests" {
+    validNamedNode(NamedNode("")) shouldBe false
+    validNamedNode(NamedNode("http://localhost/people/7")) shouldBe true
+    validNamedNode(NamedNode("http://localhost(/people/7")) shouldBe false
+    validNamedNode(NamedNode("http://localhost{/people/7")) shouldBe false
+    validNamedNode(NamedNode("http://localhost\\/people/7")) shouldBe false
+    validNamedNode(NamedNode("http://localhost</people/7")) shouldBe false
+    validNamedNode(NamedNode("http://localhost>/people/7")) shouldBe false
+    validNamedNode(NamedNode("http://localhost[/people/7")) shouldBe false
+    validNamedNode(NamedNode("http://localhost]/people/7")) shouldBe false
+    validNamedNode(NamedNode("http://localhost\"/people/7")) shouldBe false
+    validNamedNode(NamedNode("http://localhost'/people/7")) shouldBe false
+    validNamedNode(NamedNode("http://localhost`/people/7")) shouldBe false
+    validNamedNode(NamedNode("http://localhost\t/people/7")) shouldBe false
+    validNamedNode(NamedNode("http://localhost\n/people/7")) shouldBe false
+    validNamedNode(NamedNode("http://localhost /people/7")) shouldBe false
+    validNamedNode(NamedNode("hello")) shouldBe true
+    validNamedNode(NamedNode("_:")) shouldBe true
+    validNamedNode(NamedNode("_:valid")) shouldBe true
+    validNamedNode(NamedNode("_:1")) shouldBe true
+    validNamedNode(NamedNode("_:1344")) shouldBe true
   }
 
-  test("validLangTag tests") {
-    assert(!validLangTag(""))
-    assert(validLangTag("en"))
-    assert(!validLangTag("en-"))
-    assert(validLangTag("en-fr"))
-    assert(!validLangTag("en-fr-"))
-    assert(validLangTag("en-fr-sp"))
-    assert(validLangTag("ennnenefnk-dkfjkjfl-dfakjelfkjalkf-fakjeflkajlkfj"))
-    assert(!validLangTag("en-fr-ef "))
+  "validLangTag tests" {
+    validLangTag("") shouldBe false
+    validLangTag("en") shouldBe true
+    validLangTag("en-") shouldBe false
+    validLangTag("en-fr") shouldBe true
+    validLangTag("en-fr-") shouldBe false
+    validLangTag("en-fr-sp") shouldBe true
+    validLangTag("ennnenefnk-dkfjkjfl-dfakjelfkjalkf-fakjeflkajlkfj") shouldBe true
+    validLangTag("en-fr-ef ") shouldBe false
   }
-}
+})

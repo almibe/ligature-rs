@@ -5,6 +5,8 @@
 package dev.ligature
 
 import arrow.core.Either
+import arrow.core.None
+import arrow.core.Option
 import kotlinx.coroutines.flow.Flow
 
 data class Dataset(val name: String)
@@ -32,13 +34,13 @@ data class PersistedStatement(val dataset: Dataset, val statement: Statement, va
 
 val a: NamedNode = NamedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
 fun validDataset(dataset: Dataset): Boolean =
-  "[a-z_]+(/[a-z_]+)*".r.matches(dataset.name)
+  "[a-z_]+(/[a-z_]+)*".toRegex().matches(dataset.name)
 
 fun validNamedNode(node: NamedNode): Boolean =
-  "[a-zA-Z_][^\\s()\\[\\]{}'\"`<>\\\\]*".r.matches(node.name)
+  "[a-zA-Z_][^\\s()\\[\\]{}'\"`<>\\\\]*".toRegex().matches(node.name)
 
 fun validLangTag(langTag: String): Boolean =
-  "[a-zA-Z]+(-[a-zA-Z0-9]+)*".r.matches(langTag)
+  "[a-zA-Z]+(-[a-zA-Z0-9]+)*".toRegex().matches(langTag)
 
 interface Ligature {
   suspend fun <T>read(fn: (readTx: LigatureReadTx) -> Either<Throwable, T>): Either<Throwable, T>
@@ -46,19 +48,19 @@ interface Ligature {
 }
 
 interface LigatureReadTx {
-  suspend fun datasets(): Flow<IO, Dataset>
-  suspend fun datasets(prefix: Dataset): Flow<IO, Dataset>
-  suspend fun datasets(from: Dataset, to: Dataset): Flow<IO, Dataset>
-  suspend fun allStatements(dataset: Dataset): Flow<IO, PersistedStatement>
+  suspend fun datasets(): Flow<Either<Throwable, Dataset>>
+  suspend fun datasets(prefix: Dataset): Flow<Either<Throwable, Dataset>>
+  suspend fun datasets(from: Dataset, to: Dataset): Flow<Either<Throwable, Dataset>>
+  suspend fun allStatements(dataset: Dataset): Flow<Either<Throwable, PersistedStatement>>
   suspend fun matchStatements(dataset: Dataset,
-                      subject: Option<Node> = None,
-                      predicate: Option<NamedNode> = None,
-                      `object`: Option<Object> = None): Flow<IO, PersistedStatement>
+                              subject: Option<Node> = None,
+                              predicate: Option<NamedNode> = None,
+                              `object`: Option<Object> = None): Flow<Either<Throwable, PersistedStatement>>
   suspend fun matchStatements(dataset: Dataset,
                       subject: Option<Node>,
                       predicate: Option<NamedNode>,
-                      range: Range): Flow<IO, PersistedStatement>
-  suspend fun statementByContext(dataset: Dataset, context: AnonymousNode): IO<Option<PersistedStatement>>
+                      range: Range): Flow<Either<Throwable, PersistedStatement>>
+  suspend fun statementByContext(dataset: Dataset, context: AnonymousNode): Option<PersistedStatement>
 }
 
 interface LigatureWriteTx {
