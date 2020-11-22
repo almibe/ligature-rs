@@ -1,5 +1,5 @@
 # ligature
-Ligature is a library for working with knowledge graphs on the JVM written in Scala.
+Ligature is a library for working with knowledge graphs on the JVM written in Kotlin.
 This project provides the main interfaces used by Ligature as well as some helper functions and constants.
 See related projects for implementations of these APIs.
 Ligature is heavily influenced by RDF and related standards but attempts to be more general purpose and easier to use.
@@ -50,9 +50,9 @@ If for some reason you need any of these characters in your identifier it is sug
 Note that identifiers that start with underscores are reserved for internal use and end users cannot create them themselves.
 
 Identifiers can be something that is meaningful like an IRI/URL, an id from an existing system, or a common name for the domain.
-Below is an example statement using identifiers in Scala format.
+Below is an example statement using identifiers in Kotlin format.
 
-```scala
+```kotlin
 tx.addStatement(Dataset("dataset"), Statement(NamedNode("Emily"), NamedNode("loves"), NamedNode("cats")))
 ```
 
@@ -61,7 +61,7 @@ that is automatically generated.
 The `newNode` method runs inside a transaction so it is guaranteed to be unique and at the time of creation.
 For example here is some pseudocode.
 
-```scala
+```kotlin
 val ds = Dataset("dataset")
 instance.write.use { tx =>
   val e: AnonymousNode = tx.newNode(ds) // creates a new identifer, in this case let's say `42`
@@ -82,8 +82,8 @@ Below is a table with the currently supported types.
 | LangLiteral(val value: String, val langTag: String) | Similar to a plain literal in RDF.  A text String and a lang tag. | Yes    |
 | StringLiteral(val value: String)                    | A simple string type.                                             | Yes    |
 | BooleanLiteral(val value: Boolean)                  | A boolean value.                                                  | No     |
-| LongLiteral(val value: Long)                        | A value based on Scala's Long.                                    | Yes    |
-| DoubleLiteral(val value: Double)                    | A value based on Scala's Double.                                  | Yes    |
+| LongLiteral(val value: Long)                        | A value based on Kotlin's Long.                                    | Yes    |
+| DoubleLiteral(val value: Double)                    | A value based on Kotlin's Double.                                  | Yes    |
 
 ### Predicates
 Predicates are just NamedNodes in the predicate position of the triple.
