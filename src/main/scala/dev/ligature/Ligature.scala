@@ -4,8 +4,9 @@
 
 package dev.ligature
 
-import cats.effect.{IO, Resource}
-import fs2.Stream
+import cats.effect.Resource
+import monix.eval.Task
+import monix.reactive.Observable
 
 final case class Dataset(name: String)
 
@@ -43,35 +44,35 @@ object Ligature {
 }
 
 trait Ligature {
-  def instance: Resource[IO, LigatureInstance]
+  def instance: Resource[Task, LigatureInstance]
 }
 
 trait LigatureInstance {
-  def read: Resource[IO, LigatureReadTx]
-  def write: Resource[IO, LigatureWriteTx]
+  def read: Resource[Task, LigatureReadTx]
+  def write: Resource[Task, LigatureWriteTx]
 }
 
 trait LigatureReadTx {
-  def datasets: Stream[IO, Dataset]
-  def datasets(prefix: Dataset): Stream[IO, Dataset]
-  def datasets(from: Dataset, to: Dataset): Stream[IO, Dataset]
-  def allStatements(dataset: Dataset): Stream[IO, PersistedStatement]
+  def datasets: Observable[Dataset]
+  def datasets(prefix: Dataset): Observable[Dataset]
+  def datasets(from: Dataset, to: Dataset): Observable[Dataset]
+  def allStatements(dataset: Dataset): Observable[PersistedStatement]
   def matchStatements(dataset: Dataset,
                       subject: Option[Node] = None,
                       predicate: Option[NamedNode] = None,
-                      `object`: Option[Object] = None): Stream[IO, PersistedStatement]
+                      `object`: Option[Object] = None): Observable[PersistedStatement]
   def matchStatements(dataset: Dataset,
                       subject: Option[Node],
                       predicate: Option[NamedNode],
-                      range: Range): Stream[IO, PersistedStatement]
-  def statementByContext(dataset: Dataset, context: AnonymousNode): IO[Option[PersistedStatement]]
+                      range: Range): Observable[PersistedStatement]
+  def statementByContext(dataset: Dataset, context: AnonymousNode): Task[Option[PersistedStatement]]
 }
 
 trait LigatureWriteTx {
-  def createDataset(dataset: Dataset): IO[Dataset]
-  def deleteDataset(dataset: Dataset): IO[Dataset]
-  def newNode(dataset: Dataset): IO[AnonymousNode]
-  def addStatement(dataset: Dataset, statement: Statement): IO[PersistedStatement]
-  def removeStatement(dataset: Dataset, statement: Statement): IO[Statement]
+  def createDataset(dataset: Dataset): Task[Dataset]
+  def deleteDataset(dataset: Dataset): Task[Dataset]
+  def newNode(dataset: Dataset): Task[AnonymousNode]
+  def addStatement(dataset: Dataset, statement: Statement): Task[PersistedStatement]
+  def removeStatement(dataset: Dataset, statement: Statement): Task[Statement]
   def cancel(): Unit
 }
