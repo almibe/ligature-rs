@@ -21,6 +21,7 @@ case class StringLiteral(value: String) extends Literal
 case class BooleanLiteral(value: Boolean) extends Literal
 case class LongLiteral(value: Long) extends Literal
 case class DoubleLiteral(value: Double) extends Literal
+case class UnknownLiteral(value: String, `type`: NamedNode) extends Literal
 
 sealed trait Range
 case class LangLiteralRange(start: LangLiteral, stop: LangLiteral) extends Range
