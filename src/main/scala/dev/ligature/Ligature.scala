@@ -8,8 +8,6 @@ import cats.effect.Resource
 import monix.eval.Task
 import monix.reactive.Observable
 
-final case class Dataset(name: String)
-
 sealed trait Object
 sealed trait Node extends Object
 case class NamedNode(name: String) extends Node
@@ -30,13 +28,10 @@ case class LongLiteralRange(start: LongLiteral, stop: LongLiteral) extends Range
 case class DoubleLiteralRange(start: DoubleLiteral, stop: DoubleLiteral) extends Range
 
 case class Statement(subject: Node, predicate: NamedNode, `object`: Object)
-case class PersistedStatement(dataset: Dataset, statement: Statement, context: AnonymousNode)
+case class PersistedStatement(dataset: NamedNode, statement: Statement, context: AnonymousNode)
 
 object Ligature {
   val a: NamedNode = NamedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
-  def validDataset(dataset: Dataset): Boolean = {
-    "[a-z_]+(/[a-z_]+)*".r.matches(dataset.name)
-  }
   def validNamedNode(node: NamedNode): Boolean = {
     "[a-zA-Z_][^\\s()\\[\\]{}'\"`<>\\\\]*".r.matches(node.name)
   }
@@ -54,26 +49,26 @@ trait LigatureInstance {
 }
 
 trait LigatureReadTx {
-  def datasets: Observable[Dataset]
-  def datasets(prefix: Dataset): Observable[Dataset]
-  def datasets(from: Dataset, to: Dataset): Observable[Dataset]
-  def allStatements(dataset: Dataset): Observable[PersistedStatement]
-  def matchStatements(dataset: Dataset,
+  def datasets: Observable[NamedNode]
+  def datasets(prefix: NamedNode): Observable[NamedNode]
+  def datasets(from: NamedNode, to: NamedNode): Observable[NamedNode]
+  def allStatements(dataset: NamedNode): Observable[PersistedStatement]
+  def matchStatements(dataset: NamedNode,
                       subject: Option[Node] = None,
                       predicate: Option[NamedNode] = None,
                       `object`: Option[Object] = None): Observable[PersistedStatement]
-  def matchStatements(dataset: Dataset,
+  def matchStatements(dataset: NamedNode,
                       subject: Option[Node],
                       predicate: Option[NamedNode],
                       range: Range): Observable[PersistedStatement]
-  def statementByContext(dataset: Dataset, context: AnonymousNode): Task[Option[PersistedStatement]]
+  def statementByContext(dataset: NamedNode, context: AnonymousNode): Task[Option[PersistedStatement]]
 }
 
 trait LigatureWriteTx {
-  def createDataset(dataset: Dataset): Task[Dataset]
-  def deleteDataset(dataset: Dataset): Task[Dataset]
-  def newNode(dataset: Dataset): Task[AnonymousNode]
-  def addStatement(dataset: Dataset, statement: Statement): Task[PersistedStatement]
-  def removeStatement(dataset: Dataset, statement: Statement): Task[Statement]
+  def createDataset(dataset: NamedNode): Task[NamedNode]
+  def deleteDataset(dataset: NamedNode): Task[NamedNode]
+  def newNode(dataset: NamedNode): Task[AnonymousNode]
+  def addStatement(dataset: NamedNode, statement: Statement): Task[PersistedStatement]
+  def removeStatement(dataset: NamedNode, statement: Statement): Task[Statement]
   def cancel(): Unit
 }

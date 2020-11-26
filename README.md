@@ -12,18 +12,14 @@ Ligature is heavily influenced by RDF and related standards but attempts to be m
 |            |            | literal    |            |
 
 ## Ligature's Data Model
-| Dataset | Subject       | Predicate | Object        | Context       |
-| ------- | ------------- | --------- | ------------- | ------------- |
-| Dataset | NamedNode     | NamedNode | NamedNode     | AnonymousNode |
-|         | AnonymousNode |           | AnonymousNode |               |
-|         |               |           | Literal       |               |
+| Dataset   | Subject       | Predicate | Object        | Context       |
+| --------- | ------------- | --------- | ------------- | ------------- |
+| NamedNode | NamedNode     | NamedNode | NamedNode     | AnonymousNode |
+|           | AnonymousNode |           | AnonymousNode |               |
+|           |               |           | Literal       |               |
 
 ### Datasets
 A dataset in Ligature is a named collection of statements.
-A dataset's name must be a valid URL path (not a full URL just the path part).
-Currently, naming is even more restrictive and must contain only lower case ASCII characters, underscores, and forward-slashes.
-This is likely to change to be more flexible but seems like a good starting point.
-
 It's important to note that currently, Ligature doesn't support named graphs like quad-stores support, and datasets are very different from named graphs.
 Even though dataset names might seem like they nest (`test/test` looks like it is under `test`) this isn't the case.
 A dataset is its own unique entity and stands alone from all other datasets.
@@ -53,7 +49,7 @@ Identifiers can be something that is meaningful like an IRI/URL, an id from an e
 Below is an example statement using identifiers in Scala format.
 
 ```scala
-tx.addStatement(Dataset("dataset"), Statement(NamedNode("Emily"), NamedNode("loves"), NamedNode("cats")))
+tx.addStatement(NamedNode("dataset"), Statement(NamedNode("Emily"), NamedNode("loves"), NamedNode("cats")))
 ```
 
 Besides using named nodes, the `newNode` method returns a unique Anonymous Node with an Identifier
@@ -62,7 +58,7 @@ The `newNode` method runs inside a transaction so it is guaranteed to be unique 
 For example here is some pseudocode.
 
 ```scala
-val ds = Dataset("dataset")
+val ds = NamedNode("dataset")
 instance.write.use { tx =>
   val e: AnonymousNode = tx.newNode(ds) // creates a new identifer, in this case let's say `42`
   tx.addStatement(ds, Statement(e, a, NamedNode("company"))) // should run fine
