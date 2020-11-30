@@ -7,34 +7,32 @@ package dev.ligature
 import cats.effect.Resource
 import monix.eval.Task
 import monix.reactive.Observable
+import dev.ligature.iris.IRI
 
-sealed trait Object
-sealed trait Node extends Object
-case class NamedNode(name: String) extends Node
-case class AnonymousNode(identifier: Long) extends Node
+final case class BlankNode(identifier: Long)
 
-sealed trait Literal extends Object
-case class LangLiteral(value: String, langTag: String) extends Literal
-case class StringLiteral(value: String) extends Literal
-case class BooleanLiteral(value: Boolean) extends Literal
-case class LongLiteral(value: Long) extends Literal
-case class DoubleLiteral(value: Double) extends Literal
-case class UnknownLiteral(value: String, `type`: NamedNode) extends Literal
+sealed trait Literal
+final case class LangLiteral(value: String, langTag: String) extends Literal
+final case class StringLiteral(value: String) extends Literal
+final case class BooleanLiteral(value: Boolean) extends Literal
+final case class LongLiteral(value: Long) extends Literal
+final case class DoubleLiteral(value: Double) extends Literal
+final case class UnknownLiteral(value: String, `type`: IRI) extends Literal
 
 sealed trait Range
-case class LangLiteralRange(start: LangLiteral, stop: LangLiteral) extends Range
-case class StringLiteralRange(start: StringLiteral, stop: StringLiteral) extends Range
-case class LongLiteralRange(start: LongLiteral, stop: LongLiteral) extends Range
-case class DoubleLiteralRange(start: DoubleLiteral, stop: DoubleLiteral) extends Range
+final case class LangLiteralRange(start: LangLiteral, stop: LangLiteral) extends Range
+final case class StringLiteralRange(start: StringLiteral, stop: StringLiteral) extends Range
+final case class LongLiteralRange(start: LongLiteral, stop: LongLiteral) extends Range
+final case class DoubleLiteralRange(start: DoubleLiteral, stop: DoubleLiteral) extends Range
 
-case class Statement(subject: Node, predicate: NamedNode, `object`: Object)
-case class PersistedStatement(dataset: NamedNode, statement: Statement, context: AnonymousNode)
+type Subject = IRI | BlankNode
+type Object = Subject | Literal
+
+final case class Statement(subject: Subject, predicate: IRI, `object`: Object)
+final case class PersistedStatement(dataset: IRI, statement: Statement, context: BlankNode)
 
 object Ligature {
-  val a: NamedNode = NamedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
-  def validNamedNode(node: NamedNode): Boolean = {
-    "[a-zA-Z_][^\\s()\\[\\]{}'\"`<>\\\\]*".r.matches(node.name)
-  }
+  val a: IRI = IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
   def validLangTag(langTag: String): Boolean =
     "[a-zA-Z]+(-[a-zA-Z0-9]+)*".r.matches(langTag)
 }
@@ -49,26 +47,26 @@ trait LigatureInstance {
 }
 
 trait LigatureReadTx {
-  def datasets: Observable[NamedNode]
-  def datasets(prefix: NamedNode): Observable[NamedNode]
-  def datasets(from: NamedNode, to: NamedNode): Observable[NamedNode]
-  def allStatements(dataset: NamedNode): Observable[PersistedStatement]
-  def matchStatements(dataset: NamedNode,
-                      subject: Option[Node] = None,
-                      predicate: Option[NamedNode] = None,
+  def datasets: Observable[IRI]
+  def datasets(prefix: String): Observable[IRI]
+  def datasets(from: String, to: String): Observable[IRI]
+  def allStatements(dataset: IRI): Observable[PersistedStatement]
+  def matchStatements(dataset: IRI,
+                      subject: Option[Subject] = None,
+                      predicate: Option[IRI] = None,
                       `object`: Option[Object] = None): Observable[PersistedStatement]
-  def matchStatements(dataset: NamedNode,
-                      subject: Option[Node],
-                      predicate: Option[NamedNode],
+  def matchStatements(dataset: IRI,
+                      subject: Option[Subject],
+                      predicate: Option[IRI],
                       range: Range): Observable[PersistedStatement]
-  def statementByContext(dataset: NamedNode, context: AnonymousNode): Task[Option[PersistedStatement]]
+  def statementByContext(dataset: IRI, context: BlankNode): Task[Option[PersistedStatement]]
 }
 
 trait LigatureWriteTx {
-  def createDataset(dataset: NamedNode): Task[NamedNode]
-  def deleteDataset(dataset: NamedNode): Task[NamedNode]
-  def newNode(dataset: NamedNode): Task[AnonymousNode]
-  def addStatement(dataset: NamedNode, statement: Statement): Task[PersistedStatement]
-  def removeStatement(dataset: NamedNode, statement: Statement): Task[Statement]
+  def createDataset(dataset: IRI): Task[IRI]
+  def deleteDataset(dataset: IRI): Task[IRI]
+  def newNode(dataset: IRI): Task[BlankNode]
+  def addStatement(dataset: IRI, statement: Statement): Task[PersistedStatement]
+  def removeStatement(dataset: IRI, statement: Statement): Task[Statement]
   def cancel(): Unit
 }
