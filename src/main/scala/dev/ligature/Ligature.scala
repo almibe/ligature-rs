@@ -32,7 +32,7 @@ final case class Statement(subject: Subject, predicate: IRI, `object`: Object)
 final case class PersistedStatement(dataset: IRI, statement: Statement, context: BlankNode)
 
 object Ligature {
-  val a: IRI = IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+  val a: IRI = IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type").getOrElse(???)
   def validLangTag(langTag: String): Boolean =
     "[a-zA-Z]+(-[a-zA-Z0-9]+)*".r.matches(langTag)
 }
