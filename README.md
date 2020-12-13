@@ -3,6 +3,10 @@ Ligature is a library for working with knowledge graphs on the JVM written in Sc
 This project provides the main interfaces used by Ligature as well as some helper functions and constants.
 See related projects for implementations of these APIs.
 Ligature is heavily influenced by RDF and related standards but attempts to be more general purpose and easier to use.
+It attempts to do this by making minor changes while staying mostly compatible.
+
+## Status
+This project is still very much under development and subject to change quite a bit in the short term while I'm experimenting.
 
 ## RDF's Data Model
 | Subject    | Predicate  | Object     | Graph      |
@@ -12,27 +16,23 @@ Ligature is heavily influenced by RDF and related standards but attempts to be m
 |            |            | literal    |            |
 
 ## Ligature's Data Model
-| Dataset   | Subject       | Predicate | Object        | Context       |
-| --------- | ------------- | --------- | ------------- | ------------- |
-| NamedNode | NamedNode     | NamedNode | NamedNode     | AnonymousNode |
-|           | AnonymousNode |           | AnonymousNode |               |
-|           |               |           | Literal       |               |
+| Dataset    | Subject    | Predicate  | Object     | Graph      |
+| ---------- | ---------- | ---------- | ---------- | ---------- |
+| local name | iri        | iri        | iri        | iri        |
+|            | blank node | local name | blank node | blank node |
+|            | local name |            | literal    | local name |
+|            |            |            | local name |            |
 
 ### Datasets
 A dataset in Ligature is a named collection of statements.
-It's important to note that currently, Ligature doesn't support named graphs like quad-stores support, and datasets are very different from named graphs.
 Even though dataset names might seem like they nest (`test/test` looks like it is under `test`) this isn't the case.
 A dataset is its own unique entity and stands alone from all other datasets.
-For example with named graphs blank nodes are shared across graphs in a dataset, but in Ligature AnonymousNodes are unique to their dataset.
-When Ligature supports named graphs within datasets it will be the case that AnonymousNodes are shared across named graphs in a single dataset.
+Also, datasets are very different from named graphs.
+For example with named graphs blank nodes are shared across graphs in a dataset, but in datasets blank nodes are unique to their dataset.
 
-### Nodes
-Ligature has two types of nodes.
-An NamedNode is represented by an identifier given by the user
-and an AnonymousNode is represented by a numeric identifier that is automatically generated.
-Finally, a literal is one of several types of nodes that represents a value of a specific type see below for a list
-of current literal types.
-Named node identifiers in Ligature are *currently* defined as strings that start with an ASCII letter
+### Local Names
+An Local Name is represented by an identifier given by the user that isn't an IRI and local to the dataset.
+Local Name identifiers in Ligature are *currently* defined as strings that start with an ASCII letter
 or an underscore and don't contain any of the following characters:
  * whitespace (space, newline, tabs, carriage returns, etc)
  * " ' `
@@ -49,7 +49,7 @@ Identifiers can be something that is meaningful like an IRI/URL, an id from an e
 Below is an example statement using identifiers in Scala format.
 
 ```scala
-tx.addStatement(NamedNode("dataset"), Statement(NamedNode("Emily"), NamedNode("loves"), NamedNode("cats")))
+tx.addStatement(LocalName("dataset"), Statement(LocalName("Emily"), LocalName("loves"), LocalName("cats")))
 ```
 
 Besides using named nodes, the `newNode` method returns a unique Anonymous Node with an Identifier
@@ -58,13 +58,13 @@ The `newNode` method runs inside a transaction so it is guaranteed to be unique 
 For example here is some pseudocode.
 
 ```scala
-val ds = NamedNode("dataset")
+val ds = LocalName("dataset")
 instance.write.use { tx =>
   val e: AnonymousNode = tx.newNode(ds) // creates a new identifer, in this case let's say `42`
-  tx.addStatement(ds, Statement(e, a, NamedNode("company"))) // should run fine
-  tx.addStatement(ds, Statement(e, NamedNode("name"), StringLiteral("Pear"))) // should run fine
-  tx.addStatement(ds, Statement(AnonymousNode(newNode.identifer), NamedNode("name"), StringLiteral("Pear"))) // will run fine since it's just another way of writing the above line
-  tx.addStatement(ds, Statement(AnonymousNode(24601), a, NamedNode("bird"))) // will erorr out since that identifier hasn't been created yet
+  tx.addStatement(ds, Statement(e, a, LocalName("company"))) // should run fine
+  tx.addStatement(ds, Statement(e, LocalName("name"), StringLiteral("Pear"))) // should run fine
+  tx.addStatement(ds, Statement(AnonymousNode(newNode.identifer), LocalName("name"), StringLiteral("Pear"))) // will run fine since it's just another way of writing the above line
+  tx.addStatement(ds, Statement(AnonymousNode(24601), a, LocalName("bird"))) // will erorr out since that identifier hasn't been created yet
 }
 ```
 
@@ -80,13 +80,6 @@ Below is a table with the currently supported types.
 | BooleanLiteral(val value: Boolean)                  | A boolean value.                                                  | No     |
 | LongLiteral(val value: Long)                        | A value based on Scala's Long.                                    | Yes    |
 | DoubleLiteral(val value: Double)                    | A value based on Scala's Double.                                  | Yes    |
-
-### Predicates
-Predicates are just NamedNodes in the predicate position of the triple.
-
-### Context
-Contexts are unique AnonymousNodes that are created for every Statement.
-They can be accessed from PersistedStatement objects.
 
 ## Building
 This project requires SBT to be installed.
@@ -105,6 +98,7 @@ Once that is set up use `sbt test` to run tests `sbt publishLocal` to install th
 | [ligature-key-value](https://github.com/almibe/ligature-key-value)     | A library for storing Ligature data in a key-value store using the `slonky` library.   |
 | [ligature-benchmark](https://github.com/almibe/ligature-benchmark)     | An internal benchmark for Ligature.                                                    |
 | [wander](https://github.com/almibe/wander)                             | A scripting language for working with Ligature.                                        |
-| [ligature-ontology](https://github.com/almibe/ligature-ontology)       | Ontology/OWL support for Ligature.                                                     |
+| [ligature-schema](https://github.com/almibe/ligature-schema)           | RDFS and SHACL support for Ligature.                                                     |
+| [iris](https://github.com/almibe/iris)                                 | IRI support for Scala 3.                                                               |
 | [ligature-formats](https://github.com/almibe/ligature-formats)         | Support for various RDF serializations with Ligature.                                  |
 | [ligature-sparql](https://github.com/almibe/ligature-sparql)           | SPARQL support for Ligature.                                                           |
