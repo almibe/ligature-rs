@@ -27,8 +27,8 @@ final case class StringLiteralRange(start: StringLiteral, stop: StringLiteral) e
 final case class LongLiteralRange(start: LongLiteral, stop: LongLiteral) extends Range
 final case class DoubleLiteralRange(start: DoubleLiteral, stop: DoubleLiteral) extends Range
 
-type Subject = IRI | LocalName | BlankNode | DefaultGraph
-type Grpah = IRI | LocalName | BlankNode | DefaultGraph
+type Subject = IRI | LocalName | BlankNode | DefaultGraph.type
+type Graph = IRI | LocalName | BlankNode | DefaultGraph.type
 type Object = Subject | Literal
 
 final case class Statement(subject: Subject, predicate: IRI, `object`: Object)
