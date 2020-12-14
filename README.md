@@ -90,6 +90,7 @@ Once that is set up use `sbt test` to run tests `sbt publishLocal` to install th
 | Name                                                                   | Description                                                                            |
 | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
 | [ligature-server](https://github.com/almibe/ligature-server)           | An HTTP server for working with Ligature.                                              |
+| [ligature-client](https://github.com/almibe/ligature-client)           | A JVM HTTP client for working with Ligature.                                           |
 | [ligature-lab](https://github.com/almibe/ligature-lab)                 | A multi-user web front-end for experimenting with Ligature via `ligature-server`.      |
 | [ligature-lab-desktop](https://github.com/almibe/ligature-lab-desktop) | A single-user desktop front-end for experimenting with Ligature via `ligature-server`. |
 | [ligature-test-suite](https://github.com/almibe/ligature-test-suite)   | A common test suite for Ligature implementations.                                      |
