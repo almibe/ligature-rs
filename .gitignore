@@ -11,3 +11,9 @@ project/project/project/metals.sbt
 project/project/metals.sbt
 project/.bloop/ligature-build.json
 project/project/.bloop/ligature-build-build.json
+
+
+# Added by cargo
+
+/target
+Cargo.lock
