@@ -2,66 +2,88 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-final case class LocalName(name: String)
-final case class BlankNode(identifier: Long)
-object DefaultGraph
+ use async_trait::async_trait;
 
-sealed trait Literal
-final case class LangLiteral(value: String, langTag: String) extends Literal
-final case class StringLiteral(value: String) extends Literal
-final case class BooleanLiteral(value: Boolean) extends Literal
-final case class LongLiteral(value: Long) extends Literal
-final case class DoubleLiteral(value: Double) extends Literal
-final case class UnknownLiteral(value: String, `type`: IRI) extends Literal
+struct BlankNode(u64);
+struct IRI(String);
+struct DefaultGraph {}
+struct LangLiteral { value: String, langTag: String }
 
-sealed trait Range
-final case class LangLiteralRange(start: LangLiteral, stop: LangLiteral) extends Range
-final case class StringLiteralRange(start: StringLiteral, stop: StringLiteral) extends Range
-final case class LongLiteralRange(start: LongLiteral, stop: LongLiteral) extends Range
-final case class DoubleLiteralRange(start: DoubleLiteral, stop: DoubleLiteral) extends Range
-
-type Subject = IRI | LocalName | BlankNode | DefaultGraph.type
-type Predicate = IRI | LocalName
-type Graph = IRI | LocalName | BlankNode | DefaultGraph.type
-type Object = Subject | Literal
-
-final case class Statement(subject: Subject, predicate: Predicate, `object`: Object)
-final case class PersistedStatement(dataset: LocalName, statement: Statement, graph: Graph)
-
-object Ligature {
-  val a: IRI = IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type").getOrElse(???)
-  def validLangTag(langTag: String): Boolean =
-    "[a-zA-Z]+(-[a-zA-Z0-9]+)*".r.matches(langTag)
+enum Literal {
+  LangLiteral { value: LangLiteral },
+  StringLiteral { value: String },
+  BooleanLiteral { value: bool },
+  LongLiteral { value: i64 },
+  DoubleLiteral { value: f64 },
+  UnknownLiteral { value: String, r#type: IRI }  
 }
 
+enum Range {
+  LangLiteralRange { start: LangLiteral, stop: LangLiteral },
+  StringLiteralRange { start: String, stop: String },
+  LongLiteralRange { start: i64, stop: i64 },
+  DoubleLiteralRange { start: f64, stop: f64 }  
+}
+
+enum Subject {
+  IRI,
+  BlankNode,
+  DefaultGraph
+}
+
+enum Predicate {
+  IRI, 
+}
+
+enum Graph { 
+  IRI,
+  BlankNode,
+  DefaultGraph
+}
+
+enum Object {
+  Subject,
+  Literal
+}
+
+struct Statement { subject: Subject, predicate: Predicate, object: Object }
+struct PersistedStatement { dataset: LocalName, statement: Statement, graph: Graph }
+
+//val a: IRI = IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type").getOrElse(???)
+//fn validLangTag(langTag: String) -> Boolean =
+//  "[a-zA-Z]+(-[a-zA-Z0-9]+)*".r.matches(langTag)
+
+#[async_trait]
 trait Ligature {
-   def datasets(): Observable[LocalName]
-   def datasets(prefix: String): Observable[LocalName]
-   def datasets(from: String, to: String): Observable[LocalName]
-   def createDataset(dataset: LocalName): Task[LocalName]
-   def deleteDataset(dataset: LocalName): Task[LocalName]
-   def query(): QueryTx
-   def addStatements(dataset: LocalName, statements: Iterator<Statement>)
-   def removeStatements(dataset: LocalName, statements: Iterator<Statement>)
+  async fn all_datasets() -> Observable<LocalName>;
+  async fn match_datasets(prefix: String) -> Observable<LocalName>;
+  async fn match_datasets_range(from: String, to: String) -> Observable<LocalName>;
+  async fn createDataset(dataset: LocalName) -> LocalName;
+  async fn deleteDataset(dataset: LocalName) -> LocalName;
+  async fn query() -> QueryTx;
+  async fn addStatements(dataset: LocalName, statements: Iterator<Statement>);
+  async fn removeStatements(dataset: LocalName, statements: Iterator<Statement>);
 }
 
+#[async_trait]
 trait QueryTx {
-  def allStatements(dataset: LocalName): Observable[PersistedStatement]
-  def matchStatements(dataset: LocalName,
-                      subject: Option[Subject] = None,
-                      predicate: Option[Predicate] = None,
-                      `object`: Option[Object] = None,
-                      graph: Option[Graph] = None): Observable[PersistedStatement]
-  def matchStatements(dataset: LocalName,
-                      subject: Option[Subject],
-                      predicate: Option[Predicate],
-                      graph: Option[Graph],
-                      range: Range): Observable[PersistedStatement]
+  async fn all_statements(dataset: LocalName) -> Observable<PersistedStatement>;
+  async fn match_statements(dataset: LocalName,
+                      subject: Option<Subject>,
+                      predicate: Option<Predicate>,
+                      object: Option<Object>,
+                      graph: Option<Graph>) -> Observable<PersistedStatement>;
+  async fn match_statements_range(dataset: LocalName,
+                      subject: Option<Subject>,
+                      predicate: Option<Predicate>,
+                      graph: Option<Graph>,
+                      range: Range) -> Observable<PersistedStatement>;
 }
 
+#[async_trait]
 trait WriteTx {
-  def newNode(dataset: LocalName): Task[BlankNode]
-  def addStatement(dataset: LocalName, statement: Statement, graph: Graph = DefaultGraph): Task[PersistedStatement]
-  def removeStatement(dataset: LocalName, statement: Statement, graph: Graph = DefaultGraph): Task[Statement]
-  def cancel(): Unit
+  async fn newNode(dataset: LocalName) -> Task<BlankNode>;
+  async fn addStatement(dataset: LocalName, statement: Statement, graph: Graph) -> Task<PersistedStatement>;
+  async fn removeStatement(dataset: LocalName, statement: Statement, graph: Graph) -> Task<Statement>;
+  async fn cancel() -> Unit;
 }
