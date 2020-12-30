@@ -1,4 +1,4 @@
-# ligature
+# L I G ∀ T U R Ǝ
 Ligature is a library for working with knowledge graphs written in Rust.
 This project provides the main interfaces used by Ligature as well as some helper functions and constants.
 See related projects for implementations of these APIs.
