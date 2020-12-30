@@ -91,3 +91,44 @@ pub trait WriteTx {
   async fn remove_statement(self, statement: Statement, graph: Graph) -> Result<Statement, LigatureError>;
   async fn cancel(self) -> Result<(), LigatureError>;
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn valid_dataset_names() {
+//   assert(!validNamedNode(NamedNode("")))
+//   assert(validNamedNode(NamedNode("http://localhost/people/7")))
+//   assert(!validNamedNode(NamedNode("http://localhost(/people/7")))
+//   assert(!validNamedNode(NamedNode("http://localhost{/people/7")))
+//   assert(!validNamedNode(NamedNode("http://localhost\\/people/7")))
+//   assert(!validNamedNode(NamedNode("http://localhost</people/7")))
+//   assert(!validNamedNode(NamedNode("http://localhost>/people/7")))
+//   assert(!validNamedNode(NamedNode("http://localhost[/people/7")))
+//   assert(!validNamedNode(NamedNode("http://localhost]/people/7")))
+//   assert(!validNamedNode(NamedNode("http://localhost\"/people/7")))
+//   assert(!validNamedNode(NamedNode("http://localhost'/people/7")))
+//   assert(!validNamedNode(NamedNode("http://localhost`/people/7")))
+//   assert(!validNamedNode(NamedNode("http://localhost\t/people/7")))
+//   assert(!validNamedNode(NamedNode("http://localhost\n/people/7")))
+//   assert(!validNamedNode(NamedNode("http://localhost /people/7")))
+//   assert(validNamedNode(NamedNode("hello")))
+//   assert(validNamedNode(NamedNode("_:")))
+//   assert(validNamedNode(NamedNode("_:valid")))
+//   assert(validNamedNode(NamedNode("_:1")))
+//   assert(validNamedNode(NamedNode("_:1344")))
+    }
+
+    #[test]
+    fn valid_lang_tags() {
+      // assert(!validLangTag(""))
+      // assert(validLangTag("en"))
+      // assert(!validLangTag("en-"))
+      // assert(validLangTag("en-fr"))
+      // assert(!validLangTag("en-fr-"))
+      // assert(validLangTag("en-fr-sp"))
+      // assert(validLangTag("ennnenefnk-dkfjkjfl-dfakjelfkjalkf-fakjeflkajlkfj"))
+      // assert(!validLangTag("en-fr-ef "))  
+    }
+}
