@@ -9,4 +9,3 @@ edition = "2018"
 [dependencies]
 futures-core = "0.3.8"
 async-trait = "0.1.42"
-async-stream = "0.3.0"

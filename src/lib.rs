@@ -61,35 +61,35 @@ pub struct LigatureError(String);
 
 #[async_trait]
 pub trait Ligature {
-  fn all_datasets(self) -> dyn Stream<Item = DatasetName>;
-  fn match_datasets(self, prefix: String) -> dyn Stream<Item = DatasetName>;
-  fn match_datasets_range(self, from: String, to: String) -> dyn Stream<Item = DatasetName>;
-  async fn create_dataset(self, dataset: DatasetName) -> Result<DatasetName, LigatureError>;
-  async fn delete_dataset(self, dataset: DatasetName) -> Result<DatasetName, LigatureError>;
-  async fn query(self, dataset: DatasetName) -> Result<Box<dyn QueryTx>, LigatureError>;
-  async fn write(self, dataset: DatasetName) -> Result<Box<dyn WriteTx>, LigatureError>;
+  fn all_datasets(&self) -> Box<dyn Stream<Item = DatasetName>>;
+  fn match_datasets(&self, prefix: String) -> Box<dyn Stream<Item = DatasetName>>;
+  fn match_datasets_range(&self, from: String, to: String) -> Box<dyn Stream<Item = DatasetName>>;
+  async fn create_dataset(&self, dataset: DatasetName) -> Result<DatasetName, LigatureError>;
+  async fn delete_dataset(&self, dataset: DatasetName) -> Result<DatasetName, LigatureError>;
+  async fn query(&self, dataset: DatasetName) -> Result<Box<dyn QueryTx>, LigatureError>;
+  async fn write(&self, dataset: DatasetName) -> Result<Box<dyn WriteTx>, LigatureError>;
 }
 
 pub trait QueryTx {
-  fn all_statements(self) -> dyn Stream<Item = PersistedStatement>;
-  fn match_statements(self,
+  fn all_statements(&self) -> Box<dyn Stream<Item = PersistedStatement>>;
+  fn match_statements(&self,
                       subject: Option<Subject>,
                       predicate: Option<Predicate>,
                       object: Option<Object>,
-                      graph: Option<Graph>) -> dyn Stream<Item = PersistedStatement>;
-  fn match_statements_range(self,
+                      graph: Option<Graph>) -> Box<dyn Stream<Item = PersistedStatement>>;
+  fn match_statements_range(&self,
                       subject: Option<Subject>,
                       predicate: Option<Predicate>,
                       graph: Option<Graph>,
-                      range: Range) -> dyn Stream<Item = PersistedStatement>;
+                      range: Range) -> Box<dyn Stream<Item = PersistedStatement>>;
 }
 
 #[async_trait]
 pub trait WriteTx {
-  async fn new_blank_node(self) -> Result<BlankNode, LigatureError>;
-  async fn add_statement(self, statement: Statement, graph: Graph) -> Result<PersistedStatement, LigatureError>;
-  async fn remove_statement(self, statement: Statement, graph: Graph) -> Result<Statement, LigatureError>;
-  async fn cancel(self) -> Result<(), LigatureError>;
+  async fn new_blank_node(&self) -> Result<BlankNode, LigatureError>;
+  async fn add_statement(&self, statement: Statement, graph: Graph) -> Result<PersistedStatement, LigatureError>;
+  async fn remove_statement(&self, statement: Statement, graph: Graph) -> Result<Statement, LigatureError>;
+  async fn cancel(&self) -> Result<(), LigatureError>;
 }
 
 #[cfg(test)]
