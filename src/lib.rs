@@ -10,48 +10,74 @@ pub struct BlankNode(u64);
 pub struct IRI(String);
 pub struct DefaultGraph {}
 pub struct LangTag(String);
-pub struct LangLiteral { pub value: String, pub lang_tag: LangTag }
-pub struct UnknownLiteral { pub value: String, pub r#type: IRI }
+pub struct LangLiteral {
+    pub value: String,
+    pub lang_tag: LangTag,
+}
+pub struct UnknownLiteral {
+    pub value: String,
+    pub r#type: IRI,
+}
 
 pub enum Literal {
-  LangLiteral(LangLiteral),
-  StringLiteral(String),
-  BooleanLiteral(bool),
-  LongLiteral(i64),
-  DoubleLiteral(f64),
-  UnknownLiteral(UnknownLiteral)
+    LangLiteral(LangLiteral),
+    StringLiteral(String),
+    BooleanLiteral(bool),
+    LongLiteral(i64),
+    DoubleLiteral(f64),
+    UnknownLiteral(UnknownLiteral),
 }
 
 pub enum Range {
-  LangLiteralRange { start: LangLiteral, stop: LangLiteral },
-  StringLiteralRange { start: String, stop: String },
-  LongLiteralRange { start: i64, stop: i64 },
-  DoubleLiteralRange { start: f64, stop: f64 }  
+    LangLiteralRange {
+        start: LangLiteral,
+        stop: LangLiteral,
+    },
+    StringLiteralRange {
+        start: String,
+        stop: String,
+    },
+    LongLiteralRange {
+        start: i64,
+        stop: i64,
+    },
+    DoubleLiteralRange {
+        start: f64,
+        stop: f64,
+    },
 }
 
 pub enum Subject {
-  IRI(IRI),
-  BlankNode(BlankNode),
-  DefaultGraph(DefaultGraph)
+    IRI(IRI),
+    BlankNode(BlankNode),
+    DefaultGraph(DefaultGraph),
 }
 
 pub enum Predicate {
-  IRI(IRI)
+    IRI(IRI),
 }
 
 pub enum Object {
-  Subject(Subject),
-  Literal(Literal)
+    Subject(Subject),
+    Literal(Literal),
 }
 
 pub enum Graph {
-  IRI(IRI),
-  BlankNode(BlankNode),
-  DefaultGraph(DefaultGraph)
+    IRI(IRI),
+    BlankNode(BlankNode),
+    DefaultGraph(DefaultGraph),
 }
 
-pub struct Statement { pub subject: Subject, pub predicate: Predicate, pub object: Object }
-pub struct PersistedStatement { pub dataset: DatasetName, pub statement: Statement, pub graph: Graph }
+pub struct Statement {
+    pub subject: Subject,
+    pub predicate: Predicate,
+    pub object: Object,
+}
+pub struct PersistedStatement {
+    pub dataset: DatasetName,
+    pub statement: Statement,
+    pub graph: Graph,
+}
 
 //val a: IRI = IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type").getOrElse(???)
 //fn validLangTag(langTag: String) -> Boolean =
@@ -61,35 +87,48 @@ pub struct LigatureError(String);
 
 #[async_trait]
 pub trait Ligature {
-  fn all_datasets(&self) -> Box<dyn Stream<Item = DatasetName>>;
-  fn match_datasets(&self, prefix: String) -> Box<dyn Stream<Item = DatasetName>>;
-  fn match_datasets_range(&self, from: String, to: String) -> Box<dyn Stream<Item = DatasetName>>;
-  async fn create_dataset(&self, dataset: DatasetName) -> Result<DatasetName, LigatureError>;
-  async fn delete_dataset(&self, dataset: DatasetName) -> Result<DatasetName, LigatureError>;
-  async fn query(&self, dataset: DatasetName) -> Result<Box<dyn QueryTx>, LigatureError>;
-  async fn write(&self, dataset: DatasetName) -> Result<Box<dyn WriteTx>, LigatureError>;
+    fn all_datasets(&self) -> Box<dyn Stream<Item = DatasetName>>;
+    fn match_datasets(&self, prefix: String) -> Box<dyn Stream<Item = DatasetName>>;
+    fn match_datasets_range(&self, from: String, to: String)
+        -> Box<dyn Stream<Item = DatasetName>>;
+    async fn create_dataset(&self, dataset: DatasetName) -> Result<DatasetName, LigatureError>;
+    async fn delete_dataset(&self, dataset: DatasetName) -> Result<DatasetName, LigatureError>;
+    async fn query(&self, dataset: DatasetName) -> Result<Box<dyn QueryTx>, LigatureError>;
+    async fn write(&self, dataset: DatasetName) -> Result<Box<dyn WriteTx>, LigatureError>;
 }
 
 pub trait QueryTx {
-  fn all_statements(&self) -> Box<dyn Stream<Item = PersistedStatement>>;
-  fn match_statements(&self,
-                      subject: Option<Subject>,
-                      predicate: Option<Predicate>,
-                      object: Option<Object>,
-                      graph: Option<Graph>) -> Box<dyn Stream<Item = PersistedStatement>>;
-  fn match_statements_range(&self,
-                      subject: Option<Subject>,
-                      predicate: Option<Predicate>,
-                      graph: Option<Graph>,
-                      range: Range) -> Box<dyn Stream<Item = PersistedStatement>>;
+    fn all_statements(&self) -> Box<dyn Stream<Item = PersistedStatement>>;
+    fn match_statements(
+        &self,
+        subject: Option<Subject>,
+        predicate: Option<Predicate>,
+        object: Option<Object>,
+        graph: Option<Graph>,
+    ) -> Box<dyn Stream<Item = PersistedStatement>>;
+    fn match_statements_range(
+        &self,
+        subject: Option<Subject>,
+        predicate: Option<Predicate>,
+        graph: Option<Graph>,
+        range: Range,
+    ) -> Box<dyn Stream<Item = PersistedStatement>>;
 }
 
 #[async_trait]
 pub trait WriteTx {
-  async fn new_blank_node(&self) -> Result<BlankNode, LigatureError>;
-  async fn add_statement(&self, statement: Statement, graph: Graph) -> Result<PersistedStatement, LigatureError>;
-  async fn remove_statement(&self, statement: Statement, graph: Graph) -> Result<Statement, LigatureError>;
-  async fn cancel(&self) -> Result<(), LigatureError>;
+    async fn new_blank_node(&self) -> Result<BlankNode, LigatureError>;
+    async fn add_statement(
+        &self,
+        statement: Statement,
+        graph: Graph,
+    ) -> Result<PersistedStatement, LigatureError>;
+    async fn remove_statement(
+        &self,
+        statement: Statement,
+        graph: Graph,
+    ) -> Result<Statement, LigatureError>;
+    async fn cancel(&self) -> Result<(), LigatureError>;
 }
 
 #[cfg(test)]
@@ -98,37 +137,37 @@ mod tests {
 
     #[test]
     fn valid_dataset_names() {
-//   assert(!validNamedNode(NamedNode("")))
-//   assert(validNamedNode(NamedNode("http://localhost/people/7")))
-//   assert(!validNamedNode(NamedNode("http://localhost(/people/7")))
-//   assert(!validNamedNode(NamedNode("http://localhost{/people/7")))
-//   assert(!validNamedNode(NamedNode("http://localhost\\/people/7")))
-//   assert(!validNamedNode(NamedNode("http://localhost</people/7")))
-//   assert(!validNamedNode(NamedNode("http://localhost>/people/7")))
-//   assert(!validNamedNode(NamedNode("http://localhost[/people/7")))
-//   assert(!validNamedNode(NamedNode("http://localhost]/people/7")))
-//   assert(!validNamedNode(NamedNode("http://localhost\"/people/7")))
-//   assert(!validNamedNode(NamedNode("http://localhost'/people/7")))
-//   assert(!validNamedNode(NamedNode("http://localhost`/people/7")))
-//   assert(!validNamedNode(NamedNode("http://localhost\t/people/7")))
-//   assert(!validNamedNode(NamedNode("http://localhost\n/people/7")))
-//   assert(!validNamedNode(NamedNode("http://localhost /people/7")))
-//   assert(validNamedNode(NamedNode("hello")))
-//   assert(validNamedNode(NamedNode("_:")))
-//   assert(validNamedNode(NamedNode("_:valid")))
-//   assert(validNamedNode(NamedNode("_:1")))
-//   assert(validNamedNode(NamedNode("_:1344")))
+        //   assert(!validNamedNode(NamedNode("")))
+        //   assert(validNamedNode(NamedNode("http://localhost/people/7")))
+        //   assert(!validNamedNode(NamedNode("http://localhost(/people/7")))
+        //   assert(!validNamedNode(NamedNode("http://localhost{/people/7")))
+        //   assert(!validNamedNode(NamedNode("http://localhost\\/people/7")))
+        //   assert(!validNamedNode(NamedNode("http://localhost</people/7")))
+        //   assert(!validNamedNode(NamedNode("http://localhost>/people/7")))
+        //   assert(!validNamedNode(NamedNode("http://localhost[/people/7")))
+        //   assert(!validNamedNode(NamedNode("http://localhost]/people/7")))
+        //   assert(!validNamedNode(NamedNode("http://localhost\"/people/7")))
+        //   assert(!validNamedNode(NamedNode("http://localhost'/people/7")))
+        //   assert(!validNamedNode(NamedNode("http://localhost`/people/7")))
+        //   assert(!validNamedNode(NamedNode("http://localhost\t/people/7")))
+        //   assert(!validNamedNode(NamedNode("http://localhost\n/people/7")))
+        //   assert(!validNamedNode(NamedNode("http://localhost /people/7")))
+        //   assert(validNamedNode(NamedNode("hello")))
+        //   assert(validNamedNode(NamedNode("_:")))
+        //   assert(validNamedNode(NamedNode("_:valid")))
+        //   assert(validNamedNode(NamedNode("_:1")))
+        //   assert(validNamedNode(NamedNode("_:1344")))
     }
 
     #[test]
     fn valid_lang_tags() {
-      // assert(!validLangTag(""))
-      // assert(validLangTag("en"))
-      // assert(!validLangTag("en-"))
-      // assert(validLangTag("en-fr"))
-      // assert(!validLangTag("en-fr-"))
-      // assert(validLangTag("en-fr-sp"))
-      // assert(validLangTag("ennnenefnk-dkfjkjfl-dfakjelfkjalkf-fakjeflkajlkfj"))
-      // assert(!validLangTag("en-fr-ef "))  
+        // assert(!validLangTag(""))
+        // assert(validLangTag("en"))
+        // assert(!validLangTag("en-"))
+        // assert(validLangTag("en-fr"))
+        // assert(!validLangTag("en-fr-"))
+        // assert(validLangTag("en-fr-sp"))
+        // assert(validLangTag("ennnenefnk-dkfjkjfl-dfakjelfkjalkf-fakjeflkajlkfj"))
+        // assert(!validLangTag("en-fr-ef "))
     }
 }
