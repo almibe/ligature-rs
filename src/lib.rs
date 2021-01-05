@@ -1,9 +1,6 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-use async_trait::async_trait;
-use futures_core::stream::Stream;
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 pub struct DatasetName(String);
 pub struct BlankNode(u64);
@@ -85,50 +82,51 @@ pub struct PersistedStatement {
 
 pub struct LigatureError(String);
 
-#[async_trait]
 pub trait Ligature {
-    fn all_datasets(&self) -> Box<dyn Stream<Item = DatasetName>>;
-    fn match_datasets(&self, prefix: String) -> Box<dyn Stream<Item = DatasetName>>;
-    fn match_datasets_range(&self, from: String, to: String)
-        -> Box<dyn Stream<Item = DatasetName>>;
-    async fn create_dataset(&self, dataset: DatasetName) -> Result<DatasetName, LigatureError>;
-    async fn delete_dataset(&self, dataset: DatasetName) -> Result<DatasetName, LigatureError>;
-    async fn query(&self, dataset: DatasetName) -> Result<Box<dyn QueryTx>, LigatureError>;
-    async fn write(&self, dataset: DatasetName) -> Result<Box<dyn WriteTx>, LigatureError>;
+    fn all_datasets(&self) -> Box<dyn Iterator<Item = DatasetName>>;
+    fn match_datasets(&self, prefix: String) -> Box<dyn Iterator<Item = DatasetName>>;
+    fn match_datasets_range(
+        &self,
+        from: String,
+        to: String,
+    ) -> Box<dyn Iterator<Item = DatasetName>>;
+    fn create_dataset(&self, dataset: DatasetName) -> Result<DatasetName, LigatureError>;
+    fn delete_dataset(&self, dataset: DatasetName) -> Result<DatasetName, LigatureError>;
+    fn query(&self, dataset: DatasetName) -> Result<Box<dyn QueryTx>, LigatureError>;
+    fn write(&self, dataset: DatasetName) -> Result<Box<dyn WriteTx>, LigatureError>;
 }
 
 pub trait QueryTx {
-    fn all_statements(&self) -> Box<dyn Stream<Item = PersistedStatement>>;
+    fn all_statements(&self) -> Box<dyn Iterator<Item = PersistedStatement>>;
     fn match_statements(
         &self,
         subject: Option<Subject>,
         predicate: Option<Predicate>,
         object: Option<Object>,
         graph: Option<Graph>,
-    ) -> Box<dyn Stream<Item = PersistedStatement>>;
+    ) -> Box<dyn Iterator<Item = PersistedStatement>>;
     fn match_statements_range(
         &self,
         subject: Option<Subject>,
         predicate: Option<Predicate>,
         graph: Option<Graph>,
         range: Range,
-    ) -> Box<dyn Stream<Item = PersistedStatement>>;
+    ) -> Box<dyn Iterator<Item = PersistedStatement>>;
 }
 
-#[async_trait]
 pub trait WriteTx {
-    async fn new_blank_node(&self) -> Result<BlankNode, LigatureError>;
-    async fn add_statement(
+    fn new_blank_node(&self) -> Result<BlankNode, LigatureError>;
+    fn add_statement(
         &self,
         statement: Statement,
         graph: Graph,
     ) -> Result<PersistedStatement, LigatureError>;
-    async fn remove_statement(
+    fn remove_statement(
         &self,
         statement: Statement,
         graph: Graph,
     ) -> Result<Statement, LigatureError>;
-    async fn cancel(&self) -> Result<(), LigatureError>;
+    fn cancel(&self) -> Result<(), LigatureError>;
 }
 
 #[cfg(test)]
