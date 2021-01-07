@@ -2,17 +2,41 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#![deny(missing_docs)]
-//#![deny(missing_doc_example)] <-- for later, when I'm swole
-
 //! This module is the main module for the Ligature project.
 //! It represents to common types and traits used by Ligature.
 
-/// A string that represents a Dataset's Name.
+#![deny(missing_docs)]
+//#![deny(missing_doc_example)] <-- for later, when I'm swole
+
+#[macro_use]
+extern crate lazy_static;
+
+use regex::Regex;
+
+/// A string that represents a Dataset by name.
 /// Currently can only be ASCII text separated by /
-/// TODO add validator and tests
 #[derive(Debug)]
-pub struct DatasetName(String);
+pub struct Dataset(String);
+
+impl Dataset {
+    /// Creates a new Dataset and returns a Result based on if it is valid or not.
+    pub fn new(name: &str) -> Result<Dataset, LigatureError> {
+        lazy_static! {
+            static ref RE: Regex = Regex::new(r"^[a-zA-Z_]+(/[a-zA-Z0-9_]+)*$").unwrap();
+        }
+
+        if RE.is_match(name) {
+            Ok(Dataset(name.to_string()))
+        } else {
+            Err(LigatureError(format!("Invalid Dataset name {}", name)))
+        }
+    }
+
+    /// Returns the name of the given Dataset.
+    pub fn name(&self) -> &str {
+        &self.0
+    }
+}
 
 /// A node that is only identified by a unique u64 id.
 #[derive(Debug)]
@@ -28,13 +52,30 @@ pub struct IRI(String);
 pub struct DefaultGraph;
 
 /// A wrapper type that represents a language tag.
-/// Represented via `[a-zA-Z]+ ('-' [a-zA-Z0-9]+)*`
-/// TODO add validator and tests
 #[derive(Debug)]
 pub struct LangTag(String);
 
+impl LangTag {
+    /// Create a new LangTag from a &str and returns a Result based on if it is valid or not.
+    pub fn new(tag: &str) -> Result<LangTag, LigatureError> {
+        lazy_static! {
+            static ref RE: Regex = Regex::new(r"^[a-zA-Z]+(\-[a-zA-Z0-9]+)*$").unwrap();
+        }
+
+        if RE.is_match(tag) {
+            Ok(LangTag(tag.to_string()))
+        } else {
+            Err(LigatureError(format!("Invalid LangTag value {}", tag)))
+        }
+    }
+
+    /// Returns the value of the LangTag.
+    pub fn value(&self) -> &str {
+        &self.0
+    }
+}
+
 /// A struct containing text and a language tag that denotes what language the text is expressed in.
-/// TODO add validator and tests
 #[derive(Debug)]
 pub struct LangLiteral {
     /// The String literal that is represented by this LangLiteral
@@ -44,7 +85,6 @@ pub struct LangLiteral {
 }
 
 /// A struct containing a value represented as a String and the type of the value represented by an IRI.
-/// TODO add validator and tests
 /// TODO probably need a function that double checks a given UnknownLiteral is actually unknown
 #[derive(Debug)]
 pub struct UnknownLiteral {
@@ -106,7 +146,6 @@ pub enum Range {
 }
 
 /// The set of valid types that can be used as a Subject.
-/// TODO add validator and tests
 #[derive(Debug)]
 pub enum Subject {
     /// A tagged IRI used as a Subject.
@@ -118,7 +157,6 @@ pub enum Subject {
 }
 
 /// The set of valid types that can be used as a Predicate.
-/// TODO add validator and tests
 #[derive(Debug)]
 pub enum Predicate {
     /// A tagged IRI used as a Predicate.
@@ -126,7 +164,6 @@ pub enum Predicate {
 }
 
 /// The set of valid types that can be used as an Object.
-/// TODO add validator and tests
 #[derive(Debug)]
 pub enum Object {
     /// A tagged Subject used as an Object.
@@ -136,7 +173,6 @@ pub enum Object {
 }
 
 /// The set of valid types that can be used as a Graph name.
-/// TODO add validator and tests
 #[derive(Debug)]
 pub enum Graph {
     /// A tagged IRI used as a Graph.
@@ -148,7 +184,6 @@ pub enum Graph {
 }
 
 /// A Statement is a grouping of Subject, Predicate, and Object.
-/// TODO add validator and tests
 #[derive(Debug)]
 pub struct Statement {
     /// The Subject of a Statement
@@ -159,12 +194,11 @@ pub struct Statement {
     pub object: Object,
 }
 
-/// A PersistedStatement is a Statement along with a DatasetName and Graph that that Statement belongs to.
-/// TODO add validator and tests
+/// A PersistedStatement is a Statement along with a Dataset and Graph that that Statement belongs to.
 #[derive(Debug)]
 pub struct PersistedStatement {
     /// The Dataset this Statement is persisted in
-    pub dataset: DatasetName,
+    pub dataset: Dataset,
     /// The Statement that is persisted
     pub statement: Statement,
     /// The Graph this Statement is persisted in
@@ -172,8 +206,6 @@ pub struct PersistedStatement {
 }
 
 //val a: IRI = IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type").getOrElse(???)
-//fn validLangTag(langTag: String) -> Boolean =
-//  "[a-zA-Z]+(-[a-zA-Z0-9]+)*".r.matches(langTag)
 
 /// A general struct for representing errors involving Ligature.
 /// TODO should probably be an enum with a bunch of specific cases
@@ -183,33 +215,33 @@ pub struct LigatureError(String);
 /// A trait that all Ligature implementations implement.
 pub trait Ligature {
     /// Returns all Datasets in a Ligature instance.
-    fn all_datasets(&self) -> Box<dyn Iterator<Item = DatasetName>>;
+    fn all_datasets(&self) -> Box<dyn Iterator<Item = Dataset>>;
 
     /// Returns all Datasets in a Ligature instance that start with the given prefix.
-    fn match_datasets(&self, prefix: String) -> Box<dyn Iterator<Item = DatasetName>>;
+    fn match_datasets(&self, prefix: String) -> Box<dyn Iterator<Item = Dataset>>;
 
     /// Returns all Datasets in a Ligature instance that are in a given range (inclusive, exclusive].
     fn match_datasets_range(
         &self,
         start: String,
         end: String,
-    ) -> Box<dyn Iterator<Item = DatasetName>>;
+    ) -> Box<dyn Iterator<Item = Dataset>>;
 
     /// Creates a dataset with the given name.
-    /// TODO should probably return its own error type { InvalidDatasetName, DatasetExists, CouldNotCreateDataset }
-    fn create_dataset(&self, dataset: DatasetName) -> Result<(), LigatureError>;
+    /// TODO should probably return its own error type { InvalidDataset, DatasetExists, CouldNotCreateDataset }
+    fn create_dataset(&self, dataset: Dataset) -> Result<(), LigatureError>;
 
     /// Deletes a dataset with the given name.
-    /// TODO should probably return its own error type { InvalidDatasetName, CouldNotDeleteDataset }
-    fn delete_dataset(&self, dataset: DatasetName) -> Result<DatasetName, LigatureError>;
+    /// TODO should probably return its own error type { InvalidDataset, CouldNotDeleteDataset }
+    fn delete_dataset(&self, dataset: Dataset) -> Result<(), LigatureError>;
 
     /// Initiazes a QueryTx
     /// TODO should probably return its own error type CouldNotInitializeQueryTx
-    fn query(&self, dataset: DatasetName) -> Result<Box<dyn QueryTx>, LigatureError>;
+    fn query(&self, dataset: Dataset) -> Result<Box<dyn QueryTx>, LigatureError>;
 
     /// Initiazes a WriteTx
     /// TODO should probably return its own error type CouldNotInitializeWriteTx
-    fn write(&self, dataset: DatasetName) -> Result<Box<dyn WriteTx>, LigatureError>;
+    fn write(&self, dataset: Dataset) -> Result<Box<dyn WriteTx>, LigatureError>;
 }
 
 /// Represents a QueryTx within the context of a Ligature instance and a single Dataset
@@ -268,45 +300,8 @@ pub trait WriteTx {
     /// Cancels this transaction so that none of the changes made so far will be stored.
     /// This also closes this transaction so no other methods can be called.
     fn cancel(&self) -> Result<(), LigatureError>;
-}
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn valid_dataset_names() {
-        //   assert(!validNamedNode(NamedNode("")))
-        //   assert(validNamedNode(NamedNode("http://localhost/people/7")))
-        //   assert(!validNamedNode(NamedNode("http://localhost(/people/7")))
-        //   assert(!validNamedNode(NamedNode("http://localhost{/people/7")))
-        //   assert(!validNamedNode(NamedNode("http://localhost\\/people/7")))
-        //   assert(!validNamedNode(NamedNode("http://localhost</people/7")))
-        //   assert(!validNamedNode(NamedNode("http://localhost>/people/7")))
-        //   assert(!validNamedNode(NamedNode("http://localhost[/people/7")))
-        //   assert(!validNamedNode(NamedNode("http://localhost]/people/7")))
-        //   assert(!validNamedNode(NamedNode("http://localhost\"/people/7")))
-        //   assert(!validNamedNode(NamedNode("http://localhost'/people/7")))
-        //   assert(!validNamedNode(NamedNode("http://localhost`/people/7")))
-        //   assert(!validNamedNode(NamedNode("http://localhost\t/people/7")))
-        //   assert(!validNamedNode(NamedNode("http://localhost\n/people/7")))
-        //   assert(!validNamedNode(NamedNode("http://localhost /people/7")))
-        //   assert(validNamedNode(NamedNode("hello")))
-        //   assert(validNamedNode(NamedNode("_:")))
-        //   assert(validNamedNode(NamedNode("_:valid")))
-        //   assert(validNamedNode(NamedNode("_:1")))
-        //   assert(validNamedNode(NamedNode("_:1344")))
-    }
-
-    #[test]
-    fn valid_lang_tags() {
-        // assert(!validLangTag(""))
-        // assert(validLangTag("en"))
-        // assert(!validLangTag("en-"))
-        // assert(validLangTag("en-fr"))
-        // assert(!validLangTag("en-fr-"))
-        // assert(validLangTag("en-fr-sp"))
-        // assert(validLangTag("ennnenefnk-dkfjkjfl-dfakjelfkjalkf-fakjeflkajlkfj"))
-        // assert(!validLangTag("en-fr-ef "))
-    }
+    /// Commits this transaction.
+    /// This also closes this transaction so no other methods can be called.
+    fn commit(&self) -> Result<(), LigatureError>;
 }
