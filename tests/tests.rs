@@ -9,7 +9,16 @@ mod tests {
     #[test]
     fn valid_dataset_names() {
         //TODO add more tests
-        let oks = vec!["test", "test/test/test", "test/test", "this/is/a/test", "_", "_test", "__test__", "test/_test"];
+        let oks = vec![
+            "test",
+            "test/test/test",
+            "test/test",
+            "this/is/a/test",
+            "_",
+            "_test",
+            "__test__",
+            "test/_test",
+        ];
         let errs = vec!["", "/", "test/", "/test", "test//test"];
 
         for ok in oks {
@@ -25,7 +34,12 @@ mod tests {
     fn valid_lang_tags() {
         //TODO add more tests
         //TODO make sure case is handled correctly -- ie allow upper case in new() but value() should always be lower
-        let oks = vec!["en", "en-fr", "en-fr-sp", "ennnenefnk-dkfjkjfl-dfakjelfkjalkf-fakjeflkajlkfj"];
+        let oks = vec![
+            "en",
+            "en-fr",
+            "en-fr-sp",
+            "ennnenefnk-dkfjkjfl-dfakjelfkjalkf-fakjeflkajlkfj",
+        ];
         let errs = vec!["", "en-", "en-fr-", "en--fr", "-en-fr", "en-fr-ef "];
 
         for ok in oks {

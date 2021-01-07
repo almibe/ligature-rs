@@ -218,14 +218,11 @@ pub trait Ligature {
     fn all_datasets(&self) -> Box<dyn Iterator<Item = Dataset>>;
 
     /// Returns all Datasets in a Ligature instance that start with the given prefix.
-    fn match_datasets(&self, prefix: String) -> Box<dyn Iterator<Item = Dataset>>;
+    fn match_datasets(&self, prefix: &str) -> Box<dyn Iterator<Item = Dataset>>;
 
     /// Returns all Datasets in a Ligature instance that are in a given range (inclusive, exclusive].
-    fn match_datasets_range(
-        &self,
-        start: String,
-        end: String,
-    ) -> Box<dyn Iterator<Item = Dataset>>;
+    fn match_datasets_range(&self, start: &str, end: &str)
+        -> Box<dyn Iterator<Item = Dataset>>;
 
     /// Creates a dataset with the given name.
     /// TODO should probably return its own error type { InvalidDataset, DatasetExists, CouldNotCreateDataset }
