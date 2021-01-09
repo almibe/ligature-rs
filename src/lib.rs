@@ -14,7 +14,7 @@ use regex::Regex;
 
 /// A string that represents a Dataset by name.
 /// Currently can only be ASCII text separated by /
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct Dataset(String);
 
 impl Dataset {
@@ -38,20 +38,20 @@ impl Dataset {
 }
 
 /// A node that is only identified by a unique u64 id.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct BlankNode(u64);
 
 /// An IRI is represented via https://www.ietf.org/rfc/rfc3987.txt
 /// TODO add validator and tests
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct IRI(String);
 
 /// A unit struct used to represent the concept of a Default Graph in a quad store.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct DefaultGraph;
 
 /// A wrapper type that represents a language tag.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct LangTag(String);
 
 impl LangTag {
@@ -75,7 +75,7 @@ impl LangTag {
 }
 
 /// A struct containing text and a language tag that denotes what language the text is expressed in.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct LangLiteral {
     /// The String literal that is represented by this LangLiteral
     pub value: String,
@@ -85,7 +85,7 @@ pub struct LangLiteral {
 
 /// A struct containing a value represented as a String and the type of the value represented by an IRI.
 /// TODO probably need a function that double checks a given UnknownLiteral is actually unknown
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct UnknownLiteral {
     /// The value of this literal represented as a String.
     pub value: String,
@@ -94,7 +94,7 @@ pub struct UnknownLiteral {
 }
 
 /// An enum that represents all the currently supported literal types.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Literal {
     /// A tagged LangLiteral used for an RDF literal
     LangLiteral(LangLiteral),
@@ -145,7 +145,7 @@ pub enum Range {
 }
 
 /// The set of valid types that can be used as a Subject.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Subject {
     /// A tagged IRI used as a Subject.
     IRI(IRI),
@@ -156,14 +156,14 @@ pub enum Subject {
 }
 
 /// The set of valid types that can be used as a Predicate.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Predicate {
     /// A tagged IRI used as a Predicate.
     IRI(IRI),
 }
 
 /// The set of valid types that can be used as an Object.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Object {
     /// A tagged Subject used as an Object.
     Subject(Subject),
@@ -172,7 +172,7 @@ pub enum Object {
 }
 
 /// The set of valid types that can be used as a Graph name.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Graph {
     /// A tagged IRI used as a Graph.
     IRI(IRI),
@@ -183,7 +183,7 @@ pub enum Graph {
 }
 
 /// A Statement is a grouping of Subject, Predicate, and Object.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Statement {
     /// The Subject of a Statement
     pub subject: Subject,
