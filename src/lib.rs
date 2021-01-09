@@ -8,14 +8,13 @@
 #![deny(missing_docs)]
 //#![deny(missing_doc_example)] <-- for later, when I'm swole
 
-#[macro_use]
-extern crate lazy_static;
+#[macro_use] extern crate lazy_static;
 
 use regex::Regex;
 
 /// A string that represents a Dataset by name.
 /// Currently can only be ASCII text separated by /
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Dataset(String);
 
 impl Dataset {
@@ -192,16 +191,7 @@ pub struct Statement {
     pub predicate: Predicate,
     /// The Object of a Statement
     pub object: Object,
-}
-
-/// A PersistedStatement is a Statement along with a Dataset and Graph that that Statement belongs to.
-#[derive(Debug)]
-pub struct PersistedStatement {
-    /// The Dataset this Statement is persisted in
-    pub dataset: Dataset,
-    /// The Statement that is persisted
-    pub statement: Statement,
-    /// The Graph this Statement is persisted in
+    /// The Graph this Statement in
     pub graph: Graph,
 }
 
@@ -243,9 +233,9 @@ pub trait Ligature {
 
 /// Represents a QueryTx within the context of a Ligature instance and a single Dataset
 pub trait QueryTx {
-    /// Returns all Statements in this Dataset as PersistedStatements.
+    /// Returns all Statements in this Dataset as Statements.
     /// TODO should probably return a Result
-    fn all_statements(&self) -> Box<dyn Iterator<Item = PersistedStatement>>;
+    fn all_statements(&self) -> Box<dyn Iterator<Item = Statement>>;
 
     /// Retuns all Statements that match the given criteria.
     /// If a parameter is None then it matches all, so passing all Nones is the same as calling all_statements.
@@ -256,7 +246,7 @@ pub trait QueryTx {
         predicate: Option<Predicate>,
         object: Option<Object>,
         graph: Option<Graph>,
-    ) -> Box<dyn Iterator<Item = PersistedStatement>>;
+    ) -> Box<dyn Iterator<Item = Statement>>;
 
     /// Retuns all Statements that match the given criteria.
     /// If a parameter is None then it matches all.
@@ -267,7 +257,7 @@ pub trait QueryTx {
         predicate: Option<Predicate>,
         graph: Option<Graph>,
         range: Range,
-    ) -> Box<dyn Iterator<Item = PersistedStatement>>;
+    ) -> Box<dyn Iterator<Item = Statement>>;
 }
 
 /// Represents a WriteTx within the context of a Ligature instance and a single Dataset
@@ -283,7 +273,7 @@ pub trait WriteTx {
         &self,
         statement: Statement,
         graph: Graph,
-    ) -> Result<PersistedStatement, LigatureError>;
+    ) -> Result<Statement, LigatureError>;
 
     /// Removes a given Statement from this Dataset.
     /// If the Statement doesn't exist nothing happens.
