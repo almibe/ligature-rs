@@ -8,7 +8,8 @@
 #![deny(missing_docs)]
 //#![deny(missing_doc_example)] <-- for later, when I'm swole
 
-#[macro_use] extern crate lazy_static;
+#[macro_use]
+extern crate lazy_static;
 
 use regex::Regex;
 
@@ -191,7 +192,7 @@ pub struct Statement {
     pub predicate: Predicate,
     /// The Object of a Statement
     pub object: Object,
-    /// The Graph this Statement in
+    /// The Graph this Statement is in
     pub graph: Graph,
 }
 
@@ -202,6 +203,14 @@ pub struct Statement {
 #[derive(Debug)]
 pub struct LigatureError(String);
 
+/// A struct that is returned from SPAQRL and wander queries.
+pub struct QueryResult {
+    /// A Vec of headers for the results.
+    pub headers: Vec<String>,
+    /// A stream of results, the inner Vec has the same lenth as the headers Vec.
+    pub results: Box<dyn Iterator<Item = Vec<Object>>>,
+}
+
 /// A trait that all Ligature implementations implement.
 pub trait Ligature {
     /// Returns all Datasets in a Ligature instance.
@@ -211,8 +220,7 @@ pub trait Ligature {
     fn match_datasets(&self, prefix: &str) -> Box<dyn Iterator<Item = Dataset>>;
 
     /// Returns all Datasets in a Ligature instance that are in a given range (inclusive, exclusive].
-    fn match_datasets_range(&self, start: &str, end: &str)
-        -> Box<dyn Iterator<Item = Dataset>>;
+    fn match_datasets_range(&self, start: &str, end: &str) -> Box<dyn Iterator<Item = Dataset>>;
 
     /// Creates a dataset with the given name.
     /// TODO should probably return its own error type { InvalidDataset, DatasetExists, CouldNotCreateDataset }
@@ -237,27 +245,11 @@ pub trait QueryTx {
     /// TODO should probably return a Result
     fn all_statements(&self) -> Box<dyn Iterator<Item = Statement>>;
 
-    /// Retuns all Statements that match the given criteria.
-    /// If a parameter is None then it matches all, so passing all Nones is the same as calling all_statements.
-    /// TODO should return a Result
-    fn match_statements(
-        &self,
-        subject: Option<Subject>,
-        predicate: Option<Predicate>,
-        object: Option<Object>,
-        graph: Option<Graph>,
-    ) -> Box<dyn Iterator<Item = Statement>>;
+    /// Run a SPARQL query.
+    fn sparql_query(&self, query: String) -> Result<QueryResult, LigatureError>;
 
-    /// Retuns all Statements that match the given criteria.
-    /// If a parameter is None then it matches all.
-    /// TODO should return a Result
-    fn match_statements_range(
-        &self,
-        subject: Option<Subject>,
-        predicate: Option<Predicate>,
-        graph: Option<Graph>,
-        range: Range,
-    ) -> Box<dyn Iterator<Item = Statement>>;
+    /// Run a wander query.
+    fn wander_query(&self, query: String) -> Result<QueryResult, LigatureError>;
 }
 
 /// Represents a WriteTx within the context of a Ligature instance and a single Dataset
@@ -269,11 +261,8 @@ pub trait WriteTx {
     /// Adds a given Statement to this Dataset.
     /// If the Statement already exists nothing happens.
     /// Note: Potentally could trigger a ValidationError
-    fn add_statement(
-        &self,
-        statement: Statement,
-        graph: Graph,
-    ) -> Result<Statement, LigatureError>;
+    fn add_statement(&self, statement: Statement, graph: Graph)
+        -> Result<Statement, LigatureError>;
 
     /// Removes a given Statement from this Dataset.
     /// If the Statement doesn't exist nothing happens.

@@ -15,11 +15,24 @@ mod tests {
             "test/test",
             "this/is/a/test",
             "_",
+            "_/_",
+            "_/_/_",
             "_test",
             "__test__",
             "test/_test",
         ];
-        let errs = vec!["", "/", "test/", "/test", "test//test"];
+        let errs = vec![
+            "",
+            "/",
+            "test/",
+            "/test",
+            "_/_/",
+            "/_/_",
+            "test//test",
+            "test test",
+            "test/ /test",
+            " test",
+        ];
 
         for ok in oks {
             assert!(Dataset::new(ok).is_ok());
