@@ -261,17 +261,12 @@ pub trait WriteTx {
     /// Adds a given Statement to this Dataset.
     /// If the Statement already exists nothing happens.
     /// Note: Potentally could trigger a ValidationError
-    fn add_statement(&self, statement: Statement, graph: Graph)
-        -> Result<Statement, LigatureError>;
+    fn add_statement(&self, statement: Statement) -> Result<Statement, LigatureError>;
 
     /// Removes a given Statement from this Dataset.
     /// If the Statement doesn't exist nothing happens.
     /// Note: Potentally could trigger a ValidationError.
-    fn remove_statement(
-        &self,
-        statement: Statement,
-        graph: Graph,
-    ) -> Result<Statement, LigatureError>;
+    fn remove_statement(&self, statement: Statement) -> Result<Statement, LigatureError>;
 
     /// Cancels this transaction so that none of the changes made so far will be stored.
     /// This also closes this transaction so no other methods can be called.
