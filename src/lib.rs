@@ -201,7 +201,7 @@ pub struct Statement {
 /// A general struct for representing errors involving Ligature.
 /// TODO should probably be an enum with a bunch of specific cases
 #[derive(Debug)]
-pub struct LigatureError(String);
+pub struct LigatureError(pub String);
 
 /// A struct that is returned from SPAQRL and wander queries.
 pub struct QueryResult {
