@@ -214,13 +214,13 @@ pub struct QueryResult {
 /// A trait that all Ligature implementations implement.
 pub trait Ligature {
     /// Returns all Datasets in a Ligature instance.
-    fn all_datasets(&self) -> Box<dyn Iterator<Item = Dataset>>;
+    fn all_datasets(&self) -> Result<Box<dyn Iterator<Item = Dataset>>, LigatureError>;
 
     /// Returns all Datasets in a Ligature instance that start with the given prefix.
-    fn match_datasets(&self, prefix: &str) -> Box<dyn Iterator<Item = Dataset>>;
+    fn match_datasets(&self, prefix: &str) -> Result<Box<dyn Iterator<Item = Dataset>>, LigatureError>;
 
     /// Returns all Datasets in a Ligature instance that are in a given range (inclusive, exclusive].
-    fn match_datasets_range(&self, start: &str, end: &str) -> Box<dyn Iterator<Item = Dataset>>;
+    fn match_datasets_range(&self, start: &str, end: &str) -> Result<Box<dyn Iterator<Item = Dataset>>, LigatureError>;
 
     /// Creates a dataset with the given name.
     /// TODO should probably return its own error type { InvalidDataset, DatasetExists, CouldNotCreateDataset }
@@ -243,7 +243,7 @@ pub trait Ligature {
 pub trait QueryTx {
     /// Returns all Statements in this Dataset as Statements.
     /// TODO should probably return a Result
-    fn all_statements(&self) -> Box<dyn Iterator<Item = Statement>>;
+    fn all_statements(&self) -> Result<Box<dyn Iterator<Item = Statement>>, LigatureError>;
 
     /// Run a SPARQL query.
     fn sparql_query(&self, query: String) -> Result<QueryResult, LigatureError>;
