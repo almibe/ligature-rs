@@ -70,7 +70,7 @@ Below is a table with the currently supported types.
 | [ligature-lab-desktop](https://github.com/almibe/ligature-lab-desktop) | A single-user desktop front-end for experimenting with Ligature via `ligature-server`. |
 | [ligature-test-suite](https://github.com/almibe/ligature-test-suite)   | A common test suite for Ligature implementations.                                      |
 | [ligature-mock](https://github.com/almibe/ligature-mock)               | A painfully simple (yet working) implementation of Ligature.                           |
-| [ligature-xodus](https://github.com/almibe/ligature-xodus)             | An implementation of Ligature based on Xodus's EntityStore api.                        |
+| [ligature-sled](https://github.com/almibe/ligature-sled)               | An implementation of Ligature based on the sled key-value store.                       |
 | [ligature-key-value](https://github.com/almibe/ligature-key-value)     | A library for storing Ligature data in a key-value store using the `slonky` library.   |
 | [ligature-benchmark](https://github.com/almibe/ligature-benchmark)     | An internal benchmark for Ligature.                                                    |
 | [wander](https://github.com/almibe/wander)                             | A scripting language for working with Ligature.                                        |
