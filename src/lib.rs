@@ -12,7 +12,7 @@
 extern crate lazy_static;
 
 use regex::Regex;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 /// A string that represents a Dataset by name.
 /// Currently can only be ASCII text separated by /
@@ -48,20 +48,20 @@ pub struct Node(u64);
 pub struct Arrow(String);
 
 impl Arrow {
-    /// Creates a new Dataset and returns a Result based on if it is valid or not.
-    pub fn new(name: &str) -> Result<Dataset, LigatureError> {
+    /// Creates a new Arrow and returns a Result based on if it is valid or not.
+    pub fn new(name: &str) -> Result<Self, LigatureError> {
         lazy_static! {
             static ref RE: Regex = Regex::new(r"^[a-zA-Z_]+(/[a-zA-Z0-9_]+)*$").unwrap();
         }
 
         if RE.is_match(name) {
-            Ok(Dataset(name.to_string()))
+            Ok(Self(name.to_string()))
         } else {
-            Err(LigatureError(format!("Invalid Dataset name {}", name)))
+            Err(LigatureError(format!("Invalid Arrow name {}", name)))
         }
     }
 
-    /// Returns the name of the given Dataset.
+    /// Returns the name of the given Arrow.
     pub fn name(&self) -> &str {
         &self.0
     }
