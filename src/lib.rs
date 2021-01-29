@@ -39,18 +39,33 @@ impl Dataset {
     }
 }
 
-/// A node that is only identified by a unique u64 id.
+/// A node that is identified by a unique u64 id.
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
-pub struct BlankNode(u64);
+pub struct Node(u64);
 
-/// An IRI is represented via https://www.ietf.org/rfc/rfc3987.txt
-/// TODO add validator and tests
+/// A named connection between two nodes.
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
-pub struct IRI(String);
+pub struct Arrow(String);
 
-/// A unit struct used to represent the concept of a Default Graph in a quad store.
-#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
-pub struct DefaultGraph;
+impl Arrow {
+    /// Creates a new Dataset and returns a Result based on if it is valid or not.
+    pub fn new(name: &str) -> Result<Dataset, LigatureError> {
+        lazy_static! {
+            static ref RE: Regex = Regex::new(r"^[a-zA-Z_]+(/[a-zA-Z0-9_]+)*$").unwrap();
+        }
+
+        if RE.is_match(name) {
+            Ok(Dataset(name.to_string()))
+        } else {
+            Err(LigatureError(format!("Invalid Dataset name {}", name)))
+        }
+    }
+
+    /// Returns the name of the given Dataset.
+    pub fn name(&self) -> &str {
+        &self.0
+    }
+}
 
 /// A wrapper type that represents a language tag.
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
@@ -91,8 +106,8 @@ pub struct LangLiteral {
 pub struct UnknownLiteral {
     /// The value of this literal represented as a String.
     pub value: String,
-    /// The IRI that represents this type.
-    pub r#type: IRI,
+    /// The name of this type.
+    pub r#type: String,
 }
 
 /// An enum that represents all the currently supported literal types.
@@ -146,58 +161,34 @@ pub enum Range {
     },
 }
 
-/// The set of valid types that can be used as a Subject.
-#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
-pub enum Subject {
-    /// A tagged IRI used as a Subject.
-    IRI(IRI),
-    /// A tagged BlankNode used as a Subject.
-    BlankNode(BlankNode),
-    /// A tagged DefaultGraph used as a Subject.
-    DefaultGraph(DefaultGraph),
-}
-
-/// The set of valid types that can be used as a Predicate.
-#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
-pub enum Predicate {
-    /// A tagged IRI used as a Predicate.
-    IRI(IRI),
-}
-
-/// The set of valid types that can be used as an Object.
+/// The set of valid types that can be used as a Target.
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
-pub enum Object {
-    /// A tagged Subject used as an Object.
-    Subject(Subject),
-    /// A tagged Literal used as an Object.
+pub enum Target {
+    /// A tagged Node used as a Target.
+    Node(Node),
+    /// A tagged Literal used as a Target.
     Literal(Literal),
 }
 
-/// The set of valid types that can be used as a Graph name.
-#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
-pub enum Graph {
-    /// A tagged IRI used as a Graph.
-    IRI(IRI),
-    /// A tagged BlankNode used as a Graph.
-    BlankNode(BlankNode),
-    /// A tagged DefaultGraph used as a Graph.
-    DefaultGraph(DefaultGraph),
-}
-
-/// A Statement is a grouping of Subject, Predicate, and Object.
+/// A Link is a grouping of a source, an arrow, and a target.
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
-pub struct Statement {
-    /// The Subject of a Statement
-    pub subject: Subject,
-    /// The Predicate of a Statement
-    pub predicate: Predicate,
-    /// The Object of a Statement
-    pub object: Object,
-    /// The Graph this Statement is in
-    pub graph: Graph,
+pub struct Link {
+    /// The Source of a Link
+    pub source: Node,
+    /// The Arrow of a Link
+    pub arrow: Arrow,
+    /// The Target of a Link
+    pub target: Target,
 }
 
-//val a: IRI = IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type").getOrElse(???)
+/// A Link that has been persisted so it has an assoicated context.
+#[derive(Debug, Clone, PartialOrd, PartialEq)]
+pub struct PersistedLink {
+    /// The Target of a Link
+    pub link: Link,
+    /// The Context of this Link
+    pub context: Node,
+}
 
 /// A general struct for representing errors involving Ligature.
 /// TODO should probably be an enum with a bunch of specific cases
@@ -209,7 +200,7 @@ pub struct QueryResult {
     /// A Vec of headers for the results.
     pub headers: Vec<String>,
     /// A stream of results, the inner Vec has the same lenth as the headers Vec.
-    pub results: Box<dyn Iterator<Item = Result<Vec<Object>, LigatureError>>>,
+    pub results: Box<dyn Iterator<Item = Result<Vec<Target>, LigatureError>>>,
 }
 
 /// A trait that all Ligature implementations implement.
@@ -249,12 +240,29 @@ pub trait Ligature {
 
 /// Represents a QueryTx within the context of a Ligature instance and a single Dataset
 pub trait QueryTx {
-    /// Returns all Statements in this Dataset as Statements.
-    /// TODO should probably return a Result
-    fn all_statements(&self) -> Box<dyn Iterator<Item = Result<Statement, LigatureError>>>;
+    /// Returns all PersistedLinks in this Dataset.
+    fn all_links(&self) -> Box<dyn Iterator<Item = Result<PersistedLink, LigatureError>>>;
 
-    /// Run a SPARQL query.
-    fn sparql_query(&self, query: String) -> Result<QueryResult, LigatureError>;
+    /// Returns all PersistedLinks that match the given criteria.
+    /// If a parameter is None then it matches all, so passing all Nones is the same as calling all_statements.
+    fn match_links(
+        &self,
+        source: Option<Node>,
+        arrow: Option<Arrow>,
+        target: Option<Target>,
+    ) -> Box<dyn Iterator<Item = Result<PersistedLink, LigatureError>>>;
+
+    /// Retuns all PersistedLinks that match the given criteria.
+    /// If a parameter is None then it matches all.
+    fn match_links_range(
+        &self,
+        source: Option<Node>,
+        arrow: Option<Arrow>,
+        target: Range,
+    ) -> Box<dyn Iterator<Item = Result<PersistedLink, LigatureError>>>;
+
+    /// Returns the PersistedLink for the given context.
+    fn link_for_context(&self, context: Node) -> Result<PersistedLink, LigatureError>;
 
     /// Run a wander query.
     fn wander_query(&self, query: String) -> Result<QueryResult, LigatureError>;
@@ -262,19 +270,19 @@ pub trait QueryTx {
 
 /// Represents a WriteTx within the context of a Ligature instance and a single Dataset
 pub trait WriteTx {
-    /// Creates a new, unique BlankNode within this Dataset.
-    /// Note: BlankNodes are shared across named graphs in a given Dataset.
-    fn new_blank_node(&self) -> Result<BlankNode, LigatureError>;
+    /// Creates a new, unique Node within this Dataset.
+    /// Note: Nodes are shared across named graphs in a given Dataset.
+    fn new_node(&self) -> Result<Node, LigatureError>;
 
-    /// Adds a given Statement to this Dataset.
-    /// If the Statement already exists nothing happens.
+    /// Adds a given Link to this Dataset.
+    /// If the Link already exists nothing happens (TODO maybe add it with a new context?).
     /// Note: Potentally could trigger a ValidationError
-    fn add_statement(&self, statement: Statement) -> Result<Statement, LigatureError>;
+    fn add_link(&self, link: Link) -> Result<PersistedLink, LigatureError>;
 
-    /// Removes a given Statement from this Dataset.
-    /// If the Statement doesn't exist nothing happens.
+    /// Removes a given PersistedLink from this Dataset.
+    /// If the PersistedLink doesn't exist nothing happens.
     /// Note: Potentally could trigger a ValidationError.
-    fn remove_statement(&self, statement: Statement) -> Result<Statement, LigatureError>;
+    fn remove_link(&self, persisted_link: PersistedLink) -> Result<PersistedLink, LigatureError>;
 
     /// Cancels this transaction so that none of the changes made so far will be stored.
     /// This also closes this transaction so no other methods can be called.

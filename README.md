@@ -1,34 +1,30 @@
 # L I G ∀ T U R Ǝ
 Ligature is a library for working with knowledge graphs written in Rust.
-This project provides the main interfaces used by Ligature as well as some helper functions and constants.
+This project provides the main interfaces used by Ligature as well as some helper functions.
 See related projects for implementations of these APIs.
-Ligature is heavily influenced by RDF and related standards but attempts to be more general purpose and easier to use.
-It attempts to do this by making minor changes while staying mostly compatible.
+Ligature is heavily influenced by RDF and related standards but attempts to be more general and easier to use.
 
 ## Status
 This project is still very much under development and subject to change quite a bit in the short term while I'm experimenting.
 
-## Ligature's Data Model (a.k.a. RDF's Data Model)
-| Dataset | Subject    | Predicate  | Object     | Graph      |
-| ------- | ---------- | ---------- | ---------- | ---------- |
-| dataset | iri        | iri        | iri        | iri        |
-|         | blank node |            | blank node | blank node |
-|         |            |            | literal    |            |
+## Ligature's Data Model
+| Dataset | Source | Arrow | Target     | Context |
+| ------- | ------ | ----- | ---------- | ------- |
+| Dataset | Node   | Arrow | Node       | Node    |
+|         |        |       | Literal    |         |
 
 ### Datasets
 A dataset in Ligature is a named collection of statements.
 Even though dataset names might seem like they nest (`test/test` looks like it is under `test`) this isn't the case.
 A dataset is its own unique entity and stands alone from all other datasets.
-Also, datasets are very different from named graphs.
+Also, datasets are very different from named graphs in RDF.
 For example with named graphs blank nodes are shared across graphs in a dataset, but in datasets blank nodes are unique to their dataset.
 `TODO explain dataset names`
 
-### IRI
-
-`TODO`
-
-### Blank Nodes
-Besides using IRIs, the `newNode` method returns a unique Anonymous Node with an Identifier
+### Nodes
+A Node in Ligature is simply an object that we can make statements about.
+Every Node is given a unique id
+The `newNode` method returns a unique Anonymous Node with an Identifier
 that is automatically generated.
 The `newNode` method runs inside a transaction so it is guaranteed to be unique and at the time of creation.
 For example here is some pseudocode.
@@ -57,9 +53,13 @@ Below is a table with the currently supported types.
 | LongLiteral(i64)                                    | A value based on Rust's i64.                                      | Yes    |
 | DoubleLiteral(f64)                                  | A value based on Rust's f64.                                      | Yes    |
 
-## Building
+### Context
+`TODO`
 
-`TODO update for cargo`
+## Building
+This project uses cargo for building.
+See https://rustup.rs/ for instructions on installing the Rust toolchain.
+See https://doc.rust-lang.org/cargo/ for documentation on cargo in general.
 
 ## Related Projects
 | Name                                                                   | Description                                                                            |
