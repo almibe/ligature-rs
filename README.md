@@ -1,6 +1,6 @@
 # L I G ∀ T U R Ǝ
 Ligature is a library for working with knowledge graphs written in Rust.
-This project provides the main interfaces used by Ligature as well as some helper functions.
+This project provides the main traits and structs used by Ligature as well as some helper functions.
 See related projects for implementations of these APIs.
 Ligature is heavily influenced by RDF and related standards but attempts to be more general and easier to use.
 
@@ -8,10 +8,18 @@ Ligature is heavily influenced by RDF and related standards but attempts to be m
 This project is still very much under development and subject to change quite a bit in the short term while I'm experimenting.
 
 ## Ligature's Data Model
-| Dataset | Source | Arrow | Target     | Context |
-| ------- | ------ | ----- | ---------- | ------- |
-| Dataset | Node   | Arrow | Node       | Node    |
-|         |        |       | Literal    |         |
+```
+Dataset { dataset_name: DatasetName, links: Link* }
+DatasetName { name: String }
+Link { source: Vertex, arrow: Arrow, target: Vertex, context: Node }
+Vertx { 
+    Node { id: u64 } |
+    String { value: String } |
+    Integer { value: i64 } |
+    /* TODO list all literal types */ 
+}
+Arrow { name: String }
+```
 
 ### Datasets
 A dataset in Ligature is a named collection of statements.
@@ -21,24 +29,14 @@ Also, datasets are very different from named graphs in RDF.
 For example with named graphs blank nodes are shared across graphs in a dataset, but in datasets blank nodes are unique to their dataset.
 `TODO explain dataset names`
 
-### Nodes
-A Node in Ligature is simply an object that we can make statements about.
-Every Node is given a unique id
-The `newNode` method returns a unique Anonymous Node with an Identifier
-that is automatically generated.
-The `newNode` method runs inside a transaction so it is guaranteed to be unique and at the time of creation.
-For example here is some pseudocode.
+### Vertices
+Vertices in Ligature can either be a Node or a Literal.
 
-```scala
-val ds = Dataset("dataset")
-instance.write.use { tx =>
-  val e: AnonymousNode = tx.newNode(ds) // creates a new identifer, in this case let's say `42`
-  tx.addStatement(ds, Statement(e, a, LocalName("company"))) // should run fine
-  tx.addStatement(ds, Statement(e, LocalName("name"), StringLiteral("Pear"))) // should run fine
-  tx.addStatement(ds, Statement(AnonymousNode(newNode.identifer), LocalName("name"), StringLiteral("Pear"))) // will run fine since it's just another way of writing the above line
-  tx.addStatement(ds, Statement(AnonymousNode(24601), a, LocalName("bird"))) // will erorr out since that identifier hasn't been created yet
-}
-```
+### Nodes
+Nodes in Ligature are simply an object that we can make statements about.
+Every Node is defined by an unique id.
+The `newNode` method returns a new Node that is automatically generated.
+The `newNode` method runs inside a transaction so it is guaranteed to be unique and at the time of creation.
 
 ### Literals
 Literals in Ligature represent an immutable value.
@@ -53,8 +51,14 @@ Below is a table with the currently supported types.
 | LongLiteral(i64)                                    | A value based on Rust's i64.                                      | Yes    |
 | DoubleLiteral(f64)                                  | A value based on Rust's f64.                                      | Yes    |
 
-### Context
-`TODO`
+### Arrows
+Arrows in Ligature are a label that links two Nodes together.
+
+### Links
+A Link in Ligature is a sum type of { source: Node, arrow: Arrow, target: Node, context: Node }.
+
+### Contexts
+Contexts in Ligature are an unique Idenifier that represents a given Link.
 
 ## Building
 This project uses cargo for building.
