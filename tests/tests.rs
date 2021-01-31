@@ -4,7 +4,7 @@
 
 #[cfg(test)]
 mod tests {
-    use ligature::{Dataset, LangTag};
+    use ligature::Dataset;
 
     #[test]
     fn valid_dataset_names() {
@@ -41,31 +41,5 @@ mod tests {
         for err in errs {
             assert!(Dataset::new(err).is_err());
         }
-    }
-
-    #[test]
-    fn valid_lang_tags() {
-        //TODO add more tests
-        //TODO make sure case is handled correctly -- ie allow upper case in new() but value() should always be lower
-        let oks = vec![
-            "en",
-            "en-fr",
-            "en-fr-sp",
-            "ennnenefnk-dkfjkjfl-dfakjelfkjalkf-fakjeflkajlkfj",
-        ];
-        let errs = vec!["", "en-", "en-fr-", "en--fr", "-en-fr", "en-fr-ef "];
-
-        for ok in oks {
-            assert!(LangTag::new(ok).is_ok());
-        }
-
-        for err in errs {
-            assert!(LangTag::new(err).is_err());
-        }
-    }
-
-    #[test]
-    fn valid_node_names() {
-        todo!()
     }
 }

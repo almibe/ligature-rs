@@ -67,54 +67,11 @@ impl Arrow {
     }
 }
 
-/// A wrapper type that represents a language tag.
-#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
-pub struct LangTag(String);
-
-impl LangTag {
-    /// Create a new LangTag from a &str and returns a Result based on if it is valid or not.
-    pub fn new(tag: &str) -> Result<LangTag, LigatureError> {
-        lazy_static! {
-            static ref RE: Regex = Regex::new(r"^[a-zA-Z]+(\-[a-zA-Z0-9]+)*$").unwrap();
-        }
-
-        if RE.is_match(tag) {
-            Ok(LangTag(tag.to_string()))
-        } else {
-            Err(LigatureError(format!("Invalid LangTag value {}", tag)))
-        }
-    }
-
-    /// Returns the value of the LangTag.
-    pub fn value(&self) -> &str {
-        &self.0
-    }
-}
-
-/// A struct containing text and a language tag that denotes what language the text is expressed in.
-#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
-pub struct LangLiteral {
-    /// The String literal that is represented by this LangLiteral
-    pub value: String,
-    /// The LangTag that represents the language used to express the value.
-    pub lang_tag: LangTag,
-}
-
-/// A struct containing a value represented as a String and the type of the value represented by an IRI.
-/// TODO probably need a function that double checks a given UnknownLiteral is actually unknown
-#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
-pub struct UnknownLiteral {
-    /// The value of this literal represented as a String.
-    pub value: String,
-    /// The name of this type.
-    pub r#type: String,
-}
-
 /// An enum that represents all the currently supported literal types.
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
-pub enum Literal {
-    /// A tagged LangLiteral used for an RDF literal
-    LangLiteral(LangLiteral),
+pub enum Vertex {
+    /// A node.
+    Node(Node),
     /// A tagged String used for an RDF literal
     StringLiteral(String),
     /// A tagged bool used for an RDF literal
@@ -123,21 +80,11 @@ pub enum Literal {
     LongLiteral(i64),
     /// A tagged f64 used for an RDF literal
     DoubleLiteral(f64),
-    /// A tagged UnknownLiteral used for an RDF literal
-    UnknownLiteral(UnknownLiteral),
 }
 
 /// A set of enums used to express range queries when it makes sense for that type (ie no support for BooleanLiteralRange or UnknownLiteralRange since they don't make sense).
 #[derive(Debug)]
 pub enum Range {
-    /// Represents a range of LangLiterals
-    /// Note: LangTag needs to match for any comparison to take place.
-    LangLiteralRange {
-        /// The starting LangLiteral (inclusive)
-        start: LangLiteral,
-        /// The end LangLiteral (exclusive)
-        end: LangLiteral,
-    },
     /// Represents a String range using basic String comparisons.
     StringLiteralRange {
         /// The starting String (inclusive)
@@ -161,24 +108,15 @@ pub enum Range {
     },
 }
 
-/// The set of valid types that can be used as a Target.
-#[derive(Debug, Clone, PartialOrd, PartialEq)]
-pub enum Target {
-    /// A tagged Node used as a Target.
-    Node(Node),
-    /// A tagged Literal used as a Target.
-    Literal(Literal),
-}
-
 /// A Link is a grouping of a source, an arrow, and a target.
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
 pub struct Link {
     /// The Source of a Link
-    pub source: Node,
+    pub source: Vertex,
     /// The Arrow of a Link
     pub arrow: Arrow,
     /// The Target of a Link
-    pub target: Target,
+    pub target: Vertex,
 }
 
 /// A Link that has been persisted so it has an assoicated context.
@@ -200,7 +138,7 @@ pub struct QueryResult {
     /// A Vec of headers for the results.
     pub headers: Vec<String>,
     /// A stream of results, the inner Vec has the same lenth as the headers Vec.
-    pub results: Box<dyn Iterator<Item = Result<Vec<Target>, LigatureError>>>,
+    pub results: Box<dyn Iterator<Item = Result<Vec<Vertex>, LigatureError>>>,
 }
 
 /// A trait that all Ligature implementations implement.
@@ -247,16 +185,16 @@ pub trait QueryTx {
     /// If a parameter is None then it matches all, so passing all Nones is the same as calling all_statements.
     fn match_links(
         &self,
-        source: Option<Node>,
+        source: Option<Vertex>,
         arrow: Option<Arrow>,
-        target: Option<Target>,
+        target: Option<Vertex>,
     ) -> Box<dyn Iterator<Item = Result<PersistedLink, LigatureError>>>;
 
     /// Retuns all PersistedLinks that match the given criteria.
     /// If a parameter is None then it matches all.
     fn match_links_range(
         &self,
-        source: Option<Node>,
+        source: Option<Vertex>,
         arrow: Option<Arrow>,
         target: Range,
     ) -> Box<dyn Iterator<Item = Result<PersistedLink, LigatureError>>>;

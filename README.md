@@ -14,9 +14,10 @@ DatasetName { name: String }
 Link { source: Vertex, arrow: Arrow, target: Vertex, context: Node }
 Vertx { 
     Node { id: u64 } |
-    String { value: String } |
-    Integer { value: i64 } |
-    /* TODO list all literal types */ 
+    StringLiteral { value: String } |
+    LongLiteral { value: i64 } |
+    DoubleLiteral { value: f64 } |
+    BooleanLiteral { value: bool }
 }
 Arrow { name: String }
 ```
@@ -45,7 +46,6 @@ Below is a table with the currently supported types.
 
 | Name/Signature                                      | Description                                                       | Range? |
 | --------------------------------------------------- | ----------------------------------------------------------------- | ------ |
-| LangLiteral { value: String, langTag: String }      | Similar to a plain literal in RDF.  A text String and a lang tag. | Yes    |
 | StringLiteral(String)                               | A simple string type.                                             | Yes    |
 | BooleanLiteral(bool)                                | A boolean value.                                                  | No     |
 | LongLiteral(i64)                                    | A value based on Rust's i64.                                      | Yes    |
