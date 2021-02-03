@@ -2,7 +2,7 @@
 Ligature is a library for working with knowledge graphs written in Rust.
 This project provides the main traits and structs used by Ligature as well as some helper functions.
 See related projects for implementations of these APIs.
-Ligature is heavily influenced by RDF and related standards but attempts to be more general and easier to use.
+Ligature is heavily influenced by RDF and related standards but attempts to be more general, more flexible, and easier to use.
 
 ## Status
 This project is still very much under development and subject to change quite a bit in the short term while I'm experimenting.
@@ -11,8 +11,7 @@ This project is still very much under development and subject to change quite a 
 ```
 Dataset { dataset_name: DatasetName, links: Link* }
 DatasetName { name: String }
-Link { source: Vertex, arrow: Arrow, target: Vertex, context: Node }
-Vertx { 
+Vertex { 
     Node { id: u64 } |
     StringLiteral { value: String } |
     LongLiteral { value: i64 } |
@@ -20,6 +19,8 @@ Vertx {
     BooleanLiteral { value: bool }
 }
 Arrow { name: String }
+Link { source: Vertex, arrow: Arrow, target: Vertex }
+PersistedLink { link: Link, context: Node }
 ```
 
 ### Datasets
@@ -36,8 +37,8 @@ Vertices in Ligature can either be a Node or a Literal.
 ### Nodes
 Nodes in Ligature are simply an object that we can make statements about.
 Every Node is defined by an unique id.
-The `newNode` method returns a new Node that is automatically generated.
-The `newNode` method runs inside a transaction so it is guaranteed to be unique and at the time of creation.
+The `new_node` method returns a new Node that is automatically generated.
+The `new_node` method runs inside a transaction so it is guaranteed to be unique and at the time of creation.
 
 ### Literals
 Literals in Ligature represent an immutable value.
@@ -49,7 +50,7 @@ Below is a table with the currently supported types.
 | StringLiteral(String)                               | A simple string type.                                             | Yes    |
 | BooleanLiteral(bool)                                | A boolean value.                                                  | No     |
 | LongLiteral(i64)                                    | A value based on Rust's i64.                                      | Yes    |
-| DoubleLiteral(f64)                                  | A value based on Rust's f64.                                      | Yes    |
+| FloatLiteral(f64)                                   | A value based on Rust's f64.                                      | Yes    |
 
 ### Arrows
 Arrows in Ligature are a label that links two Nodes together.

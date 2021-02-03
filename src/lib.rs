@@ -79,7 +79,7 @@ pub enum Vertex {
     /// A tagged i64 used for an RDF literal
     LongLiteral(i64),
     /// A tagged f64 used for an RDF literal
-    DoubleLiteral(f64),
+    FloatLiteral(f64),
 }
 
 /// A set of enums used to express range queries when it makes sense for that type (ie no support for BooleanLiteralRange or UnknownLiteralRange since they don't make sense).
@@ -100,7 +100,7 @@ pub enum Range {
         end: i64,
     },
     /// Represents a String range using basic f64 comparisons.
-    DoubleLiteralRange {
+    FloatLiteralRange {
         /// The starting f64 (inclusive)
         start: f64,
         /// The end f64 (exclusive)
@@ -220,7 +220,7 @@ pub trait WriteTx {
     /// Removes a given PersistedLink from this Dataset.
     /// If the PersistedLink doesn't exist nothing happens.
     /// Note: Potentally could trigger a ValidationError.
-    fn remove_link(&self, persisted_link: PersistedLink) -> Result<PersistedLink, LigatureError>;
+    fn remove_link(&self, persisted_link: PersistedLink) -> Result<(), LigatureError>;
 
     /// Cancels this transaction so that none of the changes made so far will be stored.
     /// This also closes this transaction so no other methods can be called.
