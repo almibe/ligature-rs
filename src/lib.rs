@@ -119,7 +119,7 @@ pub struct Link {
     pub target: Vertex,
 }
 
-/// A Link that has been persisted so it has an assoicated context.
+/// A Link that has been persisted so it has an assoicated Context Node.
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
 pub struct PersistedLink {
     /// The Target of a Link
@@ -146,8 +146,11 @@ pub trait Ligature {
     /// Returns all Datasets in a Ligature instance.
     fn all_datasets(&self) -> Box<dyn Iterator<Item = Result<Dataset, LigatureError>>>;
 
+    /// Check if a given Dataset exists.
+    fn dataset_exists(&self, dataset: &Dataset) -> Result<bool, LigatureError>;
+
     /// Returns all Datasets in a Ligature instance that start with the given prefix.
-    fn match_datasets(
+    fn match_datasets_prefix(
         &self,
         prefix: &str,
     ) -> Box<dyn Iterator<Item = Result<Dataset, LigatureError>>>;
@@ -161,19 +164,19 @@ pub trait Ligature {
 
     /// Creates a dataset with the given name.
     /// TODO should probably return its own error type { InvalidDataset, DatasetExists, CouldNotCreateDataset }
-    fn create_dataset(&self, dataset: Dataset) -> Result<(), LigatureError>;
+    fn create_dataset(&self, dataset: &Dataset) -> Result<(), LigatureError>;
 
     /// Deletes a dataset with the given name.
     /// TODO should probably return its own error type { InvalidDataset, CouldNotDeleteDataset }
-    fn delete_dataset(&self, dataset: Dataset) -> Result<(), LigatureError>;
+    fn delete_dataset(&self, dataset: &Dataset) -> Result<(), LigatureError>;
 
     /// Initiazes a QueryTx
     /// TODO should probably return its own error type CouldNotInitializeQueryTx
-    fn query(&self, dataset: Dataset) -> Result<Box<dyn QueryTx>, LigatureError>;
+    fn query(&self, dataset: &Dataset) -> Result<Box<dyn QueryTx>, LigatureError>;
 
     /// Initiazes a WriteTx
     /// TODO should probably return its own error type CouldNotInitializeWriteTx
-    fn write(&self, dataset: Dataset) -> Result<Box<dyn WriteTx>, LigatureError>;
+    fn write(&self, dataset: &Dataset) -> Result<Box<dyn WriteTx>, LigatureError>;
 }
 
 /// Represents a QueryTx within the context of a Ligature instance and a single Dataset
@@ -200,10 +203,10 @@ pub trait QueryTx {
     ) -> Box<dyn Iterator<Item = Result<PersistedLink, LigatureError>>>;
 
     /// Returns the PersistedLink for the given context.
-    fn link_for_context(&self, context: Node) -> Result<PersistedLink, LigatureError>;
+    fn link_for_context(&self, context: &Node) -> Result<PersistedLink, LigatureError>;
 
     /// Run a wander query.
-    fn wander_query(&self, query: String) -> Result<QueryResult, LigatureError>;
+    fn wander_query(&self, query: &str) -> Result<QueryResult, LigatureError>;
 }
 
 /// Represents a WriteTx within the context of a Ligature instance and a single Dataset
@@ -215,12 +218,12 @@ pub trait WriteTx {
     /// Adds a given Link to this Dataset.
     /// If the Link already exists nothing happens (TODO maybe add it with a new context?).
     /// Note: Potentally could trigger a ValidationError
-    fn add_link(&self, link: Link) -> Result<PersistedLink, LigatureError>;
+    fn add_link(&self, link: &Link) -> Result<PersistedLink, LigatureError>;
 
     /// Removes a given PersistedLink from this Dataset.
     /// If the PersistedLink doesn't exist nothing happens.
     /// Note: Potentally could trigger a ValidationError.
-    fn remove_link(&self, persisted_link: PersistedLink) -> Result<(), LigatureError>;
+    fn remove_link(&self, persisted_link: &PersistedLink) -> Result<(), LigatureError>;
 
     /// Cancels this transaction so that none of the changes made so far will be stored.
     /// This also closes this transaction so no other methods can be called.
