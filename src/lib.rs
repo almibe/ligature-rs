@@ -51,7 +51,7 @@ impl Arrow {
     /// Creates a new Arrow and returns a Result based on if it is valid or not.
     pub fn new(name: &str) -> Result<Self, LigatureError> {
         lazy_static! {
-            static ref RE: Regex = Regex::new(r"^[a-zA-Z_]+(/[a-zA-Z0-9_]+)*$").unwrap();
+            static ref RE: Regex = Regex::new(r"^[a-zA-Z0-9_]+(/[a-zA-Z0-9_]+)*$").unwrap();
         }
 
         if RE.is_match(name) {
@@ -203,7 +203,7 @@ pub trait QueryTx {
     ) -> Box<dyn Iterator<Item = Result<PersistedLink, LigatureError>>>;
 
     /// Returns the PersistedLink for the given context.
-    fn link_for_context(&self, context: &Node) -> Result<PersistedLink, LigatureError>;
+    fn link_for_context(&self, context: &Node) -> Result<Option<PersistedLink>, LigatureError>;
 
     /// Run a wander query.
     fn wander_query(&self, query: &str) -> Result<QueryResult, LigatureError>;

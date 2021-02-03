@@ -20,6 +20,7 @@ mod tests {
             "_test",
             "__test__",
             "test/_test",
+            "test3/test",
         ];
         let errs = vec![
             "",
