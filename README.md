@@ -9,18 +9,19 @@ This project is still very much under development and subject to change quite a 
 
 ## Ligature's Data Model
 ```
-Dataset { dataset_name: DatasetName, links: Link* }
+Dataset { dataset_name: DatasetName, statements: Statement* }
 DatasetName { name: String }
-Vertex { 
-    Node { id: u64 } |
+Entity { id: u64 } |
+Attribute { name: String }
+Value {
+    Entity { value: Entity } |
     StringLiteral { value: String } |
     LongLiteral { value: i64 } |
     DoubleLiteral { value: f64 } |
-    BooleanLiteral { value: bool }
+    BooleanLiteral { value: bool 
 }
-Arrow { name: String }
-Link { source: Vertex, arrow: Arrow, target: Vertex }
-PersistedLink { link: Link, context: Node }
+Statement { entity: Entity, attribute: Attribute, value: Value }
+PersistedStatement { statement: Statement, context: Entity }
 ```
 
 ### Datasets
@@ -32,14 +33,17 @@ For example with named graphs blank nodes are shared across graphs in a dataset,
 Valid dataset names are currently groups of characters that include `_ a-z A-Z 0-9` that can't start with a number and that are separated by single `/`.
 This naming convention is likely to change.
 
-### Vertices
-Vertices in Ligature can either be a Node or a Literal.
+### Entities
+Entities in Ligature are simply an object that we can make statements about.
+Every Entity is defined by an unique id.
+The `new_entity` method returns a new Entity that is automatically generated.
+The `new_entity` method runs inside a transaction so it is guaranteed to be unique and at the time of creation.
 
-### Nodes
-Nodes in Ligature are simply an object that we can make statements about.
-Every Node is defined by an unique id.
-The `new_node` method returns a new Node that is automatically generated.
-The `new_node` method runs inside a transaction so it is guaranteed to be unique and at the time of creation.
+### Attributes
+Attributes in Ligature are a label that statements two Entities together.
+
+### Values
+Values in Ligature can either be an Entity or a Literal.
 
 ### Literals
 Literals in Ligature represent an immutable value.
@@ -49,18 +53,15 @@ Below is a table with the currently supported types.
 | Name/Signature                                      | Description                                                       | Range? |
 | --------------------------------------------------- | ----------------------------------------------------------------- | ------ |
 | StringLiteral(String)                               | A simple string type.                                             | Yes    |
-| BooleanLiteral(bool)                                | A boolean value.                                                  | No     |
 | LongLiteral(i64)                                    | A value based on Rust's i64.                                      | Yes    |
 | FloatLiteral(f64)                                   | A value based on Rust's f64.                                      | Yes    |
 
-### Arrows
-Arrows in Ligature are a label that links two Nodes together.
-
-### Links
-A Link in Ligature is a sum type of { source: Node, arrow: Arrow, target: Node, context: Node }.
+### Statements
+A Statement in Ligature is a sum type of { source: Entity, arrow: Attribute, target: Entity, context: Entity }.
 
 ### Contexts
-Contexts in Ligature are an unique Idenifier that represents a given Link.
+Contexts in Ligature are an unique Entity that represents a given Statement.
+They allow you to make Statements about Statements.
 
 ## Building
 This project uses cargo for building.

@@ -47,7 +47,7 @@ mod tests {
     }
 
     #[test]
-    fn valid_arrow_names() {
+    fn valid_attribute_names() {
         //TODO add more tests
         let oks = vec![
             "test",

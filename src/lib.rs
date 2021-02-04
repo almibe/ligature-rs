@@ -23,7 +23,8 @@ impl Dataset {
     /// Creates a new Dataset and returns a Result based on if it is valid or not.
     pub fn new(name: &str) -> Result<Dataset, LigatureError> {
         lazy_static! {
-            static ref RE: Regex = Regex::new(r"^([a-zA-Z_]{1}[a-zA-Z0-9_]*)(/[a-zA-Z_]{1}[a-zA-Z0-9_]*)*$").unwrap();
+            static ref RE: Regex =
+                Regex::new(r"^([a-zA-Z_]{1}[a-zA-Z0-9_]*)(/[a-zA-Z_]{1}[a-zA-Z0-9_]*)*$").unwrap();
         }
 
         if RE.is_match(name) {
@@ -39,15 +40,15 @@ impl Dataset {
     }
 }
 
-/// A node that is identified by a unique u64 id.
+/// An Entity that is identified by a unique u64 id.
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
-pub struct Node(u64);
+pub struct Entity(u64);
 
-/// A named connection between two nodes.
+/// A named connection between an Entity and a Value.
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
-pub struct Arrow(String);
+pub struct Attribute(String);
 
-impl Arrow {
+impl Attribute {
     /// Creates a new Arrow and returns a Result based on if it is valid or not.
     pub fn new(name: &str) -> Result<Self, LigatureError> {
         lazy_static! {
@@ -57,7 +58,7 @@ impl Arrow {
         if RE.is_match(name) {
             Ok(Self(name.to_string()))
         } else {
-            Err(LigatureError(format!("Invalid Arrow name {}", name)))
+            Err(LigatureError(format!("Invalid Attribute name {}", name)))
         }
     }
 
@@ -67,18 +68,16 @@ impl Arrow {
     }
 }
 
-/// An enum that represents all the currently supported literal types.
+/// An enum that represents all the currently supported Value types.
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
-pub enum Vertex {
-    /// A node.
-    Node(Node),
-    /// A tagged String used for an RDF literal
+pub enum Value {
+    /// An Entity.
+    Entity(Entity),
+    /// A String used for a Ligature literal
     StringLiteral(String),
-    /// A tagged bool used for an RDF literal
-    BooleanLiteral(bool),
-    /// A tagged i64 used for an RDF literal
+    /// An i64 used for a Ligature literal
     LongLiteral(i64),
-    /// A tagged f64 used for an RDF literal
+    /// An f64 used for a Ligature literal
     FloatLiteral(f64),
 }
 
@@ -108,38 +107,30 @@ pub enum Range {
     },
 }
 
-/// A Link is a grouping of a source, an arrow, and a target.
+/// A Statement is a grouping of an Entity, an Attribute, and a Value.
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
-pub struct Link {
-    /// The Source of a Link
-    pub source: Vertex,
-    /// The Arrow of a Link
-    pub arrow: Arrow,
-    /// The Target of a Link
-    pub target: Vertex,
+pub struct Statement {
+    /// The Entity of a Statement
+    pub entity: Entity,
+    /// The Attribute of a Statement
+    pub attribute: Attribute,
+    /// The Value of a Statement
+    pub value: Value,
 }
 
-/// A Link that has been persisted so it has an assoicated Context Node.
+/// A Statement that has been persisted so it has an assoicated Context Entity.
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
-pub struct PersistedLink {
-    /// The Target of a Link
-    pub link: Link,
-    /// The Context of this Link
-    pub context: Node,
+pub struct PersistedStatement {
+    /// The target Statment
+    pub statement: Statement,
+    /// The Context of this Statement
+    pub context: Entity,
 }
 
 /// A general struct for representing errors involving Ligature.
 /// TODO should probably be an enum with a bunch of specific cases
 #[derive(Debug, PartialEq, Eq)]
 pub struct LigatureError(pub String);
-
-/// A struct that is returned from SPAQRL and wander queries.
-pub struct QueryResult {
-    /// A Vec of headers for the results.
-    pub headers: Vec<String>,
-    /// A stream of results, the inner Vec has the same lenth as the headers Vec.
-    pub results: Box<dyn Iterator<Item = Result<Vec<Vertex>, LigatureError>>>,
-}
 
 /// A trait that all Ligature implementations implement.
 pub trait Ligature {
@@ -181,49 +172,53 @@ pub trait Ligature {
 
 /// Represents a QueryTx within the context of a Ligature instance and a single Dataset
 pub trait QueryTx {
-    /// Returns all PersistedLinks in this Dataset.
-    fn all_links(&self) -> Box<dyn Iterator<Item = Result<PersistedLink, LigatureError>>>;
+    /// Returns all PersistedStatements in this Dataset.
+    fn all_statements(&self)
+        -> Box<dyn Iterator<Item = Result<PersistedStatement, LigatureError>>>;
 
-    /// Returns all PersistedLinks that match the given criteria.
+    /// Returns all PersistedStatements that match the given criteria.
     /// If a parameter is None then it matches all, so passing all Nones is the same as calling all_statements.
-    fn match_links(
+    fn match_statements(
         &self,
-        source: Option<Vertex>,
-        arrow: Option<Arrow>,
-        target: Option<Vertex>,
-    ) -> Box<dyn Iterator<Item = Result<PersistedLink, LigatureError>>>;
+        source: Option<Entity>,
+        arrow: Option<Attribute>,
+        target: Option<Value>,
+    ) -> Box<dyn Iterator<Item = Result<PersistedStatement, LigatureError>>>;
 
-    /// Retuns all PersistedLinks that match the given criteria.
+    /// Retuns all PersistedStatements that match the given criteria.
     /// If a parameter is None then it matches all.
-    fn match_links_range(
+    fn match_statements_range(
         &self,
-        source: Option<Vertex>,
-        arrow: Option<Arrow>,
+        source: Option<Entity>,
+        arrow: Option<Attribute>,
         target: Range,
-    ) -> Box<dyn Iterator<Item = Result<PersistedLink, LigatureError>>>;
+    ) -> Box<dyn Iterator<Item = Result<PersistedStatement, LigatureError>>>;
 
-    /// Returns the PersistedLink for the given context.
-    fn link_for_context(&self, context: &Node) -> Result<Option<PersistedLink>, LigatureError>;
-
-    /// Run a wander query.
-    fn wander_query(&self, query: &str) -> Result<QueryResult, LigatureError>;
+    /// Returns the PersistedStatement for the given context.
+    fn statement_for_context(
+        &self,
+        context: &Entity,
+    ) -> Result<Option<PersistedStatement>, LigatureError>;
 }
 
 /// Represents a WriteTx within the context of a Ligature instance and a single Dataset
 pub trait WriteTx {
-    /// Creates a new, unique Node within this Dataset.
-    /// Note: Nodes are shared across named graphs in a given Dataset.
-    fn new_node(&self) -> Result<Node, LigatureError>;
+    /// Creates a new, unique Entity within this Dataset.
+    /// Note: Entitys are shared across named graphs in a given Dataset.
+    fn new_entity(&self) -> Result<Entity, LigatureError>;
 
-    /// Adds a given Link to this Dataset.
-    /// If the Link already exists nothing happens (TODO maybe add it with a new context?).
+    /// Adds a given Statement to this Dataset.
+    /// If the Statement already exists nothing happens (TODO maybe add it with a new context?).
     /// Note: Potentally could trigger a ValidationError
-    fn add_link(&self, link: &Link) -> Result<PersistedLink, LigatureError>;
+    fn add_statement(&self, statement: &Statement) -> Result<PersistedStatement, LigatureError>;
 
-    /// Removes a given PersistedLink from this Dataset.
-    /// If the PersistedLink doesn't exist nothing happens.
+    /// Removes a given PersistedStatement from this Dataset.
+    /// If the PersistedStatement doesn't exist nothing happens.
     /// Note: Potentally could trigger a ValidationError.
-    fn remove_link(&self, persisted_link: &PersistedLink) -> Result<(), LigatureError>;
+    fn remove_statement(
+        &self,
+        persisted_statement: &PersistedStatement,
+    ) -> Result<(), LigatureError>;
 
     /// Cancels this transaction so that none of the changes made so far will be stored.
     /// This also closes this transaction so no other methods can be called.
