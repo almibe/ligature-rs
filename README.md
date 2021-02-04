@@ -29,7 +29,7 @@ Even though dataset names might seem like they nest (`test/test` looks like it i
 A dataset is its own unique entity and stands alone from all other datasets.
 Also, datasets are very different from named graphs in RDF.
 For example with named graphs blank nodes are shared across graphs in a dataset, but in datasets blank nodes are unique to their dataset.
-Valid dataset names are currently groups of characters that include `_ a-z A-Z 0-9` that are separated by single `/`.
+Valid dataset names are currently groups of characters that include `_ a-z A-Z 0-9` that can't start with a number and that are separated by single `/`.
 This naming convention is likely to change.
 
 ### Vertices

@@ -23,7 +23,7 @@ impl Dataset {
     /// Creates a new Dataset and returns a Result based on if it is valid or not.
     pub fn new(name: &str) -> Result<Dataset, LigatureError> {
         lazy_static! {
-            static ref RE: Regex = Regex::new(r"^[a-zA-Z_]+(/[a-zA-Z0-9_]+)*$").unwrap();
+            static ref RE: Regex = Regex::new(r"^([a-zA-Z_]{1}[a-zA-Z0-9_]*)(/[a-zA-Z_]{1}[a-zA-Z0-9_]*)*$").unwrap();
         }
 
         if RE.is_match(name) {
@@ -51,7 +51,7 @@ impl Arrow {
     /// Creates a new Arrow and returns a Result based on if it is valid or not.
     pub fn new(name: &str) -> Result<Self, LigatureError> {
         lazy_static! {
-            static ref RE: Regex = Regex::new(r"^[a-zA-Z0-9_]+(/[a-zA-Z0-9_]+)*$").unwrap();
+            static ref RE: Regex = Regex::new(r"^[a-zA-Z_]{1}[a-zA-Z0-9_]*$").unwrap();
         }
 
         if RE.is_match(name) {

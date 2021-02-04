@@ -10,6 +10,8 @@ mod tests {
     fn valid_dataset_names() {
         //TODO add more tests
         let oks = vec![
+            "t",
+            "T",
             "test",
             "test/test/test",
             "test/test",
@@ -28,6 +30,43 @@ mod tests {
             "test/",
             "/test",
             "_/_/",
+            "/_/_",
+            "test//test",
+            "test test",
+            "test/ /test",
+            " test",
+        ];
+
+        for ok in oks {
+            assert!(Dataset::new(ok).is_ok());
+        }
+
+        for err in errs {
+            assert!(Dataset::new(err).is_err());
+        }
+    }
+
+    #[test]
+    fn valid_arrow_names() {
+        //TODO add more tests
+        let oks = vec![
+            "test",
+            "test_test_test",
+            "test_test",
+            "this1_is2_a_test",
+            "_",
+            "_test",
+            "__test__",
+            "testTest",
+            "G",
+            "HELLO",
+        ];
+        let errs = vec![
+            "",
+            "2",
+            "5test",
+            "test!",
+            "this is a test",
             "/_/_",
             "test//test",
             "test test",
