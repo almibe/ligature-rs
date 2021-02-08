@@ -76,7 +76,7 @@ pub enum Value {
     /// A String used for a Ligature literal
     StringLiteral(String),
     /// An i64 used for a Ligature literal
-    LongLiteral(i64),
+    IntegerLiteral(i64),
     /// An f64 used for a Ligature literal
     FloatLiteral(f64),
 }
@@ -92,7 +92,7 @@ pub enum Range {
         end: String,
     },
     /// Represents a String range using basic i64 comparisons.
-    LongLiteralRange {
+    IntegerLiteralRange {
         /// The starting i64 (inclusive)
         start: i64,
         /// The end i64 (exclusive)
