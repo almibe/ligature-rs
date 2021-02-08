@@ -11,14 +11,13 @@ This project is still very much under development and subject to change quite a 
 ```
 Dataset { dataset_name: DatasetName, statements: Statement* }
 DatasetName { name: String }
-Entity { id: u64 } |
+Entity { id: u64 }
 Attribute { name: String }
 Value {
     Entity { value: Entity } |
     StringLiteral { value: String } |
-    LongLiteral { value: i64 } |
-    DoubleLiteral { value: f64 } |
-    BooleanLiteral { value: bool 
+    IntegerLiteral { value: i64 } |
+    FloatLiteral { value: f64 } |
 }
 Statement { entity: Entity, attribute: Attribute, value: Value }
 PersistedStatement { statement: Statement, context: Entity }
@@ -53,7 +52,7 @@ Below is a table with the currently supported types.
 | Name/Signature        | Description                  | Range? |
 | --------------------- | -----------------------------| ------ |
 | StringLiteral(String) | A simple string type.        | Yes    |
-| LongLiteral(i64)      | A value based on Rust's i64. | Yes    |
+| IntegerLiteral(i64)      | A value based on Rust's i64. | Yes    |
 | FloatLiteral(f64)     | A value based on Rust's f64. | Yes    |
 
 ### Statements
