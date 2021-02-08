@@ -42,7 +42,7 @@ impl Dataset {
 
 /// An Entity that is identified by a unique u64 id.
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
-pub struct Entity(u64);
+pub struct Entity(pub u64);
 
 /// A named connection between an Entity and a Value.
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
