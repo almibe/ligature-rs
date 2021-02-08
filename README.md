@@ -26,12 +26,12 @@ PersistedStatement { statement: Statement, context: Entity }
 
 ### Datasets
 A dataset in Ligature is a named collection of statements.
+Valid dataset names are currently groups of characters that include `_ a-z A-Z 0-9` that can't start with a number and that are separated by single `/`.
+This naming convention is likely to change.
 Even though dataset names might seem like they nest (`test/test` looks like it is under `test`) this isn't the case.
 A dataset is its own unique entity and stands alone from all other datasets.
 Also, datasets are very different from named graphs in RDF.
 For example with named graphs blank nodes are shared across graphs in a dataset, but in datasets blank nodes are unique to their dataset.
-Valid dataset names are currently groups of characters that include `_ a-z A-Z 0-9` that can't start with a number and that are separated by single `/`.
-This naming convention is likely to change.
 
 ### Entities
 Entities in Ligature are simply an object that we can make statements about.
@@ -40,7 +40,7 @@ The `new_entity` method returns a new Entity that is automatically generated.
 The `new_entity` method runs inside a transaction so it is guaranteed to be unique and at the time of creation.
 
 ### Attributes
-Attributes in Ligature are a label that statements two Entities together.
+Attributes in Ligature are a label that relates two Entities together.
 
 ### Values
 Values in Ligature can either be an Entity or a Literal.
@@ -50,14 +50,14 @@ Literals in Ligature represent an immutable value.
 Several types are currently supported with plans to add more.
 Below is a table with the currently supported types.
 
-| Name/Signature                                      | Description                                                       | Range? |
-| --------------------------------------------------- | ----------------------------------------------------------------- | ------ |
-| StringLiteral(String)                               | A simple string type.                                             | Yes    |
-| LongLiteral(i64)                                    | A value based on Rust's i64.                                      | Yes    |
-| FloatLiteral(f64)                                   | A value based on Rust's f64.                                      | Yes    |
+| Name/Signature        | Description                  | Range? |
+| --------------------- | -----------------------------| ------ |
+| StringLiteral(String) | A simple string type.        | Yes    |
+| LongLiteral(i64)      | A value based on Rust's i64. | Yes    |
+| FloatLiteral(f64)     | A value based on Rust's f64. | Yes    |
 
 ### Statements
-A Statement in Ligature is a sum type of { source: Entity, arrow: Attribute, target: Entity, context: Entity }.
+A Statement in Ligature is a product type of { entity: Entity, attribute: Attribute, value: Value, context: Entity }.
 
 ### Contexts
 Contexts in Ligature are an unique Entity that represents a given Statement.
@@ -82,6 +82,5 @@ See https://doc.rust-lang.org/cargo/ for documentation on cargo in general.
 | [ligature-benchmark](https://github.com/almibe/ligature-benchmark)     | An internal benchmark for Ligature.                                                    |
 | [wander](https://github.com/almibe/wander)                             | A scripting language for working with Ligature.                                        |
 | [ligature-schema](https://github.com/almibe/ligature-schema)           | RDFS and SHACL support for Ligature.                                                   |
-| [iris](https://github.com/almibe/iris)                                 | IRI support for Scala 3.                                                               |
 | [ligature-formats](https://github.com/almibe/ligature-formats)         | Support for various RDF serializations with Ligature.                                  |
 | [ligature-sparql](https://github.com/almibe/ligature-sparql)           | SPARQL support for Ligature.                                                           |
