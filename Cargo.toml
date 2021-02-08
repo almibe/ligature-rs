@@ -1,6 +1,6 @@
 [package]
 name = "ligature"
-version = "0.2.0"
+version = "0.3.0-SNAPSHOT"
 authors = ["Alex Michael Berry <alexmiberry@gmail.com>"]
 edition = "2018"
 license = "MPL-2.0"
