@@ -166,7 +166,7 @@ pub trait Ligature {
     fn query<T>(
         &self,
         dataset: &Dataset,
-        f: dyn Fn(&dyn QueryTx) -> Result<T, LigatureError>,
+        f: QueryFn<T>,
     ) -> Result<T, LigatureError>;
 
     /// Initiazes a WriteTx
@@ -174,9 +174,15 @@ pub trait Ligature {
     fn write<T>(
         &self,
         dataset: &Dataset,
-        f: dyn Fn(&dyn WriteTx) -> Result<T, LigatureError>,
+        f: WriteFn<T>,
     ) -> Result<T, LigatureError>;
 }
+
+/// An Fn that is used when making a Query tranaction.
+pub type QueryFn<T> = Box<dyn Fn(Box<dyn QueryTx>) -> Result<T, LigatureError>>;
+
+/// An Fn that is used when making a Write transaction.
+pub type WriteFn<T> = Box<dyn Fn(Box<dyn WriteTx>) -> Result<T, LigatureError>>;
 
 /// Represents a QueryTx within the context of a Ligature instance and a single Dataset
 pub trait QueryTx {
