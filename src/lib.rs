@@ -163,19 +163,11 @@ pub trait Ligature {
 
     /// Initiazes a QueryTx
     /// TODO should probably return its own error type CouldNotInitializeQueryTx
-    fn query<T>(
-        &self,
-        dataset: &Dataset,
-        f: QueryFn<T>,
-    ) -> Result<T, LigatureError>;
+    fn query<T>(&self, dataset: &Dataset, f: QueryFn<T>) -> Result<T, LigatureError>;
 
     /// Initiazes a WriteTx
     /// TODO should probably return its own error type CouldNotInitializeWriteTx
-    fn write<T>(
-        &self,
-        dataset: &Dataset,
-        f: WriteFn<T>,
-    ) -> Result<T, LigatureError>;
+    fn write<T>(&self, dataset: &Dataset, f: WriteFn<T>) -> Result<T, LigatureError>;
 }
 
 /// An Fn that is used when making a Query tranaction.
