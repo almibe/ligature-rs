@@ -179,8 +179,9 @@ pub type WriteFn<T> = Box<dyn Fn(Box<dyn WriteTx>) -> Result<T, LigatureError>>;
 /// Represents a QueryTx within the context of a Ligature instance and a single Dataset
 pub trait QueryTx {
     /// Returns all PersistedStatements in this Dataset.
-    fn all_statements(&self)
-        -> Box<dyn Iterator<Item = Result<PersistedStatement, LigatureError>>>;
+    fn all_statements(
+        &self,
+    ) -> Box<dyn Iterator<Item = Result<PersistedStatement, LigatureError>> + '_>;
 
     /// Returns all PersistedStatements that match the given criteria.
     /// If a parameter is None then it matches all, so passing all Nones is the same as calling all_statements.
@@ -189,7 +190,7 @@ pub trait QueryTx {
         source: Option<Entity>,
         arrow: Option<Attribute>,
         target: Option<Value>,
-    ) -> Box<dyn Iterator<Item = Result<PersistedStatement, LigatureError>>>;
+    ) -> Box<dyn Iterator<Item = Result<PersistedStatement, LigatureError>> + '_>;
 
     /// Retuns all PersistedStatements that match the given criteria.
     /// If a parameter is None then it matches all.
@@ -198,7 +199,7 @@ pub trait QueryTx {
         source: Option<Entity>,
         arrow: Option<Attribute>,
         target: Range,
-    ) -> Box<dyn Iterator<Item = Result<PersistedStatement, LigatureError>>>;
+    ) -> Box<dyn Iterator<Item = Result<PersistedStatement, LigatureError>> + '_>;
 
     /// Returns the PersistedStatement for the given context.
     fn statement_for_context(
