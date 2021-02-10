@@ -163,11 +163,19 @@ pub trait Ligature {
 
     /// Initiazes a QueryTx
     /// TODO should probably return its own error type CouldNotInitializeQueryTx
-    fn query(&self, dataset: &Dataset) -> Result<Box<dyn QueryTx>, LigatureError>;
+    fn query<T>(
+        &self,
+        dataset: &Dataset,
+        f: dyn Fn(&dyn QueryTx) -> Result<T, LigatureError>,
+    ) -> Result<T, LigatureError>;
 
     /// Initiazes a WriteTx
     /// TODO should probably return its own error type CouldNotInitializeWriteTx
-    fn write(&self, dataset: &Dataset) -> Result<Box<dyn WriteTx>, LigatureError>;
+    fn write<T>(
+        &self,
+        dataset: &Dataset,
+        f: dyn Fn(&dyn WriteTx) -> Result<T, LigatureError>,
+    ) -> Result<T, LigatureError>;
 }
 
 /// Represents a QueryTx within the context of a Ligature instance and a single Dataset
@@ -221,10 +229,6 @@ pub trait WriteTx {
     ) -> Result<(), LigatureError>;
 
     /// Cancels this transaction so that none of the changes made so far will be stored.
-    /// This also closes this transaction so no other methods can be called.
+    /// This also closes this transaction so no other methods can be called without returning a LigatureError.
     fn cancel(&self) -> Result<(), LigatureError>;
-
-    /// Commits this transaction.
-    /// This also closes this transaction so no other methods can be called.
-    fn commit(&self) -> Result<(), LigatureError>;
 }
