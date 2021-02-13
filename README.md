@@ -52,7 +52,7 @@ Below is a table with the currently supported types.
 | Name/Signature        | Description                  | Range? |
 | --------------------- | -----------------------------| ------ |
 | StringLiteral(String) | A simple string type.        | Yes    |
-| IntegerLiteral(i64)      | A value based on Rust's i64. | Yes    |
+| IntegerLiteral(i64)   | A value based on Rust's i64. | Yes    |
 | FloatLiteral(f64)     | A value based on Rust's f64. | Yes    |
 
 ### Statements
@@ -74,6 +74,7 @@ See https://doc.rust-lang.org/cargo/ for documentation on cargo in general.
 | [ligature-client](https://github.com/almibe/ligature-client)           | A JVM HTTP client for working with Ligature.                                           |
 | [ligature-lab](https://github.com/almibe/ligature-lab)                 | A multi-user web front-end for experimenting with Ligature via `ligature-server`.      |
 | [ligature-lab-desktop](https://github.com/almibe/ligature-lab-desktop) | A single-user desktop front-end for experimenting with Ligature via `ligature-server`. |
+| [ligature-repl](https://github.com/almibe/ligature-repl)               | A REPL for working with Ligature.                                                      |
 | [ligature-test-suite](https://github.com/almibe/ligature-test-suite)   | A common test suite for Ligature implementations.                                      |
 | [ligature-mock](https://github.com/almibe/ligature-mock)               | A painfully simple (yet working) implementation of Ligature.                           |
 | [ligature-sled](https://github.com/almibe/ligature-sled)               | An implementation of Ligature based on the sled key-value store.                       |

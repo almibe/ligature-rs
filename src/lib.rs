@@ -220,12 +220,13 @@ pub trait WriteTx {
     fn add_statement(&self, statement: &Statement) -> Result<PersistedStatement, LigatureError>;
 
     /// Removes a given PersistedStatement from this Dataset.
-    /// If the PersistedStatement doesn't exist nothing happens.
+    /// If the PersistedStatement doesn't exist nothing happens and returns Ok(false).
+    /// This function returns Ok(true) only if the given PersistedStatement was found and removed.
     /// Note: Potentally could trigger a ValidationError.
     fn remove_statement(
         &self,
         persisted_statement: &PersistedStatement,
-    ) -> Result<(), LigatureError>;
+    ) -> Result<bool, LigatureError>;
 
     /// Cancels this transaction so that none of the changes made so far will be stored.
     /// This also closes this transaction so no other methods can be called without returning a LigatureError.
