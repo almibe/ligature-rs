@@ -77,8 +77,9 @@ See https://doc.rust-lang.org/cargo/ for documentation on cargo in general.
 | [ligature-repl](https://github.com/almibe/ligature-repl)               | A REPL for working with Ligature.                                                      |
 | [ligature-test-suite](https://github.com/almibe/ligature-test-suite)   | A common test suite for Ligature implementations.                                      |
 | [ligature-mock](https://github.com/almibe/ligature-mock)               | A painfully simple (yet working) implementation of Ligature.                           |
+| [ligature-kv](https://github.com/almibe/ligature-kv)                   | A common library to help with storing Ligature data in a key-value store.              |
+| [ligature-lmdb](https://github.com/almibe/ligature-lmdb)               | An implementation of Ligature based on the LMDB key-value store.                       |
 | [ligature-sled](https://github.com/almibe/ligature-sled)               | An implementation of Ligature based on the sled key-value store.                       |
-| [ligature-key-value](https://github.com/almibe/ligature-key-value)     | A library for storing Ligature data in a key-value store using the `slonky` library.   |
 | [ligature-benchmark](https://github.com/almibe/ligature-benchmark)     | An internal benchmark for Ligature.                                                    |
 | [wander](https://github.com/almibe/wander)                             | A scripting language for working with Ligature.                                        |
 | [ligature-schema](https://github.com/almibe/ligature-schema)           | RDFS and SHACL support for Ligature.                                                   |

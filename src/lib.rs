@@ -171,10 +171,10 @@ pub trait Ligature {
 }
 
 /// An Fn that is used when making a Query tranaction.
-pub type QueryFn<T> = Box<dyn Fn(Box<dyn QueryTx>) -> Result<T, LigatureError>>;
+pub type QueryFn<T> = Box<dyn Fn(Box<&dyn QueryTx>) -> Result<T, LigatureError>>;
 
 /// An Fn that is used when making a Write transaction.
-pub type WriteFn<T> = Box<dyn Fn(Box<dyn WriteTx>) -> Result<T, LigatureError>>;
+pub type WriteFn<T> = Box<dyn Fn(Box<&dyn WriteTx>) -> Result<T, LigatureError>>;
 
 /// Represents a QueryTx within the context of a Ligature instance and a single Dataset
 pub trait QueryTx {
