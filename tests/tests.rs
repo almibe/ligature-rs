@@ -4,7 +4,7 @@
 
 #[cfg(test)]
 mod tests {
-    use ligature::Dataset;
+    use ligature::{Attribute, Dataset};
 
     #[test]
     fn valid_dataset_names() {
@@ -75,11 +75,11 @@ mod tests {
         ];
 
         for ok in oks {
-            assert!(Dataset::new(ok).is_ok());
+            assert!(Attribute::new(ok).is_ok());
         }
 
         for err in errs {
-            assert!(Dataset::new(err).is_err());
+            assert!(Attribute::new(err).is_err());
         }
     }
 }

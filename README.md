@@ -85,3 +85,4 @@ See https://doc.rust-lang.org/cargo/ for documentation on cargo in general.
 | [ligature-schema](https://github.com/almibe/ligature-schema)           | RDFS and SHACL support for Ligature.                                                   |
 | [ligature-formats](https://github.com/almibe/ligature-formats)         | Support for various RDF serializations with Ligature.                                  |
 | [ligature-sparql](https://github.com/almibe/ligature-sparql)           | SPARQL support for Ligature.                                                           |
+| [slonky](https://github.com/almibe/slonky)                             | An implementation of Ligature written in Scala for the JVM.                            |
