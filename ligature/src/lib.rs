@@ -13,6 +13,7 @@ extern crate lazy_static;
 
 use regex::Regex;
 use serde::{Deserialize, Serialize};
+use bytes::Bytes;
 
 /// A string that represents a Dataset by name.
 /// Currently can only be ASCII text separated by /
@@ -42,7 +43,27 @@ impl Dataset {
 
 /// An Entity that is identified by a unique u64 id.
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
-pub struct Entity(pub u64);
+pub struct Entity(String);
+
+impl Entity {
+    /// Creates a new Arrow and returns a Result based on if it is valid or not.
+    pub fn new(name: &str) -> Result<Self, LigatureError> {
+        lazy_static! {
+            static ref RE: Regex = Regex::new(r"^[a-zA-Z_]{1}[a-zA-Z0-9_]*$").unwrap();
+        }
+
+        if RE.is_match(name) {
+            Ok(Self(name.to_string()))
+        } else {
+            Err(LigatureError(format!("Invalid Entity id {}", name)))
+        }
+    }
+
+    /// Returns the name of the given Arrow.
+    pub fn id(&self) -> &str {
+        &self.0
+    }
+}
 
 /// A named connection between an Entity and a Value.
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
@@ -79,9 +100,11 @@ pub enum Value {
     IntegerLiteral(i64),
     /// An f64 used for a Ligature literal
     FloatLiteral(f64),
+    /// An array of bytes
+    BytesLiteral(Bytes)
 }
 
-/// A set of enums used to express range queries when it makes sense for that type (ie no support for BooleanLiteralRange or UnknownLiteralRange since they don't make sense).
+/// A set of enums used to express range queries when it makes sense for that type.
 #[derive(Debug)]
 pub enum Range {
     /// Represents a String range using basic String comparisons.
@@ -104,6 +127,13 @@ pub enum Range {
         start: f64,
         /// The end f64 (exclusive)
         end: f64,
+    },
+    /// Represents a String range using basic Bytes comparisons.
+    BytesLiteralRange {
+        /// The starting Byte array (inclusive)
+        start: Bytes,
+        /// The end Byte array (exclusive)
+        end: Bytes,
     },
 }
 
@@ -154,16 +184,16 @@ pub trait Ligature {
     /// TODO should probably return its own error type { InvalidDataset, CouldNotDeleteDataset }
     fn delete_dataset(&self, dataset: &Dataset) -> Result<(), LigatureError>;
 
-    /// Initiazes a QueryTx
+    /// Initializes a QueryTx
     /// TODO should probably return its own error type CouldNotInitializeQueryTx
     fn query<T>(&self, dataset: &Dataset, f: QueryFn<T>) -> Result<T, LigatureError>;
 
-    /// Initiazes a WriteTx
+    /// Initializes a WriteTx
     /// TODO should probably return its own error type CouldNotInitializeWriteTx
     fn write<T>(&self, dataset: &Dataset, f: WriteFn<T>) -> Result<T, LigatureError>;
 }
 
-/// An Fn that is used when making a Query tranaction.
+/// An Fn that is used when making a Query transaction.
 pub type QueryFn<T> = Box<dyn Fn(Box<&dyn QueryTx>) -> Result<T, LigatureError>>;
 
 /// An Fn that is used when making a Write transaction.
@@ -204,18 +234,18 @@ pub trait QueryTx {
 /// Represents a WriteTx within the context of a Ligature instance and a single Dataset
 pub trait WriteTx {
     /// Creates a new, unique Entity within this Dataset.
-    /// Note: Entitys are shared across named graphs in a given Dataset.
+    /// Note: Entities are shared across named graphs in a given Dataset.
     fn new_entity(&self) -> Result<Entity, LigatureError>;
 
     /// Adds a given Statement to this Dataset.
     /// If the Statement already exists nothing happens (TODO maybe add it with a new context?).
-    /// Note: Potentally could trigger a ValidationError
+    /// Note: Potentially could trigger a ValidationError
     fn add_statement(&self, statement: &Statement) -> Result<Statement, LigatureError>;
 
     /// Removes a given Statement from this Dataset.
     /// If the Statement doesn't exist nothing happens and returns Ok(false).
     /// This function returns Ok(true) only if the given Statement was found and removed.
-    /// Note: Potentally could trigger a ValidationError.
+    /// Note: Potentially could trigger a ValidationError.
     fn remove_statement(
         &self,
         persisted_statement: &Statement,
