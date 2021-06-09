@@ -116,13 +116,6 @@ pub struct Statement {
     pub attribute: Attribute,
     /// The Value of a Statement
     pub value: Value,
-}
-
-/// A Statement that has been persisted so it has an associated Context Entity.
-#[derive(Debug, Clone, PartialOrd, PartialEq)]
-pub struct PersistedStatement {
-    /// The target Statment
-    pub statement: Statement,
     /// The Context of this Statement
     pub context: Entity,
 }
@@ -178,34 +171,34 @@ pub type WriteFn<T> = Box<dyn Fn(Box<&dyn WriteTx>) -> Result<T, LigatureError>>
 
 /// Represents a QueryTx within the context of a Ligature instance and a single Dataset
 pub trait QueryTx {
-    /// Returns all PersistedStatements in this Dataset.
+    /// Returns all Statements in this Dataset.
     fn all_statements(
         &self,
-    ) -> Box<dyn Iterator<Item = Result<PersistedStatement, LigatureError>> + '_>;
+    ) -> Box<dyn Iterator<Item = Result<Statement, LigatureError>> + '_>;
 
-    /// Returns all PersistedStatements that match the given criteria.
+    /// Returns all Statements that match the given criteria.
     /// If a parameter is None then it matches all, so passing all Nones is the same as calling all_statements.
     fn match_statements(
         &self,
         source: Option<Entity>,
         arrow: Option<Attribute>,
         target: Option<Value>,
-    ) -> Box<dyn Iterator<Item = Result<PersistedStatement, LigatureError>> + '_>;
+    ) -> Box<dyn Iterator<Item = Result<Statement, LigatureError>> + '_>;
 
-    /// Retuns all PersistedStatements that match the given criteria.
+    /// Returns all Statements that match the given criteria.
     /// If a parameter is None then it matches all.
     fn match_statements_range(
         &self,
         source: Option<Entity>,
         arrow: Option<Attribute>,
         target: Range,
-    ) -> Box<dyn Iterator<Item = Result<PersistedStatement, LigatureError>> + '_>;
+    ) -> Box<dyn Iterator<Item = Result<Statement, LigatureError>> + '_>;
 
-    /// Returns the PersistedStatement for the given context.
+    /// Returns the Statement for the given context.
     fn statement_for_context(
         &self,
         context: &Entity,
-    ) -> Result<Option<PersistedStatement>, LigatureError>;
+    ) -> Result<Option<Statement>, LigatureError>;
 }
 
 /// Represents a WriteTx within the context of a Ligature instance and a single Dataset
@@ -217,15 +210,15 @@ pub trait WriteTx {
     /// Adds a given Statement to this Dataset.
     /// If the Statement already exists nothing happens (TODO maybe add it with a new context?).
     /// Note: Potentally could trigger a ValidationError
-    fn add_statement(&self, statement: &Statement) -> Result<PersistedStatement, LigatureError>;
+    fn add_statement(&self, statement: &Statement) -> Result<Statement, LigatureError>;
 
-    /// Removes a given PersistedStatement from this Dataset.
-    /// If the PersistedStatement doesn't exist nothing happens and returns Ok(false).
-    /// This function returns Ok(true) only if the given PersistedStatement was found and removed.
+    /// Removes a given Statement from this Dataset.
+    /// If the Statement doesn't exist nothing happens and returns Ok(false).
+    /// This function returns Ok(true) only if the given Statement was found and removed.
     /// Note: Potentally could trigger a ValidationError.
     fn remove_statement(
         &self,
-        persisted_statement: &PersistedStatement,
+        persisted_statement: &Statement,
     ) -> Result<bool, LigatureError>;
 
     /// Cancels this transaction so that none of the changes made so far will be stored.
