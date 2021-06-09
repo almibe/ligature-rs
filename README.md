@@ -11,7 +11,7 @@ This project is still very much under development and subject to change quite a 
 ```
 Dataset { dataset_name: DatasetName, statements: Statement* }
 DatasetName { name: String }
-Entity { id: u64 }
+Entity { id: String }
 Attribute { name: String }
 Value {
     Entity { value: Entity } |
@@ -19,8 +19,7 @@ Value {
     IntegerLiteral { value: i64 } |
     FloatLiteral { value: f64 } |
 }
-Statement { entity: Entity, attribute: Attribute, value: Value }
-PersistedStatement { statement: Statement, context: Entity }
+Statement { entity: Entity, attribute: Attribute, value: Value, context: Entity }
 ```
 
 ### Datasets
@@ -34,9 +33,9 @@ For example with named graphs blank nodes are shared across graphs in a dataset,
 
 ### Entities
 Entities in Ligature are simply an object that we can make statements about.
-Every Entity is defined by an unique id.
+Every Entity is defined by a unique id.
 The `new_entity` method returns a new Entity that is automatically generated.
-The `new_entity` method runs inside a transaction so it is guaranteed to be unique and at the time of creation.
+The `new_entity` method runs inside a transaction, so it is guaranteed to be unique and at the time of creation.
 
 ### Attributes
 Attributes in Ligature are a label that relates two Entities together.

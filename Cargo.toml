@@ -1,15 +1,5 @@
-[package]
-name = "ligature"
-version = "0.4.0-SNAPSHOT"
-authors = ["Alex Michael Berry <alexmiberry@gmail.com>"]
-edition = "2018"
-license = "MPL-2.0"
-description = "Ligature is a knowledge graph library written in Rust."
-repository = "https://github.com/almibe/ligature/"
+[workspace]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-regex = "1"
-lazy_static = "1.4.0"
-serde = { version = "1.0", features = ["derive"] }
+members = [
+    "ligature",
+]

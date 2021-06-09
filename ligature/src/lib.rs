@@ -118,7 +118,7 @@ pub struct Statement {
     pub value: Value,
 }
 
-/// A Statement that has been persisted so it has an assoicated Context Entity.
+/// A Statement that has been persisted so it has an associated Context Entity.
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
 pub struct PersistedStatement {
     /// The target Statment
