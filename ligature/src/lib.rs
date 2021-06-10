@@ -235,7 +235,7 @@ pub trait QueryTx {
 pub trait WriteTx {
     /// Creates a new, unique Entity within this Dataset.
     /// Note: Entities are shared across named graphs in a given Dataset.
-    fn new_entity(&self) -> Result<Entity, LigatureError>;
+    fn new_entity(&self, prefix: String) -> Result<Entity, LigatureError>;
 
     /// Adds a given Statement to this Dataset.
     /// If the Statement already exists nothing happens (TODO maybe add it with a new context?).
