@@ -9,29 +9,26 @@ experimenting.
 
 ## Specification
 
-See [https://github.com/almibe/ligature-specification] to learn more about Ligature.
+See https://github.com/almibe/ligature-specification to learn more about Ligature.
 
 ## Building
 This project uses cargo for building.
 See https://rustup.rs/ for instructions on installing the Rust toolchain.
 See https://doc.rust-lang.org/cargo/ for documentation on cargo in general.
 
+## Projects in this Repository
+| Name                  | Description                                                                            |
+| --------------------- | -------------------------------------------------------------------------------------- |
+| ligature              | Basic structs and traits used by Ligature implementations.                             |
+| lig                   | Serialization support for Ligature using the Lig format.                               |
+| ligature-test-suite   | A test suite for Ligature implementations.                                             |
+| ligature-benchmark    | A simple benchmark for Ligature implementations.                                       |
+| ligature-in-memory    | An in-memory implementation of Ligature based on the `im` crate.                       |
+| ligature-sqlite       | An implementation of Ligature that uses sqlite3 for storage.                           |
+
 ## Related Projects
-| Name                                                                   | Description                                                                            |
-| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| [ligature-server](https://github.com/almibe/ligature-server)           | An HTTP server for working with Ligature.                                              |
-| [ligature-client](https://github.com/almibe/ligature-client)           | A JVM HTTP client for working with Ligature.                                           |
-| [ligature-lab](https://github.com/almibe/ligature-lab)                 | A multi-user web front-end for experimenting with Ligature via `ligature-server`.      |
-| [ligature-lab-desktop](https://github.com/almibe/ligature-lab-desktop) | A single-user desktop front-end for experimenting with Ligature via `ligature-server`. |
-| [ligature-repl](https://github.com/almibe/ligature-repl)               | A REPL for working with Ligature.                                                      |
-| [ligature-test-suite](https://github.com/almibe/ligature-test-suite)   | A common test suite for Ligature implementations.                                      |
-| [ligature-mock](https://github.com/almibe/ligature-mock)               | A painfully simple (yet working) implementation of Ligature.                           |
-| [ligature-kv](https://github.com/almibe/ligature-kv)                   | A common library to help with storing Ligature data in a key-value store.              |
-| [ligature-lmdb](https://github.com/almibe/ligature-lmdb)               | An implementation of Ligature based on the LMDB key-value store.                       |
-| [ligature-sled](https://github.com/almibe/ligature-sled)               | An implementation of Ligature based on the sled key-value store.                       |
-| [ligature-benchmark](https://github.com/almibe/ligature-benchmark)     | An internal benchmark for Ligature.                                                    |
-| [wander](https://github.com/almibe/wander)                             | A scripting language for working with Ligature.                                        |
-| [ligature-schema](https://github.com/almibe/ligature-schema)           | RDFS and SHACL support for Ligature.                                                   |
-| [ligature-formats](https://github.com/almibe/ligature-formats)         | Support for various RDF serializations with Ligature.                                  |
-| [ligature-sparql](https://github.com/almibe/ligature-sparql)           | SPARQL support for Ligature.                                                           |
-| [slonky](https://github.com/almibe/slonky)                             | An implementation of Ligature written in Scala for the JVM.                            |
+| Name                                                                       | Description                                                                       |
+| -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------|
+| [ligature-specification](https://github.com/almibe/ligature-specification) | Ligature's specification.                                                         |
+| [ligature-lab](https://github.com/almibe/ligature-lab)                     | A multi-user web front-end for experimenting with Ligature via `ligature-server`. |
+| [ligature-jvm](https://github.com/almibe/ligature-jvm)                     | An implementation of Ligature written in Scala for the JVM.                       |
