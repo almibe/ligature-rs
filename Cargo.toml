@@ -1,9 +1,10 @@
 [workspace]
 
 members = [
-    "ligature",
     "lig",
-    "ligature-test-suite",
-    "ligature-sqlite",
+    "ligature",
     "ligature-benchmark",
+    "ligature-repl",
+    "ligature-sqlite",
+    "ligature-test-suite",
 ]

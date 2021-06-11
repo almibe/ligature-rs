@@ -1,5 +1,5 @@
 [package]
-name = "ligature-benchmark"
+name = "ligature-repl"
 version = "0.1.0-SNAPSHOT"
 authors = ["Alex Michael Berry <alexmiberry@gmail.com>"]
 edition = "2018"
