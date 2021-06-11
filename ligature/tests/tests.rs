@@ -47,6 +47,16 @@ mod tests {
     }
 
     #[test]
+    fn valid_entity_names() {
+        todo!()
+    }
+
+    #[test]
+    fn test_generate_entities() {
+        todo!()
+    }
+
+    #[test]
     fn valid_attribute_names() {
         //TODO add more tests
         let oks = vec![

@@ -14,6 +14,7 @@ extern crate lazy_static;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use bytes::Bytes;
+use uuid::Uuid;
 
 /// A string that represents a Dataset by name.
 /// Currently can only be ASCII text separated by /
@@ -63,6 +64,16 @@ impl Entity {
     pub fn id(&self) -> &str {
         &self.0
     }
+}
+
+/// Creates a new, unique Entity within this Dataset with an optional prefix.
+pub fn generate_entity(prefix: Option<String>) -> Result<Entity, LigatureError> {
+    let uuid = Uuid::new_v4().to_hyphenated().to_string();
+    let p = match prefix {
+        Some(s) => s + &uuid,
+        None => "_:" + uuid,
+    };
+    Entity::new(p.to_str)
 }
 
 /// A named connection between an Entity and a Value.
@@ -233,9 +244,9 @@ pub trait QueryTx {
 
 /// Represents a WriteTx within the context of a Ligature instance and a single Dataset
 pub trait WriteTx {
-    /// Creates a new, unique Entity within this Dataset.
-    /// Note: Entities are shared across named graphs in a given Dataset.
-    fn new_entity(&self, prefix: String) -> Result<Entity, LigatureError>;
+    /// Creates a new, unique Entity within this Dataset with an optional prefix.
+    /// This version of the function enforces that the generated entity is unique in this Dataset.
+    fn generate_entity(&self, prefix: Option<String>) -> Result<Entity, LigatureError>;
 
     /// Adds a given Statement to this Dataset.
     /// If the Statement already exists nothing happens (TODO maybe add it with a new context?).
