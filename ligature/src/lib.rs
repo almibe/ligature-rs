@@ -245,8 +245,8 @@ pub trait QueryTx {
 /// Represents a WriteTx within the context of a Ligature instance and a single Dataset
 pub trait WriteTx {
     /// Creates a new, unique Entity within this Dataset with an optional prefix.
-    /// This version of the function enforces that the generated entity is unique in this Dataset.
-    fn generate_entity(&self, prefix: Option<String>) -> Result<Entity, LigatureError>;
+    /// This version of the function enforces that the new entity is unique in this Dataset.
+    fn new_entity(&self, prefix: Option<String>) -> Result<Entity, LigatureError>;
 
     /// Adds a given Statement to this Dataset.
     /// If the Statement already exists nothing happens (TODO maybe add it with a new context?).
