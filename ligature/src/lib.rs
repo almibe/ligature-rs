@@ -42,7 +42,7 @@ impl Dataset {
     }
 }
 
-/// An Entity that is identified by a unique u64 id.
+/// An Entity that is identified by a unique String id.
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
 pub struct Entity(String);
 
@@ -66,14 +66,15 @@ impl Entity {
     }
 }
 
-/// Creates a new, unique Entity within this Dataset with an optional prefix.
-pub fn generate_entity(prefix: Option<String>) -> Result<Entity, LigatureError> {
+/// Creates a new Entity with an optional prefix.
+/// To assure this Entity is unique within a Dataset use the version located in WriteTx.
+pub fn new_entity(prefix: Option<String>) -> Result<Entity, LigatureError> {
     let uuid = Uuid::new_v4().to_hyphenated().to_string();
     let p = match prefix {
         Some(s) => s + &uuid,
-        None => "_:" + uuid,
+        None => String::from("_:") + &uuid,
     };
-    Entity::new(p.to_str)
+    Entity::new(p.as_str())
 }
 
 /// A named connection between an Entity and a Value.
