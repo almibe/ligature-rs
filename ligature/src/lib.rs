@@ -11,9 +11,9 @@
 #[macro_use]
 extern crate lazy_static;
 
+use bytes::Bytes;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use bytes::Bytes;
 use uuid::Uuid;
 
 /// A string that represents a Dataset by name.
@@ -42,6 +42,15 @@ impl Dataset {
     }
 }
 
+fn validate_identifier(id: &str) -> bool {
+    lazy_static! {
+        static ref RE: Regex =
+            Regex::new(r"^[a-zA-Z_][a-zA-Z0-9-._~:/?#\[\]@!$&'()*+,;%=]*$").unwrap();
+    }
+
+    RE.is_match(id)
+}
+
 /// An Entity that is identified by a unique String id.
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
 pub struct Entity(String);
@@ -49,11 +58,7 @@ pub struct Entity(String);
 impl Entity {
     /// Creates a new Arrow and returns a Result based on if it is valid or not.
     pub fn new(name: &str) -> Result<Self, LigatureError> {
-        lazy_static! {
-            static ref RE: Regex = Regex::new(r"^[a-zA-Z_]{1}[a-zA-Z0-9_]*$").unwrap();
-        }
-
-        if RE.is_match(name) {
+        if validate_identifier(name) {
             Ok(Self(name.to_string()))
         } else {
             Err(LigatureError(format!("Invalid Entity id {}", name)))
@@ -84,11 +89,7 @@ pub struct Attribute(String);
 impl Attribute {
     /// Creates a new Arrow and returns a Result based on if it is valid or not.
     pub fn new(name: &str) -> Result<Self, LigatureError> {
-        lazy_static! {
-            static ref RE: Regex = Regex::new(r"^[a-zA-Z_]{1}[a-zA-Z0-9_]*$").unwrap();
-        }
-
-        if RE.is_match(name) {
+        if validate_identifier(name) {
             Ok(Self(name.to_string()))
         } else {
             Err(LigatureError(format!("Invalid Attribute name {}", name)))
@@ -113,7 +114,7 @@ pub enum Value {
     /// An f64 used for a Ligature literal
     FloatLiteral(f64),
     /// An array of bytes
-    BytesLiteral(Bytes)
+    BytesLiteral(Bytes),
 }
 
 /// A set of enums used to express range queries when it makes sense for that type.
@@ -214,9 +215,7 @@ pub type WriteFn<T> = Box<dyn Fn(Box<&dyn WriteTx>) -> Result<T, LigatureError>>
 /// Represents a QueryTx within the context of a Ligature instance and a single Dataset
 pub trait QueryTx {
     /// Returns all Statements in this Dataset.
-    fn all_statements(
-        &self,
-    ) -> Box<dyn Iterator<Item = Result<Statement, LigatureError>> + '_>;
+    fn all_statements(&self) -> Box<dyn Iterator<Item = Result<Statement, LigatureError>> + '_>;
 
     /// Returns all Statements that match the given criteria.
     /// If a parameter is None then it matches all, so passing all Nones is the same as calling all_statements.
@@ -237,10 +236,7 @@ pub trait QueryTx {
     ) -> Box<dyn Iterator<Item = Result<Statement, LigatureError>> + '_>;
 
     /// Returns the Statement for the given context.
-    fn statement_for_context(
-        &self,
-        context: &Entity,
-    ) -> Result<Option<Statement>, LigatureError>;
+    fn statement_for_context(&self, context: &Entity) -> Result<Option<Statement>, LigatureError>;
 }
 
 /// Represents a WriteTx within the context of a Ligature instance and a single Dataset
@@ -258,10 +254,7 @@ pub trait WriteTx {
     /// If the Statement doesn't exist nothing happens and returns Ok(false).
     /// This function returns Ok(true) only if the given Statement was found and removed.
     /// Note: Potentially could trigger a ValidationError.
-    fn remove_statement(
-        &self,
-        persisted_statement: &Statement,
-    ) -> Result<bool, LigatureError>;
+    fn remove_statement(&self, persisted_statement: &Statement) -> Result<bool, LigatureError>;
 
     /// Cancels this transaction so that none of the changes made so far will be stored.
     /// This also closes this transaction so no other methods can be called without returning a LigatureError.
