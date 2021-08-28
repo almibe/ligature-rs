@@ -3,7 +3,12 @@ name = "lig"
 version = "0.1.0-SNAPSHOT"
 authors = ["Alex Michael Berry <alexmiberry@gmail.com>"]
 edition = "2018"
+license = "MPL-2.0"
+description = "A Rust implementation of the lig serialization format for Ligature."
+repository = "https://github.com/almibe/ligature/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+ligature = { path = "../ligature" }
+bytes = "1"
