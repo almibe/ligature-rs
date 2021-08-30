@@ -6,6 +6,7 @@
 mod tests {
     use ligature::{Entity, Attribute, Value, Statement};
     use lig::*;
+    use bytes::Bytes;
 
     #[test]
     fn read_entities() -> Result<(), LigError> {
@@ -45,14 +46,14 @@ mod tests {
     #[test]
     fn read_byte_arrays_literals() -> Result<(), LigError> {
         let b = "0x00ff";
-        assert_eq!(read_value(b)?, vec![0, 255]);
+        assert_eq!(read_value(b)?, Value::BytesLiteral(Bytes::from(vec![0, 255])));
         Ok(())
     }
 
     #[test]
     fn read_entity_as_value() -> Result<(), LigError> {
         let e = "<test>";
-        assert_eq!(read_value(e)?, Entity::new("test")?);
+        assert_eq!(read_value(e)?, Value::Entity(Entity::new("test")?));
         Ok(())
     }
 
@@ -60,7 +61,7 @@ mod tests {
     fn read_empty_set_of_statements() -> Result<(), LigError> {
         let s = "";
         let expected: Vec<Statement> = vec![];
-        assert_eq!(read(s), expected);
+        assert_eq!(read(s)?, expected);
         Ok(())
     }
 
@@ -69,7 +70,7 @@ mod tests {
         let s = "<e> @<a> 123 <c>\n<e2> @<a> <e> <c2>\n";
         let expected = vec![
             Statement { entity: Entity::new("e")?, attribute: Attribute::new("a")?, value: Value::IntegerLiteral(123), context: Entity::new("c")? },
-            Statement { entity: Entity::new("e2")?, attribute: Attribute::new("a")?, value: Entity::new("e")?, context: Entity::new("c2")? }
+            Statement { entity: Entity::new("e2")?, attribute: Attribute::new("a")?, value: Value::Entity(Entity::new("e")?), context: Entity::new("c2")? }
         ];
         assert_eq!(read(s)?, expected);
         Ok(())

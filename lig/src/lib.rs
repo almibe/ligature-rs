@@ -11,7 +11,14 @@ use bytes::Bytes;
 use parser::Parser;
 
 /// A error related to parsing Lig.
-pub struct LigError(String);
+#[derive(Debug, PartialEq, Eq)]
+pub struct LigError(pub String);
+
+impl From<LigatureError> for LigError {
+    fn from(err: LigatureError) -> Self {
+        LigError(err.0)
+    }
+}
 
 /// Writes out an Entity to a String.
 pub fn write_entity(entity: &Entity) -> String {
@@ -44,6 +51,10 @@ pub fn read_attribute(attribute: &str) -> Result<Attribute, LigError> {
 }
 
 pub fn write_value(value: &Value) -> String {
+    todo!()
+}
+
+pub fn read_value(value: &str) -> Result<Value, LigError> {
     todo!()
 }
 
