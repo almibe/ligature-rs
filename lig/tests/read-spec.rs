@@ -4,53 +4,74 @@
 
 #[cfg(test)]
 mod tests {
-    fn read_entities() {
+    use ligature::{Entity, Attribute, Value, Statement};
+    use lig::*;
+
+    #[test]
+    fn read_entities() -> Result<(), LigError> {
         let e = "<test>";
-        readEntity(e).should.be.eql(new Entity("test"));
+        assert_eq!(read_entity(e)?, Entity::new("test")?);
+        Ok(())
     }
 
-    fn read_attributes() {
+    #[test]
+    fn read_attributes() -> Result<(), LigError> {
         let a = "@<test>";
-        readAttribute(a).should.be.eql(new Attribute("test"));
+        assert_eq!(read_attribute(a)?, Attribute::new("test")?);
+        Ok(())
     }
 
-    fn read_string_literals() {
+    #[test]
+    fn read_string_literals() -> Result<(), LigError> {
         let s = "\"test\"";
-        readValue(s).should.be.equal("test");
+        assert_eq!(read_value(s)?, Value::StringLiteral("test".to_string()));
+        Ok(())
     }
 
-    fn read_integer_literals() {
+    #[test]
+    fn read_integer_literals() -> Result<(), LigError> {
         let i = "243";
-        readValue(i).should.be.equal(243n);
+        assert_eq!(read_value(i)?, Value::IntegerLiteral(243));
+        Ok(())
     }
 
-    fn read_float_literals() {
+    #[test]
+    fn read_float_literals() -> Result<(), LigError> {
         let f = "1.2";
-        readValue(f).should.be.equal(1.2);
+        assert_eq!(read_value(f)?, Value::FloatLiteral(1.2));
+        Ok(())
     }
 
-    fn read_byte_arrays_literals() {
+    #[test]
+    fn read_byte_arrays_literals() -> Result<(), LigError> {
         let b = "0x00ff";
-        readValue(b).should.be.eql(new Uint8Array([0, 255]));
+        assert_eq!(read_value(b)?, vec![0, 255]);
+        Ok(())
     }
 
-    fn read_entity_as_value() {
+    #[test]
+    fn read_entity_as_value() -> Result<(), LigError> {
         let e = "<test>";
-        readValue(e).should.be.eql(new Entity("test"));
+        assert_eq!(read_value(e)?, Entity::new("test")?);
+        Ok(())
     }
 
-    fn read_empty_set_of_statements() {
+    #[test]
+    fn read_empty_set_of_statements() -> Result<(), LigError> {
         let s = "";
-        let expected: Array<Statement> = [];
-        read(s).should.be.eql(expected);
+        let expected: Vec<Statement> = vec![];
+        assert_eq!(read(s), expected);
+        Ok(())
     }
 
-    fn read_set_of_statements() {
+    #[test]
+    fn read_set_of_statements() -> Result<(), LigError> {
         let s = "<e> @<a> 123 <c>\n<e2> @<a> <e> <c2>\n";
-        let expected = [
-            new Statement(new Entity("e"), new Attribute("a"), 123n, new Entity("c")),
-            new Statement(new Entity("e2"), new Attribute("a"), new Entity("e"), new Entity("c2"))
+        let expected = vec![
+            Statement { entity: Entity::new("e")?, attribute: Attribute::new("a")?, value: Value::IntegerLiteral(123), context: Entity::new("c")? },
+            Statement { entity: Entity::new("e2")?, attribute: Attribute::new("a")?, value: Entity::new("e")?, context: Entity::new("c2")? }
         ];
-        read(s).should.be.eql(expected);
+        assert_eq!(read(s)?, expected);
+        Ok(())
     }
 }
