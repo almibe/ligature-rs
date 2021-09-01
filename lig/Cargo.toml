@@ -11,4 +11,4 @@ repository = "https://github.com/almibe/ligature/"
 
 [dependencies]
 ligature = { path = "../ligature" }
-bytes = "1"
+hex = "0.4"
