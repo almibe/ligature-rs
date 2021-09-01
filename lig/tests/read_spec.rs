@@ -4,7 +4,7 @@
 
 use lig::read::{read, read_attribute, read_entity, read_value};
 use lig::*;
-use ligature::{Attribute, Entity, Statement, Value, Bytes};
+use ligature::{Attribute, Bytes, Entity, Statement, Value};
 
 #[test]
 fn read_entities() -> Result<(), LigError> {
@@ -44,10 +44,7 @@ fn read_float_literals() -> Result<(), LigError> {
 #[test]
 fn read_byte_arrays_literals() -> Result<(), LigError> {
     let b = "0x00ff";
-    assert_eq!(
-        read_value(b)?,
-        Value::BytesLiteral(vec![0, 255])
-    );
+    assert_eq!(read_value(b)?, Value::BytesLiteral(vec![0, 255]));
     Ok(())
 }
 

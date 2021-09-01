@@ -22,7 +22,7 @@ impl Parser<'_> {
             location: 0,
             line: 0,
             location_in_line: 0,
-            save_point: None
+            save_point: None,
         }
     }
 
@@ -94,19 +94,19 @@ impl Parser<'_> {
         let chars = input.as_bytes(); //TODO use unicode-segmentation for this eventually
         loop {
             if offset == chars.len() {
-                return true
+                return true;
             }
             let current = self.next();
             let test = chars[offset] as char;
             match current {
                 None => {
                     self.location = start_pos;
-                    return false
+                    return false;
                 }
                 Some(c) => {
                     if c != test {
                         self.location = start_pos;
-                        return false
+                        return false;
                     }
                     offset += 1;
                 }
@@ -124,16 +124,16 @@ impl Parser<'_> {
             match peek {
                 None => {
                     self.location = start_point;
-                    return None
+                    return None;
                 }
                 Some(c) => {
                     if c == sentinel {
                         self.next();
-                        return Some(res)
+                        return Some(res);
                     } else {
                         self.next();
                         res.push(c);
-                        continue
+                        continue;
                     }
                 }
             }
@@ -145,13 +145,13 @@ impl Parser<'_> {
         loop {
             let current = self.peek();
             match current {
-                None => { return }
+                None => return,
                 Some(c) => {
                     if chars.contains(&c) {
                         self.next();
-                        continue
+                        continue;
                     } else {
-                        return
+                        return;
                     }
                 }
             }
