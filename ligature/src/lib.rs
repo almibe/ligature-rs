@@ -11,10 +11,12 @@
 #[macro_use]
 extern crate lazy_static;
 
-use bytes::Bytes;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+
+/// A simple type alias for Bytes.
+pub type Bytes = Vec<u8>;
 
 /// A string that represents a Dataset by name.
 /// Currently can only be ASCII text separated by /
