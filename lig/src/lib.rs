@@ -6,7 +6,6 @@
 
 use ligature::LigatureError;
 
-pub mod parser;
 pub mod read;
 pub mod write;
 
