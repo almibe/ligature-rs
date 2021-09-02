@@ -62,10 +62,14 @@ impl Parser<'_> {
         }
     }
 
+    pub fn is_complete(&self) -> bool {
+        self.location >= self.input.len()
+    }
+
     /// Returns the next char, but doesn't affect the current Parser location.
     /// Returns None if there is no more text.
     pub fn peek(&self) -> Option<char> {
-        if self.input.len() < self.location {
+        if self.is_complete() {
             None
         } else {
             let x = self.input.as_bytes()[self.location] as char; //TODO rewrite
@@ -116,7 +120,7 @@ impl Parser<'_> {
 
     /// Takes until a sentinel character is found.
     /// Returns the values that were found before final token.
-    pub fn take_until(&mut self, sentinel: char) -> Option<String> {
+    pub fn take_until(&mut self, stop_condition: Box<dyn Fn(char) -> bool>) -> Option<String> {
         let mut res = String::new();
         let start_point = self.location;
         loop {
@@ -127,7 +131,7 @@ impl Parser<'_> {
                     return None;
                 }
                 Some(c) => {
-                    if c == sentinel {
+                    if stop_condition(c) {
                         self.next();
                         return Some(res);
                     } else {
