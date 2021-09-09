@@ -44,10 +44,21 @@ impl Dataset {
     }
 }
 
-fn validate_identifier(id: &str) -> bool {
+/// Check if a given identifier is valid.
+pub fn validate_identifier(id: &str) -> bool {
     lazy_static! {
         static ref RE: Regex =
             Regex::new(r"^[a-zA-Z_][a-zA-Z0-9-._~:/?#\[\]@!$&'()*+,;%=]*$").unwrap();
+    }
+
+    RE.is_match(id)
+}
+
+/// Check if a given str contains only valid identifier characters.
+pub fn validate_identifier_characters(id: &str) -> bool {
+    lazy_static! {
+        static ref RE: Regex =
+            Regex::new(r"^[a-zA-Z0-9-._~:/?#\[\]@!$&'()*+,;%=]*$").unwrap();
     }
 
     RE.is_match(id)
