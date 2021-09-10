@@ -7,6 +7,19 @@ use gaze::steps::{TakeString, TakeWhile};
 use gaze::{Gaze, Step};
 use ligature::{validate_identifier_characters, Attribute, Bytes, Entity, Statement, Value};
 
+enum LigToken {
+    OpenAngle,
+    CloseAngle,
+    AtSign,
+    Identifier(String),
+    Whitespace,
+    NewLine,
+    DoubleQuote,
+    StringContent(String),
+    Integer(String),
+    Dot,
+}
+
 /// Reads an Entity from the given &str.
 /// Will return an error if there is anything other than an Entity + whitespace in the input.
 pub fn read_entity(input: &str) -> Result<Entity, LigError> {
