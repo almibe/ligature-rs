@@ -5,7 +5,7 @@
 use crate::LigError;
 use gaze::steps::{take_string, take_while_str, NoMatch};
 use gaze::Gaze;
-use ligature::{validate_identifier_characters, Attribute, Bytes, Entity, Statement, Value};
+use ligature::{validate_identifier_characters, Attribute, Entity, Statement, Value};
 
 #[derive(Debug, Clone, Copy)]
 pub enum LigToken {
