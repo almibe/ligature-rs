@@ -69,22 +69,21 @@ fn attribute_step(gaze: &mut Gaze<&str>) -> Result<Attribute, NoMatch> {
 }
 
 fn value_step(gaze: &mut Gaze<&str>) -> Result<Value, NoMatch> {
-    // let next_char = gaze.peek();
-    // return match next_char {
-    //     None => Err(LigError("Could not match Value".into())),
-    //     Some(c) => {
-    //         if c == "<" {
-    //             Ok(Value::Entity(gaze.run(&EntityTokenizer())?))
-    //         } else if is_digit(&c) {
-    //             gaze.run(&NumberTokenizer())
-    //         } else if c == "\"" {
-    //             gaze.run(&StringTokenizer())
-    //         } else {
-    //             Err(LigError("Could not match Value".into()))
-    //         }
-    //     }
-    // };
-    todo!()
+    let next_char = gaze.peek();
+    match next_char {
+        None => Err(NoMatch), //Err(LigError("Could not match Value".into())),
+        Some(c) => {
+            if c == "<" {
+                Ok(Value::Entity(gaze.attempt(&entity_step)?))
+            } else if is_digit(&c) {
+                gaze.attempt(&number_step)
+            } else if c == "\"" {
+                gaze.attempt(&string_step)
+            } else {
+                Err(NoMatch)//Err(LigError("Could not match Value".into()))
+            }
+        }
+    }
 }
 
 fn is_digit(s: &str) -> bool {
@@ -100,61 +99,42 @@ fn is_digit(s: &str) -> bool {
         || s == "9"
 }
 
-// pub struct NumberTokenizer();
-// impl Tokenizer<Value, LigError> for NumberTokenizer {
-//     fn attempt(&self, gaze: &mut Gaze) -> Result<Value, LigError> {
-//         let is_hex = gaze.run(&TakeString::new("0x"));
-//         match is_hex {
-//             Ok(_) => {
-//                 return gaze.run(&HexTokenizer());
-//             },
-//             Err(_) => {
-//                 let integer = gaze.run(&IntegerTokenizer())?;
-//                 let is_float = gaze.run(&TakeString::new("."));
-//                 match is_float {
-//                     Ok(_) => todo!(),
-//                     Err(_) => todo!(),
-//                 }
-//                 //if not read integer
-//                 //then check for decimal point
-//                 //handle float if decimal point exists
-//             },
-//         }
-//         todo!()
-//     }
-// }
+fn number_step(gaze: &mut Gaze<&str>) -> Result<Value, NoMatch> {
+    let is_hex = gaze.attempt(&take_string("0x"));
+    match is_hex {
+        Ok(_) => {
+            return gaze.attempt(&hex_step);
+        },
+        Err(_) => {
+            let integer = gaze.attempt(&integer_step)?;
+            let is_float = gaze.attempt(&take_string("."));
+            match is_float {
+                Ok(_) => todo!(),
+                Err(_) => todo!(),
+            }
+            //if not read integer
+            //then check for decimal point
+            //handle float if decimal point exists
+        },
+    }
+}
 
-// pub struct HexTokenizer();
-// impl Tokenizer<Value, LigError> for HexTokenizer {
-//     fn attempt(&self, gaze: &mut Gaze) -> Result<Value, LigError> {
-//         todo!()
-//     }
-// }
+fn hex_step(gaze: &mut Gaze<&str>) -> Result<Value, NoMatch> {
+    todo!()
+}
 
-// pub struct IntegerTokenizer();
-// impl Tokenizer<Value, LigError> for IntegerTokenizer {
-//     fn attempt(&self, gaze: &mut Gaze) -> Result<Value, LigError> {
-//         todo!()
-//     }
-// }
+fn integer_step(gaze: &mut Gaze<&str>) -> Result<Value, NoMatch> {
+    todo!()
+}
 
-// pub struct BytesTokenizer();
-// impl Tokenizer<Value, LigError> for BytesTokenizer {
-//     fn attempt(&self, gaze: &mut Gaze) -> Result<Value, LigError> {
-//         todo!()
-//     }
-// }
+fn bytes_step(gaze: &mut Gaze<&str>) -> Result<Value, NoMatch> {
+    todo!()
+}
 
-// pub struct StringTokenizer();
-// impl Tokenizer<Value, LigError> for StringTokenizer {
-//     fn attempt(&self, gaze: &mut Gaze) -> Result<Value, LigError> {
-//         todo!()
-//     }
-// }
+fn string_step(gaze: &mut Gaze<&str>) -> Result<Value, NoMatch> {
+    todo!()
+}
 
-// pub struct StatementTokenizer();
-// impl Tokenizer<Statement, LigError> for StatementTokenizer {
-//     fn attempt(&self, gaze: &mut Gaze) -> Result<Statement, LigError> {
-//         todo!()
-//     }
-// }
+fn statement_step(gaze: &mut Gaze<&str>) -> Result<Statement, NoMatch> {
+    todo!()
+}

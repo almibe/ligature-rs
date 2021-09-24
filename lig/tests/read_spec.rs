@@ -19,12 +19,12 @@ fn read_attributes() -> Result<(), LigError> {
     Ok(())
 }
 
-// #[test]
-// fn read_string_literals() -> Result<(), LigError> {
-//     let s = "\"test\"";
-//     assert_eq!(read_value(s)?, Value::StringLiteral("test".to_string()));
-//     Ok(())
-// }
+#[test]
+fn read_string_literals() -> Result<(), LigError> {
+    let s = "\"test\"";
+    assert_eq!(read_value(s)?, Value::StringLiteral("test".to_string()));
+    Ok(())
+}
 
 // #[test]
 // fn read_integer_literals() -> Result<(), LigError> {
