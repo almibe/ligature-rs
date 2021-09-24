@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use hex::encode;
-use ligature::{Attribute, Bytes, Entity, Statement, Value};
+use ligature::{Attribute, Entity, Statement, Value};
 
 /// Writes out an Entity to a String.
 pub fn write_entity(entity: &Entity) -> String {
