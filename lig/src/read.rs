@@ -47,15 +47,11 @@ pub fn read(input: &str) -> Result<Vec<Statement>, LigError> {
 }
 
 fn entity_step(gaze: &mut Gaze<&str>) -> Result<Entity, NoMatch> {
-    println!("a");
     gaze.attempt(&take_string("<"))?; //.map_err(|_| LigError("Could not read Entity.".into()))?;
-    println!("b");
     let res = gaze.attempt(&take_while_str(&|c: &str| {
         validate_identifier_characters(c)
     }))?;
-    println!("c");
     gaze.attempt(&take_string(">"))?; //.map_err(|_| LigError("Could not read Entity.".into()))?;
-    println!("d");
     Ok(Entity::new(&res).map_err(|_| NoMatch)?)
 }
 
@@ -69,21 +65,19 @@ fn attribute_step(gaze: &mut Gaze<&str>) -> Result<Attribute, NoMatch> {
 }
 
 fn value_step(gaze: &mut Gaze<&str>) -> Result<Value, NoMatch> {
-    let next_char = gaze.peek();
-    match next_char {
-        None => Err(NoMatch), //Err(LigError("Could not match Value".into())),
-        Some(c) => {
-            if c == "<" {
-                Ok(Value::Entity(gaze.attempt(&entity_step)?))
-            } else if is_digit(&c) {
-                gaze.attempt(&number_step)
-            } else if c == "\"" {
-                gaze.attempt(&string_step)
-            } else {
-                Err(NoMatch)//Err(LigError("Could not match Value".into()))
-            }
-        }
+    if let Ok(entity) = gaze.attempt(&entity_step) {
+        return Ok(Value::Entity(entity));
+    }    
+    if let Ok(string) = gaze.attempt(&string_step) {
+        return Ok(string);
     }
+    if let Ok(number) = gaze.attempt(&number_step) {
+        return Ok(number);
+    }
+    if let Ok(hex) = gaze.attempt(&bytes_step) {
+        return Ok(hex);
+    }
+    Err(NoMatch)//Err(LigError("Could not match Value".into()))
 }
 
 fn is_digit(s: &str) -> bool {
@@ -99,32 +93,23 @@ fn is_digit(s: &str) -> bool {
         || s == "9"
 }
 
+/// Attempts to parse an IntegerLiteral or FloatLiteral.
 fn number_step(gaze: &mut Gaze<&str>) -> Result<Value, NoMatch> {
-    let is_hex = gaze.attempt(&take_string("0x"));
-    match is_hex {
+    let integer = gaze.attempt(&take_while_str(&is_digit))?;
+    let is_float = gaze.attempt(&take_string("."));
+    match is_float {
         Ok(_) => {
-            return gaze.attempt(&hex_step);
-        },
-        Err(_) => {
-            let integer = gaze.attempt(&integer_step)?;
-            let is_float = gaze.attempt(&take_string("."));
-            match is_float {
-                Ok(_) => todo!(),
-                Err(_) => todo!(),
+            let decimal = gaze.attempt(&take_while_str(&is_digit));
+            match decimal {
+                Ok(decimal) => {
+                    let float = format!("{}.{}", integer, decimal);
+                    Ok(Value::FloatLiteral(float.parse::<f64>().map_err(|_| NoMatch)?))
+                },
+                Err(_) => Err(NoMatch),
             }
-            //if not read integer
-            //then check for decimal point
-            //handle float if decimal point exists
         },
+        Err(_) => Ok(Value::IntegerLiteral(integer.parse::<i64>().map_err(|_| NoMatch)?)),
     }
-}
-
-fn hex_step(gaze: &mut Gaze<&str>) -> Result<Value, NoMatch> {
-    todo!()
-}
-
-fn integer_step(gaze: &mut Gaze<&str>) -> Result<Value, NoMatch> {
-    todo!()
 }
 
 fn bytes_step(gaze: &mut Gaze<&str>) -> Result<Value, NoMatch> {
