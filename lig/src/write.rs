@@ -38,7 +38,15 @@ pub fn write_float(float: &f64) -> String {
 }
 
 pub fn write_string(string: &str) -> String {
-    format!("\"{}\"", string) //TODO doesn't escape
+    //TODO this could be done better
+    let escaped_string = string.replace("\"", "\\\"")
+        //.replace("\f", "\\b") <-- TODO not sure how to handle this or if I really need to
+        //.replace("\b", "\\b") <-- TODO not sure how to handle this or if I really need to
+        .replace("\n", "\\n")
+        .replace("\r", "\\r")
+        .replace("\t", "\\t")
+        .replace("\\", "\\\\");
+    format!("\"{}\"", escaped_string)
 }
 
 pub fn write_bytes(bytes: &Bytes) -> String {
