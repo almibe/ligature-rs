@@ -26,41 +26,41 @@ fn read_string_literals() -> Result<(), LigError> {
     Ok(())
 }
 
-// #[test]
-// fn read_integer_literals() -> Result<(), LigError> {
-//     let i = "243";
-//     assert_eq!(read_value(i)?, Value::IntegerLiteral(243));
-//     Ok(())
-// }
+#[test]
+fn read_integer_literals() -> Result<(), LigError> {
+    let i = "243";
+    assert_eq!(read_value(i)?, Value::IntegerLiteral(243));
+    Ok(())
+}
 
-// #[test]
-// fn read_float_literals() -> Result<(), LigError> {
-//     let f = "1.2";
-//     assert_eq!(read_value(f)?, Value::FloatLiteral(1.2));
-//     Ok(())
-// }
+#[test]
+fn read_float_literals() -> Result<(), LigError> {
+    let f = "1.2";
+    assert_eq!(read_value(f)?, Value::FloatLiteral(1.2));
+    Ok(())
+}
 
-// #[test]
-// fn read_byte_arrays_literals() -> Result<(), LigError> {
-//     let b = "0x00ff";
-//     assert_eq!(read_value(b)?, Value::BytesLiteral(vec![0, 255]));
-//     Ok(())
-// }
+#[test]
+fn read_byte_arrays_literals() -> Result<(), LigError> {
+    let b = "0x00ff";
+    assert_eq!(read_value(b)?, Value::BytesLiteral(vec![0, 255]));
+    Ok(())
+}
 
-// #[test]
-// fn read_entity_as_value() -> Result<(), LigError> {
-//     let e = "<test>";
-//     assert_eq!(read_value(e)?, Value::Entity(Entity::new("test")?));
-//     Ok(())
-// }
+#[test]
+fn read_entity_as_value() -> Result<(), LigError> {
+    let e = "<test>";
+    assert_eq!(read_value(e)?, Value::Entity(Entity::new("test")?));
+    Ok(())
+}
 
-// #[test]
-// fn read_empty_set_of_statements() -> Result<(), LigError> {
-//     let s = "";
-//     let expected: Vec<Statement> = vec![];
-//     assert_eq!(read(s)?, expected);
-//     Ok(())
-// }
+#[test]
+fn read_empty_set_of_statements() -> Result<(), LigError> {
+    let s = "";
+    let expected: Vec<Statement> = vec![];
+    assert_eq!(read(s)?, expected);
+    Ok(())
+}
 
 // #[test]
 // fn read_set_of_statements() -> Result<(), LigError> {

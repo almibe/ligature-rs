@@ -3,9 +3,10 @@
 // // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use crate::LigError;
-use gaze::steps::{take_string, take_while_str, NoMatch};
+use gaze::steps::{NoMatch, take_string, take_while_str};
 use gaze::Gaze;
 use ligature::{validate_identifier_characters, Attribute, Entity, Statement, Value};
+use hex::decode;
 
 #[derive(Debug, Clone, Copy)]
 pub enum LigToken {
@@ -43,7 +44,9 @@ pub fn read_value(input: &str) -> Result<Value, LigError> {
 }
 
 pub fn read(input: &str) -> Result<Vec<Statement>, LigError> {
-    todo!()
+    let result: Vec<Statement> = Vec::new();
+
+    Ok(result)
 }
 
 fn entity_step(gaze: &mut Gaze<&str>) -> Result<Entity, NoMatch> {
@@ -71,11 +74,11 @@ fn value_step(gaze: &mut Gaze<&str>) -> Result<Value, NoMatch> {
     if let Ok(string) = gaze.attempt(&string_step) {
         return Ok(string);
     }
-    if let Ok(number) = gaze.attempt(&number_step) {
-        return Ok(number);
-    }
     if let Ok(hex) = gaze.attempt(&bytes_step) {
         return Ok(hex);
+    }
+    if let Ok(number) = gaze.attempt(&number_step) {
+        return Ok(number);
     }
     Err(NoMatch)//Err(LigError("Could not match Value".into()))
 }
@@ -91,6 +94,25 @@ fn is_digit(s: &str) -> bool {
         || s == "7"
         || s == "8"
         || s == "9"
+}
+
+fn is_hex(s: &str) -> bool {
+    s == "0"
+        || s == "1"
+        || s == "2"
+        || s == "3"
+        || s == "4"
+        || s == "5"
+        || s == "6"
+        || s == "7"
+        || s == "8"
+        || s == "9"
+        || s == "a"
+        || s == "b"
+        || s == "c"
+        || s == "d"
+        || s == "e"
+        || s == "f"
 }
 
 /// Attempts to parse an IntegerLiteral or FloatLiteral.
@@ -113,11 +135,28 @@ fn number_step(gaze: &mut Gaze<&str>) -> Result<Value, NoMatch> {
 }
 
 fn bytes_step(gaze: &mut Gaze<&str>) -> Result<Value, NoMatch> {
-    todo!()
+    gaze.attempt(&take_string("0x"))?;
+    let content = gaze.attempt(&take_while_str(&is_hex));
+    match content {
+        Ok(content) => {
+            let res = decode(content).map_err(|_| NoMatch)?;
+            Ok(Value::BytesLiteral(res))
+        },
+        Err(_) => {
+            Ok(Value::BytesLiteral(vec![]))
+        },
+    }
 }
 
 fn string_step(gaze: &mut Gaze<&str>) -> Result<Value, NoMatch> {
-    todo!()
+    //TODO this doesn't handle escaping
+    gaze.attempt(&take_string("\""))?;
+    let content = gaze.attempt(&take_while_str(&|c| c != "\""));
+    gaze.attempt(&take_string("\""))?;
+    match content {
+        Ok(content) => Ok(Value::StringLiteral(content)),
+        Err(_) => Ok(Value::StringLiteral("".into())),
+    }
 }
 
 fn statement_step(gaze: &mut Gaze<&str>) -> Result<Statement, NoMatch> {
