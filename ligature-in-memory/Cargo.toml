@@ -1,0 +1,19 @@
+[package]
+name = "ligature-in-memory"
+version = "0.1.0-SNAPSHOT"
+authors = ["Alex Michael Berry <alexmiberry@gmail.com>"]
+edition = "2018"
+license = "MPL-2.0"
+description = "An implementation of Ligature that uses persistant data structures to store Ligature's data model in memory."
+repository = "https://github.com/almibe/ligature/"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ligature = "0.5"
+rpds = "0.9"
+# regex = "1"
+# lazy_static = "1.4.0"
+# serde = { version = "1.0", features = ["derive"] }
+# bytes = "1"
+# uuid = { version = "0.8", features = ["serde", "v4"] }
