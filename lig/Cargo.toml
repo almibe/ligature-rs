@@ -12,6 +12,6 @@ repository = "https://github.com/almibe/ligature/"
 
 [dependencies]
 ligature = "0.5" #{ path = "../ligature" }
-gaze = "0.3" #{ path = "../../gaze" }
+gaze = { path = "../../gaze" }
 hex = "0.4"
 lazy_static = "1.4"

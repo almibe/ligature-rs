@@ -3,7 +3,7 @@
 // // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use crate::LigError;
-use gaze::steps::{NoMatch, take_string, take_while_str};
+use gaze::steps::{NoMatch, ignore_all, take_string, take_while_str};
 use gaze::Gaze;
 use ligature::{validate_identifier_characters, Attribute, Entity, Statement, Value};
 use hex::decode;
@@ -44,8 +44,21 @@ pub fn read_value(input: &str) -> Result<Value, LigError> {
 }
 
 pub fn read(input: &str) -> Result<Vec<Statement>, LigError> {
-    let result: Vec<Statement> = Vec::new();
-
+    let mut gaze = Gaze::<&str>::from_str(input);
+    let mut result: Vec<Statement> = Vec::new();
+    while !gaze.is_complete() {
+        gaze.ignore(&ws_step);
+        let entity = gaze.attempt(&entity_step).map_err(|_| LigError("Error reading Entity.".into()))?;
+        gaze.ignore(&ws_step);
+        let attribute = gaze.attempt(&attribute_step).map_err(|_| LigError("Error reading Attribute.".into()))?;
+        gaze.ignore(&ws_step);
+        let value = gaze.attempt(&value_step).map_err(|_| LigError("Error reading Value.".into()))?;
+        gaze.ignore(&ws_step);
+        let context = gaze.attempt(&entity_step).map_err(|_| LigError("Error reading Context.".into()))?;
+        gaze.ignore(&ws_step);
+        gaze.ignore(&take_string("\n"));
+        result.push(Statement { entity, attribute, value, context });
+    }
     Ok(result)
 }
 
@@ -113,6 +126,11 @@ fn is_hex(s: &str) -> bool {
         || s == "d"
         || s == "e"
         || s == "f"
+}
+
+fn ws_step(gaze: &mut Gaze<&str>) -> Result<(), NoMatch> {
+    let ws: Vec<&str> = vec![" ", "\t"];    
+    ignore_all(ws)(gaze)
 }
 
 /// Attempts to parse an IntegerLiteral or FloatLiteral.

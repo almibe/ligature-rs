@@ -62,23 +62,23 @@ fn read_empty_set_of_statements() -> Result<(), LigError> {
     Ok(())
 }
 
-// #[test]
-// fn read_set_of_statements() -> Result<(), LigError> {
-//     let s = "<e> @<a> 123 <c>\n<e2> @<a> <e> <c2>\n";
-//     let expected = vec![
-//         Statement {
-//             entity: Entity::new("e")?,
-//             attribute: Attribute::new("a")?,
-//             value: Value::IntegerLiteral(123),
-//             context: Entity::new("c")?,
-//         },
-//         Statement {
-//             entity: Entity::new("e2")?,
-//             attribute: Attribute::new("a")?,
-//             value: Value::Entity(Entity::new("e")?),
-//             context: Entity::new("c2")?,
-//         },
-//     ];
-//     assert_eq!(read(s)?, expected);
-//     Ok(())
-// }
+#[test]
+fn read_set_of_statements() -> Result<(), LigError> {
+    let s = "<e> @<a> 123 <c>\n<e2> @<a> <e> <c2>\n";
+    let expected = vec![
+        Statement {
+            entity: Entity::new("e")?,
+            attribute: Attribute::new("a")?,
+            value: Value::IntegerLiteral(123),
+            context: Entity::new("c")?,
+        },
+        Statement {
+            entity: Entity::new("e2")?,
+            attribute: Attribute::new("a")?,
+            value: Value::Entity(Entity::new("e")?),
+            context: Entity::new("c2")?,
+        },
+    ];
+    assert_eq!(read(s)?, expected);
+    Ok(())
+}
