@@ -1,0 +1,13 @@
+[package]
+name = "ligature-graph"
+version = "0.1.0"
+publish = true
+authors = ["Alex Michael Berry <alexmiberry@gmail.com>"]
+edition = "2018"
+license = "MPL-2.0"
+description = "An in-memory, non-transactional version of the Ligature knowledge graph."
+repository = "https://github.com/almibe/ligature/"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
