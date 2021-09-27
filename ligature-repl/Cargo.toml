@@ -3,7 +3,14 @@ name = "ligature-repl"
 version = "0.1.0-SNAPSHOT"
 authors = ["Alex Michael Berry <alexmiberry@gmail.com>"]
 edition = "2018"
+license = "MPL-2.0"
+description = "An implementation of Ligature that uses persistant data structures to store Ligature's data model in memory."
+repository = "https://github.com/almibe/ligature/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+ligature = "0.5"
+lig = "0.1"
+ligature-in-memory = "0.1"
+wander = "0.1"
