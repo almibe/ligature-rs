@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use hex::encode;
-use ligature::{Attribute, Entity, Statement, Value, Bytes};
+use ligature::{Attribute, Bytes, Entity, Statement, Value};
 
 /// Writes out an Entity to a String.
 pub fn write_entity(entity: &Entity) -> String {
@@ -39,7 +39,8 @@ pub fn write_float(float: &f64) -> String {
 
 pub fn write_string(string: &str) -> String {
     //TODO this could be done better
-    let escaped_string = string.replace("\"", "\\\"")
+    let escaped_string = string
+        .replace("\"", "\\\"")
         //.replace("\f", "\\b") <-- TODO not sure how to handle this or if I really need to
         //.replace("\b", "\\b") <-- TODO not sure how to handle this or if I really need to
         .replace("\n", "\\n")

@@ -4,12 +4,15 @@
 
 use lig::read::{read, read_attribute, read_entity, read_value};
 use lig::*;
-use ligature::{Attribute, Bytes, Entity, Statement, Value};
+use ligature::{Attribute, Entity, Statement, Value};
 
 #[test]
 fn read_entities() {
     let e = "<test>";
-    assert_eq!(read_entity(e), Entity::new("test").map_err(|_| LigError("Could not create entity.".into())));
+    assert_eq!(
+        read_entity(e),
+        Entity::new("test").map_err(|_| LigError("Could not create entity.".into()))
+    );
 }
 
 #[test]

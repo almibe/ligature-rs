@@ -3,10 +3,10 @@
 // // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use crate::LigError;
-use gaze::steps::{NoMatch, ignore_all, take_string, take_while_str};
+use gaze::steps::{ignore_all, take_string, take_while_str, NoMatch};
 use gaze::Gaze;
-use ligature::{validate_identifier_characters, Attribute, Entity, Statement, Value};
 use hex::decode;
+use ligature::{validate_identifier_characters, Attribute, Entity, Statement, Value};
 
 #[derive(Debug, Clone, Copy)]
 pub enum LigToken {
@@ -48,16 +48,29 @@ pub fn read(input: &str) -> Result<Vec<Statement>, LigError> {
     let mut result: Vec<Statement> = Vec::new();
     while !gaze.is_complete() {
         gaze.ignore(&ws_step);
-        let entity = gaze.attempt(&entity_step).map_err(|_| LigError("Error reading Entity.".into()))?;
+        let entity = gaze
+            .attempt(&entity_step)
+            .map_err(|_| LigError("Error reading Entity.".into()))?;
         gaze.ignore(&ws_step);
-        let attribute = gaze.attempt(&attribute_step).map_err(|_| LigError("Error reading Attribute.".into()))?;
+        let attribute = gaze
+            .attempt(&attribute_step)
+            .map_err(|_| LigError("Error reading Attribute.".into()))?;
         gaze.ignore(&ws_step);
-        let value = gaze.attempt(&value_step).map_err(|_| LigError("Error reading Value.".into()))?;
+        let value = gaze
+            .attempt(&value_step)
+            .map_err(|_| LigError("Error reading Value.".into()))?;
         gaze.ignore(&ws_step);
-        let context = gaze.attempt(&entity_step).map_err(|_| LigError("Error reading Context.".into()))?;
+        let context = gaze
+            .attempt(&entity_step)
+            .map_err(|_| LigError("Error reading Context.".into()))?;
         gaze.ignore(&ws_step);
         gaze.ignore(&take_string("\n"));
-        result.push(Statement { entity, attribute, value, context });
+        result.push(Statement {
+            entity,
+            attribute,
+            value,
+            context,
+        });
     }
     Ok(result)
 }
@@ -83,7 +96,7 @@ fn attribute_step(gaze: &mut Gaze<&str>) -> Result<Attribute, NoMatch> {
 fn value_step(gaze: &mut Gaze<&str>) -> Result<Value, NoMatch> {
     if let Ok(entity) = gaze.attempt(&entity_step) {
         return Ok(Value::Entity(entity));
-    }    
+    }
     if let Ok(string) = gaze.attempt(&string_step) {
         return Ok(string);
     }
@@ -93,7 +106,7 @@ fn value_step(gaze: &mut Gaze<&str>) -> Result<Value, NoMatch> {
     if let Ok(number) = gaze.attempt(&number_step) {
         return Ok(number);
     }
-    Err(NoMatch)//Err(LigError("Could not match Value".into()))
+    Err(NoMatch) //Err(LigError("Could not match Value".into()))
 }
 
 fn is_digit(s: &str) -> bool {
@@ -129,7 +142,7 @@ fn is_hex(s: &str) -> bool {
 }
 
 fn ws_step(gaze: &mut Gaze<&str>) -> Result<(), NoMatch> {
-    let ws: Vec<&str> = vec![" ", "\t"];    
+    let ws: Vec<&str> = vec![" ", "\t"];
     ignore_all(ws)(gaze)
 }
 
@@ -143,12 +156,16 @@ fn number_step(gaze: &mut Gaze<&str>) -> Result<Value, NoMatch> {
             match decimal {
                 Ok(decimal) => {
                     let float = format!("{}.{}", integer, decimal);
-                    Ok(Value::FloatLiteral(float.parse::<f64>().map_err(|_| NoMatch)?))
-                },
+                    Ok(Value::FloatLiteral(
+                        float.parse::<f64>().map_err(|_| NoMatch)?,
+                    ))
+                }
                 Err(_) => Err(NoMatch),
             }
-        },
-        Err(_) => Ok(Value::IntegerLiteral(integer.parse::<i64>().map_err(|_| NoMatch)?)),
+        }
+        Err(_) => Ok(Value::IntegerLiteral(
+            integer.parse::<i64>().map_err(|_| NoMatch)?,
+        )),
     }
 }
 
@@ -159,10 +176,8 @@ fn bytes_step(gaze: &mut Gaze<&str>) -> Result<Value, NoMatch> {
         Ok(content) => {
             let res = decode(content).map_err(|_| NoMatch)?;
             Ok(Value::BytesLiteral(res))
-        },
-        Err(_) => {
-            Ok(Value::BytesLiteral(vec![]))
-        },
+        }
+        Err(_) => Ok(Value::BytesLiteral(vec![])),
     }
 }
 
