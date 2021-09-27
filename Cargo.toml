@@ -4,7 +4,9 @@ members = [
     "lig",
     "ligature",
     "ligature-benchmark",
+    "ligature-in-memory",
     "ligature-repl",
     "ligature-sqlite",
     "ligature-test-suite",
+    "wander"
 ]
