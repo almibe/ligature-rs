@@ -11,6 +11,6 @@ repository = "https://github.com/almibe/ligature/"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ligature = { path = "../ligature" }
-lig = { path = "../lig" }
-gaze = "0.3"
+ligature = "0.5" #{ path = "../ligature" }
+lig = "0.1" #{ path = "../lig" }
+gaze = "0.4"
