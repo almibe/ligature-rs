@@ -1,25 +1,12 @@
-// // This Source Code Form is subject to the terms of the Mozilla Public
-// // License, v. 2.0. If a copy of the MPL was not distributed with this
-// // file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use crate::LigError;
 use gaze::steps::{ignore_all, take_string, take_while_str, NoMatch};
 use gaze::Gaze;
 use hex::decode;
 use ligature::{validate_identifier_characters, Attribute, Entity, Statement, Value};
-
-#[derive(Debug, Clone, Copy)]
-pub enum LigToken {
-    OpenAngle,
-    CloseAngle,
-    AtSign,
-    Whitespace,
-    NewLine,
-    DoubleQuote,
-    Dot,
-    Identifier,
-    Integer,
-}
 
 /// Reads an Entity from the given &str.
 /// Will return an error if there is anything other than an Entity + whitespace in the input.
