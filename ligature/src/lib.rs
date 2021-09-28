@@ -116,7 +116,7 @@ impl Attribute {
 }
 
 /// An enum that represents all the currently supported Value types.
-#[derive(Debug, Clone, PartialOrd, PartialEq)]
+#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
 pub enum Value {
     /// An Entity.
     Entity(Entity),
@@ -124,8 +124,8 @@ pub enum Value {
     StringLiteral(String),
     /// An i64 used for a Ligature literal
     IntegerLiteral(i64),
-    /// An f64 used for a Ligature literal
-    FloatLiteral(f64),
+    // /// An f64 used for a Ligature literal
+    // FloatLiteral(f64),
     /// An array of bytes
     BytesLiteral(Bytes),
 }
@@ -147,13 +147,13 @@ pub enum Range {
         /// The end i64 (exclusive)
         end: i64,
     },
-    /// Represents a String range using basic f64 comparisons.
-    FloatLiteralRange {
-        /// The starting f64 (inclusive)
-        start: f64,
-        /// The end f64 (exclusive)
-        end: f64,
-    },
+    // /// Represents a String range using basic f64 comparisons.
+    // FloatLiteralRange {
+    //     /// The starting f64 (inclusive)
+    //     start: f64,
+    //     /// The end f64 (exclusive)
+    //     end: f64,
+    // },
     /// Represents a String range using basic Bytes comparisons.
     BytesLiteralRange {
         /// The starting Byte array (inclusive)
@@ -164,7 +164,7 @@ pub enum Range {
 }
 
 /// A Statement is a grouping of an Entity, an Attribute, and a Value.
-#[derive(Debug, Clone, PartialOrd, PartialEq)]
+#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
 pub struct Statement {
     /// The Entity of a Statement
     pub entity: Entity,
