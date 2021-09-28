@@ -47,8 +47,7 @@ impl Dataset {
 /// Check if a given identifier is valid.
 pub fn validate_identifier(id: &str) -> bool {
     lazy_static! {
-        static ref RE: Regex =
-            Regex::new(r"^[a-zA-Z0-9-._~:/?#\[\]@!$&'()*+,;%=]*$").unwrap();
+        static ref RE: Regex = Regex::new(r"^[a-zA-Z0-9-._~:/?#\[\]@!$&'()*+,;%=]+$").unwrap();
     }
 
     RE.is_match(id)
@@ -219,7 +218,10 @@ pub trait QueryTx {
     ) -> Box<dyn Iterator<Item = Result<Statement, LigatureError>> + '_>;
 
     /// Returns the Statement for the given context.
-    fn statement_for_context(&self, context: &Identifier) -> Result<Option<Statement>, LigatureError>;
+    fn statement_for_context(
+        &self,
+        context: &Identifier,
+    ) -> Result<Option<Statement>, LigatureError>;
 }
 
 /// Represents a WriteTx within the context of a Ligature instance and a single Dataset
