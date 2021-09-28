@@ -48,16 +48,6 @@ impl Dataset {
 pub fn validate_identifier(id: &str) -> bool {
     lazy_static! {
         static ref RE: Regex =
-            Regex::new(r"^[a-zA-Z_][a-zA-Z0-9-._~:/?#\[\]@!$&'()*+,;%=]*$").unwrap();
-    }
-
-    RE.is_match(id)
-}
-
-/// Check if a given str contains only valid identifier characters.
-pub fn validate_identifier_characters(id: &str) -> bool {
-    lazy_static! {
-        static ref RE: Regex =
             Regex::new(r"^[a-zA-Z0-9-._~:/?#\[\]@!$&'()*+,;%=]*$").unwrap();
     }
 
@@ -66,9 +56,9 @@ pub fn validate_identifier_characters(id: &str) -> bool {
 
 /// An Entity that is identified by a unique String id.
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
-pub struct Entity(String);
+pub struct Identifier(String);
 
-impl Entity {
+impl Identifier {
     /// Creates a new Arrow and returns a Result based on if it is valid or not.
     pub fn new(name: &str) -> Result<Self, LigatureError> {
         if validate_identifier(name) {
@@ -86,40 +76,20 @@ impl Entity {
 
 /// Creates a new Entity with an optional prefix.
 /// To assure this Entity is unique within a Dataset use the version located in WriteTx.
-pub fn new_entity(prefix: Option<String>) -> Result<Entity, LigatureError> {
+pub fn new_identifier(prefix: Option<String>) -> Result<Identifier, LigatureError> {
     let uuid = Uuid::new_v4().to_hyphenated().to_string();
     let p = match prefix {
         Some(s) => s + &uuid,
-        None => String::from("_:") + &uuid,
+        None => uuid,
     };
-    Entity::new(p.as_str())
-}
-
-/// A named connection between an Entity and a Value.
-#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
-pub struct Attribute(String);
-
-impl Attribute {
-    /// Creates a new Arrow and returns a Result based on if it is valid or not.
-    pub fn new(name: &str) -> Result<Self, LigatureError> {
-        if validate_identifier(name) {
-            Ok(Self(name.to_string()))
-        } else {
-            Err(LigatureError(format!("Invalid Attribute name {}", name)))
-        }
-    }
-
-    /// Returns the name of the given Arrow.
-    pub fn name(&self) -> &str {
-        &self.0
-    }
+    Identifier::new(p.as_str())
 }
 
 /// An enum that represents all the currently supported Value types.
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
 pub enum Value {
     /// An Entity.
-    Entity(Entity),
+    Identifier(Identifier),
     /// A String used for a Ligature literal
     StringLiteral(String),
     /// An i64 used for a Ligature literal
@@ -167,13 +137,13 @@ pub enum Range {
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
 pub struct Statement {
     /// The Entity of a Statement
-    pub entity: Entity,
+    pub entity: Identifier,
     /// The Attribute of a Statement
-    pub attribute: Attribute,
+    pub attribute: Identifier,
     /// The Value of a Statement
     pub value: Value,
     /// The Context of this Statement
-    pub context: Entity,
+    pub context: Identifier,
 }
 
 /// A general struct for representing errors involving Ligature.
@@ -234,8 +204,8 @@ pub trait QueryTx {
     /// If a parameter is None then it matches all, so passing all Nones is the same as calling all_statements.
     fn match_statements(
         &self,
-        source: Option<Entity>,
-        arrow: Option<Attribute>,
+        source: Option<Identifier>,
+        arrow: Option<Identifier>,
         target: Option<Value>,
     ) -> Box<dyn Iterator<Item = Result<Statement, LigatureError>> + '_>;
 
@@ -243,20 +213,20 @@ pub trait QueryTx {
     /// If a parameter is None then it matches all.
     fn match_statements_range(
         &self,
-        source: Option<Entity>,
-        arrow: Option<Attribute>,
+        source: Option<Identifier>,
+        arrow: Option<Identifier>,
         target: Range,
     ) -> Box<dyn Iterator<Item = Result<Statement, LigatureError>> + '_>;
 
     /// Returns the Statement for the given context.
-    fn statement_for_context(&self, context: &Entity) -> Result<Option<Statement>, LigatureError>;
+    fn statement_for_context(&self, context: &Identifier) -> Result<Option<Statement>, LigatureError>;
 }
 
 /// Represents a WriteTx within the context of a Ligature instance and a single Dataset
 pub trait WriteTx {
     /// Creates a new, unique Entity within this Dataset with an optional prefix.
     /// This version of the function enforces that the new entity is unique in this Dataset.
-    fn new_entity(&self, prefix: Option<String>) -> Result<Entity, LigatureError>;
+    fn new_identifier(&self, prefix: Option<String>) -> Result<Identifier, LigatureError>;
 
     /// Adds a given Statement to this Dataset.
     /// If the Statement already exists nothing happens (TODO maybe add it with a new context?).
