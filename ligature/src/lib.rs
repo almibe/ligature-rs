@@ -141,8 +141,6 @@ pub struct Statement {
     pub attribute: Identifier,
     /// The Value of a Statement
     pub value: Value,
-    /// The Context of this Statement
-    pub context: Identifier,
 }
 
 /// A general struct for representing errors involving Ligature.
