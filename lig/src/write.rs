@@ -3,20 +3,16 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use hex::encode;
-use ligature::{Attribute, Bytes, Entity, Statement, Value};
+use ligature::{Bytes, Identifier, Statement, Value};
 
 /// Writes out an Entity to a String.
-pub fn write_entity(entity: &Entity) -> String {
+pub fn write_identifier(entity: &Identifier) -> String {
     format!("<{}>", entity.id())
-}
-
-pub fn write_attribute(attribute: &Attribute) -> String {
-    format!("@<{}>", attribute.name())
 }
 
 pub fn write_value(value: &Value) -> String {
     match value {
-        Value::Entity(entity) => write_entity(entity),
+        Value::Entity(entity) => write_identifier(entity),
         Value::IntegerLiteral(integer) => write_integer(integer),
         Value::FloatLiteral(float) => write_float(float),
         Value::StringLiteral(string) => write_string(string),
@@ -57,10 +53,10 @@ pub fn write_bytes(bytes: &Bytes) -> String {
 pub fn write_statement(statement: &Statement) -> String {
     format!(
         "{} {} {} {}\n",
-        write_entity(&statement.entity),
-        write_attribute(&statement.attribute),
+        write_identifier(&statement.entity),
+        write_identifier(&statement.attribute),
         write_value(&statement.value),
-        write_entity(&statement.context)
+        write_identifier(&statement.context)
     )
 }
 
