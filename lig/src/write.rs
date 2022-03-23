@@ -12,9 +12,9 @@ pub fn write_identifier(entity: &Identifier) -> String {
 
 pub fn write_value(value: &Value) -> String {
     match value {
-        Value::Entity(entity) => write_identifier(entity),
+        Value::Identifier(entity) => write_identifier(entity),
         Value::IntegerLiteral(integer) => write_integer(integer),
-        Value::FloatLiteral(float) => write_float(float),
+        //Value::FloatLiteral(float) => write_float(float),
         Value::StringLiteral(string) => write_string(string),
         Value::BytesLiteral(bytes) => write_bytes(bytes),
     }
@@ -52,11 +52,10 @@ pub fn write_bytes(bytes: &Bytes) -> String {
 
 pub fn write_statement(statement: &Statement) -> String {
     format!(
-        "{} {} {} {}\n",
+        "{} {} {}\n",
         write_identifier(&statement.entity),
         write_identifier(&statement.attribute),
         write_value(&statement.value),
-        write_identifier(&statement.context)
     )
 }
 

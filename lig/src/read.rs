@@ -6,7 +6,7 @@ use crate::LigError;
 use gaze::steps::{ignore_all, take_string, take_while_str, NoMatch};
 use gaze::Gaze;
 use hex::decode;
-use ligature::{validate_identifier_characters, Identifier, Entity, Statement, Value};
+use ligature::{validate_identifier_characters, Identifier, Statement, Value};
 
 /// Reads an Entity from the given &str.
 /// Will return an error if there is anything other than an Entity + whitespace in the input.
@@ -41,16 +41,11 @@ pub fn read(input: &str) -> Result<Vec<Statement>, LigError> {
             .attempt(&value_step)
             .map_err(|_| LigError("Error reading Value.".into()))?;
         gaze.ignore(&ws_step);
-        let context = gaze
-            .attempt(&identifier_step)
-            .map_err(|_| LigError("Error reading Context.".into()))?;
-        gaze.ignore(&ws_step);
         gaze.ignore(&take_string("\n"));
         result.push(Statement {
             entity,
             attribute,
             value,
-            context,
         });
     }
     Ok(result)
