@@ -131,9 +131,11 @@ fn number_step(gaze: &mut Gaze<&str>) -> Result<Value, NoMatch> {
     //         }
     //     }
     //     Err(_) => Ok(Value::IntegerLiteral(
-        Ok(Value::IntegerLiteral(integer.parse::<i64>().map_err(|_| NoMatch)?))//,
-        // )),
-    // }
+    Ok(Value::IntegerLiteral(
+        integer.parse::<i64>().map_err(|_| NoMatch)?,
+    )) //,
+       // )),
+       // }
 }
 
 fn bytes_step(gaze: &mut Gaze<&str>) -> Result<Value, NoMatch> {

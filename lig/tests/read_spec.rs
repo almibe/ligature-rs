@@ -2,24 +2,17 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use lig::read::{read, read_attribute, read_entity, read_value};
+use lig::read::{read, read_identifier, read_value};
 use lig::*;
-use ligature::{Attribute, Entity, Statement, Value};
+use ligature::{Identifier, Statement, Value};
 
 #[test]
 fn read_entities() {
     let e = "<test>";
     assert_eq!(
-        read_entity(e),
-        Entity::new("test").map_err(|_| LigError("Could not create entity.".into()))
+        read_identifier(e),
+        Identifier::new("test").map_err(|_| LigError("Could not create Identifier.".into()))
     );
-}
-
-#[test]
-fn read_attributes() -> Result<(), LigError> {
-    let a = "@<test>";
-    assert_eq!(read_attribute(a)?, Attribute::new("test")?);
-    Ok(())
 }
 
 #[test]
@@ -36,12 +29,12 @@ fn read_integer_literals() -> Result<(), LigError> {
     Ok(())
 }
 
-#[test]
-fn read_float_literals() -> Result<(), LigError> {
-    let f = "1.2";
-    assert_eq!(read_value(f)?, Value::FloatLiteral(1.2));
-    Ok(())
-}
+// #[test]
+// fn read_float_literals() -> Result<(), LigError> {
+//     let f = "1.2";
+//     assert_eq!(read_value(f)?, Value::FloatLiteral(1.2));
+//     Ok(())
+// }
 
 #[test]
 fn read_byte_arrays_literals() -> Result<(), LigError> {
@@ -51,9 +44,9 @@ fn read_byte_arrays_literals() -> Result<(), LigError> {
 }
 
 #[test]
-fn read_entity_as_value() -> Result<(), LigError> {
+fn read_identifier_as_value() -> Result<(), LigError> {
     let e = "<test>";
-    assert_eq!(read_value(e)?, Value::Entity(Entity::new("test")?));
+    assert_eq!(read_value(e)?, Value::Identifier(Identifier::new("test")?));
     Ok(())
 }
 
@@ -67,19 +60,17 @@ fn read_empty_set_of_statements() -> Result<(), LigError> {
 
 #[test]
 fn read_set_of_statements() -> Result<(), LigError> {
-    let s = "<e> @<a> 123 <c>\n<e2> @<a> <e> <c2>\n";
+    let s = "<e> <a> 123\n<e2> <a> <e>\n";
     let expected = vec![
         Statement {
-            entity: Entity::new("e")?,
-            attribute: Attribute::new("a")?,
+            entity: Identifier::new("e")?,
+            attribute: Identifier::new("a")?,
             value: Value::IntegerLiteral(123),
-            context: Entity::new("c")?,
         },
         Statement {
-            entity: Entity::new("e2")?,
-            attribute: Attribute::new("a")?,
-            value: Value::Entity(Entity::new("e")?),
-            context: Entity::new("c2")?,
+            entity: Identifier::new("e2")?,
+            attribute: Identifier::new("a")?,
+            value: Value::Identifier(Identifier::new("e")?),
         },
     ];
     assert_eq!(read(s)?, expected);
