@@ -53,6 +53,15 @@ pub fn validate_identifier(id: &str) -> bool {
     RE.is_match(id)
 }
 
+/// Check if a given identifier is valid.
+pub fn validate_identifier_characters(id: &str) -> bool {
+    lazy_static! {
+        static ref RE: Regex = Regex::new(r"^[a-zA-Z0-9-._~:/?#\[\]@!$&'()*+,;%=]+$").unwrap();
+    }
+
+    RE.is_match(id)
+}
+
 /// An Entity that is identified by a unique String id.
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
 pub struct Identifier(String);
