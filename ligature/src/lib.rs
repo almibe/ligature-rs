@@ -6,7 +6,6 @@
 //! It represents to common types and traits used by Ligature.
 
 #![deny(missing_docs)]
-//#![deny(missing_doc_example)] <-- for later, when I'm swole
 
 #[macro_use]
 extern crate lazy_static;
@@ -53,13 +52,10 @@ pub fn validate_identifier(id: &str) -> bool {
     RE.is_match(id)
 }
 
-/// Check if a given identifier is valid.
+/// Check if a given str only contains valid characters.
+/// This is a duplicate of valid_identifier for now but the two could deviate potentially.
 pub fn validate_identifier_characters(id: &str) -> bool {
-    lazy_static! {
-        static ref RE: Regex = Regex::new(r"^[a-zA-Z0-9-._~:/?#\[\]@!$&'()*+,;%=]+$").unwrap();
-    }
-
-    RE.is_match(id)
+    validate_identifier(id)
 }
 
 /// An Entity that is identified by a unique String id.
@@ -67,7 +63,7 @@ pub fn validate_identifier_characters(id: &str) -> bool {
 pub struct Identifier(String);
 
 impl Identifier {
-    /// Creates a new Arrow and returns a Result based on if it is valid or not.
+    /// Creates a new Identifier and returns a Result based on if it is valid or not.
     pub fn new(name: &str) -> Result<Self, LigatureError> {
         if validate_identifier(name) {
             Ok(Self(name.to_string()))
@@ -76,14 +72,13 @@ impl Identifier {
         }
     }
 
-    /// Returns the name of the given Arrow.
+    /// Returns the name of the given Identifier.
     pub fn id(&self) -> &str {
         &self.0
     }
 }
 
-/// Creates a new Entity with an optional prefix.
-/// To assure this Entity is unique within a Dataset use the version located in WriteTx.
+/// Creates a new Identifier with an optional prefix.
 pub fn new_identifier(prefix: Option<String>) -> Result<Identifier, LigatureError> {
     let uuid = Uuid::new_v4().to_hyphenated().to_string();
     let p = match prefix {
