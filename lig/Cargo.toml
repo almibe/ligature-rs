@@ -3,10 +3,10 @@ name = "lig"
 version = "0.2.0"
 publish = false
 authors = ["Alex Michael Berry <alexmiberry@gmail.com>"]
-edition = "2018"
+edition = "2021"
 license = "MPL-2.0"
 description = "A Rust implementation of the lig serialization format for Ligature."
-repository = "https://github.com/almibe/ligature/"
+repository = "https://github.com/almibe/ligature-rs/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

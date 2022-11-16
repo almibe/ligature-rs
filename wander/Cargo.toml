@@ -3,14 +3,14 @@ name = "wander"
 version = "0.2.0"
 publish = false
 authors = ["Alex Michael Berry <alexmiberry@gmail.com>"]
-edition = "2018"
+edition = "2021"
 license = "MPL-2.0"
 description = "The Wander scripting language."
-repository = "https://github.com/almibe/ligature/"
+repository = "https://github.com/almibe/ligature-rs/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ligature = "0.5" #{ path = "../ligature" }
-lig = "0.1" #{ path = "../lig" }
-gaze = "0.4"
+ligature = { path = "../ligature" }
+lig = { path = "../lig" }
+gaze = { path = "../../gaze" }
