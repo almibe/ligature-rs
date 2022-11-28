@@ -9,5 +9,6 @@ members = [
     "ligature-repl",
     "ligature-sqlite",
     "ligature-test-suite",
+    "ligature-wasm",
     "wander"
 ]
