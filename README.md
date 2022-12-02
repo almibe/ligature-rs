@@ -16,13 +16,13 @@ This project uses cargo for building.
 See https://rustup.rs/ for instructions on installing the Rust toolchain.
 See https://doc.rust-lang.org/cargo/ for documentation on cargo in general.
 
-### Wasm
+### Grain
 
-Most crates in this repo are intended to be used by projects that target either native code or Wasm.
-Currently only ligature-wasm produces Wasm as output.
-To build for Wasm install [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/).
+This project contains a folder `grain` that contains Grain code for working with Ligature.
+This integration is still experimental and details will be added as things are worked out.
+See https://grain-lang.org for information on Grain.
 
-## Projects in this Repository
+## Rust Projects in this Repository
 
 This project uses a monorepo and contains several subprojects.
 Each project contains its own README with additional information when needed.
@@ -37,4 +37,3 @@ Each project contains its own README with additional information when needed.
 | ligature-in-memory    | An in-memory implementation of Ligature.                            | lib    |
 | ligature-sqlite       | An implementation of Ligature that uses sqlite3 for storage.        | lib    |
 | ligature-repl         | A REPL for using Ligature and Wander.                               | app    |
-| ligature-playground   | A Wasm artifact for using Ligature in the browser primarily.        | wasm   |
