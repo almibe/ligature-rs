@@ -1,0 +1,59 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+import String from "string"
+import Array from "array"
+
+record Gaze<t> {
+    content: Array<t>,
+    mut offset: Number
+}
+
+export type Nibbler<t> = (Gaze<t>) -> Option<List<t>>
+
+export let fromString = (str: String) => {
+    content: String.explode(str),
+    offset: 0
+}
+
+export let fromArray = (input) => {
+    content: input,
+    offset: 0
+}
+
+export let isComplete = gaze => gaze.offset >= Array.length(gaze.content)
+
+export let peek = gaze => if (isComplete(gaze)) {
+    None
+} else {
+    Some(Array.get(gaze.offset, gaze.content))
+}
+
+export let next = gaze => if (isComplete(gaze)) {
+    None
+} else {
+    let result = Array.get(gaze.offset, gaze.content)
+    gaze.offset = gaze.offset + 1
+    Some(result)
+}
+
+export let check = (nibbler, gaze) => {
+    let startOffset = gaze.offset
+    let res = nibbler(gaze)
+    gaze.offset = startOffset
+    res
+}
+
+export let attempt = (nibbler, gaze) => {
+    let startOffset = gaze.offset
+    match (nibbler(gaze)) {
+        Ok(res) => Ok(res),
+        Err(msg) => {
+            gaze.offset = startOffset
+            Err(msg)
+        } 
+    }
+}
+
+export let offset = gaze => gaze.offset

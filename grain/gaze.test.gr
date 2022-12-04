@@ -1,0 +1,24 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+import { test, runTests } from "./test"
+import Gaze from "./gaze"
+import Array from "array"
+
+runTests([
+    test("empty String input", () => {
+        let gaze = Gaze.fromString("")
+        assert(Gaze.isComplete(gaze))
+        assert(Gaze.peek(gaze) == None)
+        assert(Gaze.peek(gaze) == None)
+        assert(Gaze.isComplete(gaze))
+    }),
+    test("empty array input", () => {
+        let gaze = Gaze.fromArray(Array.make(0, "a"))
+        assert(Gaze.isComplete(gaze))
+        assert(Gaze.peek(gaze) == None)
+        assert(Gaze.peek(gaze) == None)
+        assert(Gaze.isComplete(gaze))
+    })
+])
