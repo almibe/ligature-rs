@@ -10,7 +10,7 @@ record Gaze<t> {
     mut offset: Number
 }
 
-export type Nibbler<t> = (Gaze<t>) -> Option<List<t>>
+export type Nibbler<in, out> = (Gaze<in>) -> Option<List<out>>
 
 export let fromString = (str: String) => {
     content: String.explode(str),
@@ -48,10 +48,10 @@ export let check = (nibbler, gaze) => {
 export let attempt = (nibbler, gaze) => {
     let startOffset = gaze.offset
     match (nibbler(gaze)) {
-        Ok(res) => Ok(res),
-        Err(msg) => {
+        Some(res) => Some(res),
+        None => {
             gaze.offset = startOffset
-            Err(msg)
+            None
         } 
     }
 }

@@ -5,8 +5,9 @@
 import { test, runTests } from "./test"
 import Gaze from "./gaze"
 import Array from "array"
+import Nibblers from "./nibblers"
 
-runTests([
+runTests("Gaze Suite", [
     test("empty String input", () => {
         let gaze = Gaze.fromString("")
         assert(Gaze.isComplete(gaze))
@@ -19,6 +20,32 @@ runTests([
         assert(Gaze.isComplete(gaze))
         assert(Gaze.peek(gaze) == None)
         assert(Gaze.peek(gaze) == None)
+        assert(Gaze.isComplete(gaze))
+    }),
+    test("init Gaze with one value", () => {
+        let gaze = Gaze.fromArray(Array.make(1, "a"))
+        assert(!Gaze.isComplete(gaze))
+        assert(Gaze.peek(gaze) == Some("a"))
+        assert(Gaze.peek(gaze) == Some("a"))
+        assert(Gaze.next(gaze) == Some("a"))
+        assert(Gaze.next(gaze) == None)
+        assert(Gaze.isComplete(gaze))
+    }),
+    test("init Gaze with single char String", () => {
+        let gaze = Gaze.fromString("a")
+        assert(!Gaze.isComplete(gaze))
+        assert(Gaze.peek(gaze) == Some('a'))
+        assert(Gaze.peek(gaze) == Some('a'))
+        assert(Gaze.next(gaze) == Some('a'))
+        assert(Gaze.next(gaze) == None)
+        assert(Gaze.isComplete(gaze))
+    })
+])
+
+runTests("Take Suite", [
+    test("take with single value", () => {
+        let gaze = Gaze.fromString("a")
+        assert(Gaze.attempt(Nibblers.take('a'), gaze) == Some(['a']))
         assert(Gaze.isComplete(gaze))
     })
 ])
