@@ -5,15 +5,24 @@
 import List from "list"
 import { concat } from "string"
 
+let mut totalTestsPassed = 0
+
 record Test { title: String, body: () -> Void }
 
 export let test = (title, body) => {
     { title, body }
 }
 
-export let runTests = (tests: List<Test>) => {
+export let runTests = (suiteName: String, tests: List<Test>) => {
+    print("-- Starting " ++ suiteName ++ " --")
+    let mut numberOfTestsRan = 0
     List.forEach((test) => {
         test.body()
         print(concat("SUCCESS - ", test.title))
+        numberOfTestsRan += 1
     }, tests)
+    totalTestsPassed += numberOfTestsRan
+    print("-- Finished! " 
+        ++ toString(numberOfTestsRan) ++ " Tests Passed / "
+        ++ toString(totalTestsPassed) ++ " Passed Total --")
 }
