@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import { dataset, identifier } from "./ligature"
-import { test, runTests, expect } from "./test"
+import { test, runTests, expect } from "../util/test"
 import List from "list"
 import Result from "result"
 

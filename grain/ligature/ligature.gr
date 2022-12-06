@@ -5,12 +5,11 @@
 import Option from "option"
 import { concat } from "string"
 import Regex from "regex"
-import Gaze from "./gaze"
 import { unwrap } from "result"
 
 export record LigatureError { userMessage: String, debugMessage: Option<String> }
 
-record Dataset { id: String }
+record Dataset { name: String }
 
 let datasetPattern = unwrap(Regex.make("^([a-zA-Z_][a-zA-Z0-9_]*)(/[a-zA-Z_][a-zA-Z0-9_]*)*$"))
 
@@ -19,11 +18,11 @@ let invalidDataset = (datasetName: String) => {
     debugMessage: None,
 }
 
-export let dataset = (id: String) => {
-    if (Regex.isMatch(datasetPattern, id)) {
-        Ok({ id })
+export let dataset = (name: String) => {
+    if (Regex.isMatch(datasetPattern, name)) {
+        Ok({ name })
     } else {
-        Err(invalidDataset(id))
+        Err(invalidDataset(name))
     }
 }
 
@@ -43,6 +42,10 @@ export let identifier = (id: String) => {
         Err(invalidIdentifier(id))
     }
 }
+
+export let readId = (identifier: Identifier) => identifier.id
+
+export let readName = (dataset: Dataset) => dataset.name
 
 export enum Value {
     Identifier(Identifier),
