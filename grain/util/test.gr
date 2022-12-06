@@ -1,0 +1,40 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+import List from "list"
+import { concat } from "string"
+
+let mut totalTestsPassed = 0
+
+record Test { title: String, body: () -> Void }
+
+export let test = (title, body) => {
+    { title, body }
+}
+
+export let runTests = (suiteName: String, tests: List<Test>) => {
+    print("-- Starting " ++ suiteName ++ " --")
+    let mut numberOfTestsRan = 0
+    List.forEach((test) => {
+        test.body()
+        print(concat("SUCCESS - ", test.title))
+        numberOfTestsRan += 1
+    }, tests)
+    totalTestsPassed += numberOfTestsRan
+    print("-- Finished! " ++ 
+        toString(numberOfTestsRan) ++ " Tests Passed / " ++ 
+        toString(totalTestsPassed) ++ " Passed Total --")
+}
+
+export let assertEq = (a, b) => {
+    if (a != b) {
+        fail("Assertion Failed! " ++ toString(a) ++ " != " ++ toString(b))
+    }
+}
+
+export let expect = (condition, message) => {
+    if (!condition) {
+        fail("Assertion Failed! " ++ message)
+    }
+}
