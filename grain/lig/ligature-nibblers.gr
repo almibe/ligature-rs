@@ -6,6 +6,7 @@ import String from "string"
 import Char from "char"
 import Range from "range"
 import { missing } from "../util/common"
+
 let charInRange = (char, start, end) => {
     let char = Char.code(char)
     let start = Char.code(start)

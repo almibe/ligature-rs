@@ -5,7 +5,7 @@
 import { dataset, identifier } from "./ligature"
 import { test, runTests, expect } from "../util/test"
 import List from "list"
-import Result from "result"
+import { isOk, isErr } from "result"
 
 runTests("Validation Code", [
     test("check Dataset names", () => {
@@ -37,8 +37,8 @@ runTests("Validation Code", [
             " test"
         ]
 
-        List.forEach((name) => assert(Result.isOk(dataset(name))), okNames)
-        List.forEach((name) => assert(Result.isErr(dataset(name))), errNames)
+        List.forEach((name) => assert(isOk(dataset(name))), okNames)
+        List.forEach((name) => assert(isErr(dataset(name))), errNames)
     }),
     test("valid Identifier names", () => {
         let okNames = [
@@ -67,7 +67,7 @@ runTests("Validation Code", [
             " test"
         ]
 
-        List.forEach((name) => expect(Result.isOk(identifier(name)), name ++ " failed when expected to pass."), okNames)
-        List.forEach((name) => expect(Result.isErr(identifier(name)), name ++ " passed when expected to fail"), errNames)
+        List.forEach((name) => expect(isOk(identifier(name)), name ++ " failed when expected to pass."), okNames)
+        List.forEach((name) => expect(isErr(identifier(name)), name ++ " passed when expected to fail"), errNames)
     })
 ])

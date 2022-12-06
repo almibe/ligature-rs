@@ -37,13 +37,13 @@ let invalidIdentifier = (identifierName: String) => {
 
 export let identifier = (id: String) => {
     if (Regex.isMatch(identifierPattern, id)) {
-        Ok({ id })
+        Ok({ id : id })
     } else {
         Err(invalidIdentifier(id))
     }
 }
 
-export let readId = (identifier: Identifier) => identifier.id
+export let readId = identifier => identifier.id
 
 export let readName = (dataset: Dataset) => dataset.name
 
