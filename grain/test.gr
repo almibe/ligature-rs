@@ -32,3 +32,9 @@ export let assertEq = (a, b) => {
         fail("Assertion Failed! " ++ toString(a) ++ " != " ++ toString(b))
     }
 }
+
+export let expect = (condition, message) => {
+    if (!condition) {
+        fail("Assertion Failed! " ++ message)
+    }
+}

@@ -1,0 +1,73 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+import { dataset, identifier } from "./ligature"
+import { test, runTests, expect } from "./test"
+import List from "list"
+import Result from "result"
+
+runTests("Validation Code", [
+    test("check Dataset names", () => {
+        let okNames = [
+            "t",
+            "T",
+            "test",
+            "test/test/test",
+            "test/test",
+            "this/is/a/test",
+            "_",
+            "_/_",
+            "_/_/_",
+            "_test",
+            "__test__",
+            "test/_test",
+            "test3/test"
+        ]
+        let errNames = [
+            "",
+            "/",
+            "test/",
+            "/test",
+            "_/_/",
+            "/_/_",
+            "test//test",
+            "test test",
+            "test/ /test",
+            " test"
+        ]
+
+        List.forEach((name) => assert(Result.isOk(dataset(name))), okNames)
+        List.forEach((name) => assert(Result.isErr(dataset(name))), errNames)
+    }),
+    test("valid Identifier names", () => {
+        let okNames = [
+            "test",
+            "test_test_test",
+            "test_test",
+            "this1_is2_a_test",
+            "_",
+            "_test",
+            "__test__",
+            "testTest",
+            "G",
+            "2",
+            "5test",
+            "test!",
+            "/_/_",
+            "test//test",
+            "HELLO"
+        ]
+
+        let errNames = [
+            "", 
+            "this is a test", 
+            "test test", 
+            "test/ /test", 
+            " test"
+        ]
+
+        List.forEach((name) => expect(Result.isOk(identifier(name)), name ++ " failed when expected to pass."), okNames)
+        List.forEach((name) => expect(Result.isErr(identifier(name)), name ++ " passed when expected to fail"), errNames)
+    })
+])

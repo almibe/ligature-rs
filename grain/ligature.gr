@@ -1,0 +1,54 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+import Option from "option"
+import { concat } from "string"
+import Regex from "regex"
+import Gaze from "./gaze"
+import { unwrap } from "result"
+
+export record LigatureError { userMessage: String, debugMessage: Option<String> }
+
+record Dataset { id: String }
+
+let datasetPattern = unwrap(Regex.make("^([a-zA-Z_][a-zA-Z0-9_]*)(/[a-zA-Z_][a-zA-Z0-9_]*)*$"))
+
+let invalidDataset = (datasetName: String) => {
+    userMessage: concat("Invalid Dataset name, ", datasetName),
+    debugMessage: None,
+}
+
+export let dataset = (id: String) => {
+    if (Regex.isMatch(datasetPattern, id)) {
+        Ok({ id })
+    } else {
+        Err(invalidDataset(id))
+    }
+}
+
+record Identifier { id: String }
+
+let identifierPattern = unwrap(Regex.make("^[-a-zA-Z0-9._~:/?#\\[\\]@!$&'()*+,;%=]+$"))
+
+let invalidIdentifier = (identifierName: String) => {
+    userMessage: concat("Invalid Identifier name, ", identifierName),
+    debugMessage: None,
+}
+
+export let identifier = (id: String) => {
+    if (Regex.isMatch(identifierPattern, id)) {
+        Ok({ id })
+    } else {
+        Err(invalidIdentifier(id))
+    }
+}
+
+export enum Value {
+    Identifier(Identifier),
+    String(String),
+    Integer(Int64),
+    Bytes(Bytes)
+}
+
+export record Statement { entity: Identifier, attribute: Identifier, value: Value }
