@@ -2,9 +2,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import { test, runTests } from "./test"
+import { test, runTests, assertEq } from "./test"
 import Gaze from "./gaze"
 import Array from "array"
+import List from "list"
 import Nibblers from "./nibblers"
 
 runTests("Gaze Suite", [
@@ -47,5 +48,28 @@ runTests("Take Suite", [
         let gaze = Gaze.fromString("a")
         assert(Gaze.attempt(Nibblers.take('a'), gaze) == Some(['a']))
         assert(Gaze.isComplete(gaze))
+    })
+])
+
+runTests("Take Cond Suite", [
+    test("takeCond with a single value", () => {
+        let gaze = Gaze.fromString("a")
+        assertEq(Gaze.attempt(Nibblers.takeCond((c) => c == 'a'), gaze), Some(['a']))
+        assert(Gaze.isComplete(gaze))
+    }),
+    test("takeCond with multiple values", () => {
+        let gaze = Gaze.fromString("cab")
+        assertEq(Gaze.attempt(Nibblers.takeCond((c) => List.contains(c, ['a', 'b', 'c', 'd'])), gaze), Some(['c', 'a', 'b']))
+        assert(Gaze.isComplete(gaze))
+    }),
+    test("takeCond match beginning", () => {
+        let gaze = Gaze.fromString("abc123")
+        assertEq(Gaze.attempt(Nibblers.takeCond((c) => List.contains(c, ['a', 'b', 'c', 'd'])), gaze), Some(['a', 'b', 'c']))
+        assert(!Gaze.isComplete(gaze))
+    }),
+    test("takeCond no match beginning", () => {
+        let gaze = Gaze.fromString("123abc")
+        assertEq(Gaze.attempt(Nibblers.takeCond((c) => List.contains(c, ['a', 'b', 'c', 'd'])), gaze), None)
+        assert(!Gaze.isComplete(gaze))
     })
 ])

@@ -22,7 +22,13 @@ export let runTests = (suiteName: String, tests: List<Test>) => {
         numberOfTestsRan += 1
     }, tests)
     totalTestsPassed += numberOfTestsRan
-    print("-- Finished! " 
-        ++ toString(numberOfTestsRan) ++ " Tests Passed / "
-        ++ toString(totalTestsPassed) ++ " Passed Total --")
+    print("-- Finished! " ++ 
+        toString(numberOfTestsRan) ++ " Tests Passed / " ++ 
+        toString(totalTestsPassed) ++ " Passed Total --")
+}
+
+export let assertEq = (a, b) => {
+    if (a != b) {
+        fail("Assertion Failed! " ++ toString(a) ++ " != " ++ toString(b))
+    }
 }
