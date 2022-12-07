@@ -81,3 +81,11 @@ runTests("Take CondI Suite", [
         assert(Gaze.isComplete(gaze))
     }),
 ])
+
+runTests("Between Suite", [
+    test("between simple", () => {
+        let gaze = Gaze.fromString("abbbbbc")
+        assertEq(Gaze.attempt(Nibblers.between('a', Nibblers.takeCond((c) => c == 'b'), 'c'), gaze), Some(['b', 'b', 'b', 'b', 'b']))
+        assert(Gaze.isComplete(gaze))
+    })
+])
