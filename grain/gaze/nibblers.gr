@@ -13,7 +13,7 @@ export let take = (t) => (gaze) => {
     }
 }
 
-export let takeCond = (predicate) => (gaze) => {
+export let takeCond = predicate => (gaze) => {
     let mut cont = true
     let mut results = []
     while (cont) {
@@ -22,6 +22,28 @@ export let takeCond = (predicate) => (gaze) => {
             Some(value) when predicate(value) => {
                 results = List.append(results, [value])
                 cont = true
+            },
+            _ => cont = false
+        }
+    }
+    if (List.length(results) == 0) {
+        None
+    } else {
+        Some(results)
+    }
+}
+
+export let takeCondI = predicate => (gaze) => {
+    let mut index = 0
+    let mut cont = true
+    let mut results = []
+    while (cont) {
+        let next = Gaze.next(gaze)
+        match (next) {
+            Some(value) when predicate(value, index) => {
+                results = List.append(results, [value])
+                cont = true
+                index += 1
             },
             _ => cont = false
         }

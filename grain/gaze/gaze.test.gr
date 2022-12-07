@@ -73,3 +73,11 @@ runTests("Take Cond Suite", [
         assert(!Gaze.isComplete(gaze))
     })
 ])
+
+runTests("Take CondI Suite", [
+    test("takeCondI simple", () => {
+        let gaze = Gaze.fromString("abc")
+        assertEq(Gaze.attempt(Nibblers.takeCondI((c, i) => { (c == 'a' && i == 0) || (c == 'b' && i == 1) }), gaze), Some(['a', 'b']))
+        assert(Gaze.isComplete(gaze))
+    }),
+])
