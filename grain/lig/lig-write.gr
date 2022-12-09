@@ -1,0 +1,45 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+import List from "list"
+import { Statement, Value, Identifier, String, Integer, Bytes, readId } from "../ligature/ligature"
+import { missing } from "../util/common"
+import Buffer from "buffer"
+
+export let writeIdentifier = (identifier) => {
+    "<" ++ readId(identifier) ++ ">"
+}
+
+export let writeString = string => {
+    let chars = String.explode(string)
+    let buffer = Buffer.make(64)
+    Buffer.addChar('"', buffer)
+    Array.forEach(c => {
+        //TODO check for special chars and escape
+        Buffer.addChar(c, buffer)
+    }, chars)
+    Buffer.addChar('"', buffer)
+    Buffer.toString(buffer)
+}
+
+export let writeBytes = bytes => {
+    missing()
+}
+
+export let writeValue = (value: Value) =>
+    match (value) {
+        Identifier(identifier) => writeIdentifier(identifier),
+        String(string) => writeString(string),
+        Integer(int64) => toString(int64),
+        Bytes(bytes) => writeBytes(bytes)
+    }
+
+export let writeStatement = (statement: Statement) => {
+    writeIdentifier(statement.entity) ++ " " ++ 
+    writeIdentifier(statement.attribute) ++ " " ++ 
+    writeValue(statement.value)
+}
+
+export let writeLig = (statements: List<Statement>) =>
+    List.reduce((result, statement) => result ++ writeStatement(statement) ++ "\n", "", statements)

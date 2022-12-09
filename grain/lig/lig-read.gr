@@ -1,0 +1,67 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+import String from "string"
+import Char from "char"
+import Range from "range"
+import { missing } from "../util/common"
+import Nibblers from "../gaze/nibblers"
+import Regex from "regex"
+import { unwrap } from "result"
+import Gaze from "../gaze/gaze"
+
+let charInRange = (char, start, end) => {
+    let char = Char.code(char)
+    let start = Char.code(start)
+    let end = Char.code(end)
+    char <= start && char >= end
+}
+
+let identifierPattern = unwrap(Regex.make("^[-a-zA-Z0-9._~:/?#\\[\\]@!$&'()*+,;%=]$"))
+
+let identifierCharacterNibbler = Nibblers.takeCond((c) => {
+    Regex.isMatch(identifierPattern, toString(c))
+})
+
+export let identifierNibbler = Nibblers.between('<', identifierCharacterNibbler, '>')
+
+export let whitespaceNibbler = Nibblers.takeCond((c) => c == ' ' || c == '\t')
+
+export let newLineNibbler = Nibblers.takeCond((c) => c == '\n' || c == '\r')
+
+/**
+ * Reads in a String and returns a List of Statements or an Error.
+ * 
+ * @param lig: The input String in lig format.
+ * 
+ * @returns A List of Statements or an Error.
+ */
+export let readLig = (lig: String) => {
+    let gaze = Gaze.fromString(lig)
+    let mut cont = true
+
+    //read opening white space
+    Gaze.attempt(Nibblers.repeat(Nibblers.takeCond(c => c == ' ' || c == '\t' || c == '\n' || c == '\r')), gaze)
+
+    while (!Gaze.isComplete(gaze) && cont) {
+        match (Gaze.attempt(identifierNibbler)) {
+            None => cont = false,
+            Some(entity) => {
+                let entity = 
+            }
+        }
+        //read identifier - entity
+        //read white space and ignore
+        //read identifier - attribute
+        //read white space and ignore
+        //read value
+        //create statement
+    }
+
+    if (cont) {
+        Ok([])
+    } else {
+        Err("Could not read Lig.")
+    }
+}

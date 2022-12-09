@@ -1,0 +1,20 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+import { runTests, test, assertEq } from "../util/test"
+import { identifier, Identifier, String, Integer, Bytes } from "../ligature/ligature"
+import { writeIdentifier, writeValue } from "./lig-write"
+import { unwrap } from "result"
+
+runTests("Ligature Write", [
+    test("Write Identifier", () => {
+        assertEq(writeIdentifier(unwrap(identifier("hello"))), "<hello>")
+    }),
+    test("Write Value", () => {
+        assertEq(writeValue(Identifier(unwrap(identifier("hello")))), "<hello>") // identifier
+        //assertEq(writeValue(String("hello")), "\"hello\"") // string
+        assertEq(writeValue(Integer(4567L)), "4567") // integer
+        //assertEq(writeValue(unwrap(identifier("hello"))), "<hello>") // bytes
+    })
+])
