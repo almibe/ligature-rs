@@ -2,16 +2,23 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import { isOk, isErr, toOption } from "result"
+import { isOk, isErr, unwrap } from "result"
 import { runTests, test, assertEq } from "../util/test"
 import List from "list"
-import { readIdentifier, readValue } from "./lig-read"
-import { identifier, Integer, String } from "../ligature/ligature"
+import { readLig } from "./lig-read"
+import { identifier, Integer, String, Value, Statement, Identifier } from "../ligature/ligature"
+
+let statement = (entity: String, attribute: String, value: Value) => {
+    let entity = unwrap(identifier(entity))
+    let attribute = unwrap(identifier(attribute))
+    let statement: Statement = { entity, attribute, value }
+    statement
+}
 
 runTests("Read Lig", [
     test("read single Statement", () => {
-        assertEq(readIdentifier("<a> <b> <c>"),
-            toOption(identifier("hello")))
+        assertEq(readLig("<a> <b> <c>"),
+            Ok([statement("a", "b", Identifier(unwrap(identifier("c"))))]))
     }),
     // test("read Values", () => {
     //     assertEq(readValue("<hello>"), toOption(identifier("hello")))

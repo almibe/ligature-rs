@@ -3,22 +3,29 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import List from "list"
-import { concat } from "string"
 
 let mut totalTestsPassed = 0
 
 record Test { title: String, body: () -> Void }
 
+/**
+ * Create a single test.
+ * 
+ * @param title: The title of this test.
+ * @param body: The test code. Throw an exception to fail. Return normally to pass.
+ * 
+ * @returns The Test.
+ */
 export let test = (title, body) => {
     { title, body }
 }
 
-export let runTests = (suiteName: String, tests: List<Test>) => {
+export let runTests = (suiteName: String, tests: List<Test>) => { //TODO rename to suite?
     print("-- Starting " ++ suiteName ++ " --")
     let mut numberOfTestsRan = 0
     List.forEach((test) => {
         test.body()
-        print(concat("SUCCESS - ", test.title))
+        print("SUCCESS - " ++ test.title)
         numberOfTestsRan += 1
     }, tests)
     totalTestsPassed += numberOfTestsRan

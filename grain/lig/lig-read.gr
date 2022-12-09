@@ -5,11 +5,13 @@
 import String from "string"
 import Char from "char"
 import Range from "range"
+import Array from "array"
 import { missing } from "../util/common"
 import Nibblers from "../gaze/nibblers"
 import Regex from "regex"
-import { unwrap } from "result"
+import { unwrap, isOk } from "result"
 import Gaze from "../gaze/gaze"
+import { identifier, Statement, LigatureError, error } from "../ligature/ligature"
 
 let charInRange = (char, start, end) => {
     let char = Char.code(char)
@@ -31,6 +33,34 @@ export let whitespaceNibbler = Nibblers.takeCond((c) => c == ' ' || c == '\t')
 export let newLineNibbler = Nibblers.takeCond((c) => c == '\n' || c == '\r')
 
 /**
+ * Reads an Identifier in lig format from a Gaze<Char>.
+ * 
+ * @param gaze: An instance of Gaze<Char>.
+ * 
+ * @returns An Identifier or Error.
+ */
+export let readIdentifier = gaze => {
+    match (Gaze.attempt(identifierNibbler, gaze)) {
+        None => error("Could not read Identifier.", None),
+        Some(result) => {
+            identifier(String.implode(Array.fromList(result)))
+        }
+    }
+}
+
+/**
+ * Reads a Value in lig format from a Gaze<Char>.
+ * This could be an Identifier, String, Byte Array, or Integer.
+ * 
+ * @param gaze: An instance of Gaze<Char>.
+ * 
+ * @returns A lig Value or an Error.
+ */
+export let readValue = gaze => {
+    error("Not implemented.", None)
+}
+
+/**
  * Reads in a String and returns a List of Statements or an Error.
  * 
  * @param lig: The input String in lig format.
@@ -40,27 +70,26 @@ export let newLineNibbler = Nibblers.takeCond((c) => c == '\n' || c == '\r')
 export let readLig = (lig: String) => {
     let gaze = Gaze.fromString(lig)
     let mut cont = true
+    let mut statements = []
 
     //read opening white space
     Gaze.attempt(Nibblers.repeat(Nibblers.takeCond(c => c == ' ' || c == '\t' || c == '\n' || c == '\r')), gaze)
 
     while (!Gaze.isComplete(gaze) && cont) {
-        match (Gaze.attempt(identifierNibbler)) {
-            None => cont = false,
-            Some(entity) => {
-                let entity = 
-            }
+        let entity = readIdentifier(gaze)
+        Gaze.attempt(whitespaceNibbler, gaze)
+        let attribute = readIdentifier(gaze)
+        Gaze.attempt(whitespaceNibbler, gaze)
+        let value = readValue(gaze)
+        Gaze.attempt(Nibblers.repeat(Nibblers.takeCond(c => c == ' ' || c == '\t' || c == '\n' || c == '\r')), gaze)
+        if (isOk(entity) && isOk(attribute) && isOk(value)) {
+            let statement: Statement = { entity: unwrap(entity), attribute: unwrap(attribute), value: unwrap(value) }
+            statements = cons(statement, statements)
         }
-        //read identifier - entity
-        //read white space and ignore
-        //read identifier - attribute
-        //read white space and ignore
-        //read value
-        //create statement
     }
 
     if (cont) {
-        Ok([])
+        Ok(statements)
     } else {
         Err("Could not read Lig.")
     }
