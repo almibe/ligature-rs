@@ -10,7 +10,7 @@ record Gaze<t> {
     mut offset: Number
 }
 
-export type Nibbler<in, out> = (Gaze<in>) -> Option<List<out>>
+export type Nibbler<in, out> = (Gaze<in>) -> Option<out>
 
 export let fromString = (str: String) => {
     content: String.explode(str),
