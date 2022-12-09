@@ -7,6 +7,9 @@ import Gaze from "./gaze"
 import Array from "array"
 import List from "list"
 import Nibblers from "./nibblers"
+import Number from "number"
+import String from "string"
+import { unwrap } from "result"
 
 runTests("Gaze Suite", [
     test("empty String input", () => {
@@ -40,6 +43,21 @@ runTests("Gaze Suite", [
         assert(Gaze.next(gaze) == Some('a'))
         assert(Gaze.next(gaze) == None)
         assert(Gaze.isComplete(gaze))
+    })
+])
+
+runTests("Map Suite", [
+    test("map numbers", () => {
+        let gaze = Gaze.fromString("123")
+        let result = Some([1, 2, 3])
+        let nibbler = Gaze.map(
+            Nibblers.next,
+            chars => [
+                unwrap(
+                    Number.parse(
+                        String.implode(
+                            Array.fromList(chars))))])
+        assertEq(Gaze.attempt(Nibblers.repeat(nibbler), gaze), result)
     })
 ])
 
@@ -78,7 +96,7 @@ runTests("Take CondI Suite", [
     test("takeCondI simple", () => {
         let gaze = Gaze.fromString("abc")
         assertEq(Gaze.attempt(Nibblers.takeCondI((c, i) => { (c == 'a' && i == 0) || (c == 'b' && i == 1) }), gaze), Some(['a', 'b']))
-        assert(Gaze.isComplete(gaze))
+        assert(!Gaze.isComplete(gaze))
     }),
 ])
 
@@ -87,5 +105,39 @@ runTests("Between Suite", [
         let gaze = Gaze.fromString("abbbbbc")
         assertEq(Gaze.attempt(Nibblers.between('a', Nibblers.takeCond((c) => c == 'b'), 'c'), gaze), Some(['b', 'b', 'b', 'b', 'b']))
         assert(Gaze.isComplete(gaze))
+    })
+])
+
+runTests("Repeat Suite", [
+    test("repeat simple", () => {
+        let gaze = Gaze.fromString("aaaabbbbbc")
+        assertEq(Gaze.attempt(Nibblers.repeat(Nibblers.takeCond((c) => c == 'a')), gaze), Some(['a', 'a', 'a', 'a']))
+        assert(!Gaze.isComplete(gaze))
+        assertEq(Gaze.attempt(Nibblers.repeat(Nibblers.takeCond((c) => c == 'b')), gaze), Some(['b', 'b', 'b', 'b', 'b']))
+        assert(!Gaze.isComplete(gaze))
+        assertEq(Gaze.attempt(Nibblers.repeat(Nibblers.takeCond((c) => c == 'c')), gaze), Some(['c']))
+        assert(Gaze.isComplete(gaze))
+    })
+])
+
+runTests("Take All Suite", [
+    test("take all simple", () => {
+        let gaze = Gaze.fromString("aaaabbbbbc")
+        let takeAs = Nibblers.repeat(Nibblers.takeCond((c) => c == 'a'))
+        let takeBs = Nibblers.repeat(Nibblers.takeCond((c) => c == 'b'))
+        let takeCs = Nibblers.repeat(Nibblers.takeCond((c) => c == 'c'))
+        let takeAll = Nibblers.takeAll([takeAs, takeBs, takeCs])
+        assertEq(Gaze.attempt(takeAll, gaze), Some([['a', 'a', 'a', 'a'], ['b', 'b', 'b', 'b', 'b'], ['c']]))
+    })
+])
+
+runTests("Take First Suite", [
+    test("take first simple", () => {
+        let gaze = Gaze.fromString("aaaabbbbbc")
+        let takeAs = Nibblers.repeat(Nibblers.takeCond((c) => c == 'a'))
+        let takeBs = Nibblers.repeat(Nibblers.takeCond((c) => c == 'b'))
+        let takeCs = Nibblers.repeat(Nibblers.takeCond((c) => c == 'c'))
+        let takeFirst = Nibblers.takeFirst([takeCs, takeBs, takeAs])
+        assertEq(Gaze.attempt(takeFirst, gaze), Some(['a', 'a', 'a', 'a']))
     })
 ])

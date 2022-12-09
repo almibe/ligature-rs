@@ -57,3 +57,12 @@ export let attempt = (nibbler, gaze) => {
 }
 
 export let offset = gaze => gaze.offset
+
+export let map = (nibbler, mapper) => gaze => {
+    match (attempt(nibbler, gaze)) {
+        Some(result) => {
+            Some(mapper(result))
+        },
+        None => None
+    }
+}

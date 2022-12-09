@@ -4,7 +4,25 @@
 
 import Gaze from "./gaze"
 import List from "list"
+import Option from "option"
 
+/**
+ * A Nibbler that simply returns the next item or None if all items have been consumed.
+ */
+export let next = (gaze) => {
+    match (Gaze.next(gaze)) {
+        Some(t) => { Some([t]) },
+        None => None
+    }
+}
+
+/**
+ * Create a Nibbler that take a single literal value.
+ * 
+ * @param t: The literal to take.
+ * 
+ * @returns A Nibbler that takes a single literal.
+ */
 export let take = (t) => (gaze) => {
     if (Gaze.next(gaze) == Some(t)) {
         Some([t])
@@ -13,6 +31,14 @@ export let take = (t) => (gaze) => {
     }
 }
 
+/**
+ * Create a Nibbler that accepts input based on a function that recieves the current token
+ * and returns a bool.
+ * 
+ * @param predicate: The function used to decide if a token matches.
+ * 
+ * @returns A Nibbler that consumes input as long as the predicate passes.
+ */
 export let takeCond = predicate => (gaze) => {
     let mut cont = true
     let mut results = []
@@ -22,7 +48,6 @@ export let takeCond = predicate => (gaze) => {
             Some(value) when predicate(value) => {
                 Gaze.next(gaze)
                 results = List.append(results, [value])
-                cont = true
             },
             _ => cont = false
         }
@@ -34,6 +59,14 @@ export let takeCond = predicate => (gaze) => {
     }
 }
 
+/**
+ * Create a Nibbler that accepts input based on a function that recieves the current token 
+ * with index starting at 0 and returns a bool.
+ * 
+ * @param predicate: The function used to decide if a token matches.
+ * 
+ * @returns A Nibbler that consumes input as long as the predicate passes.
+ */
 export let takeCondI = predicate => (gaze) => {
     let mut index = 0
     let mut cont = true
@@ -44,7 +77,6 @@ export let takeCondI = predicate => (gaze) => {
             Some(value) when predicate(value, index) => {
                 Gaze.next(gaze)
                 results = List.append(results, [value])
-                cont = true
                 index += 1
             },
             _ => cont = false
@@ -57,14 +89,20 @@ export let takeCondI = predicate => (gaze) => {
     }
 }
 
-export let between = (opening, content, closing) => (gaze) => {
-    if (Gaze.next(gaze) == Some(opening)) {
+/**
+ * Create a Nibbler that accepts a start
+ * 
+ * @param start: The starting token.
+ * @param content: The Nibbler used to decide the matched content.
+ * @param end: The ending token.
+ * 
+ * @returns A Nibbler that consumes a starting and ending token and returns the content that matches in between.
+ */
+export let between = (start, content, end) => (gaze) => {
+    if (Gaze.next(gaze) == Some(start)) {
         match (Gaze.attempt(content, gaze)) {
             Some(result) => {
-                print(Gaze.isComplete(gaze))
-                print(Gaze.peek(gaze))
-                print(result)
-                if (Gaze.next(gaze) == Some(closing)) {
+                if (Gaze.next(gaze) == Some(end)) {
                     Some(result)
                 } else {
                     None
@@ -74,5 +112,67 @@ export let between = (opening, content, closing) => (gaze) => {
         }
     } else {
         None
+    }
+}
+
+export let repeat = (nibbler) => (gaze) => {
+    let mut cont = true
+    let mut results = []
+    while (cont) {
+        match (Gaze.attempt(nibbler, gaze)) {
+            Some(result) => {
+                results = List.append(results, result)
+            },
+            None => cont = false
+        }
+    }
+    if (results == []) {
+        None
+    } else {
+        Some(results)
+    }
+}
+
+export let takeAll = nibblers => gaze => {
+    let mut results = []
+    let mut nibblerIndex = 0
+    while (nibblerIndex >= 0 && nibblerIndex < List.length(nibblers)) {
+        let nibbler = Option.unwrap(List.nth(nibblerIndex, nibblers))
+        match (Gaze.attempt(nibbler, gaze)) {
+            Some(result) => {
+                results = List.append(results, [result])
+                nibblerIndex += 1
+            },
+            None => {
+                nibblerIndex = -1
+            }
+        }
+    }
+    if (results == [] || nibblerIndex == -1) {
+        None
+    } else {
+        Some(results)
+    }
+}
+
+export let takeFirst = nibblers => gaze => {
+    let mut results = []
+    let mut nibblerIndex = 0
+    while (nibblerIndex >= 0 && nibblerIndex < List.length(nibblers)) {
+        let nibbler = Option.unwrap(List.nth(nibblerIndex, nibblers))
+        match (Gaze.attempt(nibbler, gaze)) {
+            Some(result) => {
+                results = result
+                nibblerIndex = -1
+            },
+            None => {
+                nibblerIndex += 1
+            }
+        }
+    }
+    if (results == []) {
+        None
+    } else {
+        Some(results)
     }
 }
