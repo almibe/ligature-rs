@@ -7,16 +7,6 @@ import List from "list"
 import Option from "option"
 
 /**
- * A Nibbler that simply returns the next item or None if all items have been consumed.
- */
-export let next = (gaze) => {
-    match (Gaze.next(gaze)) {
-        Some(t) => { Some([t]) },
-        None => None
-    }
-}
-
-/**
  * Create a Nibbler that take a single literal value.
  * 
  * @param t: The literal to take.
@@ -25,7 +15,7 @@ export let next = (gaze) => {
  */
 export let take = (t) => (gaze) => {
     if (Gaze.next(gaze) == Some(t)) {
-        Some([t])
+        Some(t)
     } else {
         None
     }
@@ -37,9 +27,28 @@ export let take = (t) => (gaze) => {
  * 
  * @param predicate: The function used to decide if a token matches.
  * 
- * @returns A Nibbler that consumes input as long as the predicate passes.
+ * @returns A Nibbler that consumes one item as long as the predicate passes.
  */
 export let takeCond = predicate => (gaze) => {
+    let next = Gaze.peek(gaze)
+    match (next) {
+        Some(value) when predicate(value) => {
+            Gaze.next(gaze)
+            Some(value)
+        },
+        _ => None
+    }
+}
+
+/**
+ * Create a Nibbler that accepts input based on a function that recieves the current token
+ * and returns a bool.
+ * 
+ * @param predicate: The function used to decide if a token matches.
+ * 
+ * @returns A Nibbler that consumes input as long as the predicate passes.
+ */
+export let takeWhile = predicate => (gaze) => {
     let mut cont = true
     let mut results = []
     while (cont) {
@@ -67,7 +76,7 @@ export let takeCond = predicate => (gaze) => {
  * 
  * @returns A Nibbler that consumes input as long as the predicate passes.
  */
-export let takeCondI = predicate => (gaze) => {
+export let takeWhileIndex = predicate => (gaze) => {
     let mut index = 0
     let mut cont = true
     let mut results = []
@@ -121,7 +130,7 @@ export let repeat = (nibbler) => (gaze) => {
     while (cont) {
         match (Gaze.attempt(nibbler, gaze)) {
             Some(result) => {
-                results = List.append(results, result)
+                results = List.append(results, [result])
             },
             None => cont = false
         }
@@ -133,6 +142,14 @@ export let repeat = (nibbler) => (gaze) => {
     }
 }
 
+/**
+ * Create a Nibbler that accepts a List of Nibblers and only succeeds if all of the
+ * passed in Nibblers succeed in order.
+ * 
+ * @param nibblers: A List of nibblers.
+ * 
+ * @returns A List of all of the results from each Nibbler internally grouped in Lists.
+ */
 export let takeAll = nibblers => gaze => {
     let mut results = []
     let mut nibblerIndex = 0
@@ -155,6 +172,14 @@ export let takeAll = nibblers => gaze => {
     }
 }
 
+/**
+ * Create a Nibbler that accepts a List of Nibblers and matches on the first that succeeds.
+ * If all fail the created Nibbler will fail as well.
+ * 
+ * @param nibblers: A list of Nibblers to check.
+ * 
+ * @returns The newly created Nibbler.
+ */
 export let takeFirst = nibblers => gaze => {
     let mut results = []
     let mut nibblerIndex = 0

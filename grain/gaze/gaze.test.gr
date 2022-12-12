@@ -51,12 +51,10 @@ runTests("Map Suite", [
         let gaze = Gaze.fromString("123")
         let result = Some([1, 2, 3])
         let nibbler = Gaze.map(
-            Nibblers.next,
-            chars => [
+            Gaze.next,
+            char => 
                 unwrap(
-                    Number.parse(
-                        String.implode(
-                            Array.fromList(chars))))])
+                    Number.parse(toString(char))))
         assertEq(Gaze.attempt(Nibblers.repeat(nibbler), gaze), result)
     })
 ])
@@ -64,7 +62,7 @@ runTests("Map Suite", [
 runTests("Take Suite", [
     test("take with single value", () => {
         let gaze = Gaze.fromString("a")
-        assert(Gaze.attempt(Nibblers.take('a'), gaze) == Some(['a']))
+        assert(Gaze.attempt(Nibblers.take('a'), gaze) == Some('a'))
         assert(Gaze.isComplete(gaze))
     })
 ])
@@ -72,17 +70,17 @@ runTests("Take Suite", [
 runTests("Take Cond Suite", [
     test("takeCond with a single value", () => {
         let gaze = Gaze.fromString("a")
-        assertEq(Gaze.attempt(Nibblers.takeCond((c) => c == 'a'), gaze), Some(['a']))
+        assertEq(Gaze.attempt(Nibblers.takeCond((c) => c == 'a'), gaze), Some('a'))
         assert(Gaze.isComplete(gaze))
     }),
     test("takeCond with multiple values", () => {
         let gaze = Gaze.fromString("cab")
-        assertEq(Gaze.attempt(Nibblers.takeCond((c) => List.contains(c, ['a', 'b', 'c', 'd'])), gaze), Some(['c', 'a', 'b']))
-        assert(Gaze.isComplete(gaze))
+        assertEq(Gaze.attempt(Nibblers.takeCond((c) => List.contains(c, ['a', 'b', 'c', 'd'])), gaze), Some('c'))
+        assert(!Gaze.isComplete(gaze))
     }),
     test("takeCond match beginning", () => {
         let gaze = Gaze.fromString("abc123")
-        assertEq(Gaze.attempt(Nibblers.takeCond((c) => List.contains(c, ['a', 'b', 'c', 'd'])), gaze), Some(['a', 'b', 'c']))
+        assertEq(Gaze.attempt(Nibblers.takeCond((c) => List.contains(c, ['a', 'b', 'c', 'd'])), gaze), Some('a'))
         assert(!Gaze.isComplete(gaze))
     }),
     test("takeCond no match beginning", () => {
@@ -92,10 +90,33 @@ runTests("Take Cond Suite", [
     })
 ])
 
-runTests("Take CondI Suite", [
-    test("takeCondI simple", () => {
+runTests("Take While Suite", [
+    test("takeWhile with a single value", () => {
+        let gaze = Gaze.fromString("a")
+        assertEq(Gaze.attempt(Nibblers.takeWhile((c) => c == 'a'), gaze), Some(['a']))
+        assert(Gaze.isComplete(gaze))
+    }),
+    test("takeWhile with multiple values", () => {
+        let gaze = Gaze.fromString("cab")
+        assertEq(Gaze.attempt(Nibblers.takeWhile((c) => List.contains(c, ['a', 'b', 'c', 'd'])), gaze), Some(['c', 'a', 'b']))
+        assert(Gaze.isComplete(gaze))
+    }),
+    test("takeWhile match beginning", () => {
+        let gaze = Gaze.fromString("abc123")
+        assertEq(Gaze.attempt(Nibblers.takeWhile((c) => List.contains(c, ['a', 'b', 'c', 'd'])), gaze), Some(['a', 'b', 'c']))
+        assert(!Gaze.isComplete(gaze))
+    }),
+    test("takeWhile no match beginning", () => {
+        let gaze = Gaze.fromString("123abc")
+        assertEq(Gaze.attempt(Nibblers.takeWhile((c) => List.contains(c, ['a', 'b', 'c', 'd'])), gaze), None)
+        assert(!Gaze.isComplete(gaze))
+    })
+])
+
+runTests("Take While Index Suite", [
+    test("takeWhileIndex simple", () => {
         let gaze = Gaze.fromString("abc")
-        assertEq(Gaze.attempt(Nibblers.takeCondI((c, i) => { (c == 'a' && i == 0) || (c == 'b' && i == 1) }), gaze), Some(['a', 'b']))
+        assertEq(Gaze.attempt(Nibblers.takeWhileIndex((c, i) => { (c == 'a' && i == 0) || (c == 'b' && i == 1) }), gaze), Some(['a', 'b']))
         assert(!Gaze.isComplete(gaze))
     }),
 ])
@@ -103,7 +124,7 @@ runTests("Take CondI Suite", [
 runTests("Between Suite", [
     test("between simple", () => {
         let gaze = Gaze.fromString("abbbbbc")
-        assertEq(Gaze.attempt(Nibblers.between('a', Nibblers.takeCond((c) => c == 'b'), 'c'), gaze), Some(['b', 'b', 'b', 'b', 'b']))
+        assertEq(Gaze.attempt(Nibblers.between('a', Nibblers.takeWhile((c) => c == 'b'), 'c'), gaze), Some(['b', 'b', 'b', 'b', 'b']))
         assert(Gaze.isComplete(gaze))
     })
 ])
