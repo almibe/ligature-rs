@@ -1,0 +1,51 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+import Gaze from "../gaze/gaze"
+import Nibblers from "../gaze/nibblers"
+import String from "string"
+import Array from "array"
+import Number from "number"
+import Int64 from "int64"
+import { unwrap } from "result"
+
+export enum WanderTokens {
+  Boolean(Bool),
+  WhiteSpace(String),
+  Identifier(String),
+  Integer(Int64),
+  Comment(String),
+  NewLine(String),
+  StringLiteral(String),
+  BytesLiteral(Bytes),
+  LetKeyword,
+  EqualSign,
+  Name(String),
+  OpenBrace,
+  CloseBrace,
+  Colon,
+  OpenParen,
+  CloseParen,
+  OpenSquare,
+  CloseSquare,
+  Arrow,
+  Dot,
+  QuestionMark,
+  IfKeyword,
+  ElsifKeyword,
+  ElseKeyword,
+}
+
+let integerNibbler = Gaze.map(Nibblers.take('1'), c => {
+  let str = String.implode(Array.fromList(c))
+  Integer(Int64.fromNumber(unwrap(Number.parse(str))))
+})
+
+let tokenNibbler = Nibblers.repeat(integerNibbler)
+
+export let tokenize = script => {
+    let gaze = Gaze.fromString(script)
+    let tokens = Gaze.attempt(tokenNibbler, gaze)
+    tokens
+}
