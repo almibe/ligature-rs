@@ -2,6 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import Number from "number"
+import Int64 from "int64"
 import String from "string"
 import Char from "char"
 import Range from "range"
@@ -11,26 +13,47 @@ import Nibblers from "../gaze/nibblers"
 import Regex from "regex"
 import { unwrap, isOk } from "result"
 import Gaze from "../gaze/gaze"
-import { identifier, Statement, LigatureError, error } from "../ligature/ligature"
+import { identifier, Statement, LigatureError, error, String, Integer, Identifier } from "../ligature/ligature"
 
 let charInRange = (char, start, end) => {
     let char = Char.code(char)
     let start = Char.code(start)
     let end = Char.code(end)
-    char <= start && char >= end
+    char >= start && char <= end
 }
 
 let identifierPattern = unwrap(Regex.make("^[-a-zA-Z0-9._~:/?#\\[\\]@!$&'()*+,;%=]$"))
 
-let identifierCharacterNibbler = Nibblers.takeCond((c) => {
+let identifierCharacterNibbler = Nibblers.takeWhile((c) => {
     Regex.isMatch(identifierPattern, toString(c))
 })
 
-export let identifierNibbler = Nibblers.between('<', identifierCharacterNibbler, '>')
+let identifierNibbler = Nibblers.between('<', identifierCharacterNibbler, '>')
 
-export let whitespaceNibbler = Nibblers.takeCond((c) => c == ' ' || c == '\t')
+//TODO the below Nibbler is incorrect
+let stringContentNibbler = Nibblers.takeWhile((c) => Regex.isMatch(identifierPattern, toString(c)))
 
-export let newLineNibbler = Nibblers.takeCond((c) => c == '\n' || c == '\r')
+let stringNibbler = Gaze.map(Nibblers.between('"', stringContentNibbler, '"'), s => {
+    String(String.implode(Array.fromList(s)))
+})
+
+//TODO this doesn't handle negative numbers and maybe other cases
+let integerNibbler = Gaze.map(Nibblers.takeWhile(c => charInRange(c, '0', '9')), i => {
+    Integer(Int64.fromNumber(unwrap(Number.parse(String.implode(Array.fromList(i))))))
+})
+
+let bytesNibbler = Nibblers.takeAll([
+    Gaze.map(Nibblers.take('0'), (e) => [e]),
+    Gaze.map(Nibblers.take('x'), (e) => [e]),
+    Nibblers.takeWhile(c => charInRange(c, '0', '9') || charInRange(c, 'A', 'F'))
+])
+
+//TODO add bytes nibbler
+export let valueNibbler = Nibblers.takeFirst([stringNibbler, integerNibbler])
+
+export let whitespaceNibbler = Nibblers.takeWhile((c) => c == ' ' || c == '\t')
+
+export let newLineNibbler = Nibblers.takeWhile((c) => c == '\n' || c == '\r')
 
 /**
  * Reads an Identifier in lig format from a Gaze<Char>.
@@ -57,7 +80,18 @@ export let readIdentifier = gaze => {
  * @returns A lig Value or an Error.
  */
 export let readValue = gaze => {
-    error("Not implemented.", None)
+    let id = readIdentifier(gaze)
+    match (id) {
+        Ok(i) => Ok(Identifier(i)),
+        Err(_) => {
+            match (Gaze.attempt(valueNibbler, gaze)) {
+                None => error("Could not read Value.", None),
+                Some(result) => {
+                    Ok(result)
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -73,7 +107,7 @@ export let readLig = (lig: String) => {
     let mut statements = []
 
     //read opening white space
-    Gaze.attempt(Nibblers.repeat(Nibblers.takeCond(c => c == ' ' || c == '\t' || c == '\n' || c == '\r')), gaze)
+    Gaze.attempt(Nibblers.repeat(Nibblers.takeWhile(c => c == ' ' || c == '\t' || c == '\n' || c == '\r')), gaze)
 
     while (!Gaze.isComplete(gaze) && cont) {
         let entity = readIdentifier(gaze)
@@ -81,7 +115,7 @@ export let readLig = (lig: String) => {
         let attribute = readIdentifier(gaze)
         Gaze.attempt(whitespaceNibbler, gaze)
         let value = readValue(gaze)
-        Gaze.attempt(Nibblers.repeat(Nibblers.takeCond(c => c == ' ' || c == '\t' || c == '\n' || c == '\r')), gaze)
+        Gaze.attempt(Nibblers.repeat(Nibblers.takeWhile(c => c == ' ' || c == '\t' || c == '\n' || c == '\r')), gaze)
         if (isOk(entity) && isOk(attribute) && isOk(value)) {
             let statement: Statement = { entity: unwrap(entity), attribute: unwrap(attribute), value: unwrap(value) }
             statements = cons(statement, statements)

@@ -6,6 +6,8 @@ import List from "list"
 import { Statement, Value, Identifier, String, Integer, Bytes, readId } from "../ligature/ligature"
 import { missing } from "../util/common"
 import Buffer from "buffer"
+import String from "string"
+import Array from "array"
 
 export let writeIdentifier = (identifier) => {
     "<" ++ readId(identifier) ++ ">"

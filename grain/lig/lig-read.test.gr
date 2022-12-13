@@ -5,8 +5,9 @@
 import { isOk, isErr, unwrap } from "result"
 import { runTests, test, assertEq } from "../util/test"
 import List from "list"
-import { readLig } from "./lig-read"
+import { readLig, readIdentifier, readValue } from "./lig-read"
 import { identifier, Integer, String, Value, Statement, Identifier } from "../ligature/ligature"
+import Gaze from "../gaze/gaze"
 
 let statement = (entity: String, attribute: String, value: Value) => {
     let entity = unwrap(identifier(entity))
@@ -16,14 +17,17 @@ let statement = (entity: String, attribute: String, value: Value) => {
 }
 
 runTests("Read Lig", [
+    test("read Identifiers", () => {
+        assertEq(readIdentifier(Gaze.fromString("<a>")), Ok(unwrap(identifier("a"))))
+    }),
+    test("read Values", () => {
+        assertEq(readValue(Gaze.fromString("<a>")), Ok(Identifier(unwrap(identifier("a")))))
+        assertEq(readValue(Gaze.fromString("4321")), Ok(Integer(4321L)))
+        assertEq(readValue(Gaze.fromString("\"hello\"")), Ok(String("hello")))
+        //assertEq(readValue(Gaze.fromString("0xDEAD")), Ok(unwrap(identifier("a"))))
+    }),
     test("read single Statement", () => {
         assertEq(readLig("<a> <b> <c>"),
             Ok([statement("a", "b", Identifier(unwrap(identifier("c"))))]))
     }),
-    // test("read Values", () => {
-    //     assertEq(readValue("<hello>"), toOption(identifier("hello")))
-    //     assertEq(readValue("1234"), Some(Integer(1234L)))
-    //     assertEq(readValue("\"Hello\""), Some(String("Hello")))
-    //     //TODO add bytes test case
-    // })
 ])
