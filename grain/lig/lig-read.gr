@@ -28,19 +28,30 @@ let identifierCharacterNibbler = Nibblers.takeWhile((c) => {
     Regex.isMatch(identifierPattern, toString(c))
 })
 
-let identifierNibbler = Nibblers.between('<', identifierCharacterNibbler, '>')
+export let identifierNibbler = Nibblers.between('<', identifierCharacterNibbler, '>')
 
 //TODO the below Nibbler is incorrect
 let stringContentNibbler = Nibblers.takeWhile((c) => Regex.isMatch(identifierPattern, toString(c)))
 
-let stringNibbler = Gaze.map(Nibblers.between('"', stringContentNibbler, '"'), s => {
-    String(String.implode(Array.fromList(s)))
+/**
+ * A Nibbler that reads Strings as defined by lig.
+ * TODO: this parser is incomplete and just used for testing currently.
+ */
+export let stringNibbler = Gaze.map(Nibblers.between('"', stringContentNibbler, '"'), s => {
+    String.implode(Array.fromList(s))
 })
 
-//TODO this doesn't handle negative numbers and maybe other cases
-let integerNibbler = Gaze.map(Nibblers.takeWhile(c => charInRange(c, '0', '9')), i => {
-    Integer(Int64.fromNumber(unwrap(Number.parse(String.implode(Array.fromList(i))))))
+let stringValueNibbler = Gaze.map(stringNibbler, s => String(s))
+
+/**
+ * A Nibbler that consumes an integer as defined by lig.
+ * TODO: this doesn't handle negative numbers and maybe other cases like too small or large of a number
+ */
+export let integerNibbler = Gaze.map(Nibblers.takeWhile(c => charInRange(c, '0', '9')), i => {
+    Int64.fromNumber(unwrap(Number.parse(String.implode(Array.fromList(i)))))
 })
+
+let integerValueNibbler = Gaze.map(integerNibbler, i => Integer(i))
 
 let bytesNibbler = Nibblers.takeAll([
     Gaze.map(Nibblers.take('0'), (e) => [e]),
@@ -49,7 +60,7 @@ let bytesNibbler = Nibblers.takeAll([
 ])
 
 //TODO add bytes nibbler
-export let valueNibbler = Nibblers.takeFirst([stringNibbler, integerNibbler])
+export let valueNibbler = Nibblers.takeFirst([stringValueNibbler, integerValueNibbler])
 
 export let whitespaceNibbler = Nibblers.takeWhile((c) => c == ' ' || c == '\t')
 
