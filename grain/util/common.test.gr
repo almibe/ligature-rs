@@ -1,0 +1,15 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+import { runTests, test, assertEq } from "./test"
+import { charInRange } from "./common"
+
+runTests("charInRange", [
+    test("basic check", () => {
+        assert(charInRange('b', 'a', 'c'))
+        assert(charInRange('a', 'a', 'c'))
+        assert(charInRange('c', 'a', 'c'))
+        assert(!charInRange('0', 'a', 'c'))
+    })
+])

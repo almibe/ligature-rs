@@ -9,6 +9,7 @@ import Array from "array"
 import Number from "number"
 import Int64 from "int64"
 import { unwrap } from "result"
+import Lig from "../lig/lig-read"
 
 export enum WanderTokens {
   Boolean(Bool),
@@ -37,12 +38,14 @@ export enum WanderTokens {
   ElseKeyword,
 }
 
-let integerNibbler = Gaze.map(Nibblers.take('1'), c => {
-  let str = String.implode(Array.fromList(c))
-  Integer(Int64.fromNumber(unwrap(Number.parse(str))))
-})
+let integerTokenNibbler = Gaze.map(Lig.integerNibbler, int64 => Integer(int64))
 
-let tokenNibbler = Nibblers.repeat(integerNibbler)
+//TODO this is correct yet, should match [a-zA-Z_][a-zA-Z0-9_]+
+let nameNibbler = Nibblers.takeWhileIndex()
+
+let tokenNibbler = Nibblers.repeat(Nibblers.takeFirst([
+  integerTokenNibbler
+]))
 
 export let tokenize = script => {
     let gaze = Gaze.fromString(script)
