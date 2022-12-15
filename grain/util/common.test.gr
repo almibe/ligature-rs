@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import { runTests, test, assertEq } from "./test"
-import { charInRange } from "./common"
+import { charInRange, charInRanges } from "./common"
 
 runTests("charInRange", [
     test("basic check", () => {
@@ -11,5 +11,13 @@ runTests("charInRange", [
         assert(charInRange('a', 'a', 'c'))
         assert(charInRange('c', 'a', 'c'))
         assert(!charInRange('0', 'a', 'c'))
+    })
+])
+
+runTests("charInRanges", [
+    test("basic check", () => {
+        assert(charInRanges('b', [('a', 'c')]))
+        assert(charInRanges('5', [('a', 'c'), ('0', '9')]))
+        assert(!charInRanges('e', [('a', 'c')]))
     })
 ])

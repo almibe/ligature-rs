@@ -3,6 +3,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import Char from "char"
+import { length, nth } from "list"
+import { unwrap } from "option"
 
 /**
  * Fail with a given message.
@@ -30,4 +32,21 @@ export let charInRange = (char, start, end) => {
     let start = Char.code(start)
     let end = Char.code(end)
     char >= start && char <= end
+}
+
+export let rec charInRanges = (char, ranges) => {
+    let mut cont = true
+    let mut result = false
+    let mut index = 0
+    let length = length(ranges)
+    while (cont && index < length) {
+        let (start, end) = unwrap(nth(index, ranges))
+        if (charInRange(char, start, end)) {
+            result = true
+            cont = false
+        } else {
+            index += 1
+        }
+    }
+    result
 }
