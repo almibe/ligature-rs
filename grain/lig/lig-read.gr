@@ -8,7 +8,9 @@ import String from "string"
 import Char from "char"
 import Range from "range"
 import Array from "array"
-import { missing, charInRange } from "../util/common"
+import List from "list"
+import Option from "option"
+import { charInRange } from "../util/common"
 import Nibblers from "../gaze/nibblers"
 import Regex from "regex"
 import { unwrap, isOk } from "result"
@@ -40,15 +42,14 @@ let stringValueNibbler = Gaze.map(stringNibbler, s => String(s))
  * A Nibbler that consumes an integer as defined by lig.
  * TODO: this doesn't handle all cases well like too small or large of a number
  */
-export let integerNibbler = Gaze.map(Nibblers.takeWhileIndex((c, i) => charInRange(c, '0', '9') || (i == 0 && c == '-')), i => {
-    Int64.fromNumber(unwrap(Number.parse(String.implode(Array.fromList(i)))))
+export let integerNibbler = Gaze.map(Nibblers.takeAll([Nibblers.optional(Nibblers.takeString("-")), Nibblers.takeWhile(c => charInRange(c, '0', '9'))]), i => {
+    Int64.fromNumber(unwrap(Number.parse(String.implode(Array.fromList(List.flatten(i))))))
 })
 
 let integerValueNibbler = Gaze.map(integerNibbler, i => Integer(i))
 
 let bytesNibbler = Nibblers.takeAll([
-    Gaze.map(Nibblers.take('0'), (e) => [e]),
-    Gaze.map(Nibblers.take('x'), (e) => [e]),
+    Nibblers.takeString("0x"),
     Nibblers.takeWhile(c => charInRange(c, '0', '9') || charInRange(c, 'A', 'F'))
 ])
 
