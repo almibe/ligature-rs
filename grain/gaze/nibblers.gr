@@ -5,6 +5,8 @@
 import Gaze from "./gaze"
 import List from "list"
 import Option from "option"
+import String from "string"
+import Array from "array"
 
 /**
  * Create a Nibbler that take a single literal value.
@@ -13,12 +15,57 @@ import Option from "option"
  * 
  * @returns A Nibbler that takes a single literal.
  */
-export let take = (t) => (gaze) => {
+export let take = t => gaze => {
     if (Gaze.next(gaze) == Some(t)) {
         Some(t)
     } else {
         None
     }
+}
+
+/**
+ * Create a Nibbler that takes a list of tokens.
+ * 
+ * @param list: The list of tokens to take.
+ * 
+ * @returns The newly created Nibbler.
+ */
+export let takeList = list => gaze => {
+    let length = List.length(list)
+    let mut index = 0
+    let mut cont = true
+    while (!Gaze.isComplete(gaze) && cont && index < length) {
+        let next = Gaze.next(gaze)
+        match (next) {
+            Some(value) => {
+                if (value == Option.unwrap(List.nth(index, list))) {
+                    index += 1
+                } else {
+                    cont = false
+                }
+            },
+            None => {
+                cont = false
+            }
+        }
+    }
+    if (cont && index == length) {
+        Some(list)
+    } else {
+        None
+    }
+}
+
+/**
+ * Create a Nibbler that takes a String when working with a Gaze<Char>.
+ * This is just a helper function that relies on takeList.
+ * 
+ * @param string: The String to match.
+ * 
+ * @returns The newly created Nibbler.
+ */
+export let takeString = string => {
+    takeList(Array.toList(String.explode(string)))
 }
 
 /**
@@ -29,7 +76,7 @@ export let take = (t) => (gaze) => {
  * 
  * @returns A Nibbler that consumes one item as long as the predicate passes.
  */
-export let takeCond = predicate => (gaze) => {
+export let takeCond = predicate => gaze => {
     let next = Gaze.peek(gaze)
     match (next) {
         Some(value) when predicate(value) => {
@@ -48,7 +95,7 @@ export let takeCond = predicate => (gaze) => {
  * 
  * @returns A Nibbler that consumes input as long as the predicate passes.
  */
-export let takeWhile = predicate => (gaze) => {
+export let takeWhile = predicate => gaze => {
     let mut cont = true
     let mut results = []
     while (cont) {
@@ -76,7 +123,7 @@ export let takeWhile = predicate => (gaze) => {
  * 
  * @returns A Nibbler that consumes input as long as the predicate passes.
  */
-export let takeWhileIndex = predicate => (gaze) => {
+export let takeWhileIndex = predicate => gaze => {
     let mut index = 0
     let mut cont = true
     let mut results = []
@@ -99,6 +146,31 @@ export let takeWhileIndex = predicate => (gaze) => {
 }
 
 /**
+ * Create a Nibbler that consumes input until the given Nibbler succeeds.
+ * 
+ * @param nibbler: The Nibbler used to test.
+ * 
+ * @returns The newly created Nibbler.
+ */
+export let takeUntil = nibbler => gaze => {
+    let mut results = []
+    let mut cont = true
+    while (cont && !Gaze.isComplete(gaze)) {
+        let res = Gaze.check(nibbler, gaze)
+        match (res) {
+            Some(_) => {
+                cont = false
+            },
+            None => {
+                let next = Gaze.next(gaze)
+                results = List.append(results, [Option.unwrap(next)])
+            }
+        }
+    }
+    Some(results)
+}
+
+/**
  * Create a Nibbler that accepts a start
  * 
  * @param start: The starting token.
@@ -107,7 +179,7 @@ export let takeWhileIndex = predicate => (gaze) => {
  * 
  * @returns A Nibbler that consumes a starting and ending token and returns the content that matches in between.
  */
-export let between = (start, content, end) => (gaze) => {
+export let between = (start, content, end) => gaze => {
     if (Gaze.next(gaze) == Some(start)) {
         match (Gaze.attempt(content, gaze)) {
             Some(result) => {
@@ -124,7 +196,21 @@ export let between = (start, content, end) => (gaze) => {
     }
 }
 
-export let repeat = (nibbler) => (gaze) => {
+/**
+ * Creates a Nibbler that wraps another Nibbler and will never fail but will instead return an empty List.
+ * 
+ * @param nibbler: The Nibbler to wrap.
+ * 
+ * @returns The newly created Nibbler.
+ */
+export let optional = nibbler => gaze => {
+    match (Gaze.attempt(nibbler, gaze)) {
+        Some(res) => Some(res),
+        None => Some([])
+    }
+}
+
+export let repeat = nibbler => gaze => {
     let mut cont = true
     let mut results = []
     while (cont) {

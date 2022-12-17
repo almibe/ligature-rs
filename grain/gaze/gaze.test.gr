@@ -62,8 +62,25 @@ runTests("Map Suite", [
 runTests("Take Suite", [
     test("take with single value", () => {
         let gaze = Gaze.fromString("a")
-        assert(Gaze.attempt(Nibblers.take('a'), gaze) == Some('a'))
+        assertEq(Gaze.attempt(Nibblers.take('a'), gaze), Some('a'))
         assert(Gaze.isComplete(gaze))
+    })
+])
+
+runTests("Take List Suite", [
+    test("takeList simple", () => {
+        let gaze = Gaze.fromString("hello, world")
+        let list = ['h', 'e', 'l', 'l', 'o']
+        assertEq(Gaze.attempt(Nibblers.takeList(list), gaze), Some(list))
+        assertEq(Gaze.peek(gaze), Some(','))
+    })
+])
+
+runTests("Take String Suite", [
+    test("takeString simple", () => {
+        let gaze = Gaze.fromString("hello, world")
+        assertEq(Gaze.attempt(Nibblers.takeString("hello"), gaze), Some(['h', 'e', 'l', 'l', 'o']))
+        assertEq(Gaze.peek(gaze), Some(','))
     })
 ])
 
@@ -121,11 +138,27 @@ runTests("Take While Index Suite", [
     }),
 ])
 
+runTests("Take Until Suite", [
+    test("takeUntil simple", () => {
+        let gaze = Gaze.fromString("hello, world")
+        assertEq(Gaze.attempt(Nibblers.takeUntil(Nibblers.take(',')), gaze), Some(['h', 'e', 'l', 'l', 'o']))
+        assertEq(Gaze.peek(gaze), Some(','))
+    })
+])
+
 runTests("Between Suite", [
     test("between simple", () => {
         let gaze = Gaze.fromString("abbbbbc")
         assertEq(Gaze.attempt(Nibblers.between('a', Nibblers.takeWhile((c) => c == 'b'), 'c'), gaze), Some(['b', 'b', 'b', 'b', 'b']))
         assert(Gaze.isComplete(gaze))
+    })
+])
+
+runTests("Optional Suite", [
+    test("optional simple", () => {
+        let gaze = Gaze.fromString("a")
+        assertEq(Gaze.attempt(Nibblers.optional(Gaze.map(Nibblers.take('b'), r => [r])), gaze), Some([]))
+        assertEq(Gaze.peek(gaze), Some('a'))
     })
 ])
 
