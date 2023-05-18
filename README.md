@@ -16,15 +16,9 @@ This project uses cargo for building.
 See https://rustup.rs/ for instructions on installing the Rust toolchain.
 See https://doc.rust-lang.org/cargo/ for documentation on cargo in general.
 
-### Grain
-
-This project contains a folder `grain` that contains Grain code for working with Ligature.
-This integration is still experimental and details will be added as things are worked out.
-See https://grain-lang.org for information on Grain.
-
 ## Rust Projects in this Repository
 
-This project uses a monorepo and contains several subprojects.
+This repo contains several projects.
 Each project contains its own README with additional information when needed.
 
 | Name                  | Description                                                         | Output |
