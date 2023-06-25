@@ -14,4 +14,6 @@ repository = "https://github.com/almibe/ligature-rs/"
 ligature = "0.5"
 lig = "0.1"
 ligature-in-memory = "0.1"
-wander = "0.1"
+wander = { path = "../wander" }
+rustyline = "10.0.0"
+anyhow = "1.0"

@@ -7,6 +7,38 @@
 
 #![deny(missing_docs)]
 
-fn main() {
-    println!("Hello from ligature-repl!");
+use wander::run;
+use rustyline::error::ReadlineError;
+use rustyline::{Editor, Result};
+
+fn main() -> Result<()> {
+    println!("Welcome to Ligature REPL!!!");
+    println!("Press Ctrl+C or Ctrl+D or type `exit()` to quit.");
+    let mut rl = Editor::<()>::new()?;
+    if rl.load_history("history.txt").is_err() {
+        println!("No previous history.");
+    }
+    loop {
+        let readline = rl.readline("> ");
+        match readline {
+            Ok(line) => {
+                rl.add_history_entry(line.as_str());
+                let result = run(line.as_str());
+                println!("Result: {:?}", result);
+            }
+            Err(ReadlineError::Interrupted) => {
+                println!("Quitting...");
+                break;
+            }
+            Err(ReadlineError::Eof) => {
+                println!("Quitting...");
+                break;
+            }
+            Err(err) => {
+                println!("Error: {:?}", err);
+                break;
+            }
+        }
+    }
+    rl.save_history("history.txt")
 }
