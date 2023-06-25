@@ -3,5 +3,23 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 //! This module is an implementation of the Wander scripting language.
-struct Wander {
+
+use interpreter::eval;
+use ligature::LigatureError;
+
+pub mod lexer;
+pub mod parser;
+pub mod interpreter;
+use crate::lexer::tokenize;
+use crate::parser::parse;
+
+#[derive(Debug, PartialEq)]
+pub enum WanderValue {
+    Boolean(bool)
+}
+
+pub fn run(script: &str) -> Result<WanderValue, LigatureError> {
+    let tokens = tokenize(script)?;
+    let elements = parse(tokens)?;
+    eval(elements)
 }

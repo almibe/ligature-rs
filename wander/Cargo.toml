@@ -12,5 +12,5 @@ repository = "https://github.com/almibe/ligature-rs/"
 
 [dependencies]
 ligature = { path = "../ligature" }
-lig = { path = "../lig" }
+logos = "0.13"
 gaze = { path = "../../gaze" }
