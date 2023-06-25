@@ -11,3 +11,19 @@ fn run_wander_true() {
     let expected = Ok(WanderValue::Boolean(true));
     assert_eq!(res, expected);
 }
+
+#[test]
+fn run_wander_integer() {
+    let input = "-100";
+    let res = run(input);
+    let expected = Ok(WanderValue::Int(-100));
+    assert_eq!(res, expected);
+}
+
+#[test]
+fn run_wander_string() {
+    let input = "\"Hello world\"";
+    let res = run(input);
+    let expected = Ok(WanderValue::String(String::from("Hello world")));
+    assert_eq!(res, expected);
+}

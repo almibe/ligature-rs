@@ -5,17 +5,20 @@
 //! This module is an implementation of the Wander scripting language.
 
 use interpreter::eval;
-use ligature::LigatureError;
+use ligature::{Identifier, LigatureError};
 
+pub mod interpreter;
 pub mod lexer;
 pub mod parser;
-pub mod interpreter;
 use crate::lexer::tokenize;
 use crate::parser::parse;
 
 #[derive(Debug, PartialEq)]
 pub enum WanderValue {
-    Boolean(bool)
+    Boolean(bool),
+    Int(i64),
+    String(String),
+    Identifier(Identifier),
 }
 
 pub fn run(script: &str) -> Result<WanderValue, LigatureError> {

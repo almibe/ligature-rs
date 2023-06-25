@@ -8,5 +8,10 @@ use crate::parser::Element;
 use crate::WanderValue;
 
 pub fn eval(script: Vec<Element>) -> Result<WanderValue, LigatureError> {
-    Ok(WanderValue::Boolean(true))
+    match script.last() {
+        Some(Element::Boolean(value)) => Ok(WanderValue::Boolean(*value)),
+        Some(Element::Int(value)) => Ok(WanderValue::Int(*value)),
+        Some(Element::String(value)) => Ok(WanderValue::String(value.to_string())),
+        _ => todo!(),
+    }
 }
