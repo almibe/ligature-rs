@@ -67,6 +67,14 @@ fn tokenize_identifier() {
 }
 
 #[test]
+fn tokenize_name() {
+    let input = "hello123";
+    let res = tokenize(input);
+    let expected = Ok(vec![Token::Name(String::from("hello123"))]);
+    assert_eq!(res, expected);
+}
+
+#[test]
 fn tokenize_names_keywords_and_symbols() {
     let input = "let x = 5";
     let res = tokenize(input);

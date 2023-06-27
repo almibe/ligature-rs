@@ -12,6 +12,7 @@ pub enum Element {
     Boolean(bool),
     Int(i64),
     String(String),
+    Name(String),
     Identifier(Identifier),
     Let(String, Box<Element>),
 }
@@ -34,6 +35,13 @@ fn string(gaze: &mut Gaze<Token>) -> Result<Element, LigatureError> {
     match gaze.next() {
         Some(Token::String(value)) => Ok(Element::String(value)),
         _ => Err(LigatureError(String::from("No Match String"))),
+    }
+}
+
+fn name(gaze: &mut Gaze<Token>) -> Result<Element, LigatureError> {
+    match gaze.next() {
+        Some(Token::Name(value)) => Ok(Element::Name(value)),
+        _ => Err(LigatureError(String::from("No Match Name"))),
     }
 }
 
@@ -65,15 +73,15 @@ fn let_binding(gaze: &mut Gaze<Token>) -> Result<Element, LigatureError> {
                 Ok(element) => {
                     Ok(Element::Let(name, Box::new(element)))
                 },
-                _ => todo!(),
+                _ => Err(LigatureError(String::from("No match"))),
             }
         }
-        _ => todo!(),
+        _ => Err(LigatureError(String::from("No match"))),
     }
 }
 
 fn elements(gaze: &mut Gaze<Token>) -> Result<Vec<Element>, LigatureError> {
-    let parsers = vec![boolean, int, string, identifier, let_binding];
+    let parsers = vec![name, boolean, int, string, identifier, let_binding];
     let mut results = vec![];
     'outer: while !gaze.is_complete() {
         for parser in parsers.iter() {

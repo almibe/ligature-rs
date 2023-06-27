@@ -48,6 +48,14 @@ fn parse_strings() {
 }
 
 #[test]
+fn parse_name() {
+    let input = vec![Token::Name(String::from("test"))];
+    let expected = Ok(vec![Element::Name(String::from("test"))]);
+    let res = parse(input);
+    assert_eq!(res, expected);
+}
+
+#[test]
 fn parse_let_binding() {
     let input = vec![
         Token::Let,
