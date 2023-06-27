@@ -20,6 +20,7 @@ pub enum WanderValue {
     Int(i64),
     String(String),
     Identifier(Identifier),
+    Nothing
 }
 
 pub fn run(script: &str) -> Result<WanderValue, LigatureError> {

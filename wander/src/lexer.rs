@@ -5,9 +5,15 @@
 use ligature::{Identifier, LigatureError};
 use logos::{Lexer, Logos, Source};
 
-#[derive(Logos, Debug, PartialEq)]
+#[derive(Logos, Debug, PartialEq, Clone)]
 #[logos(skip r"[ \t\n\f\r]+")]
 pub enum Token {
+    #[token("let")]
+    Let,
+
+    #[token("=")]
+    EqualSign,
+
     #[token("if")]
     If,
 
@@ -23,8 +29,8 @@ pub enum Token {
     #[regex("<[a-zA-Z0-9]+>", identifier)] //TODO this is wrong
     Identifier(Identifier),
 
-    #[regex("[a-zA-Z]+")]
-    Name,
+    #[regex("[_a-zA-Z]+[_a-zA-Z0-9]*", name)]
+    Name(String),
 
     #[regex("(true)|(false)", bool)]
     Boolean(bool),
@@ -61,11 +67,15 @@ fn identifier(lex: &mut Lexer<Token>) -> Option<Identifier> {
     }
 }
 
+fn name(lex: &mut Lexer<Token>) -> Option<String> {
+    Some(lex.slice().to_string())
+}
+
 pub fn tokenize(script: &str) -> Result<Vec<Token>, LigatureError> {
     let lexer = Token::lexer(script);
     let mut results = vec![];
-    for x in lexer {
-        match x {
+    for token in lexer {
+        match token {
             Ok(token) => results.push(token),
             Err(err) => todo!(), //Err(LigatureError(String::from("Error tokenizing input.")))
         }

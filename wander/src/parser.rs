@@ -2,8 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use gaze::Gaze;
-use ligature::{Identifier, LigatureError};
+use gaze::{Gaze, Step};
+use ligature::{Identifier, LigatureError, Value};
 
 use crate::lexer::Token;
 
@@ -19,33 +19,57 @@ pub enum Element {
 fn boolean(gaze: &mut Gaze<Token>) -> Result<Element, LigatureError> {
     match gaze.next() {
         Some(Token::Boolean(value)) => Ok(Element::Boolean(value)),
-        _ => Err(LigatureError(String::from("No Match Boolean")))
+        _ => Err(LigatureError(String::from("No Match Boolean"))),
     }
 }
 
 fn int(gaze: &mut Gaze<Token>) -> Result<Element, LigatureError> {
     match gaze.next() {
         Some(Token::Int(value)) => Ok(Element::Int(value)),
-        _ => Err(LigatureError(String::from("No Match Integer")))
+        _ => Err(LigatureError(String::from("No Match Integer"))),
     }
 }
 
 fn string(gaze: &mut Gaze<Token>) -> Result<Element, LigatureError> {
     match gaze.next() {
         Some(Token::String(value)) => Ok(Element::String(value)),
-        _ => Err(LigatureError(String::from("No Match String")))
+        _ => Err(LigatureError(String::from("No Match String"))),
     }
 }
 
 fn identifier(gaze: &mut Gaze<Token>) -> Result<Element, LigatureError> {
     match gaze.next() {
         Some(Token::Identifier(value)) => Ok(Element::Identifier(value)),
-        _ => Err(LigatureError(String::from("No Match Identifier")))
+        _ => Err(LigatureError(String::from("No Match Identifier"))),
+    }
+}
+
+fn take_token(token: Token) -> Box<Step<Token, Element, LigatureError>> {
+    todo!()
+}
+
+fn literal_token_to_element(token: Token) -> Result<Element, LigatureError> {
+    match token {
+        Token::Boolean(value) => Ok(Element::Boolean(value)),
+        Token::Int(value) => Ok(Element::Int(value)),
+        Token::Identifier(value) => Ok(Element::Identifier(value)),
+        Token::String(value) => Ok(Element::String(value)),
+        _ => todo!(),
     }
 }
 
 fn let_binding(gaze: &mut Gaze<Token>) -> Result<Element, LigatureError> {
-    todo!()
+    match (gaze.next(), gaze.next(), gaze.next(), gaze.next()) {
+        (Some(Token::Let), Some(Token::Name(name)), Some(Token::EqualSign), Some(value)) => {
+            match literal_token_to_element(value) {
+                Ok(element) => {
+                    Ok(Element::Let(name, Box::new(element)))
+                },
+                _ => todo!(),
+            }
+        }
+        _ => todo!(),
+    }
 }
 
 fn elements(gaze: &mut Gaze<Token>) -> Result<Vec<Element>, LigatureError> {
@@ -58,7 +82,7 @@ fn elements(gaze: &mut Gaze<Token>) -> Result<Vec<Element>, LigatureError> {
                 continue 'outer;
             }
         }
-        return Err(LigatureError(String::from("No Match Elements")))
+        return Err(LigatureError(String::from("No Match Elements")));
     }
     Ok(results)
 }

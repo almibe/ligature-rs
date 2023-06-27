@@ -65,3 +65,16 @@ fn tokenize_identifier() {
     let expected = Ok(vec![Token::Identifier(expected_identifier)]);
     assert_eq!(res, expected);
 }
+
+#[test]
+fn tokenize_names_keywords_and_symbols() {
+    let input = "let x = 5";
+    let res = tokenize(input);
+    let expected = Ok(vec![
+        Token::Let,
+        Token::Name(String::from("x")),
+        Token::EqualSign,
+        Token::Int(5),
+    ]);
+    assert_eq!(res, expected);
+}

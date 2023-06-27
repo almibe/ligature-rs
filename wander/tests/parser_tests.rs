@@ -46,3 +46,19 @@ fn parse_strings() {
     ]);
     assert_eq!(res, expected);
 }
+
+#[test]
+fn parse_let_binding() {
+    let input = vec![
+        Token::Let,
+        Token::Name(String::from("x")),
+        Token::EqualSign,
+        Token::Int(5),
+    ];
+    let res = parse(input);
+    let expected = Ok(vec![Element::Let(
+        String::from("x"),
+        Box::new(Element::Int(5)),
+    )]);
+    assert_eq!(res, expected)
+}
