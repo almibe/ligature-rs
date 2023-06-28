@@ -86,3 +86,16 @@ fn tokenize_names_keywords_and_symbols() {
     ]);
     assert_eq!(res, expected);
 }
+
+#[test]
+fn tokenize_function_call() {
+    let input = "not(false)";
+    let res = tokenize(input);
+    let expected = Ok(vec![
+        Token::Name(String::from("not")),
+        Token::OpenParen,
+        Token::Boolean(false),
+        Token::CloseParen,
+    ]);
+    assert_eq!(res, expected);
+}

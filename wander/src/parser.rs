@@ -15,44 +15,49 @@ pub enum Element {
     Name(String),
     Identifier(Identifier),
     Let(String, Box<Element>),
+    FunctionCall(String, Vec<Element>),
 }
 
-fn boolean(gaze: &mut Gaze<Token>) -> Result<Element, LigatureError> {
+fn boolean(gaze: &mut Gaze<Token>) -> Option<Element> {
     match gaze.next() {
-        Some(Token::Boolean(value)) => Ok(Element::Boolean(value)),
-        _ => Err(LigatureError(String::from("No Match Boolean"))),
+        Some(Token::Boolean(value)) => Some(Element::Boolean(value)),
+        _ => None,
     }
 }
 
-fn int(gaze: &mut Gaze<Token>) -> Result<Element, LigatureError> {
+fn int(gaze: &mut Gaze<Token>) -> Option<Element> {
     match gaze.next() {
-        Some(Token::Int(value)) => Ok(Element::Int(value)),
-        _ => Err(LigatureError(String::from("No Match Integer"))),
+        Some(Token::Int(value)) => Some(Element::Int(value)),
+        _ => None,
     }
 }
 
-fn string(gaze: &mut Gaze<Token>) -> Result<Element, LigatureError> {
+fn string(gaze: &mut Gaze<Token>) -> Option<Element> {
     match gaze.next() {
-        Some(Token::String(value)) => Ok(Element::String(value)),
-        _ => Err(LigatureError(String::from("No Match String"))),
+        Some(Token::String(value)) => Some(Element::String(value)),
+        _ => None,
     }
 }
 
-fn name(gaze: &mut Gaze<Token>) -> Result<Element, LigatureError> {
+fn function_call(gaze: &mut Gaze<Token>) -> Option<Element> {
+    todo!()
+}
+
+fn name(gaze: &mut Gaze<Token>) -> Option<Element> {
     match gaze.next() {
-        Some(Token::Name(value)) => Ok(Element::Name(value)),
-        _ => Err(LigatureError(String::from("No Match Name"))),
+        Some(Token::Name(value)) => Some(Element::Name(value)),
+        _ => None,
     }
 }
 
-fn identifier(gaze: &mut Gaze<Token>) -> Result<Element, LigatureError> {
+fn identifier(gaze: &mut Gaze<Token>) -> Option<Element> {
     match gaze.next() {
-        Some(Token::Identifier(value)) => Ok(Element::Identifier(value)),
-        _ => Err(LigatureError(String::from("No Match Identifier"))),
+        Some(Token::Identifier(value)) => Some(Element::Identifier(value)),
+        _ => None,
     }
 }
 
-fn take_token(token: Token) -> Box<Step<Token, Element, LigatureError>> {
+fn take_token(token: Token) -> Box<Step<Token, Element>> {
     todo!()
 }
 
@@ -66,36 +71,37 @@ fn literal_token_to_element(token: Token) -> Result<Element, LigatureError> {
     }
 }
 
-fn let_binding(gaze: &mut Gaze<Token>) -> Result<Element, LigatureError> {
+fn let_binding(gaze: &mut Gaze<Token>) -> Option<Element> {
     match (gaze.next(), gaze.next(), gaze.next(), gaze.next()) {
         (Some(Token::Let), Some(Token::Name(name)), Some(Token::EqualSign), Some(value)) => {
             match literal_token_to_element(value) {
-                Ok(element) => {
-                    Ok(Element::Let(name, Box::new(element)))
-                },
-                _ => Err(LigatureError(String::from("No match"))),
+                Ok(element) => Some(Element::Let(name, Box::new(element))),
+                _ => None,
             }
         }
-        _ => Err(LigatureError(String::from("No match"))),
+        _ => None,
     }
 }
 
-fn elements(gaze: &mut Gaze<Token>) -> Result<Vec<Element>, LigatureError> {
+fn elements(gaze: &mut Gaze<Token>) -> Option<Vec<Element>> {
     let parsers = vec![name, boolean, int, string, identifier, let_binding];
     let mut results = vec![];
     'outer: while !gaze.is_complete() {
         for parser in parsers.iter() {
-            if let Ok(element) = gaze.attempt(parser) {
+            if let Some(element) = gaze.attempt(parser) {
                 results.push(element);
                 continue 'outer;
             }
         }
-        return Err(LigatureError(String::from("No Match Elements")));
+        return None;
     }
-    Ok(results)
+    Some(results)
 }
 
 pub fn parse(tokens: Vec<Token>) -> Result<Vec<Element>, LigatureError> {
     let mut gaze = Gaze::from_vec(tokens);
-    gaze.attempt(&elements)
+    match gaze.attempt(&elements) {
+        Some(value) => Ok(value),
+        None => Err(LigatureError(String::from("Error parsing")))
+    }
 }

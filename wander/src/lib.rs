@@ -4,23 +4,30 @@
 
 //! This module is an implementation of the Wander scripting language.
 
-use crate::lexer::tokenize;
-use crate::parser::parse;
 use interpreter::eval;
+use lexer::tokenize;
 use ligature::{Identifier, LigatureError};
+use parser::parse;
 
 pub mod bindings;
 pub mod interpreter;
 pub mod lexer;
 pub mod parser;
+pub mod preludes;
 
-#[derive(Debug, PartialEq, Clone)]
+pub trait NativeFunction {
+    fn run(&self) -> Result<WanderValue, LigatureError>;
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub enum WanderValue {
     Boolean(bool),
     Int(i64),
     String(String),
     Identifier(Identifier),
-    Nothing
+    Nothing,
+    /// A named reference to a NativeFunction.
+    NativeFunction(String),
 }
 
 pub fn run(script: &str) -> Result<WanderValue, LigatureError> {

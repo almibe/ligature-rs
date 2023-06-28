@@ -2,16 +2,18 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use crate::WanderValue;
+use crate::{NativeFunction, WanderValue};
 use std::collections::{HashMap, HashSet};
 
 pub struct Bindings {
+    native_functions: HashMap<String, Box<dyn NativeFunction>>,
     scopes: Vec<HashMap<String, WanderValue>>,
 }
 
 impl Bindings {
     pub fn new() -> Bindings {
         Bindings {
+            native_functions: HashMap::new(),
             scopes: vec![HashMap::new()],
         }
     }
@@ -46,12 +48,19 @@ impl Bindings {
         self.scopes.push(current_scope);
     }
 
+    pub fn bind_native_function(&mut self, name: String, function: Box<dyn NativeFunction>) {
+        self.native_functions.insert(name, function);
+    }
+
     pub fn bound_names(&self) -> HashSet<String> {
         let mut names = HashSet::new();
         for scope in self.scopes.iter() {
             for (name, _) in scope {
                 names.insert(name.clone());
             }
+        }
+        for native_function in self.native_functions.keys() {
+            names.insert(native_function.clone());
         }
         names
     }

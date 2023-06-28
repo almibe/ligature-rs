@@ -25,13 +25,17 @@ pub fn eval(script: Vec<Element>) -> Result<WanderValue, LigatureError> {
     result
 }
 
-fn handle_let(name: &String, element: &Box<Element>, bindings: &mut Bindings) -> Result<WanderValue, LigatureError> {
+fn handle_let(
+    name: &String,
+    element: &Box<Element>,
+    bindings: &mut Bindings,
+) -> Result<WanderValue, LigatureError> {
     match literal_element_to_wander_value(element.as_ref()) {
         Ok(value) => {
             bindings.bind(name.to_string(), value);
             Ok(WanderValue::Nothing)
-        },
-        _ => todo!()
+        }
+        _ => todo!(),
     }
 }
 
@@ -48,6 +52,9 @@ fn literal_element_to_wander_value(element: &Element) -> Result<WanderValue, Lig
 fn read_name(name: &String, bindings: &mut Bindings) -> Result<WanderValue, LigatureError> {
     match bindings.read(name.to_string()) {
         Some(value) => Ok(value),
-        _ => Err(LigatureError(format!("Error looking up {}", name.to_string())))
+        _ => Err(LigatureError(format!(
+            "Error looking up {}",
+            name.to_string()
+        ))),
     }
 }

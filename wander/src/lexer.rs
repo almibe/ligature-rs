@@ -34,6 +34,12 @@ pub enum Token {
 
     #[regex("(true)|(false)", bool)]
     Boolean(bool),
+
+    #[token("(")]
+    OpenParen,
+
+    #[token(")")]
+    CloseParen,
 }
 
 fn bool(lex: &mut Lexer<Token>) -> Option<bool> {

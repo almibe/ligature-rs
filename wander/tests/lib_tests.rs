@@ -53,3 +53,9 @@ fn run_wander_let_binding_and_reference() {
     let expected = Ok(WanderValue::Boolean(true));
     assert_eq!(res, expected);
 }
+
+//#[test]
+fn run_native_function() {
+    let input = "not(false)";
+    let res = run(input);
+}
