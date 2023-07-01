@@ -7,11 +7,13 @@
 
 #![deny(missing_docs)]
 
+use wander::preludes::common;
 use wander::run;
 use rustyline::error::ReadlineError;
 use rustyline::{Editor, Result};
 
 fn main() -> Result<()> {
+    let mut bindings = common();
     println!("Welcome to Ligature REPL!!!");
     println!("Press Ctrl+C or Ctrl+D or type `exit()` to quit.");
     let mut rl = Editor::<()>::new()?;
@@ -23,7 +25,7 @@ fn main() -> Result<()> {
         match readline {
             Ok(line) => {
                 rl.add_history_entry(line.as_str());
-                let result = run(line.as_str());
+                let result = run(line.as_str(), &mut bindings);
                 println!("Result: {:?}", result);
             }
             Err(ReadlineError::Interrupted) => {
