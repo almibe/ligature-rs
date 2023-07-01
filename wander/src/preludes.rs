@@ -2,12 +2,42 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use crate::{bindings::Bindings, NativeFunction};
+use ligature::LigatureError;
+use std::rc::Rc;
+
+use crate::{bindings::Bindings, parser::Element, NativeFunction};
 
 struct AndFunction {}
 impl NativeFunction for AndFunction {
-    fn run(&self) -> Result<crate::WanderValue, ligature::LigatureError> {
-        Ok(crate::WanderValue::Boolean(true))
+    fn run(
+        &self,
+        arguments: Vec<Element>,
+        _bindings: &mut Bindings,
+    ) -> Result<crate::WanderValue, ligature::LigatureError> {
+        if let [Element::Boolean(left), Element::Boolean(right)] = arguments[..] {
+            Ok(crate::WanderValue::Boolean(left && right))
+        } else {
+            Err(LigatureError(
+                "`and` function requires two boolean parameters.".to_owned(),
+            ))
+        }
+    }
+}
+
+struct NotFunction {}
+impl NativeFunction for NotFunction {
+    fn run(
+        &self,
+        arguments: Vec<Element>,
+        _bindings: &mut Bindings,
+    ) -> Result<crate::WanderValue, ligature::LigatureError> {
+        if let [Element::Boolean(value)] = arguments[..] {
+            Ok(crate::WanderValue::Boolean(!value))
+        } else {
+            Err(LigatureError(
+                "`not` function requires one boolean parameter.".to_owned(),
+            ))
+        }
     }
 }
 
@@ -15,6 +45,7 @@ impl NativeFunction for AndFunction {
 /// functionality, but doesn't interact with an instance of Ligature.
 pub fn common() -> Bindings {
     let mut bindings = Bindings::new();
-    bindings.bind_native_function(String::from("and"), Box::new(AndFunction {}));
+    bindings.bind_native_function(String::from("and"), Rc::new(AndFunction {}));
+    bindings.bind_native_function(String::from("not"), Rc::new(NotFunction {}));
     bindings
 }

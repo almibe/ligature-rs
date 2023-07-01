@@ -17,8 +17,8 @@ fn bind_single_value() {
     bindings.bind(String::from("hello"), WanderValue::Int(3));
     let result = bindings.bound_names();
     assert!(result.contains(&String::from("hello")));
-    let read_result = bindings.read(String::from("hello"));
-    let none_result = bindings.read(String::from("nope"));
+    let read_result = bindings.read(&String::from("hello"));
+    let none_result = bindings.read(&String::from("nope"));
     assert_eq!(read_result, Some(WanderValue::Int(3)));
     assert_eq!(none_result, None);
 }

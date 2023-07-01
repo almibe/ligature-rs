@@ -4,12 +4,13 @@
 
 use wander::interpreter::eval;
 use wander::parser::Element;
+use wander::preludes::common;
 use wander::WanderValue;
 
 #[test]
 fn eval_boolean_true() {
     let input = vec![Element::Boolean(true)];
-    let res = eval(input);
+    let res = eval(input, &mut common());
     let expected = Ok(WanderValue::Boolean(true));
     assert_eq!(res, expected);
 }

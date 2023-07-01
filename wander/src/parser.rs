@@ -2,8 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use gaze::{Gaze, Step};
-use ligature::{Identifier, LigatureError, Value};
+use gaze::Gaze;
+use ligature::{Identifier, LigatureError};
 
 use crate::lexer::Token;
 
@@ -40,7 +40,26 @@ fn string(gaze: &mut Gaze<Token>) -> Option<Element> {
 }
 
 fn function_call(gaze: &mut Gaze<Token>) -> Option<Element> {
-    todo!()
+    //    take_all(take_name(), take_open_paren(), take_arguments(), take_close_paren);
+    let name = if let Some(Token::Name(function_name)) = gaze.next() {
+        function_name
+    } else {
+        return None;
+    };
+    if gaze.next() != Some(Token::OpenParen) {
+        return None;
+    }
+    let mut arguments = vec![];
+    while gaze.peek() != None && gaze.peek() != Some(Token::CloseParen) {
+        match gaze.next() {
+            Some(Token::Boolean(value)) => arguments.push(Element::Boolean(value)),
+            _ => return None,
+        }
+    }
+    if gaze.next() != Some(Token::CloseParen) {
+        return None;
+    }
+    Some(Element::FunctionCall(name, arguments))
 }
 
 fn name(gaze: &mut Gaze<Token>) -> Option<Element> {
@@ -55,10 +74,6 @@ fn identifier(gaze: &mut Gaze<Token>) -> Option<Element> {
         Some(Token::Identifier(value)) => Some(Element::Identifier(value)),
         _ => None,
     }
-}
-
-fn take_token(token: Token) -> Box<Step<Token, Element>> {
-    todo!()
 }
 
 fn literal_token_to_element(token: Token) -> Result<Element, LigatureError> {
@@ -84,11 +99,19 @@ fn let_binding(gaze: &mut Gaze<Token>) -> Option<Element> {
 }
 
 fn elements(gaze: &mut Gaze<Token>) -> Option<Vec<Element>> {
-    let parsers = vec![name, boolean, int, string, identifier, let_binding];
+    let mut parsers = vec![
+        function_call,
+        name,
+        boolean,
+        int,
+        string,
+        identifier,
+        let_binding,
+    ];
     let mut results = vec![];
     'outer: while !gaze.is_complete() {
-        for parser in parsers.iter() {
-            if let Some(element) = gaze.attempt(parser) {
+        for &mut mut parser in parsers.iter_mut() {
+            if let Some(element) = gaze.attemptf(&mut parser) {
                 results.push(element);
                 continue 'outer;
             }
@@ -98,10 +121,12 @@ fn elements(gaze: &mut Gaze<Token>) -> Option<Vec<Element>> {
     Some(results)
 }
 
+//const BOOLEAN: Nibbler<Token, Element> = ConvertNblr { to_match: To };
+
 pub fn parse(tokens: Vec<Token>) -> Result<Vec<Element>, LigatureError> {
     let mut gaze = Gaze::from_vec(tokens);
-    match gaze.attempt(&elements) {
+    match gaze.attemptf(&mut elements) {
         Some(value) => Ok(value),
-        None => Err(LigatureError(String::from("Error parsing")))
+        None => Err(LigatureError(String::from("Error parsing"))),
     }
 }

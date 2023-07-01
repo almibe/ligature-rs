@@ -4,10 +4,11 @@
 
 //! This module is an implementation of the Wander scripting language.
 
+use bindings::Bindings;
 use interpreter::eval;
 use lexer::tokenize;
 use ligature::{Identifier, LigatureError};
-use parser::parse;
+use parser::{parse, Element};
 
 pub mod bindings;
 pub mod interpreter;
@@ -16,7 +17,11 @@ pub mod parser;
 pub mod preludes;
 
 pub trait NativeFunction {
-    fn run(&self) -> Result<WanderValue, LigatureError>;
+    fn run(
+        &self,
+        arguments: Vec<Element>,
+        bindings: &mut Bindings,
+    ) -> Result<WanderValue, LigatureError>;
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -30,8 +35,8 @@ pub enum WanderValue {
     NativeFunction(String),
 }
 
-pub fn run(script: &str) -> Result<WanderValue, LigatureError> {
+pub fn run(script: &str, bindings: &mut Bindings) -> Result<WanderValue, LigatureError> {
     let tokens = tokenize(script)?;
     let elements = parse(tokens)?;
-    eval(elements)
+    eval(elements, bindings)
 }

@@ -3,12 +3,12 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use ligature::Identifier;
-use wander::{run, WanderValue};
+use wander::{preludes::common, run, WanderValue};
 
 #[test]
 fn run_wander_true() {
     let input = "true";
-    let res = run(input);
+    let res = run(input, &mut common());
     let expected = Ok(WanderValue::Boolean(true));
     assert_eq!(res, expected);
 }
@@ -16,7 +16,7 @@ fn run_wander_true() {
 #[test]
 fn run_wander_integer() {
     let input = "-100";
-    let res = run(input);
+    let res = run(input, &mut common());
     let expected = Ok(WanderValue::Int(-100));
     assert_eq!(res, expected);
 }
@@ -24,7 +24,7 @@ fn run_wander_integer() {
 #[test]
 fn run_wander_string() {
     let input = "\"Hello world\"";
-    let res = run(input);
+    let res = run(input, &mut common());
     let expected = Ok(WanderValue::String(String::from("Hello world")));
     assert_eq!(res, expected);
 }
@@ -33,7 +33,7 @@ fn run_wander_string() {
 fn run_wander_identifier() {
     let expected_identifier = Identifier::new("hello").unwrap();
     let input = "<hello>";
-    let res = run(input);
+    let res = run(input, &mut common());
     let expected = Ok(WanderValue::Identifier(expected_identifier));
     assert_eq!(res, expected);
 }
@@ -41,7 +41,7 @@ fn run_wander_identifier() {
 #[test]
 fn run_wander_let_binding() {
     let input = "let x = true";
-    let res = run(input);
+    let res = run(input, &mut common());
     let expected = Ok(WanderValue::Nothing);
     assert_eq!(res, expected);
 }
@@ -49,13 +49,15 @@ fn run_wander_let_binding() {
 #[test]
 fn run_wander_let_binding_and_reference() {
     let input = "let x = true x";
-    let res = run(input);
+    let res = run(input, &mut common());
     let expected = Ok(WanderValue::Boolean(true));
     assert_eq!(res, expected);
 }
 
-//#[test]
+#[test]
 fn run_native_function() {
-    let input = "not(false)";
-    let res = run(input);
+    let input = "not(true)";
+    let res = run(input, &mut common()); //TODO run should accept prelude as 2nd arg
+    let expected = Ok(WanderValue::Boolean(false));
+    assert_eq!(res, expected);
 }

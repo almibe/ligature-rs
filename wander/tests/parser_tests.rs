@@ -64,8 +64,7 @@ fn parse_let_binding() {
         Token::Int(5),
     ];
     let res = parse(input);
-    let expected = Ok(vec![
-        Element::Let(
+    let expected = Ok(vec![Element::Let(
         String::from("x"),
         Box::new(Element::Int(5)),
     )]);
@@ -81,8 +80,9 @@ fn parse_function_call() {
         Token::CloseParen,
     ];
     let res = parse(input);
-    let expected = Ok(vec![
-        Element::FunctionCall(String::from("test"), vec![Element::Boolean(false)])
-    ]);
+    let expected = Ok(vec![Element::FunctionCall(
+        String::from("test"),
+        vec![Element::Boolean(false)],
+    )]);
     assert_eq!(res, expected);
 }
