@@ -1,7 +1,7 @@
 [workspace]
 
 members = [
-    "lig",
+#    "lig",
     "ligature",
     "ligature-benchmark",
     "ligature-graph",
