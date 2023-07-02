@@ -30,4 +30,5 @@ Each project contains its own README with additional information when needed.
 | ligature-benchmark    | A simple benchmark for Ligature implementations.                    | lib    |
 | ligature-in-memory    | An in-memory implementation of Ligature.                            | lib    |
 | ligature-sqlite       | An implementation of Ligature that uses sqlite3 for storage.        | lib    |
+| ligature-redb         | An implementation of Ligature that uses redb for storage.           | lib    |
 | ligature-repl         | A REPL for using Ligature and Wander.                               | app    |

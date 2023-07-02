@@ -1,0 +1,16 @@
+[package]
+name = "ligature-redb"
+version = "0.1.0"
+publish = false
+authors = ["Alex Michael Berry <alexmiberry@gmail.com>"]
+edition = "2021"
+license = "MPL-2.0"
+description = "An implementation of Ligature that uses redb to store Ligature's data model."
+repository = "https://github.com/almibe/ligature-rs/"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ligature = { path = "../ligature" }
+redb = "1.0.3"
+bytes = "1"
