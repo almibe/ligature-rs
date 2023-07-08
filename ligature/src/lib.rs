@@ -10,6 +10,8 @@
 #[macro_use]
 extern crate lazy_static;
 
+use std::fmt::Display;
+
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -75,6 +77,12 @@ impl Identifier {
     /// Returns the name of the given Identifier.
     pub fn id(&self) -> &str {
         &self.0
+    }
+}
+
+impl Display for Identifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "<{}>", self.0)
     }
 }
 

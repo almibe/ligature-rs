@@ -12,14 +12,16 @@ use zmq::{Context, Socket};
 
 pub struct LigatureZeroMQClient {
     ctx: Context,
-    socket: Socket
+    socket: Socket,
 }
 
 impl LigatureZeroMQClient {
     pub fn create(port: u32) -> Result<Self, Error> {
         let ctx = zmq::Context::new();
         let socket = ctx.socket(zmq::REQ).unwrap();
-        socket.connect(format!("tcp://127.0.0.1:{}", port.to_string()).as_str()).unwrap();
+        socket
+            .connect(format!("tcp://127.0.0.1:{}", port.to_string()).as_str())
+            .unwrap();
         Ok(LigatureZeroMQClient { ctx, socket })
     }
 

@@ -4,6 +4,8 @@
 
 //! This module is an implementation of the Wander scripting language.
 
+use std::fmt::Display;
+
 use bindings::Bindings;
 use interpreter::eval;
 use lexer::tokenize;
@@ -33,6 +35,19 @@ pub enum WanderValue {
     Nothing,
     /// A named reference to a NativeFunction.
     NativeFunction(String),
+}
+
+impl Display for WanderValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            WanderValue::Boolean(value) => write!(f, "{}", value),
+            WanderValue::Int(value) => write!(f, "{}", value),
+            WanderValue::String(value) => write!(f, "{}", value),
+            WanderValue::Identifier(value) => write!(f, "{}", value),
+            WanderValue::Nothing => write!(f, "nothing"),
+            WanderValue::NativeFunction(_) => write!(f, "[function]"),
+        }
+    }
 }
 
 pub fn run(script: &str, bindings: &mut Bindings) -> Result<WanderValue, LigatureError> {

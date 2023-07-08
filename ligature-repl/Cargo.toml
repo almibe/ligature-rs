@@ -15,5 +15,6 @@ ligature = "0.5"
 lig = "0.1"
 ligature-in-memory = "0.1"
 wander = { path = "../wander" }
+ligature-client = { path = "../ligature-client" }
 rustyline = "10.0.0"
 anyhow = "1.0"

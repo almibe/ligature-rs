@@ -7,10 +7,18 @@
 
 #![deny(missing_docs)]
 
-use wander::preludes::common;
-use wander::run;
 use rustyline::error::ReadlineError;
 use rustyline::{Editor, Result};
+use wander::preludes::common;
+use wander::run;
+
+enum Connection {
+
+}
+
+struct ReplState {
+
+}
 
 fn main() -> Result<()> {
     let mut bindings = common();
@@ -24,16 +32,20 @@ fn main() -> Result<()> {
         let readline = rl.readline("> ");
         match readline {
             Ok(line) => {
-                rl.add_history_entry(line.as_str());
-                let result = run(line.as_str(), &mut bindings);
-                println!("Result: {:?}", result);
+                if line.trim().starts_with(":") {
+                    handle_command(&line);
+                } else {
+                    rl.add_history_entry(line.as_str());
+                    let result = run(line.as_str(), &mut bindings);
+                    println!("Result: {:?}", result);
+                }
             }
             Err(ReadlineError::Interrupted) => {
-                println!("Quitting...");
+                println!("Good Bye!");
                 break;
             }
             Err(ReadlineError::Eof) => {
-                println!("Quitting...");
+                println!("Good Bye!");
                 break;
             }
             Err(err) => {
@@ -43,4 +55,23 @@ fn main() -> Result<()> {
         }
     }
     rl.save_history("history.txt")
+}
+
+fn handle_command(input: &str) {
+    let mut parts = input.split_whitespace();
+    match parts.next().unwrap() {
+        //":remote" => todo!(),
+        //":local" => todo!(),
+        ":status" => status(),
+        ":quit" | ":q" => quit(),
+        _ => todo!(),
+    }
+}
+
+fn status() {
+    println!("...");
+}
+
+fn quit() {
+    todo!()
 }

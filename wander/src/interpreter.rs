@@ -70,11 +70,9 @@ fn call_function(
         }
         //found other value (err), will evntually handle lambdas here
         Some(_) => Err(LigatureError(format!("Function {} is not defined.", &name))),
-        None => {
-            match bindings.read_native_function(&name) {
-                None => Err(LigatureError(format!("Function {} is not defined.", name))),
-                Some(nf) => nf.run(arguments, bindings),
-            }
-        }
+        None => match bindings.read_native_function(&name) {
+            None => Err(LigatureError(format!("Function {} is not defined.", name))),
+            Some(nf) => nf.run(arguments, bindings),
+        },
     }
 }
