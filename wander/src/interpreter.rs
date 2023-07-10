@@ -11,21 +11,54 @@ use crate::WanderValue;
 pub fn eval(script: &Vec<Element>, bindings: &mut Bindings) -> Result<WanderValue, LigatureError> {
     let mut result = Ok(WanderValue::Nothing);
     for element in script {
-        result = match element {
-            Element::Boolean(value) => Ok(WanderValue::Boolean(*value)),
-            Element::Int(value) => Ok(WanderValue::Int(*value)),
-            Element::String(value) => Ok(WanderValue::String(value.to_string())),
-            Element::Identifier(value) => Ok(WanderValue::Identifier(value.clone())),
-            Element::Let(name, value) => handle_let(&name, &value, bindings),
-            Element::Name(name) => read_name(&name, bindings),
-            Element::FunctionCall(name, arguments) => call_function(name, arguments, bindings),
-            Element::Scope(body) => handle_scope(&body, bindings)
-        };
+        result = eval_element(element, bindings);
     }
     result
 }
 
-fn handle_scope(body: &Vec<Element>, bindings: &mut Bindings) -> Result<WanderValue, LigatureError> {
+pub fn eval_element(
+    element: &Element,
+    bindings: &mut Bindings,
+) -> Result<WanderValue, LigatureError> {
+    match element {
+        Element::Boolean(value) => Ok(WanderValue::Boolean(*value)),
+        Element::Int(value) => Ok(WanderValue::Int(*value)),
+        Element::String(value) => Ok(WanderValue::String(value.to_string())),
+        Element::Identifier(value) => Ok(WanderValue::Identifier(value.clone())),
+        Element::Let(name, value) => handle_let(&name, &value, bindings),
+        Element::Name(name) => read_name(&name, bindings),
+        Element::FunctionCall(name, arguments) => call_function(name, arguments, bindings),
+        Element::Scope(body) => handle_scope(&body, bindings),
+        Element::Conditional(c, i, e) => handle_conditional(c, i, e, bindings),
+        Element::Lambda(params, body) => handle_lambda(params, body),
+    }
+}
+
+fn handle_lambda(params: &Vec<String>, body: &Vec<Element>) -> Result<WanderValue, LigatureError> {
+    Ok(WanderValue::Lambda(params.to_owned(), body.to_owned()))
+}
+
+fn handle_conditional(
+    cond: &Box<Element>,
+    ife: &Box<Element>,
+    elsee: &Box<Element>,
+    bindings: &mut Bindings,
+) -> Result<WanderValue, LigatureError> {
+    match eval_element(cond, bindings)? {
+        WanderValue::Boolean(true) => eval_element(ife, bindings),
+        WanderValue::Boolean(false) => eval_element(elsee, bindings),
+        value => {
+            return Err(LigatureError(format!(
+                "Conditionals require a bool value found, {value}"
+            )))
+        }
+    }
+}
+
+fn handle_scope(
+    body: &Vec<Element>,
+    bindings: &mut Bindings,
+) -> Result<WanderValue, LigatureError> {
     bindings.add_scope();
     let res = eval(body, bindings);
     bindings.remove_scope();
@@ -37,25 +70,12 @@ fn handle_let(
     element: &Box<Element>,
     bindings: &mut Bindings,
 ) -> Result<WanderValue, LigatureError> {
-    match literal_element_to_wander_value(element.as_ref(), bindings) {
+    match eval_element(element.as_ref(), bindings) {
         Ok(value) => {
             bindings.bind(name.to_string(), value);
             Ok(WanderValue::Nothing)
         }
         _ => todo!(),
-    }
-}
-
-fn literal_element_to_wander_value(element: &Element, bindings: &mut Bindings) -> Result<WanderValue, LigatureError> {
-    match element {
-        Element::Boolean(value) => Ok(WanderValue::Boolean(*value)),
-        Element::Int(value) => Ok(WanderValue::Int(*value)),
-        Element::Identifier(value) => Ok(WanderValue::Identifier(value.clone())),
-        Element::String(value) => Ok(WanderValue::String(value.to_string())),
-        Element::Name(_) => todo!(),
-        Element::Let(_, _) => todo!(),
-        Element::FunctionCall(_, _) => todo!(),
-        Element::Scope(body) => handle_scope(body, bindings),
     }
 }
 

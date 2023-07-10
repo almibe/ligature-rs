@@ -35,6 +35,8 @@ pub enum WanderValue {
     Nothing,
     /// A named reference to a NativeFunction.
     NativeFunction(String),
+    Lambda(Vec<String>, Vec<Element>),
+    List(Vec<WanderValue>),
 }
 
 impl Display for WanderValue {
@@ -46,6 +48,8 @@ impl Display for WanderValue {
             WanderValue::Identifier(value) => write!(f, "{}", value),
             WanderValue::Nothing => write!(f, "nothing"),
             WanderValue::NativeFunction(_) => write!(f, "[function]"),
+            WanderValue::List(_) => write!(f, "[list]"),
+            WanderValue::Lambda(_, _) => write!(f, "[lambda]"),
         }
     }
 }

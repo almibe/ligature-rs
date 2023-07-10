@@ -69,3 +69,11 @@ fn run_scope() {
     let expected = Ok(WanderValue::Int(6));
     assert_eq!(res, expected);
 }
+
+#[test]
+fn run_conditional() {
+    let input = "if true if not(true) 5 else 6 else 7";
+    let res = run(input, &mut common());
+    let expected = Ok(WanderValue::Int(6));
+    assert_eq!(res, expected);
+}

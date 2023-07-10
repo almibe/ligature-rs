@@ -17,6 +17,8 @@ pub enum Element {
     Let(String, Box<Element>),
     FunctionCall(String, Vec<Element>),
     Scope(Vec<Element>),
+    Conditional(Box<Element>, Box<Element>, Box<Element>),
+    Lambda(Vec<String>, Vec<Element>),
 }
 
 fn boolean(gaze: &mut Gaze<Token>) -> Option<Element> {
@@ -77,21 +79,10 @@ fn identifier(gaze: &mut Gaze<Token>) -> Option<Element> {
     }
 }
 
-fn literal_token_to_element(token: Token) -> Result<Element, LigatureError> {
-    match token {
-        Token::Boolean(value) => Ok(Element::Boolean(value)),
-        Token::Int(value) => Ok(Element::Int(value)),
-        Token::Identifier(value) => Ok(Element::Identifier(value)),
-        Token::String(value) => Ok(Element::String(value)),
-        x => todo!("{:?}", x),
-    }
-}
-
 fn scope(gaze: &mut Gaze<Token>) -> Option<Element> {
     match gaze.next() {
         Some(Token::OpenBrace) => (),
-        Some(_) => return None,
-        _ => return None
+        _ => return None,
     }
     let mut body = vec![];
 
@@ -104,20 +95,82 @@ fn scope(gaze: &mut Gaze<Token>) -> Option<Element> {
 
     match gaze.next() {
         Some(Token::CloseBrace) => Some(Element::Scope(body)),
-        _ => None
+        _ => None,
+    }
+}
+
+fn conditional(gaze: &mut Gaze<Token>) -> Option<Element> {
+    if let Some(Token::If) = gaze.next() {
+        ()
+    } else {
+        return None;
+    }
+    let cond = match gaze.attemptf(&mut element) {
+        Some(d) => d,
+        None => return None,
+    };
+    let ife = match gaze.attemptf(&mut element) {
+        Some(d) => d,
+        None => return None,
+    };
+    if let Some(Token::Else) = gaze.next() {
+        ()
+    } else {
+        return None;
+    }
+    let elsee = match gaze.attemptf(&mut element) {
+        Some(d) => d,
+        None => return None,
+    };
+    Some(Element::Conditional(
+        Box::new(cond),
+        Box::new(ife),
+        Box::new(elsee),
+    ))
+}
+
+fn lambda(gaze: &mut Gaze<Token>) -> Option<Element> {
+    match gaze.next() {
+        Some(Token::OpenBrace) => (),
+        _ => return None,
+    }
+
+    let mut names = vec![];
+    loop {
+        match gaze.attemptf(&mut element) {
+            Some(Element::Name(name)) => names.push(name),
+            Some(_) => return None, //only allow names
+            None => break,          //should be the arrow token failing to match
+        }
+    }
+
+    match gaze.next() {
+        Some(Token::Arrow) => (),
+        _ => return None,
+    }
+
+    let mut body = vec![];
+    loop {
+        match gaze.attemptf(&mut element) {
+            Some(element) => body.push(element),
+            None => break,
+        }
+    }
+
+    match gaze.next() {
+        Some(Token::CloseBrace) => Some(Element::Lambda(names, body)),
+        _ => None,
     }
 }
 
 fn let_binding(gaze: &mut Gaze<Token>) -> Option<Element> {
     let name = match (gaze.next(), gaze.next(), gaze.next()) {
-        (Some(Token::Let), Some(Token::Name(name)), Some(Token::EqualSign)) => {
-            name
-        }
+        (Some(Token::Let), Some(Token::Name(name)), Some(Token::EqualSign)) => name,
         _ => return None,
     };
     match gaze.attemptf(&mut element) {
         Some(element) => Some(Element::Let(name, Box::new(element))),
-        _ => None
+        _ => None,
     }
 }
 
@@ -131,6 +184,8 @@ fn element(gaze: &mut Gaze<Token>) -> Option<Element> {
         identifier,
         let_binding,
         scope,
+        conditional,
+        lambda,
     ];
     for &mut mut parser in parsers.iter_mut() {
         if let Some(element) = gaze.attemptf(&mut parser) {

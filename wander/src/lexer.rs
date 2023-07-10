@@ -17,6 +17,9 @@ pub enum Token {
     #[token("if")]
     If,
 
+    #[token("else")]
+    Else,
+
     #[token(".")]
     Period,
 
@@ -46,6 +49,9 @@ pub enum Token {
 
     #[token("}")]
     CloseBrace,
+
+    #[token("->")]
+    Arrow,
 }
 
 fn bool(lex: &mut Lexer<Token>) -> Option<bool> {
@@ -89,7 +95,7 @@ pub fn tokenize(script: &str) -> Result<Vec<Token>, LigatureError> {
     for token in lexer {
         match token {
             Ok(token) => results.push(token),
-            Err(_) => return Err(LigatureError(String::from("Error tokenizing input.")))
+            Err(_) => return Err(LigatureError(String::from("Error tokenizing input."))),
         }
     }
     Ok(results)

@@ -89,10 +89,7 @@ fn parse_function_call() {
 
 #[test]
 fn parse_empty_scope() {
-    let input = vec![
-        Token::OpenBrace,
-        Token::CloseBrace,
-    ];
+    let input = vec![Token::OpenBrace, Token::CloseBrace];
     let res = parse(input);
     let expected = Ok(vec![Element::Scope(vec![])]);
     assert_eq!(res, expected);
@@ -109,13 +106,44 @@ fn parse_nested_scopes() {
         Token::CloseBrace,
     ];
     let res = parse(input);
-    let expected = Ok(vec![
-        Element::Scope(vec![
-            Element::Int(5),
-            Element::Scope(vec![
-                Element::Boolean(false)
-            ])
-        ])
-    ]);
+    let expected = Ok(vec![Element::Scope(vec![
+        Element::Int(5),
+        Element::Scope(vec![Element::Boolean(false)]),
+    ])]);
+    assert_eq!(res, expected);
+}
+
+#[test]
+fn parse_conditional() {
+    let input = vec![
+        Token::If,
+        Token::Boolean(true),
+        Token::Int(5),
+        Token::Else,
+        Token::Int(6),
+    ];
+    let res = parse(input);
+    let expected = Ok(vec![Element::Conditional(
+        Box::new(Element::Boolean(true)),
+        Box::new(Element::Int(5)),
+        Box::new(Element::Int(6)),
+    )]);
+    assert_eq!(res, expected);
+}
+
+#[test]
+fn parse_lambda() {
+    let input = vec![
+        Token::OpenBrace,
+        Token::Name("test".to_owned()),
+        Token::Arrow,
+        Token::Name("test".to_owned()),
+        Token::CloseBrace,
+    ];
+    let res = parse(input);
+    let expected = Ok(vec![Element::Lambda(
+        vec!["test".to_owned()],
+        vec![Element::Name("test".to_owned())],
+    )]);
     assert_eq!(res, expected);
 }
