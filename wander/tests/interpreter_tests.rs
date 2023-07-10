@@ -10,7 +10,7 @@ use wander::WanderValue;
 #[test]
 fn eval_boolean_true() {
     let input = vec![Element::Boolean(true)];
-    let res = eval(input, &mut common());
+    let res = eval(&input, &mut common());
     let expected = Ok(WanderValue::Boolean(true));
     assert_eq!(res, expected);
 }

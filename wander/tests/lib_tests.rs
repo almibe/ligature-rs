@@ -57,7 +57,15 @@ fn run_wander_let_binding_and_reference() {
 #[test]
 fn run_native_function() {
     let input = "not(true)";
-    let res = run(input, &mut common()); //TODO run should accept prelude as 2nd arg
+    let res = run(input, &mut common());
     let expected = Ok(WanderValue::Boolean(false));
+    assert_eq!(res, expected);
+}
+
+#[test]
+fn run_scope() {
+    let input = "let x = {true 5 6} {x}";
+    let res = run(input, &mut common());
+    let expected = Ok(WanderValue::Int(6));
     assert_eq!(res, expected);
 }

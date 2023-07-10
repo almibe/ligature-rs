@@ -72,7 +72,7 @@ impl Bindings {
     ) -> Result<WanderValue, LigatureError> {
         match self.read_native_function(&name) {
             None => Err(LigatureError(format!("Function {} is not defined.", name))),
-            Some(nf) => nf.run(arguments, self),
+            Some(nf) => nf.run(&arguments, self),
         }
     }
 

@@ -16,6 +16,7 @@ pub enum Element {
     Identifier(Identifier),
     Let(String, Box<Element>),
     FunctionCall(String, Vec<Element>),
+    Scope(Vec<Element>),
 }
 
 fn boolean(gaze: &mut Gaze<Token>) -> Option<Element> {
@@ -82,23 +83,45 @@ fn literal_token_to_element(token: Token) -> Result<Element, LigatureError> {
         Token::Int(value) => Ok(Element::Int(value)),
         Token::Identifier(value) => Ok(Element::Identifier(value)),
         Token::String(value) => Ok(Element::String(value)),
-        _ => todo!(),
+        x => todo!("{:?}", x),
+    }
+}
+
+fn scope(gaze: &mut Gaze<Token>) -> Option<Element> {
+    match gaze.next() {
+        Some(Token::OpenBrace) => (),
+        Some(_) => return None,
+        _ => return None
+    }
+    let mut body = vec![];
+
+    loop {
+        match gaze.attemptf(&mut element) {
+            Some(element) => body.push(element),
+            None => break,
+        }
+    }
+
+    match gaze.next() {
+        Some(Token::CloseBrace) => Some(Element::Scope(body)),
+        _ => None
     }
 }
 
 fn let_binding(gaze: &mut Gaze<Token>) -> Option<Element> {
-    match (gaze.next(), gaze.next(), gaze.next(), gaze.next()) {
-        (Some(Token::Let), Some(Token::Name(name)), Some(Token::EqualSign), Some(value)) => {
-            match literal_token_to_element(value) {
-                Ok(element) => Some(Element::Let(name, Box::new(element))),
-                _ => None,
-            }
+    let name = match (gaze.next(), gaze.next(), gaze.next()) {
+        (Some(Token::Let), Some(Token::Name(name)), Some(Token::EqualSign)) => {
+            name
         }
-        _ => None,
+        _ => return None,
+    };
+    match gaze.attemptf(&mut element) {
+        Some(element) => Some(Element::Let(name, Box::new(element))),
+        _ => None
     }
 }
 
-fn elements(gaze: &mut Gaze<Token>) -> Option<Vec<Element>> {
+fn element(gaze: &mut Gaze<Token>) -> Option<Element> {
     let mut parsers = vec![
         function_call,
         name,
@@ -107,16 +130,24 @@ fn elements(gaze: &mut Gaze<Token>) -> Option<Vec<Element>> {
         string,
         identifier,
         let_binding,
+        scope,
     ];
-    let mut results = vec![];
-    'outer: while !gaze.is_complete() {
-        for &mut mut parser in parsers.iter_mut() {
-            if let Some(element) = gaze.attemptf(&mut parser) {
-                results.push(element);
-                continue 'outer;
-            }
+    for &mut mut parser in parsers.iter_mut() {
+        if let Some(element) = gaze.attemptf(&mut parser) {
+            return Some(element);
         }
-        return None;
+    }
+    None
+}
+
+fn elements(gaze: &mut Gaze<Token>) -> Option<Vec<Element>> {
+    let mut results = vec![];
+    while !gaze.is_complete() {
+        if let Some(element) = gaze.attemptf(&mut element) {
+            results.push(element);
+        } else {
+            return None;
+        }
     }
     Some(results)
 }

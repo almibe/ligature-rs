@@ -8,20 +8,28 @@ use crate::bindings::Bindings;
 use crate::parser::Element;
 use crate::WanderValue;
 
-pub fn eval(script: Vec<Element>, bindings: &mut Bindings) -> Result<WanderValue, LigatureError> {
+pub fn eval(script: &Vec<Element>, bindings: &mut Bindings) -> Result<WanderValue, LigatureError> {
     let mut result = Ok(WanderValue::Nothing);
     for element in script {
         result = match element {
-            Element::Boolean(value) => Ok(WanderValue::Boolean(value)),
-            Element::Int(value) => Ok(WanderValue::Int(value)),
+            Element::Boolean(value) => Ok(WanderValue::Boolean(*value)),
+            Element::Int(value) => Ok(WanderValue::Int(*value)),
             Element::String(value) => Ok(WanderValue::String(value.to_string())),
             Element::Identifier(value) => Ok(WanderValue::Identifier(value.clone())),
             Element::Let(name, value) => handle_let(&name, &value, bindings),
             Element::Name(name) => read_name(&name, bindings),
             Element::FunctionCall(name, arguments) => call_function(name, arguments, bindings),
+            Element::Scope(body) => handle_scope(&body, bindings)
         };
     }
     result
+}
+
+fn handle_scope(body: &Vec<Element>, bindings: &mut Bindings) -> Result<WanderValue, LigatureError> {
+    bindings.add_scope();
+    let res = eval(body, bindings);
+    bindings.remove_scope();
+    res
 }
 
 fn handle_let(
@@ -29,7 +37,7 @@ fn handle_let(
     element: &Box<Element>,
     bindings: &mut Bindings,
 ) -> Result<WanderValue, LigatureError> {
-    match literal_element_to_wander_value(element.as_ref()) {
+    match literal_element_to_wander_value(element.as_ref(), bindings) {
         Ok(value) => {
             bindings.bind(name.to_string(), value);
             Ok(WanderValue::Nothing)
@@ -38,13 +46,16 @@ fn handle_let(
     }
 }
 
-fn literal_element_to_wander_value(element: &Element) -> Result<WanderValue, LigatureError> {
+fn literal_element_to_wander_value(element: &Element, bindings: &mut Bindings) -> Result<WanderValue, LigatureError> {
     match element {
         Element::Boolean(value) => Ok(WanderValue::Boolean(*value)),
         Element::Int(value) => Ok(WanderValue::Int(*value)),
         Element::Identifier(value) => Ok(WanderValue::Identifier(value.clone())),
         Element::String(value) => Ok(WanderValue::String(value.to_string())),
-        _ => todo!(),
+        Element::Name(_) => todo!(),
+        Element::Let(_, _) => todo!(),
+        Element::FunctionCall(_, _) => todo!(),
+        Element::Scope(body) => handle_scope(body, bindings),
     }
 }
 
@@ -59,8 +70,8 @@ fn read_name(name: &String, bindings: &mut Bindings) -> Result<WanderValue, Liga
 }
 
 fn call_function(
-    name: String,
-    arguments: Vec<Element>,
+    name: &String,
+    arguments: &Vec<Element>,
     bindings: &mut Bindings,
 ) -> Result<WanderValue, LigatureError> {
     match bindings.read(&name) {

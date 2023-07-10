@@ -86,3 +86,36 @@ fn parse_function_call() {
     )]);
     assert_eq!(res, expected);
 }
+
+#[test]
+fn parse_empty_scope() {
+    let input = vec![
+        Token::OpenBrace,
+        Token::CloseBrace,
+    ];
+    let res = parse(input);
+    let expected = Ok(vec![Element::Scope(vec![])]);
+    assert_eq!(res, expected);
+}
+
+#[test]
+fn parse_nested_scopes() {
+    let input = vec![
+        Token::OpenBrace,
+        Token::Int(5),
+        Token::OpenBrace,
+        Token::Boolean(false),
+        Token::CloseBrace,
+        Token::CloseBrace,
+    ];
+    let res = parse(input);
+    let expected = Ok(vec![
+        Element::Scope(vec![
+            Element::Int(5),
+            Element::Scope(vec![
+                Element::Boolean(false)
+            ])
+        ])
+    ]);
+    assert_eq!(res, expected);
+}

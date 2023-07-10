@@ -21,7 +21,7 @@ pub mod preludes;
 pub trait NativeFunction {
     fn run(
         &self,
-        arguments: Vec<Element>,
+        arguments: &Vec<Element>,
         bindings: &mut Bindings,
     ) -> Result<WanderValue, LigatureError>;
 }
@@ -53,5 +53,5 @@ impl Display for WanderValue {
 pub fn run(script: &str, bindings: &mut Bindings) -> Result<WanderValue, LigatureError> {
     let tokens = tokenize(script)?;
     let elements = parse(tokens)?;
-    eval(elements, bindings)
+    eval(&elements, bindings)
 }

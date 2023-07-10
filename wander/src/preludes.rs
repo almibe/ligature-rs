@@ -11,7 +11,7 @@ struct AndFunction {}
 impl NativeFunction for AndFunction {
     fn run(
         &self,
-        arguments: Vec<Element>,
+        arguments: &Vec<Element>,
         _bindings: &mut Bindings,
     ) -> Result<crate::WanderValue, ligature::LigatureError> {
         if let [Element::Boolean(left), Element::Boolean(right)] = arguments[..] {
@@ -28,7 +28,7 @@ struct NotFunction {}
 impl NativeFunction for NotFunction {
     fn run(
         &self,
-        arguments: Vec<Element>,
+        arguments: &Vec<Element>,
         _bindings: &mut Bindings,
     ) -> Result<crate::WanderValue, ligature::LigatureError> {
         if let [Element::Boolean(value)] = arguments[..] {
