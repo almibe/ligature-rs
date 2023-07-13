@@ -147,3 +147,16 @@ fn parse_lambda() {
     )]);
     assert_eq!(res, expected);
 }
+
+#[test]
+fn parse_list() {
+    let input = vec![
+        Token::OpenSquare,
+        Token::Name("test".to_owned()),
+        Token::Int(24601),
+        Token::CloseSquare,
+    ];
+    let res = parse(input);
+    let expected = Ok(vec![Element::List(vec![Element::Name("test".to_owned()), Element::Int(24601)])]);
+    assert_eq!(res, expected);
+}

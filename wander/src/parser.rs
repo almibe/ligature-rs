@@ -19,6 +19,7 @@ pub enum Element {
     Scope(Vec<Element>),
     Conditional(Box<Element>, Box<Element>, Box<Element>),
     Lambda(Vec<String>, Vec<Element>),
+    List(Vec<Element>),
 }
 
 fn boolean(gaze: &mut Gaze<Token>) -> Option<Element> {
@@ -54,9 +55,9 @@ fn function_call(gaze: &mut Gaze<Token>) -> Option<Element> {
     }
     let mut arguments = vec![];
     while gaze.peek() != None && gaze.peek() != Some(Token::CloseParen) {
-        match gaze.next() {
-            Some(Token::Boolean(value)) => arguments.push(Element::Boolean(value)),
-            _ => return None,
+        match gaze.attemptf(&mut element) {
+            Some(element) => arguments.push(element),
+            None => return None,
         }
     }
     if gaze.next() != Some(Token::CloseParen) {
@@ -163,6 +164,26 @@ fn lambda(gaze: &mut Gaze<Token>) -> Option<Element> {
     }
 }
 
+fn list(gaze: &mut Gaze<Token>) -> Option<Element> {
+    match gaze.next() {
+        Some(Token::OpenSquare) => (),
+        _ => return None,
+    }
+
+    let mut contents = vec![];
+    loop {
+        match gaze.attemptf(&mut element) {
+            Some(e) => contents.push(e),
+            None => break,          //should be the arrow token failing to match
+        }
+    }
+
+    match gaze.next() {
+        Some(Token::CloseSquare) => Some(Element::List(contents)),
+        _ => None,
+    }
+}
+
 fn let_binding(gaze: &mut Gaze<Token>) -> Option<Element> {
     let name = match (gaze.next(), gaze.next(), gaze.next()) {
         (Some(Token::Let), Some(Token::Name(name)), Some(Token::EqualSign)) => name,
@@ -186,6 +207,7 @@ fn element(gaze: &mut Gaze<Token>) -> Option<Element> {
         scope,
         conditional,
         lambda,
+        list,
     ];
     for &mut mut parser in parsers.iter_mut() {
         if let Some(element) = gaze.attemptf(&mut parser) {

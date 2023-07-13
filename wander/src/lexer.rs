@@ -50,6 +50,12 @@ pub enum Token {
     #[token("}")]
     CloseBrace,
 
+    #[token("[")]
+    OpenSquare,
+
+    #[token("]")]
+    CloseSquare,
+
     #[token("->")]
     Arrow,
 }

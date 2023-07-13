@@ -31,7 +31,19 @@ pub fn eval_element(
         Element::Scope(body) => handle_scope(&body, bindings),
         Element::Conditional(c, i, e) => handle_conditional(c, i, e, bindings),
         Element::Lambda(params, body) => handle_lambda(params, body),
+        Element::List(values) => handle_list(values, bindings),
     }
+}
+
+fn handle_list(elements: &Vec<Element>, bindings: &mut Bindings) -> Result<WanderValue, LigatureError> {
+    let mut results = vec![];
+    for element in elements {
+        match eval_element(element, bindings) {
+            Ok(value) => results.push(value),
+            Err(err) => return Err(err),
+        }
+    }
+    Ok(WanderValue::List(results))
 }
 
 fn handle_lambda(params: &Vec<String>, body: &Vec<Element>) -> Result<WanderValue, LigatureError> {

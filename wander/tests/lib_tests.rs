@@ -77,3 +77,13 @@ fn run_conditional() {
     let expected = Ok(WanderValue::Int(6));
     assert_eq!(res, expected);
 }
+
+#[test]
+fn run_list() {
+    let input = "[1 [2] []]";
+    let res = run(input, &mut common());
+    let expected = Ok(WanderValue::List(vec![
+        WanderValue::Int(1), WanderValue::List(vec![WanderValue::Int(2)]), WanderValue::List(vec![])
+    ]));
+    assert_eq!(res, expected);
+}
