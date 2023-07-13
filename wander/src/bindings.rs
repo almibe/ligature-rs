@@ -65,17 +65,6 @@ impl Bindings {
         }
     }
 
-    pub fn run_native_function(
-        &mut self,
-        name: &String,
-        arguments: Vec<Element>,
-    ) -> Result<WanderValue, LigatureError> {
-        match self.read_native_function(&name) {
-            None => Err(LigatureError(format!("Function {} is not defined.", name))),
-            Some(nf) => nf.run(&arguments, self),
-        }
-    }
-
     pub fn bound_names(&self) -> HashSet<String> {
         let mut names = HashSet::new();
         for scope in self.scopes.iter() {

@@ -5,16 +5,16 @@
 use ligature::LigatureError;
 use std::rc::Rc;
 
-use crate::{bindings::Bindings, parser::Element, NativeFunction};
+use crate::{bindings::Bindings, NativeFunction, WanderValue};
 
 struct AndFunction {}
 impl NativeFunction for AndFunction {
     fn run(
         &self,
-        arguments: &Vec<Element>,
+        arguments: &Vec<WanderValue>,
         _bindings: &mut Bindings,
     ) -> Result<crate::WanderValue, ligature::LigatureError> {
-        if let [Element::Boolean(left), Element::Boolean(right)] = arguments[..] {
+        if let [WanderValue::Boolean(left), WanderValue::Boolean(right)] = arguments[..] {
             Ok(crate::WanderValue::Boolean(left && right))
         } else {
             Err(LigatureError(
@@ -28,10 +28,10 @@ struct NotFunction {}
 impl NativeFunction for NotFunction {
     fn run(
         &self,
-        arguments: &Vec<Element>,
+        arguments: &Vec<WanderValue>,
         _bindings: &mut Bindings,
     ) -> Result<crate::WanderValue, ligature::LigatureError> {
-        if let [Element::Boolean(value)] = arguments[..] {
+        if let [WanderValue::Boolean(value)] = arguments[..] {
             Ok(crate::WanderValue::Boolean(!value))
         } else {
             Err(LigatureError(

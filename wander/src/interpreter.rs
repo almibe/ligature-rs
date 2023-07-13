@@ -106,6 +106,13 @@ fn call_function(
     arguments: &Vec<Element>,
     bindings: &mut Bindings,
 ) -> Result<WanderValue, LigatureError> {
+    let mut argument_values = vec![];
+    for argument in arguments {
+        match eval_element(argument, bindings) {
+            Ok(value) => argument_values.push(value),
+            Err(err) => return Err(err),
+        }
+    }
     match bindings.read(&name) {
         //corner case of this name shadowing with a native function
         Some(WanderValue::NativeFunction(_)) => {
@@ -115,7 +122,7 @@ fn call_function(
         Some(_) => Err(LigatureError(format!("Function {} is not defined.", &name))),
         None => match bindings.read_native_function(&name) {
             None => Err(LigatureError(format!("Function {} is not defined.", name))),
-            Some(nf) => nf.run(arguments, bindings),
+            Some(nf) => nf.run(&argument_values, bindings),
         },
     }
 }

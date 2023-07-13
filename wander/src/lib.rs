@@ -21,7 +21,7 @@ pub mod preludes;
 pub trait NativeFunction {
     fn run(
         &self,
-        arguments: &Vec<Element>,
+        arguments: &Vec<WanderValue>,
         bindings: &mut Bindings,
     ) -> Result<WanderValue, LigatureError>;
 }

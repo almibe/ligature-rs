@@ -63,6 +63,14 @@ fn run_native_function() {
 }
 
 #[test]
+fn run_nested_function_calls() {
+    let input = "not(not(false))";
+    let res = run(input, &mut common());
+    let expected = Ok(WanderValue::Boolean(false));
+    assert_eq!(res, expected);
+}
+
+#[test]
 fn run_scope() {
     let input = "let x = {true 5 6} {x}";
     let res = run(input, &mut common());
