@@ -12,5 +12,9 @@ repository = "https://github.com/almibe/ligature-rs/"
 
 [dependencies]
 ligature = { path = "../ligature" }
+wander =  { path = "../wander" }
 redb = "1.0.3"
 bytes = "1"
+home = "0.5"
+tempfile = "3.6.0"
+rand = "0.8.5"

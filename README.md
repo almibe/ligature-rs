@@ -32,3 +32,13 @@ Each project contains its own README with additional information when needed.
 | ligature-sqlite       | An implementation of Ligature that uses sqlite3 for storage.        | lib    |
 | ligature-redb         | An implementation of Ligature that uses redb for storage.           | lib    |
 | ligature-repl         | A REPL for using Ligature and Wander.                               | app    |
+
+## Running Integration Tests
+
+Besides regular Rust tests, this project contains a testing application called `ligature-test-suite`.
+This project can be ran like any other normal Rust application.
+
+```
+cd ligature-test-suite
+cargo run
+```

@@ -7,21 +7,20 @@
 
 #![deny(missing_docs)]
 
+use ligature_redb::LigatureRedb;
 use rustyline::error::ReadlineError;
 use rustyline::{Editor, Result};
 use wander::preludes::common;
 use wander::run;
 
-enum Connection {
+enum Connection {}
 
-}
-
-struct ReplState {
-
-}
+struct ReplState {}
 
 fn main() -> Result<()> {
+    let mut instance = LigatureRedb::default();
     let mut bindings = common();
+    instance.add_bindings(&mut bindings);
     println!("Welcome to Ligature REPL!!!");
     println!("Press Ctrl+C or Ctrl+D or type `exit()` to quit.");
     let mut rl = Editor::<()>::new()?;
@@ -32,10 +31,12 @@ fn main() -> Result<()> {
         let readline = rl.readline("> ");
         match readline {
             Ok(line) => {
+                rl.add_history_entry(line.as_str());
                 if line.trim().starts_with(":") {
-                    handle_command(&line);
+                    if !handle_command(&line) {
+                        break;
+                    }
                 } else {
-                    rl.add_history_entry(line.as_str());
                     let result = run(line.as_str(), &mut bindings);
                     println!("Result: {:?}", result);
                 }
@@ -57,7 +58,7 @@ fn main() -> Result<()> {
     rl.save_history("history.txt")
 }
 
-fn handle_command(input: &str) {
+fn handle_command(input: &str) -> bool {
     let mut parts = input.split_whitespace();
     match parts.next().unwrap() {
         //":remote" => todo!(),
@@ -68,10 +69,11 @@ fn handle_command(input: &str) {
     }
 }
 
-fn status() {
+fn status() -> bool {
     println!("...");
+    true
 }
 
-fn quit() {
-    todo!()
+fn quit() -> bool {
+    false
 }
