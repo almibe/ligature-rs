@@ -7,11 +7,16 @@
 
 use home::home_dir;
 use ligature::LigatureError;
-use redb::{Database, Error, TransactionError, TableError, ReadableTable, StorageError, Table};
-use tables::IdTypes;
-use std::{path::PathBuf, rc::Rc};
-use wander::{bindings::Bindings, parser::Element, NativeFunction, WanderValue};
 use rand::distributions::{Alphanumeric, DistString};
+use redb::{
+    Database, Error, Range, ReadableTable, StorageError, Table, TableError, TransactionError,
+};
+use std::{path::PathBuf, rc::Rc};
+use tables::IdTypes;
+use wander::{
+    bindings::{Bindings, BindingsProvider},
+    NativeFunction, WanderValue,
+};
 
 mod tables {
     use redb::TableDefinition;
@@ -21,18 +26,22 @@ mod tables {
     pub const DATASETS_ID_TABLE: TableDefinition<&str, u64> = TableDefinition::new("DATASETS_ID");
     pub const ID_DATASETS_TABLE: TableDefinition<u64, &str> = TableDefinition::new("ID_DATASETS");
 
-    pub const IDENTIFIER_ID_TABLE: TableDefinition<&str, u64> = TableDefinition::new("IDENTIFIER_ID");
-    pub const ID_IDENTIFIER_TABLE: TableDefinition<&str, u64> = TableDefinition::new("ID_IDENTIFIER");
+    pub const IDENTIFIER_ID_TABLE: TableDefinition<&str, u64> =
+        TableDefinition::new("IDENTIFIER_ID");
+    pub const ID_IDENTIFIER_TABLE: TableDefinition<&str, u64> =
+        TableDefinition::new("ID_IDENTIFIER");
 
-    pub const EAV_TABLE: TableDefinition<&str, u64> = TableDefinition::new("EAV");
-    pub const EVA_TABLE: TableDefinition<&str, u64> = TableDefinition::new("EVA");
-    pub const AEV_TABLE: TableDefinition<&str, u64> = TableDefinition::new("AEV");
-    pub const AVE_TABLE: TableDefinition<&str, u64> = TableDefinition::new("AVE");
-    pub const VEA_TABLE: TableDefinition<&str, u64> = TableDefinition::new("VEA");
-    pub const VAE_TABLE: TableDefinition<&str, u64> = TableDefinition::new("VAE");
+    pub const EAV_TABLE: TableDefinition<&[u8], ()> = TableDefinition::new("EAV");
+    // pub const EVA_TABLE: TableDefinition<&[u8], ()> = TableDefinition::new("EVA");
+    // pub const AEV_TABLE: TableDefinition<&[u8], ()> = TableDefinition::new("AEV");
+    // pub const AVE_TABLE: TableDefinition<&[u8], ()> = TableDefinition::new("AVE");
+    // pub const VEA_TABLE: TableDefinition<&[u8], ()> = TableDefinition::new("VEA");
+    // pub const VAE_TABLE: TableDefinition<&[u8], ()> = TableDefinition::new("VAE");
 
     pub enum IdTypes {
-        Datasets
+        Datasets,
+        Identifiers,
+        Strings,
     }
 }
 
@@ -56,7 +65,10 @@ impl Default for LigatureRedb {
                 path.push("ligature.redb");
                 match Self::create(Config { location: path }) {
                     Ok(inst) => inst,
-                    Err(_) => panic!("Could not create LigatureRedb instance in default location."),
+                    Err(err) => panic!(
+                        "Could not create LigatureRedb instance in default location.\n{}",
+                        err.to_string()
+                    ),
                 }
             }
             None => panic!("Could not create LigatureRedb instance in default location."),
@@ -92,34 +104,58 @@ impl LigatureRedb {
             tx.open_table(tables::ID_DATASETS_TABLE)?;
             tx.open_table(tables::IDENTIFIER_ID_TABLE)?;
             tx.open_table(tables::ID_IDENTIFIER_TABLE)?;
-        
+
             tx.open_table(tables::EAV_TABLE)?;
-            tx.open_table(tables::EVA_TABLE)?;
-            tx.open_table(tables::AEV_TABLE)?;
-            tx.open_table(tables::AVE_TABLE)?;
-            tx.open_table(tables::VEA_TABLE)?;
-            tx.open_table(tables::VAE_TABLE)?;
-        
+            // tx.open_table(tables::EVA_TABLE)?;
+            // tx.open_table(tables::AEV_TABLE)?;
+            // tx.open_table(tables::AVE_TABLE)?;
+            // tx.open_table(tables::VEA_TABLE)?;
+            // tx.open_table(tables::VAE_TABLE)?;
+
             tx.commit()?;
         }
-        let instance = Self { config, db: Rc::new(db) };
+        let instance = Self {
+            config,
+            db: Rc::new(db),
+        };
         Ok(instance)
     }
+}
 
-    pub fn add_bindings(&self, bindings: &mut Bindings) {
-        bindings.bind_native_function(String::from("datasets"), Rc::new(DatasetsFunction { db: self.db.clone()}));
-        bindings.bind_native_function(String::from("addDataset"), Rc::new(AddDatasetFunction { db: self.db.clone()}));
+impl BindingsProvider for LigatureRedb {
+    fn add_bindings(&self, bindings: &mut Bindings) {
+        bindings.bind_native_function(
+            String::from("datasets"),
+            Rc::new(DatasetsFunction {
+                db: self.db.clone(),
+            }),
+        );
+        bindings.bind_native_function(
+            String::from("addDataset"),
+            Rc::new(AddDatasetFunction {
+                db: self.db.clone(),
+            }),
+        );
         bindings.bind_native_function(
             String::from("removeDataset"),
-            Rc::new(RemoveDatasetFunction { db: self.db.clone() }),
+            Rc::new(RemoveDatasetFunction {
+                db: self.db.clone(),
+            }),
+        );
+        bindings.bind_native_function(
+            String::from("statements"),
+            Rc::new(StatementsFunction {
+                db: self.db.clone(),
+            }),
         );
     }
-
 }
 
 fn id_type_str(id_type: IdTypes) -> &'static str {
     match id_type {
-        IdTypes::Datasets => "datasets",
+        IdTypes::Datasets => "Datasets",
+        IdTypes::Identifiers => "Identifiers",
+        IdTypes::Strings => "Strings",
     }
 }
 
@@ -128,7 +164,7 @@ fn next_id(id_type: IdTypes, table: &mut Table<'_, '_, &str, u64>) -> Result<u64
     let value = {
         match table.get(key)? {
             None => None,
-            Some(v) => Some(v.value())
+            Some(v) => Some(v.value()),
         }
     };
     match value {
@@ -136,11 +172,11 @@ fn next_id(id_type: IdTypes, table: &mut Table<'_, '_, &str, u64>) -> Result<u64
             let id = value + 1;
             table.insert(key, id)?;
             Ok(id)
-        },
+        }
         None => {
             table.insert(key, 0)?;
             Ok(0)
-        },
+        }
     }
 }
 
@@ -156,13 +192,11 @@ fn stor_err(err: StorageError) -> LigatureError {
     LigatureError(format!("Redb Error - {}", err.to_string()))
 }
 
-struct DatasetsFunction { db: Rc<Database> }
+struct DatasetsFunction {
+    db: Rc<Database>,
+}
 impl NativeFunction for DatasetsFunction {
-    fn run(
-        &self,
-        arguments: &Vec<Element>,
-        _bindings: &mut Bindings,
-    ) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &Vec<WanderValue>) -> Result<WanderValue, LigatureError> {
         if arguments.is_empty() {
             let mut datasets = vec![];
             {
@@ -184,15 +218,13 @@ impl NativeFunction for DatasetsFunction {
     }
 }
 
-struct AddDatasetFunction { db: Rc<Database> }
+struct AddDatasetFunction {
+    db: Rc<Database>,
+}
 impl NativeFunction for AddDatasetFunction {
-    fn run(
-        &self,
-        arguments: &Vec<Element>,
-        _bindings: &mut Bindings,
-    ) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &Vec<WanderValue>) -> Result<WanderValue, LigatureError> {
         match arguments.as_slice() {
-            [Element::String(name)] => {
+            [WanderValue::String(name)] => {
                 let tx = self.db.begin_write().map_err(tx_err)?;
                 let mut ids = tx.open_table(tables::IDS_TABLE).map_err(tbl_err)?;
                 let mut datasets = tx.open_table(tables::DATASETS_ID_TABLE).map_err(tbl_err)?;
@@ -213,21 +245,21 @@ impl NativeFunction for AddDatasetFunction {
                     tx.commit().unwrap();
                     Ok(WanderValue::Nothing)
                 }
-            },
-            _ => Err(LigatureError("`addDatasets` requires a single string argument.".to_owned()))
+            }
+            _ => Err(LigatureError(
+                "`addDatasets` requires a single string argument.".to_owned(),
+            )),
         }
     }
 }
 
-struct RemoveDatasetFunction { db: Rc<Database> }
+struct RemoveDatasetFunction {
+    db: Rc<Database>,
+}
 impl NativeFunction for RemoveDatasetFunction {
-    fn run(
-        &self,
-        arguments: &Vec<Element>,
-        bindings: &mut Bindings,
-    ) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &Vec<WanderValue>) -> Result<WanderValue, LigatureError> {
         match arguments.as_slice() {
-            [Element::String(name)] => {
+            [WanderValue::String(name)] => {
                 let tx = self.db.begin_write().map_err(tx_err)?;
                 let mut ids = tx.open_table(tables::IDS_TABLE).map_err(tbl_err)?;
                 let mut datasets = tx.open_table(tables::DATASETS_ID_TABLE).map_err(tbl_err)?;
@@ -246,46 +278,92 @@ impl NativeFunction for RemoveDatasetFunction {
                         drop(ids_datasets);
                         tx.commit().unwrap();
                         Ok(WanderValue::Nothing)
-                    },
+                    }
                     None => Ok(WanderValue::Nothing), //doesn't exist
                 }
-            },
-            _ => Err(LigatureError("`addDatasets` requires a single string argument.".to_owned()))
+            }
+            _ => Err(LigatureError(
+                "`addDatasets` requires a single string argument.".to_owned(),
+            )),
         }
     }
 }
 
-struct StatementsFunction { db: Rc<Database> }
+struct StatementsFunction {
+    db: Rc<Database>,
+}
 impl NativeFunction for StatementsFunction {
-    fn run(
-        &self,
-        arguments: &Vec<Element>,
-        _bindings: &mut Bindings,
-    ) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &Vec<WanderValue>) -> Result<WanderValue, LigatureError> {
         match arguments.as_slice() {
-            [Element::String(name)] => {
+            [WanderValue::String(name)] => {
                 let tx = self.db.begin_write().map_err(tx_err)?;
-                let mut ids = tx.open_table(tables::IDS_TABLE).map_err(tbl_err)?;
                 let mut datasets = tx.open_table(tables::DATASETS_ID_TABLE).map_err(tbl_err)?;
-                let mut ids_datasets = tx.open_table(tables::ID_DATASETS_TABLE).map_err(tbl_err)?;
+                let mut eav = tx.open_table(tables::EAV_TABLE).map_err(tbl_err)?;
                 let exists = match datasets.get(name.as_str()) {
-                    Ok(res) => res.is_some(),
+                    Ok(Some(res)) => Some(res.value()),
+                    Ok(None) => None,
                     Err(err) => todo!(),
                 };
-                if exists {
-                    Ok(WanderValue::Nothing)
+                if let Some(id) = exists {
+                    //look up entries for the given dataset in EAV table
+                    //let range = eav.range(3...&4).unwrap();
+                    //let mut result = vec![];
+                    // range.for_each(|x| {
+                    //     match x {
+                    //         Ok((x, y)) => {
+                    //             let y = x.value().to_owned();
+                    //             result.push(y);
+                    //         },
+                    //         Err(_) => todo!(),
+                    //     };
+                    // });
+                    todo!()
                 } else {
-                    let new_id = next_id(IdTypes::Datasets, &mut ids).unwrap();
-                    datasets.insert(name.as_str(), new_id).unwrap();
-                    ids_datasets.insert(new_id, name.as_str()).unwrap();
-                    drop(ids);
-                    drop(datasets);
-                    drop(ids_datasets);
-                    tx.commit().unwrap();
-                    Ok(WanderValue::Nothing)
+                    Err(LigatureError(format!("Dataset `{name}` doesn't exist.")))
                 }
-            },
-            _ => Err(LigatureError("`addDatasets` requires a single string argument.".to_owned()))
+            }
+            _ => Err(LigatureError(
+                "`addDatasets` requires a single string argument.".to_owned(),
+            )),
+        }
+    }
+}
+
+struct AddStatementsFunction {
+    db: Rc<Database>,
+}
+impl NativeFunction for AddStatementsFunction {
+    fn run(&self, arguments: &Vec<WanderValue>) -> Result<WanderValue, LigatureError> {
+        match arguments.as_slice() {
+            [WanderValue::String(name)] => {
+                let tx = self.db.begin_write().map_err(tx_err)?;
+
+                let mut datasets = tx.open_table(tables::DATASETS_ID_TABLE).map_err(tbl_err)?;
+                let mut eav = tx.open_table(tables::EAV_TABLE).map_err(tbl_err)?;
+                // let mut eva = tx.open_table(tables::EVA_TABLE).map_err(tbl_err)?;
+                // let mut aev = tx.open_table(tables::AEV_TABLE).map_err(tbl_err)?;
+                // let mut ave = tx.open_table(tables::AVE_TABLE).map_err(tbl_err)?;
+                // let mut vea = tx.open_table(tables::VEA_TABLE).map_err(tbl_err)?;
+                // let mut vae = tx.open_table(tables::VAE_TABLE).map_err(tbl_err)?;
+
+                let exists = match datasets.get(name.as_str()) {
+                    Ok(Some(res)) => Some(res.value()),
+                    Ok(None) => None,
+                    Err(err) => todo!(),
+                };
+                if let Some(id) = exists {
+                    //
+                    //let x: Range<&[u8], ()> = &[]..&[];
+                    //look up entries for the given dataset in EAV table
+                    //eav.range(&[]..&[]).unwrap();
+                    todo!()
+                } else {
+                    Err(LigatureError(format!("Dataset `{name}` doesn't exist.")))
+                }
+            }
+            _ => Err(LigatureError(
+                "`addDatasets` requires a single string argument.".to_owned(),
+            )),
         }
     }
 }
