@@ -35,7 +35,10 @@ pub fn eval_element(
     }
 }
 
-fn handle_list(elements: &Vec<Element>, bindings: &mut Bindings) -> Result<WanderValue, LigatureError> {
+fn handle_list(
+    elements: &Vec<Element>,
+    bindings: &mut Bindings,
+) -> Result<WanderValue, LigatureError> {
     let mut results = vec![];
     for element in elements {
         match eval_element(element, bindings) {
@@ -122,7 +125,7 @@ fn call_function(
         Some(_) => Err(LigatureError(format!("Function {} is not defined.", &name))),
         None => match bindings.read_native_function(&name) {
             None => Err(LigatureError(format!("Function {} is not defined.", name))),
-            Some(nf) => nf.run(&argument_values, bindings),
+            Some(nf) => nf.run(&argument_values),
         },
     }
 }

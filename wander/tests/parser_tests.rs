@@ -157,6 +157,9 @@ fn parse_list() {
         Token::CloseSquare,
     ];
     let res = parse(input);
-    let expected = Ok(vec![Element::List(vec![Element::Name("test".to_owned()), Element::Int(24601)])]);
+    let expected = Ok(vec![Element::List(vec![
+        Element::Name("test".to_owned()),
+        Element::Int(24601),
+    ])]);
     assert_eq!(res, expected);
 }

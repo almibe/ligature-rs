@@ -12,7 +12,6 @@ impl NativeFunction for AndFunction {
     fn run(
         &self,
         arguments: &Vec<WanderValue>,
-        _bindings: &mut Bindings,
     ) -> Result<crate::WanderValue, ligature::LigatureError> {
         if let [WanderValue::Boolean(left), WanderValue::Boolean(right)] = arguments[..] {
             Ok(crate::WanderValue::Boolean(left && right))
@@ -29,7 +28,6 @@ impl NativeFunction for NotFunction {
     fn run(
         &self,
         arguments: &Vec<WanderValue>,
-        _bindings: &mut Bindings,
     ) -> Result<crate::WanderValue, ligature::LigatureError> {
         if let [WanderValue::Boolean(value)] = arguments[..] {
             Ok(crate::WanderValue::Boolean(!value))

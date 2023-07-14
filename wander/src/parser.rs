@@ -174,7 +174,7 @@ fn list(gaze: &mut Gaze<Token>) -> Option<Element> {
     loop {
         match gaze.attemptf(&mut element) {
             Some(e) => contents.push(e),
-            None => break,          //should be the arrow token failing to match
+            None => break, //should be the arrow token failing to match
         }
     }
 

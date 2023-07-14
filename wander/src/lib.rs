@@ -19,11 +19,7 @@ pub mod parser;
 pub mod preludes;
 
 pub trait NativeFunction {
-    fn run(
-        &self,
-        arguments: &Vec<WanderValue>,
-        bindings: &mut Bindings,
-    ) -> Result<WanderValue, LigatureError>;
+    fn run(&self, arguments: &Vec<WanderValue>) -> Result<WanderValue, LigatureError>;
 }
 
 #[derive(Debug, Clone, PartialEq)]

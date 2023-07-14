@@ -2,9 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use ligature::LigatureError;
-
-use crate::{parser::Element, NativeFunction, WanderValue};
+use crate::{NativeFunction, WanderValue};
 use std::{
     cell::RefCell,
     collections::{HashMap, HashSet},
@@ -14,6 +12,10 @@ use std::{
 pub struct Bindings {
     native_functions: RefCell<HashMap<String, Rc<dyn NativeFunction>>>,
     scopes: Vec<HashMap<String, WanderValue>>,
+}
+
+pub trait BindingsProvider {
+    fn add_bindings(&self, bindings: &mut Bindings);
 }
 
 impl Bindings {
