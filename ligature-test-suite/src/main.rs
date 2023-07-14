@@ -6,7 +6,12 @@
 
 use ligature::LigatureError;
 use ligature_redb::LigatureRedb;
-use wander::{preludes::common, run, WanderValue};
+use ligature_sqlite::LigatureSQLite;
+use wander::{
+    bindings::{Bindings, BindingsProvider},
+    preludes::common,
+    run, WanderValue,
+};
 
 struct LigatureTestCase<'a> {
     name: &'a str,
@@ -22,7 +27,22 @@ struct TestResults<'a> {
     skipped_tests: Vec<&'a str>,
 }
 
+fn create_sqlite_bindings() -> Bindings {
+    let mut bindings = common();
+    let instance = LigatureSQLite::new_memory_store().unwrap();
+    instance.add_bindings(&mut bindings);
+    bindings
+}
+
+fn create_redb_bindings() -> Bindings {
+    let mut bindings = common();
+    let instance = LigatureRedb::temp().unwrap();
+    instance.add_bindings(&mut bindings);
+    bindings
+}
+
 pub fn main() {
+    let skip = false;
     let mut results = TestResults {
         failed_tests: vec![],
         passed_tests: vec![],
@@ -50,13 +70,17 @@ pub fn main() {
         LigatureTestCase {
             name: "add single Datasets",
             input: r#"addDataset("hello") datasets()"#,
-            result: Ok(WanderValue::List(vec![WanderValue::String("hello".to_owned())])),
+            result: Ok(WanderValue::List(vec![WanderValue::String(
+                "hello".to_owned(),
+            )])),
             skippable: true,
         },
         LigatureTestCase {
             name: "add and remove Datasets",
             input: r#"addDataset("hello") addDataset("world") removeDataset("hello") datasets()"#,
-            result: Ok(WanderValue::List(vec![WanderValue::String("world".to_owned())])),
+            result: Ok(WanderValue::List(vec![WanderValue::String(
+                "world".to_owned(),
+            )])),
             skippable: true,
         },
         LigatureTestCase {
@@ -65,25 +89,48 @@ pub fn main() {
             result: Ok(WanderValue::List(vec![])),
             skippable: false,
         },
+        LigatureTestCase {
+            name: "Add Statements to Dataset",
+            input: r#"addDataset("hello") addStatements("hello" [[<a> <b> <c>]]) statements("hello")"#,
+            result: Ok(WanderValue::List(vec![WanderValue::List(vec![
+                WanderValue::String("a".to_owned()),
+                WanderValue::String("b".to_owned()),
+                WanderValue::String("c".to_owned()),
+            ])])),
+            skippable: false,
+        },
+        LigatureTestCase {
+            name: "Remove Statements from Dataset",
+            input: r#"
+                addDataset("hello") 
+                addStatements("hello" [[<a> <b> <c>] [<d> <e> <f>]])
+                removeStatements("hello" [[<a> <b> <c>]])
+                statements("hello")"#,
+            result: Ok(WanderValue::List(vec![WanderValue::List(vec![
+                WanderValue::String("d".to_owned()),
+                WanderValue::String("e".to_owned()),
+                WanderValue::String("f".to_owned()),
+            ])])),
+            skippable: false,
+        }
     ];
 
     for test in tests {
-        if test.skippable {
+        if test.skippable && skip {
             results.skipped_tests.push(test.name);
             continue;
         }
-        let instance = match LigatureRedb::temp() {
-            Ok(i) => i,
-            Err(err) => panic!("{err}"),
-        };
-        let mut bindings = common();
-        instance.add_bindings(&mut bindings);
+        //        let mut bindings = create_redb_bindings();
+        let mut bindings = create_sqlite_bindings();
         let result = run(test.input, &mut bindings);
         if result == test.result {
             results.passed_tests.push(test.name);
         } else {
             results.failed_tests.push(test.name);
-            println!("{:?} failed\n  Expected: {:?}\n  Recieved: {:?}", test.name, result, test.result);
+            println!(
+                "{:?} failed\n  Expected: {:?}\n  Recieved: {:?}",
+                test.name, result, test.result
+            );
         }
     }
     println!("Results:\n{:?}", results);
