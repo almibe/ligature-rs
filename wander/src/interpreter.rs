@@ -32,6 +32,7 @@ pub fn eval_element(
         Element::Conditional(c, i, e) => handle_conditional(c, i, e, bindings),
         Element::Lambda(params, body) => handle_lambda(params, body),
         Element::List(values) => handle_list(values, bindings),
+        Element::Nothing => Ok(WanderValue::Nothing),
     }
 }
 

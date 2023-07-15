@@ -20,6 +20,7 @@ pub enum Element {
     Conditional(Box<Element>, Box<Element>, Box<Element>),
     Lambda(Vec<String>, Vec<Element>),
     List(Vec<Element>),
+    Nothing,
 }
 
 fn boolean(gaze: &mut Gaze<Token>) -> Option<Element> {
@@ -64,6 +65,13 @@ fn function_call(gaze: &mut Gaze<Token>) -> Option<Element> {
         return None;
     }
     Some(Element::FunctionCall(name, arguments))
+}
+
+fn nothing(gaze: &mut Gaze<Token>) -> Option<Element> {
+    match gaze.next() {
+        Some(Token::Nothing) | Some(Token::QuestionMark) => Some(Element::Nothing),
+        _ => None,
+    }
 }
 
 fn name(gaze: &mut Gaze<Token>) -> Option<Element> {
@@ -200,6 +208,7 @@ fn element(gaze: &mut Gaze<Token>) -> Option<Element> {
         function_call,
         name,
         boolean,
+        nothing,
         int,
         string,
         identifier,

@@ -58,6 +58,12 @@ pub enum Token {
 
     #[token("->")]
     Arrow,
+
+    #[token("nothing")]
+    Nothing,
+
+    #[token("?")]
+    QuestionMark,
 }
 
 fn bool(lex: &mut Lexer<Token>) -> Option<bool> {
