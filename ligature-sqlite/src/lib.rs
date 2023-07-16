@@ -10,7 +10,7 @@
 use std::{cell::RefCell, path::PathBuf, rc::Rc};
 
 use ligature::LigatureError;
-use rusqlite::{Connection, Error, params};
+use rusqlite::{params, Connection, Error, Transaction};
 use wander::{bindings::BindingsProvider, NativeFunction, WanderValue};
 
 /// The main struct used for working with the SQLite stored version of Ligature.
@@ -101,8 +101,8 @@ impl BindingsProvider for LigatureSQLite {
             }),
         );
         bindings.bind_native_function(
-            String::from("match"),
-            Rc::new(MatchFunction {
+            String::from("query"),
+            Rc::new(QueryFunction {
                 connection: self.connection.clone(),
             }),
         );
@@ -172,7 +172,7 @@ impl NativeFunction for RemoveDatasetFunction {
             [WanderValue::String(name)] => {
                 self.connection
                     .borrow()
-                    .execute("delete from dataset where name =?1", [name])
+                    .execute("delete from dataset where name = ?1", [name])
                     .unwrap();
                 Ok(WanderValue::Nothing)
             }
@@ -307,14 +307,43 @@ impl NativeFunction for RemoveStatementsFunction {
     }
 }
 
-struct MatchFunction {
+fn fetch_dataset_id(dataset_name: &str, tx: &Transaction) -> Result<Option<u64>, Error> {
+    let x = tx.query_row_and_then("select id from dataset where name = ?1", [dataset_name], |row| {
+        let id: u64 = row.get(0)?;
+        Ok::<u64, Error>(id)
+    });
+    match x {
+        Ok(dataset_id) => Ok(Some(dataset_id)),
+        Err(_) => Ok(None), //TODO just returning None for now, eventually I should match on the error (some errors should return Err others None)
+    }
+}
+
+struct QueryFunction {
     connection: Rc<RefCell<Connection>>,
 }
-impl NativeFunction for MatchFunction {
+impl NativeFunction for QueryFunction {
     fn run(
         &self,
         arguments: &Vec<wander::WanderValue>,
     ) -> Result<wander::WanderValue, LigatureError> {
-        todo!()
+        match &arguments[..] {
+            [WanderValue::String(dataset), WanderValue::Identifier(entity), WanderValue::Identifier(attribute), v] =>
+            {
+                let mut connection = self.connection.borrow_mut();
+                let tx = connection.transaction().unwrap();
+                let dataset_id = fetch_dataset_id(dataset, &tx).unwrap();
+                let mut stmt = tx.prepare("select entity, attribute, value_identifier, value_int, value_string from statement where dataset_id = ?1").unwrap();
+                let x = stmt.query_map([dataset_id], |e| {
+                    let x: String = e.get(0).unwrap();
+                    println!("!!!{x}");
+                    Ok(x) //e.get(0)
+                }).unwrap();
+                for y in x {
+                    println!("{y:?}")
+                }
+                Ok(WanderValue::Nothing)
+            }
+            _ => todo!(),
+        }
     }
 }

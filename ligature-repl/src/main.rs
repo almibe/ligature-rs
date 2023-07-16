@@ -8,8 +8,10 @@
 #![deny(missing_docs)]
 
 use ligature_redb::LigatureRedb;
+use ligature_sqlite::LigatureSQLite;
 use rustyline::error::ReadlineError;
 use rustyline::{Editor, Result};
+use wander::bindings::BindingsProvider;
 use wander::preludes::common;
 use wander::run;
 
@@ -18,7 +20,8 @@ enum Connection {}
 struct ReplState {}
 
 fn main() -> Result<()> {
-    let mut instance = LigatureRedb::default();
+    //    let mut instance = LigatureRedb::default();
+    let mut instance = LigatureSQLite::new_memory_store().unwrap();
     let mut bindings = common();
     instance.add_bindings(&mut bindings);
     println!("Welcome to Ligature REPL!!!");

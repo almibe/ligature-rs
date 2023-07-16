@@ -112,7 +112,28 @@ pub fn main() {
                 WanderValue::String("f".to_owned()),
             ])])),
             skippable: false,
-        }
+        },
+        LigatureTestCase {
+            name: "Query Statements",
+            input: r#"
+                addDataset("hello")
+                addStatements("hello" [[<a> <b> <c>][<a> <b> <d>][<a> <c> <d>]])
+                query("hello" <a> <b> ?)
+            "#, 
+            result: Ok(WanderValue::List(vec![
+                WanderValue::List(vec![
+                    WanderValue::String("a".to_owned()),
+                    WanderValue::String("b".to_owned()),
+                    WanderValue::String("c".to_owned()),
+                ]),
+                WanderValue::List(vec![
+                    WanderValue::String("a".to_owned()),
+                    WanderValue::String("b".to_owned()),
+                    WanderValue::String("d".to_owned()),
+                ]),
+            ])),
+            skippable: false,
+        },
     ];
 
     for test in tests {
@@ -120,7 +141,7 @@ pub fn main() {
             results.skipped_tests.push(test.name);
             continue;
         }
-        //        let mut bindings = create_redb_bindings();
+        // let mut bindings = create_redb_bindings();
         let mut bindings = create_sqlite_bindings();
         let result = run(test.input, &mut bindings);
         if result == test.result {
