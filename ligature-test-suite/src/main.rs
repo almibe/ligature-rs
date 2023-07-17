@@ -5,6 +5,7 @@
 //! This module is an implementation of the a test suite for Ligature implementations.
 
 use ligature::LigatureError;
+use ligature_in_memory::LigatureInMemory;
 use ligature_redb::LigatureRedb;
 use ligature_sqlite::LigatureSQLite;
 use wander::{
@@ -37,6 +38,13 @@ fn create_sqlite_bindings() -> Bindings {
 fn create_redb_bindings() -> Bindings {
     let mut bindings = common();
     let instance = LigatureRedb::temp().unwrap();
+    instance.add_bindings(&mut bindings);
+    bindings
+}
+
+fn create_memory_bindings() -> Bindings {
+    let mut bindings = common();
+    let instance = LigatureInMemory::new();
     instance.add_bindings(&mut bindings);
     bindings
 }
@@ -119,7 +127,7 @@ pub fn main() {
                 addDataset("hello")
                 addStatements("hello" [[<a> <b> <c>][<a> <b> <d>][<a> <c> <d>]])
                 query("hello" <a> <b> ?)
-            "#, 
+            "#,
             result: Ok(WanderValue::List(vec![
                 WanderValue::List(vec![
                     WanderValue::String("a".to_owned()),
@@ -142,7 +150,8 @@ pub fn main() {
             continue;
         }
         // let mut bindings = create_redb_bindings();
-        let mut bindings = create_sqlite_bindings();
+        // let mut bindings = create_sqlite_bindings();
+        let mut bindings = create_memory_bindings();
         let result = run(test.input, &mut bindings);
         if result == test.result {
             results.passed_tests.push(test.name);
