@@ -11,8 +11,9 @@ repository = "https://github.com/almibe/ligature-rs/"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ligature = "0.5"
-rpds = "0.12"
+ligature = { path = "../ligature" }
+wander = { path = "../wander" }
+# rpds = "0.12"
 # regex = "1"
 # lazy_static = "1.4.0"
 # serde = { version = "1.0", features = ["derive"] }
