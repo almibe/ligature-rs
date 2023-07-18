@@ -5,13 +5,19 @@
 //! This module is an implementation of Ligature that uses only
 //! in-memory persistent data structures for storing data.
 
-use std::{collections::{BTreeMap, BTreeSet}, sync::RwLock, rc::Rc};
+use std::{
+    borrow::BorrowMut,
+    cell::RefCell,
+    collections::{BTreeMap, BTreeSet},
+    rc::Rc,
+    sync::RwLock,
+};
 
-use ligature::{Statement, LigatureError};
+use ligature::{LigatureError, Statement, Value};
 use wander::{bindings::Bindings, NativeFunction, WanderValue};
 
 pub struct LigatureInMemory {
-    datasets: Rc<RwLock<BTreeMap<String, BTreeSet<Statement>>>>,
+    datasets: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
 }
 
 impl LigatureInMemory {
@@ -68,25 +74,27 @@ impl LigatureInMemory {
 }
 
 struct DatasetsFunction {
-    lim: Rc<RwLock<BTreeMap<String, BTreeSet<Statement>>>>,
+    lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
 }
 impl NativeFunction for DatasetsFunction {
-    fn run(
-        &self,
-        arguments: &Vec<WanderValue>,
-    ) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &Vec<WanderValue>) -> Result<WanderValue, LigatureError> {
         if arguments.is_empty() {
             let x = self.lim.read().unwrap();
-            let x = x.keys().map(|e| WanderValue::String(e.to_owned())).collect();
+            let x = x
+                .keys()
+                .map(|e| WanderValue::String(e.to_owned()))
+                .collect();
             Ok(WanderValue::List(x))
         } else {
-            Err(LigatureError("`datasets` function requires no arguments.".to_owned()))
+            Err(LigatureError(
+                "`datasets` function requires no arguments.".to_owned(),
+            ))
         }
     }
 }
 
 struct AddDatasetFunction {
-    lim: Rc<RwLock<BTreeMap<String, BTreeSet<Statement>>>>,
+    lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
 }
 impl NativeFunction for AddDatasetFunction {
     fn run(
@@ -99,17 +107,20 @@ impl NativeFunction for AddDatasetFunction {
                 if instance.contains_key(name) {
                     Ok(WanderValue::Nothing) //do nothing
                 } else {
-                    instance.insert(name.to_owned(), BTreeSet::new());
+                    let instance = instance.borrow_mut();
+                    instance.insert(name.to_owned(), RefCell::new(BTreeSet::new()));
                     Ok(WanderValue::Nothing)
                 }
-            },
-            _ => Err(LigatureError("`addDataset` function requires one string parameter.".to_owned()))
+            }
+            _ => Err(LigatureError(
+                "`addDataset` function requires one string parameter.".to_owned(),
+            )),
         }
     }
 }
 
 struct RemoveDatasetFunction {
-    lim: Rc<RwLock<BTreeMap<String, BTreeSet<Statement>>>>,
+    lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
 }
 impl NativeFunction for RemoveDatasetFunction {
     fn run(
@@ -125,14 +136,16 @@ impl NativeFunction for RemoveDatasetFunction {
                 } else {
                     Ok(WanderValue::Nothing) // do nothing
                 }
-            },
-            _ => Err(LigatureError("`removeDataset` function requires one string parameter.".to_owned()))
+            }
+            _ => Err(LigatureError(
+                "`removeDataset` function requires one string parameter.".to_owned(),
+            )),
         }
     }
 }
 
 struct StatementsFunction {
-    lim: Rc<RwLock<BTreeMap<String, BTreeSet<Statement>>>>,
+    lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
 }
 impl NativeFunction for StatementsFunction {
     fn run(
@@ -145,11 +158,14 @@ impl NativeFunction for StatementsFunction {
                 match instance.get(name) {
                     Some(statements) => {
                         let mut results = vec![];
-                        for statement in statements {
+                        let statements = statements.borrow();
+                        for statement in statements.iter() {
                             let entity = WanderValue::Identifier(statement.entity.clone());
                             let attribute = WanderValue::Identifier(statement.attribute.clone());
                             let value = match statement.value.clone() {
-                                ligature::Value::Identifier(value) => WanderValue::Identifier(value),
+                                ligature::Value::Identifier(value) => {
+                                    WanderValue::Identifier(value)
+                                }
                                 ligature::Value::StringLiteral(value) => WanderValue::String(value),
                                 ligature::Value::IntegerLiteral(value) => WanderValue::Int(value),
                                 ligature::Value::BytesLiteral(value) => todo!(),
@@ -157,47 +173,226 @@ impl NativeFunction for StatementsFunction {
                             results.push(WanderValue::List(vec![entity, attribute, value]));
                         }
                         Ok(WanderValue::List(results))
-                    },
-                    _ => Ok(WanderValue::Nothing) // do nothing
+                    }
+                    _ => Ok(WanderValue::Nothing), // do nothing
                 }
-            },
-            _ => Err(LigatureError("`removeDataset` function requires one string parameter.".to_owned()))
+            }
+            _ => Err(LigatureError(
+                "`removeDataset` function requires one string parameter.".to_owned(),
+            )),
         }
     }
 }
 
 struct AddStatementsFunction {
-    lim: Rc<RwLock<BTreeMap<String, BTreeSet<Statement>>>>,
+    lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
 }
 impl NativeFunction for AddStatementsFunction {
     fn run(
         &self,
         arguments: &Vec<wander::WanderValue>,
     ) -> Result<wander::WanderValue, ligature::LigatureError> {
-        todo!()
+        match &arguments[..] {
+            [WanderValue::String(name), WanderValue::List(statements)] => {
+                let instance = self.lim.write().unwrap();
+                match instance.get(name) {
+                    Some(ds_statements) => {
+                        //ds_statements.insert( Statement { entity: Identifier::new("test").unwrap(), attribute: todo!(), value: todo!() } );
+                        for statement in statements {
+                            match statement {
+                                WanderValue::List(statement) => match &statement[..] {
+                                    [WanderValue::Identifier(entity), WanderValue::Identifier(attribute), value] =>
+                                    {
+                                        let value: Value = match value {
+                                            WanderValue::Int(value) => {
+                                                Value::IntegerLiteral(value.to_owned())
+                                            }
+                                            WanderValue::String(value) => {
+                                                Value::StringLiteral(value.to_owned())
+                                            }
+                                            WanderValue::Identifier(value) => {
+                                                Value::Identifier(value.to_owned())
+                                            }
+                                            _ => {
+                                                return Err(LigatureError(
+                                                    "Invalid Statement".to_owned(),
+                                                ))
+                                            }
+                                        };
+                                        let statement = Statement {
+                                            entity: entity.to_owned(),
+                                            attribute: attribute.to_owned(),
+                                            value,
+                                        };
+                                        let mut ds_statements = ds_statements.borrow_mut();
+                                        ds_statements.insert(statement);
+                                    }
+                                    _ => todo!(),
+                                },
+                                _ => todo!(),
+                            }
+                        }
+                        Ok(WanderValue::Nothing)
+                    }
+                    _ => Ok(WanderValue::Nothing), // do nothing
+                }
+            }
+            _ => Err(LigatureError(
+                "`addStatements` function requires one string parameter and a list of Statements."
+                    .to_owned(),
+            )),
+        }
+    }
+}
+
+fn wander_value_to_value(value: &WanderValue) -> Result<Value, LigatureError> {
+    match value {
+        WanderValue::Int(value) => Ok(Value::IntegerLiteral(value.to_owned())),
+        WanderValue::String(value) => Ok(Value::StringLiteral(value.to_owned())),
+        WanderValue::Identifier(value) => Ok(Value::Identifier(value.to_owned())),
+        _ => return Err(LigatureError("Invalid Statement".to_owned())),
+    }
+}
+
+fn value_to_wander_value(value: &Value) -> WanderValue {
+    match value {
+        Value::Identifier(value) => WanderValue::Identifier(value.to_owned()),
+        Value::StringLiteral(value) => WanderValue::String(value.to_owned()),
+        Value::IntegerLiteral(value) => WanderValue::Int(value.to_owned()),
+        Value::BytesLiteral(value) => todo!(),
     }
 }
 
 struct RemoveStatementsFunction {
-    lim: Rc<RwLock<BTreeMap<String, BTreeSet<Statement>>>>,
+    lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
 }
 impl NativeFunction for RemoveStatementsFunction {
     fn run(
         &self,
         arguments: &Vec<wander::WanderValue>,
     ) -> Result<wander::WanderValue, ligature::LigatureError> {
-        todo!()
+        match &arguments[..] {
+            [WanderValue::String(name), WanderValue::List(statements)] => {
+                let instance = self.lim.write().unwrap();
+                match instance.get(name) {
+                    Some(ds_statements) => {
+                        for statement in statements {
+                            match statement {
+                                WanderValue::List(statement) => match &statement[..] {
+                                    [WanderValue::Identifier(entity), WanderValue::Identifier(attribute), value] =>
+                                    {
+                                        let value: Value = wander_value_to_value(&value)?;
+                                        let statement = Statement {
+                                            entity: entity.to_owned(),
+                                            attribute: attribute.to_owned(),
+                                            value,
+                                        };
+                                        let mut ds_statements = ds_statements.borrow_mut();
+                                        println!("Statements - {ds_statements:?}\nRemoving - {statement:?}");
+                                        ds_statements.remove(&statement);
+                                        return Ok(WanderValue::Nothing);
+                                    }
+                                    _ => todo!(),
+                                },
+                                _ => todo!(),
+                            }
+                        }
+                        Ok(WanderValue::Nothing)
+                    }
+                    _ => Ok(WanderValue::Nothing), // do nothing
+                }
+            }
+            _ => Err(LigatureError(
+                "`removeStatements` function requires one string parameter and a list of Statements.".to_owned(),
+            )),
+        }
     }
 }
 
 struct QueryFunction {
-    lim: Rc<RwLock<BTreeMap<String, BTreeSet<Statement>>>>,
+    lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
 }
 impl NativeFunction for QueryFunction {
     fn run(
         &self,
         arguments: &Vec<wander::WanderValue>,
     ) -> Result<wander::WanderValue, ligature::LigatureError> {
-        todo!()
+        match &arguments[..] {
+            [WanderValue::String(name), entity, attribute, value] => {
+                let instance = self.lim.read().unwrap();
+                match instance.get(name) {
+                    Some(ds_statements) => {
+                        let res: Vec<WanderValue> = ds_statements
+                            .borrow()
+                            .iter()
+                            .filter(|statement| {
+                                if let WanderValue::Identifier(id) = entity {
+                                    if statement.entity == *id {
+                                        //do nothing
+                                    } else {
+                                        return false;
+                                    }
+                                } else if let WanderValue::Nothing = entity {
+                                    //do nothing
+                                } else {
+                                    return false;
+                                }
+
+                                if let WanderValue::Identifier(id) = attribute {
+                                    if statement.attribute == *id {
+                                        //do nothing
+                                    } else {
+                                        return false;
+                                    }
+                                } else if let WanderValue::Nothing = entity {
+                                    //do nothing
+                                } else {
+                                    return false;
+                                }
+
+                                match value {
+                                    WanderValue::Boolean(_) => return false,
+                                    WanderValue::Int(ovalue) => {
+                                        if let Value::IntegerLiteral(ivalue) = &statement.value {
+                                            ovalue == ivalue
+                                        } else {
+                                            false
+                                        }
+                                    }
+                                    WanderValue::String(ovalue) => {
+                                        if let Value::StringLiteral(ivalue) = &statement.value {
+                                            ovalue == ivalue
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                    WanderValue::Identifier(ovalue) => {
+                                        if let Value::Identifier(ivalue) = &statement.value {
+                                            ovalue == ivalue
+                                        } else {
+                                            false
+                                        }
+                                    }
+                                    WanderValue::Nothing => true,
+                                    WanderValue::NativeFunction(_) => false,
+                                    WanderValue::Lambda(_, _) => false,
+                                    WanderValue::List(_) => false,
+                                }
+                            })
+                            .map(|statement| {
+                                let entity = WanderValue::Identifier(statement.entity.to_owned());
+                                let attribute =
+                                    WanderValue::Identifier(statement.attribute.to_owned());
+                                let value = value_to_wander_value(&statement.value);
+                                WanderValue::List(vec![entity, attribute, value])
+                            })
+                            .collect();
+                        Ok(WanderValue::List(res))
+                    }
+                    _ => Ok(WanderValue::Nothing), // do nothing
+                }
+            }
+            _ => Err(LigatureError("Error calling `query` function.".to_owned())),
+        }
     }
 }

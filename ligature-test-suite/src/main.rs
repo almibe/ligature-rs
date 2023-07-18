@@ -4,7 +4,7 @@
 
 //! This module is an implementation of the a test suite for Ligature implementations.
 
-use ligature::LigatureError;
+use ligature::{Identifier, LigatureError};
 use ligature_in_memory::LigatureInMemory;
 use ligature_redb::LigatureRedb;
 use ligature_sqlite::LigatureSQLite;
@@ -21,6 +21,10 @@ struct LigatureTestCase<'a> {
     skippable: bool,
 }
 
+fn ident(id: &str) -> WanderValue {
+    WanderValue::Identifier(Identifier::new(id).unwrap())
+}
+
 #[derive(Debug)]
 struct TestResults<'a> {
     failed_tests: Vec<&'a str>,
@@ -28,6 +32,7 @@ struct TestResults<'a> {
     skipped_tests: Vec<&'a str>,
 }
 
+#[allow(dead_code)]
 fn create_sqlite_bindings() -> Bindings {
     let mut bindings = common();
     let instance = LigatureSQLite::new_memory_store().unwrap();
@@ -35,6 +40,7 @@ fn create_sqlite_bindings() -> Bindings {
     bindings
 }
 
+#[allow(dead_code)]
 fn create_redb_bindings() -> Bindings {
     let mut bindings = common();
     let instance = LigatureRedb::temp().unwrap();
@@ -42,6 +48,7 @@ fn create_redb_bindings() -> Bindings {
     bindings
 }
 
+#[allow(dead_code)]
 fn create_memory_bindings() -> Bindings {
     let mut bindings = common();
     let instance = LigatureInMemory::new();
@@ -101,9 +108,9 @@ pub fn main() {
             name: "Add Statements to Dataset",
             input: r#"addDataset("hello") addStatements("hello" [[<a> <b> <c>]]) statements("hello")"#,
             result: Ok(WanderValue::List(vec![WanderValue::List(vec![
-                WanderValue::String("a".to_owned()),
-                WanderValue::String("b".to_owned()),
-                WanderValue::String("c".to_owned()),
+                ident("a"),
+                ident("b"),
+                ident("c"),
             ])])),
             skippable: false,
         },
@@ -115,9 +122,9 @@ pub fn main() {
                 removeStatements("hello" [[<a> <b> <c>]])
                 statements("hello")"#,
             result: Ok(WanderValue::List(vec![WanderValue::List(vec![
-                WanderValue::String("d".to_owned()),
-                WanderValue::String("e".to_owned()),
-                WanderValue::String("f".to_owned()),
+                ident("d"),
+                ident("e"),
+                ident("f"),
             ])])),
             skippable: false,
         },
@@ -129,16 +136,8 @@ pub fn main() {
                 query("hello" <a> <b> ?)
             "#,
             result: Ok(WanderValue::List(vec![
-                WanderValue::List(vec![
-                    WanderValue::String("a".to_owned()),
-                    WanderValue::String("b".to_owned()),
-                    WanderValue::String("c".to_owned()),
-                ]),
-                WanderValue::List(vec![
-                    WanderValue::String("a".to_owned()),
-                    WanderValue::String("b".to_owned()),
-                    WanderValue::String("d".to_owned()),
-                ]),
+                WanderValue::List(vec![ident("a"), ident("b"), ident("c")]),
+                WanderValue::List(vec![ident("a"), ident("b"), ident("d")]),
             ])),
             skippable: false,
         },
@@ -159,7 +158,7 @@ pub fn main() {
             results.failed_tests.push(test.name);
             println!(
                 "{:?} failed\n  Expected: {:?}\n  Recieved: {:?}",
-                test.name, result, test.result
+                test.name, test.result, result
             );
         }
     }
