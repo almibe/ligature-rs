@@ -9,7 +9,7 @@
 
 use std::{cell::RefCell, path::PathBuf, rc::Rc};
 
-use ligature::LigatureError;
+use ligature::{LigatureError, Identifier};
 use rusqlite::{params, Connection, Error, Transaction};
 use wander::{bindings::BindingsProvider, NativeFunction, WanderValue};
 
@@ -193,16 +193,27 @@ impl NativeFunction for StatementsFunction {
             [WanderValue::String(name)] => {
                 let connection = self.connection.borrow();
                 let mut stmt = connection.prepare(
-                    "select entity, attribute, value_identifier from statement inner join dataset on statement.dataset_id = dataset.id").unwrap();
+                    "select entity, attribute, value_identifier, value_int, value_string from statement inner join dataset on statement.dataset_id = dataset.id").unwrap();
                 let iter = stmt
                     .query_map([], |row| {
                         let entity: String = row.get(0)?;
-                        let attribute = row.get(1)?;
-                        let value = row.get(2)?;
+                        let attribute: String = row.get(1)?;
+                        let value_id: Option<String> = row.get(2)?;
+                        let value_int: Option<i64> = row.get(3)?;
+                        let value_str: Option<String> = row.get(4)?;
+                        let value = if let Some(value) = value_id {
+                            WanderValue::Identifier(Identifier::new(&value).unwrap())
+                        } else if let Some(value) = value_int {
+                            WanderValue::Int(value)
+                        } else if let Some(value) = value_str {
+                            WanderValue::String(value)
+                        } else {
+                            todo!()
+                        };
                         Ok(WanderValue::List(vec![
-                            WanderValue::String(entity),
-                            WanderValue::String(attribute),
-                            WanderValue::String(value),
+                            WanderValue::Identifier(Identifier::new(&entity).unwrap()),
+                            WanderValue::Identifier(Identifier::new(&attribute).unwrap()),
+                            value,
                         ]))
                     })
                     .unwrap();
@@ -238,15 +249,25 @@ impl NativeFunction for AddStatementsFunction {
                 statements.iter().for_each(|statement| {
                     if let WanderValue::List(contents) = statement {
                         match &contents[..] {
-                            [WanderValue::Identifier(entity), WanderValue::Identifier(attribute), x] => {
+                            [WanderValue::Identifier(entity), WanderValue::Identifier(attribute), value] => {
                                 let entity = entity.id();
                                 let attribute = attribute.id();
-                                let value = if let WanderValue::Identifier(value) = x {
-                                    value.id()
-                                } else {
-                                    todo!();
-                                };
-                                tx.execute("insert into statement (dataset_id, entity, attribute, value_identifier) values (?1, ?2, ?3, ?4)", params![id, entity, attribute, value]).unwrap();
+                                match value {
+                                    WanderValue::Int(value) => {
+                                        tx.execute("insert into statement (dataset_id, entity, attribute, value_int) values (?1, ?2, ?3, ?4)", params![id, entity, attribute, value]).unwrap();
+                                    },
+                                    WanderValue::String(value) => {
+                                        tx.execute("insert into statement (dataset_id, entity, attribute, value_string) values (?1, ?2, ?3, ?4)", params![id, entity, attribute, value]).unwrap();
+                                    },
+                                    WanderValue::Identifier(value) => {
+                                        tx.execute("insert into statement (dataset_id, entity, attribute, value_identifier) values (?1, ?2, ?3, ?4)", params![id, entity, attribute, value.id()]).unwrap();
+                                    },
+                                    WanderValue::Nothing => todo!("err"),
+                                    WanderValue::NativeFunction(_) => todo!("err"),
+                                    WanderValue::Lambda(_, _) => todo!("err"),
+                                    WanderValue::List(_) => todo!("err"),
+                                    WanderValue::Boolean(_) => todo!("err"),
+                                }
                             },
                             _ => todo!()
                         }
@@ -273,7 +294,7 @@ impl NativeFunction for RemoveStatementsFunction {
         match &arguments[..] {
             [WanderValue::String(name), WanderValue::List(statements)] => {
                 let mut connection = self.connection.borrow_mut();
-                let mut tx = connection.transaction().unwrap();
+                let tx = connection.transaction().unwrap();
                 let id = tx
                     .query_row_and_then("select id from dataset where name = ?1", [name], |row| {
                         let id: i64 = row.get(0).unwrap();
@@ -308,10 +329,14 @@ impl NativeFunction for RemoveStatementsFunction {
 }
 
 fn fetch_dataset_id(dataset_name: &str, tx: &Transaction) -> Result<Option<u64>, Error> {
-    let x = tx.query_row_and_then("select id from dataset where name = ?1", [dataset_name], |row| {
-        let id: u64 = row.get(0)?;
-        Ok::<u64, Error>(id)
-    });
+    let x = tx.query_row_and_then(
+        "select id from dataset where name = ?1",
+        [dataset_name],
+        |row| {
+            let id: u64 = row.get(0)?;
+            Ok::<u64, Error>(id)
+        },
+    );
     match x {
         Ok(dataset_id) => Ok(Some(dataset_id)),
         Err(_) => Ok(None), //TODO just returning None for now, eventually I should match on the error (some errors should return Err others None)
@@ -333,11 +358,12 @@ impl NativeFunction for QueryFunction {
                 let tx = connection.transaction().unwrap();
                 let dataset_id = fetch_dataset_id(dataset, &tx).unwrap();
                 let mut stmt = tx.prepare("select entity, attribute, value_identifier, value_int, value_string from statement where dataset_id = ?1").unwrap();
-                let x = stmt.query_map([dataset_id], |e| {
-                    let x: String = e.get(0).unwrap();
-                    println!("!!!{x}");
-                    Ok(x) //e.get(0)
-                }).unwrap();
+                let x = stmt
+                    .query_map([dataset_id], |e| {
+                        let x: String = e.get(0).unwrap();
+                        Ok(x) //e.get(0)
+                    })
+                    .unwrap();
                 for y in x {
                     println!("{y:?}")
                 }

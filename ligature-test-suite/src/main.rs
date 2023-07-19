@@ -4,6 +4,8 @@
 
 //! This module is an implementation of the a test suite for Ligature implementations.
 
+use std::fmt::Display;
+
 use ligature::{Identifier, LigatureError};
 use ligature_in_memory::LigatureInMemory;
 use ligature_redb::LigatureRedb;
@@ -30,6 +32,24 @@ struct TestResults<'a> {
     failed_tests: Vec<&'a str>,
     passed_tests: Vec<&'a str>,
     skipped_tests: Vec<&'a str>,
+}
+
+impl Display for TestResults<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "Passed Tests")?;
+        for passed_test in &self.passed_tests {
+            writeln!(f, " - {passed_test}")?;
+        }
+        writeln!(f, "Skipped Tests")?;
+        for skipped_test in &self.skipped_tests {
+            writeln!(f, " - {skipped_test}")?;
+        }
+        writeln!(f, "Failed Tests")?;
+        for failed_test in &self.failed_tests {
+            writeln!(f, " - {failed_test}")?;
+        }
+        Ok(())
+    }
 }
 
 #[allow(dead_code)]
@@ -149,8 +169,8 @@ pub fn main() {
             continue;
         }
         // let mut bindings = create_redb_bindings();
-        // let mut bindings = create_sqlite_bindings();
-        let mut bindings = create_memory_bindings();
+        let mut bindings = create_sqlite_bindings();
+        // let mut bindings = create_memory_bindings();
         let result = run(test.input, &mut bindings);
         if result == test.result {
             results.passed_tests.push(test.name);
@@ -162,5 +182,5 @@ pub fn main() {
             );
         }
     }
-    println!("Results:\n{:?}", results);
+    println!("Results:\n{results}");
 }
