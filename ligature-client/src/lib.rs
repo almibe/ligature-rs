@@ -7,11 +7,9 @@
 use std::fmt::Error;
 
 use ligature::LigatureError;
-use wander::WanderValue;
-use zmq::{Context, Socket};
+use zmq::Socket;
 
 pub struct LigatureZeroMQClient {
-    ctx: Context,
     socket: Socket,
 }
 
@@ -22,7 +20,7 @@ impl LigatureZeroMQClient {
         socket
             .connect(format!("tcp://127.0.0.1:{}", port.to_string()).as_str())
             .unwrap();
-        Ok(LigatureZeroMQClient { ctx, socket })
+        Ok(LigatureZeroMQClient { socket })
     }
 
     //TODO this should eventually return WanderValue not String

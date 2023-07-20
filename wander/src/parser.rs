@@ -55,7 +55,7 @@ fn function_call(gaze: &mut Gaze<Token>) -> Option<Element> {
         return None;
     }
     let mut arguments = vec![];
-    while gaze.peek() != None && gaze.peek() != Some(Token::CloseParen) {
+    while gaze.peek().is_some() && gaze.peek() != Some(Token::CloseParen) {
         match gaze.attemptf(&mut element) {
             Some(element) => arguments.push(element),
             None => return None,
@@ -93,13 +93,10 @@ fn scope(gaze: &mut Gaze<Token>) -> Option<Element> {
         Some(Token::OpenBrace) => (),
         _ => return None,
     }
-    let mut body = vec![];
 
-    loop {
-        match gaze.attemptf(&mut element) {
-            Some(element) => body.push(element),
-            None => break,
-        }
+    let mut body = vec![];
+    while let Some(element) = gaze.attemptf(&mut element) {
+        body.push(element)
     }
 
     match gaze.next() {
@@ -110,7 +107,7 @@ fn scope(gaze: &mut Gaze<Token>) -> Option<Element> {
 
 fn conditional(gaze: &mut Gaze<Token>) -> Option<Element> {
     if let Some(Token::If) = gaze.next() {
-        ()
+        //do nothing
     } else {
         return None;
     }
@@ -123,7 +120,7 @@ fn conditional(gaze: &mut Gaze<Token>) -> Option<Element> {
         None => return None,
     };
     if let Some(Token::Else) = gaze.next() {
-        ()
+        //do nothing
     } else {
         return None;
     }
@@ -159,11 +156,8 @@ fn lambda(gaze: &mut Gaze<Token>) -> Option<Element> {
     }
 
     let mut body = vec![];
-    loop {
-        match gaze.attemptf(&mut element) {
-            Some(element) => body.push(element),
-            None => break,
-        }
+    while let Some(element) = gaze.attemptf(&mut element) {
+        body.push(element)
     }
 
     match gaze.next() {
@@ -179,11 +173,8 @@ fn list(gaze: &mut Gaze<Token>) -> Option<Element> {
     }
 
     let mut contents = vec![];
-    loop {
-        match gaze.attemptf(&mut element) {
-            Some(e) => contents.push(e),
-            None => break, //should be the arrow token failing to match
-        }
+    while let Some(e) = gaze.attemptf(&mut element) {
+        contents.push(e)
     }
 
     match gaze.next() {
@@ -197,10 +188,8 @@ fn let_binding(gaze: &mut Gaze<Token>) -> Option<Element> {
         (Some(Token::Let), Some(Token::Name(name)), Some(Token::EqualSign)) => name,
         _ => return None,
     };
-    match gaze.attemptf(&mut element) {
-        Some(element) => Some(Element::Let(name, Box::new(element))),
-        _ => None,
-    }
+    gaze.attemptf(&mut element)
+        .map(|element| Element::Let(name, Box::new(element)))
 }
 
 fn element(gaze: &mut Gaze<Token>) -> Option<Element> {

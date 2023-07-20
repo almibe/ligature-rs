@@ -25,10 +25,10 @@ pub fn eval_element(
         Element::Int(value) => Ok(WanderValue::Int(*value)),
         Element::String(value) => Ok(WanderValue::String(value.to_string())),
         Element::Identifier(value) => Ok(WanderValue::Identifier(value.clone())),
-        Element::Let(name, value) => handle_let(&name, &value, bindings),
-        Element::Name(name) => read_name(&name, bindings),
+        Element::Let(name, value) => handle_let(name, value, bindings),
+        Element::Name(name) => read_name(name, bindings),
         Element::FunctionCall(name, arguments) => call_function(name, arguments, bindings),
-        Element::Scope(body) => handle_scope(&body, bindings),
+        Element::Scope(body) => handle_scope(body, bindings),
         Element::Conditional(c, i, e) => handle_conditional(c, i, e, bindings),
         Element::Lambda(params, body) => handle_lambda(params, body),
         Element::List(values) => handle_list(values, bindings),
@@ -55,19 +55,17 @@ fn handle_lambda(params: &Vec<String>, body: &Vec<Element>) -> Result<WanderValu
 }
 
 fn handle_conditional(
-    cond: &Box<Element>,
-    ife: &Box<Element>,
-    elsee: &Box<Element>,
+    cond: &Element,
+    ife: &Element,
+    elsee: &Element,
     bindings: &mut Bindings,
 ) -> Result<WanderValue, LigatureError> {
     match eval_element(cond, bindings)? {
         WanderValue::Boolean(true) => eval_element(ife, bindings),
         WanderValue::Boolean(false) => eval_element(elsee, bindings),
-        value => {
-            return Err(LigatureError(format!(
-                "Conditionals require a bool value found, {value}"
-            )))
-        }
+        value => Err(LigatureError(format!(
+            "Conditionals require a bool value found, {value}"
+        ))),
     }
 }
 
@@ -83,10 +81,10 @@ fn handle_scope(
 
 fn handle_let(
     name: &String,
-    element: &Box<Element>,
+    element: &Element,
     bindings: &mut Bindings,
 ) -> Result<WanderValue, LigatureError> {
-    match eval_element(element.as_ref(), bindings) {
+    match eval_element(element, bindings) {
         Ok(value) => {
             bindings.bind(name.to_string(), value);
             Ok(WanderValue::Nothing)
@@ -96,12 +94,9 @@ fn handle_let(
 }
 
 fn read_name(name: &String, bindings: &mut Bindings) -> Result<WanderValue, LigatureError> {
-    match bindings.read(&name) {
+    match bindings.read(name) {
         Some(value) => Ok(value),
-        _ => Err(LigatureError(format!(
-            "Error looking up {}",
-            name.to_string()
-        ))),
+        _ => Err(LigatureError(format!("Error looking up {name}"))),
     }
 }
 
@@ -117,14 +112,14 @@ fn call_function(
             Err(err) => return Err(err),
         }
     }
-    match bindings.read(&name) {
+    match bindings.read(name) {
         //corner case of this name shadowing with a native function
         Some(WanderValue::NativeFunction(_)) => {
             todo!()
         }
         //found other value (err), will evntually handle lambdas here
         Some(_) => Err(LigatureError(format!("Function {} is not defined.", &name))),
-        None => match bindings.read_native_function(&name) {
+        None => match bindings.read_native_function(name) {
             None => Err(LigatureError(format!("Function {} is not defined.", name))),
             Some(nf) => nf.run(&argument_values),
         },

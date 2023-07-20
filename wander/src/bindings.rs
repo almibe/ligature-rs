@@ -9,6 +9,7 @@ use std::{
     rc::Rc,
 };
 
+#[derive(Default)]
 pub struct Bindings {
     native_functions: RefCell<HashMap<String, Rc<dyn NativeFunction>>>,
     scopes: Vec<HashMap<String, WanderValue>>,
@@ -45,7 +46,7 @@ impl Bindings {
                 }
                 _ => return None,
             }
-            index = index - 1;
+            index -= 1;
         }
         None
     }
@@ -70,7 +71,7 @@ impl Bindings {
     pub fn bound_names(&self) -> HashSet<String> {
         let mut names = HashSet::new();
         for scope in self.scopes.iter() {
-            for (name, _) in scope {
+            for name in scope.keys() {
                 names.insert(name.clone());
             }
         }

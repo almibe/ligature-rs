@@ -8,9 +8,7 @@
 use home::home_dir;
 use ligature::LigatureError;
 use rand::distributions::{Alphanumeric, DistString};
-use redb::{
-    Database, Error, Range, ReadableTable, StorageError, Table, TableError, TransactionError,
-};
+use redb::{Database, Error, ReadableTable, StorageError, Table, TableError, TransactionError};
 use std::{path::PathBuf, rc::Rc};
 use tables::IdTypes;
 use wander::{
@@ -196,7 +194,7 @@ struct DatasetsFunction {
     db: Rc<Database>,
 }
 impl NativeFunction for DatasetsFunction {
-    fn run(&self, arguments: &Vec<WanderValue>) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
         if arguments.is_empty() {
             let mut datasets = vec![];
             {
@@ -222,8 +220,8 @@ struct AddDatasetFunction {
     db: Rc<Database>,
 }
 impl NativeFunction for AddDatasetFunction {
-    fn run(&self, arguments: &Vec<WanderValue>) -> Result<WanderValue, LigatureError> {
-        match arguments.as_slice() {
+    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+        match arguments {
             [WanderValue::String(name)] => {
                 let tx = self.db.begin_write().map_err(tx_err)?;
                 let mut ids = tx.open_table(tables::IDS_TABLE).map_err(tbl_err)?;
@@ -257,8 +255,8 @@ struct RemoveDatasetFunction {
     db: Rc<Database>,
 }
 impl NativeFunction for RemoveDatasetFunction {
-    fn run(&self, arguments: &Vec<WanderValue>) -> Result<WanderValue, LigatureError> {
-        match arguments.as_slice() {
+    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+        match arguments {
             [WanderValue::String(name)] => {
                 let tx = self.db.begin_write().map_err(tx_err)?;
                 let mut ids = tx.open_table(tables::IDS_TABLE).map_err(tbl_err)?;
@@ -293,8 +291,8 @@ struct StatementsFunction {
     db: Rc<Database>,
 }
 impl NativeFunction for StatementsFunction {
-    fn run(&self, arguments: &Vec<WanderValue>) -> Result<WanderValue, LigatureError> {
-        match arguments.as_slice() {
+    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+        match arguments {
             [WanderValue::String(name)] => {
                 let tx = self.db.begin_write().map_err(tx_err)?;
                 let mut datasets = tx.open_table(tables::DATASETS_ID_TABLE).map_err(tbl_err)?;
@@ -333,8 +331,8 @@ struct AddStatementsFunction {
     db: Rc<Database>,
 }
 impl NativeFunction for AddStatementsFunction {
-    fn run(&self, arguments: &Vec<WanderValue>) -> Result<WanderValue, LigatureError> {
-        match arguments.as_slice() {
+    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+        match arguments {
             [WanderValue::String(name)] => {
                 let tx = self.db.begin_write().map_err(tx_err)?;
 

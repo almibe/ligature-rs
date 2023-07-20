@@ -19,7 +19,7 @@ pub mod parser;
 pub mod preludes;
 
 pub trait NativeFunction {
-    fn run(&self, arguments: &Vec<WanderValue>) -> Result<WanderValue, LigatureError>;
+    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError>;
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -55,7 +55,7 @@ impl Display for WanderValue {
                     }
                 }
                 write!(f, "]")
-            },
+            }
             WanderValue::Lambda(_, _) => write!(f, "[lambda]"),
         }
     }

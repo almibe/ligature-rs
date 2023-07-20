@@ -16,6 +16,7 @@ use std::{
 use ligature::{LigatureError, Statement, Value};
 use wander::{bindings::Bindings, NativeFunction, WanderValue};
 
+#[derive(Default)]
 pub struct LigatureInMemory {
     datasets: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
 }
@@ -77,7 +78,7 @@ struct DatasetsFunction {
     lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
 }
 impl NativeFunction for DatasetsFunction {
-    fn run(&self, arguments: &Vec<WanderValue>) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
         if arguments.is_empty() {
             let x = self.lim.read().unwrap();
             let x = x
@@ -99,7 +100,7 @@ struct AddDatasetFunction {
 impl NativeFunction for AddDatasetFunction {
     fn run(
         &self,
-        arguments: &Vec<wander::WanderValue>,
+        arguments: &[WanderValue],
     ) -> Result<wander::WanderValue, ligature::LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name)] => {
@@ -125,7 +126,7 @@ struct RemoveDatasetFunction {
 impl NativeFunction for RemoveDatasetFunction {
     fn run(
         &self,
-        arguments: &Vec<wander::WanderValue>,
+        arguments: &[WanderValue],
     ) -> Result<wander::WanderValue, ligature::LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name)] => {
@@ -150,7 +151,7 @@ struct StatementsFunction {
 impl NativeFunction for StatementsFunction {
     fn run(
         &self,
-        arguments: &Vec<wander::WanderValue>,
+        arguments: &[WanderValue],
     ) -> Result<wander::WanderValue, ligature::LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name)] => {
@@ -168,7 +169,7 @@ impl NativeFunction for StatementsFunction {
                                 }
                                 ligature::Value::StringLiteral(value) => WanderValue::String(value),
                                 ligature::Value::IntegerLiteral(value) => WanderValue::Int(value),
-                                ligature::Value::BytesLiteral(value) => todo!(),
+                                ligature::Value::BytesLiteral(_) => todo!(),
                             };
                             results.push(WanderValue::List(vec![entity, attribute, value]));
                         }
@@ -190,7 +191,7 @@ struct AddStatementsFunction {
 impl NativeFunction for AddStatementsFunction {
     fn run(
         &self,
-        arguments: &Vec<wander::WanderValue>,
+        arguments: &[WanderValue],
     ) -> Result<wander::WanderValue, ligature::LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name), WanderValue::List(statements)] => {
@@ -250,7 +251,7 @@ fn wander_value_to_value(value: &WanderValue) -> Result<Value, LigatureError> {
         WanderValue::Int(value) => Ok(Value::IntegerLiteral(value.to_owned())),
         WanderValue::String(value) => Ok(Value::StringLiteral(value.to_owned())),
         WanderValue::Identifier(value) => Ok(Value::Identifier(value.to_owned())),
-        _ => return Err(LigatureError("Invalid Statement".to_owned())),
+        _ => Err(LigatureError("Invalid Statement".to_owned())),
     }
 }
 
@@ -259,7 +260,7 @@ fn value_to_wander_value(value: &Value) -> WanderValue {
         Value::Identifier(value) => WanderValue::Identifier(value.to_owned()),
         Value::StringLiteral(value) => WanderValue::String(value.to_owned()),
         Value::IntegerLiteral(value) => WanderValue::Int(value.to_owned()),
-        Value::BytesLiteral(value) => todo!(),
+        Value::BytesLiteral(_) => todo!(),
     }
 }
 
@@ -269,7 +270,7 @@ struct RemoveStatementsFunction {
 impl NativeFunction for RemoveStatementsFunction {
     fn run(
         &self,
-        arguments: &Vec<wander::WanderValue>,
+        arguments: &[WanderValue],
     ) -> Result<wander::WanderValue, ligature::LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name), WanderValue::List(statements)] => {
@@ -281,14 +282,13 @@ impl NativeFunction for RemoveStatementsFunction {
                                 WanderValue::List(statement) => match &statement[..] {
                                     [WanderValue::Identifier(entity), WanderValue::Identifier(attribute), value] =>
                                     {
-                                        let value: Value = wander_value_to_value(&value)?;
+                                        let value: Value = wander_value_to_value(value)?;
                                         let statement = Statement {
                                             entity: entity.to_owned(),
                                             attribute: attribute.to_owned(),
                                             value,
                                         };
                                         let mut ds_statements = ds_statements.borrow_mut();
-                                        println!("Statements - {ds_statements:?}\nRemoving - {statement:?}");
                                         ds_statements.remove(&statement);
                                         return Ok(WanderValue::Nothing);
                                     }
@@ -315,7 +315,7 @@ struct QueryFunction {
 impl NativeFunction for QueryFunction {
     fn run(
         &self,
-        arguments: &Vec<wander::WanderValue>,
+        arguments: &[WanderValue],
     ) -> Result<wander::WanderValue, ligature::LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name), entity, attribute, value] => {
@@ -351,7 +351,7 @@ impl NativeFunction for QueryFunction {
                                 }
 
                                 match value {
-                                    WanderValue::Boolean(_) => return false,
+                                    WanderValue::Boolean(_) => false,
                                     WanderValue::Int(ovalue) => {
                                         if let Value::IntegerLiteral(ivalue) = &statement.value {
                                             ovalue == ivalue
@@ -363,7 +363,7 @@ impl NativeFunction for QueryFunction {
                                         if let Value::StringLiteral(ivalue) = &statement.value {
                                             ovalue == ivalue
                                         } else {
-                                            return false;
+                                            false
                                         }
                                     }
                                     WanderValue::Identifier(ovalue) => {
