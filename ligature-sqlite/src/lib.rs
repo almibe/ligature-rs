@@ -7,47 +7,55 @@
 
 #![deny(missing_docs)]
 
-use std::{cell::RefCell, path::PathBuf, rc::Rc};
+use std::{
+    path::PathBuf,
+    rc::Rc,
+    sync::{Arc, Mutex},
+};
 
-use ligature::{LigatureError, Identifier, Value, Statement};
+use dirs::data_local_dir;
+use ligature::{Identifier, LigatureError};
 use rusqlite::{params, Connection, Error, Transaction};
-use sql_builder::{SqlBuilder, quote};
+use sql_builder::{quote, SqlBuilder};
 use wander::{bindings::BindingsProvider, NativeFunction, WanderValue};
 
 /// The main struct used for working with the SQLite stored version of Ligature.
 pub struct LigatureSQLite {
-    connection: Rc<RefCell<Connection>>,
+    connection: Arc<Mutex<Connection>>,
 }
 
 impl LigatureSQLite {
     /// Create a LigatureSQLite instance by opening the given file,
     /// or creating a new instance if that file doesn't exist.
     pub fn create_or_open_file(path: PathBuf) -> LigatureSQLite {
-        todo!()
+        let connection = Arc::new(Mutex::new(Connection::open(path).unwrap()));
+        let instance = LigatureSQLite { connection };
+        instance.setup().unwrap();
+        instance
     }
 
     /// Create a new instance of LigatureSQLite that is stored in-memory only.
     pub fn new_memory_store() -> Result<LigatureSQLite, rusqlite::Error> {
         let instance = LigatureSQLite {
-            connection: Rc::new(RefCell::new(Connection::open_in_memory()?)),
+            connection: Arc::new(Mutex::new(Connection::open_in_memory()?)),
         };
         instance.setup()?;
         Ok(instance)
     }
 
     fn setup(&self) -> Result<(), rusqlite::Error> {
-        self.connection.borrow().execute(
+        self.connection.lock().unwrap().execute(
             r#"
-            create table dataset(
+            create table if not exists dataset(
                 id integer primary key, 
                 name text not null
             );
         "#,
             (),
         )?;
-        self.connection.borrow().execute(
+        self.connection.lock().unwrap().execute(
             r#"
-            create table statement(
+            create table if not exists statement(
                 id integer primary key, 
                 dataset_id integer not null, 
                 entity text not null,
@@ -60,6 +68,15 @@ impl LigatureSQLite {
             (),
         )?;
         Ok(())
+    }
+}
+
+impl Default for LigatureSQLite {
+    fn default() -> Self {
+        let mut path = data_local_dir().unwrap();
+        path.push("ligature");
+        path.push("sqlite");
+        LigatureSQLite::create_or_open_file(path)
     }
 }
 
@@ -111,15 +128,12 @@ impl BindingsProvider for LigatureSQLite {
 }
 
 struct DatasetsFunction {
-    connection: Rc<RefCell<Connection>>,
+    connection: Arc<Mutex<Connection>>,
 }
 impl NativeFunction for DatasetsFunction {
-    fn run(
-        &self,
-        arguments: &Vec<wander::WanderValue>,
-    ) -> Result<wander::WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
         if arguments.is_empty() {
-            let connection = self.connection.borrow();
+            let connection = self.connection.lock().unwrap();
             let mut stmt = connection.prepare("select name from dataset").unwrap();
             let iter = stmt
                 .query_map([], |row| {
@@ -141,17 +155,15 @@ impl NativeFunction for DatasetsFunction {
 }
 
 struct AddDatasetFunction {
-    connection: Rc<RefCell<Connection>>,
+    connection: Arc<Mutex<Connection>>,
 }
 impl NativeFunction for AddDatasetFunction {
-    fn run(
-        &self,
-        arguments: &Vec<wander::WanderValue>,
-    ) -> Result<wander::WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name)] => {
                 self.connection
-                    .borrow()
+                    .lock()
+                    .unwrap()
                     .execute("insert into dataset (name) values (?1)", [name])
                     .unwrap();
                 Ok(WanderValue::Nothing)
@@ -162,17 +174,15 @@ impl NativeFunction for AddDatasetFunction {
 }
 
 struct RemoveDatasetFunction {
-    connection: Rc<RefCell<Connection>>,
+    connection: Arc<Mutex<Connection>>,
 }
 impl NativeFunction for RemoveDatasetFunction {
-    fn run(
-        &self,
-        arguments: &Vec<wander::WanderValue>,
-    ) -> Result<wander::WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name)] => {
                 self.connection
-                    .borrow()
+                    .lock()
+                    .unwrap()
                     .execute("delete from dataset where name = ?1", [name])
                     .unwrap();
                 Ok(WanderValue::Nothing)
@@ -183,16 +193,13 @@ impl NativeFunction for RemoveDatasetFunction {
 }
 
 struct StatementsFunction {
-    connection: Rc<RefCell<Connection>>,
+    connection: Arc<Mutex<Connection>>,
 }
 impl NativeFunction for StatementsFunction {
-    fn run(
-        &self,
-        arguments: &Vec<wander::WanderValue>,
-    ) -> Result<wander::WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name)] => {
-                let connection = self.connection.borrow();
+                let connection = self.connection.lock().unwrap();
                 let mut stmt = connection.prepare(
                     "select entity, attribute, value_identifier, value_int, value_string from statement inner join dataset on statement.dataset_id = dataset.id").unwrap();
                 let iter = stmt
@@ -230,16 +237,13 @@ impl NativeFunction for StatementsFunction {
 }
 
 struct AddStatementsFunction {
-    connection: Rc<RefCell<Connection>>,
+    connection: Arc<Mutex<Connection>>,
 }
 impl NativeFunction for AddStatementsFunction {
-    fn run(
-        &self,
-        arguments: &Vec<wander::WanderValue>,
-    ) -> Result<wander::WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name), WanderValue::List(statements)] => {
-                let mut connection = self.connection.borrow_mut();
+                let mut connection = self.connection.lock().unwrap();
                 let mut tx = connection.transaction().unwrap();
                 let id = tx
                     .query_row_and_then("select id from dataset where name = ?1", [name], |row| {
@@ -285,16 +289,13 @@ impl NativeFunction for AddStatementsFunction {
 }
 
 struct RemoveStatementsFunction {
-    connection: Rc<RefCell<Connection>>,
+    connection: Arc<Mutex<Connection>>,
 }
 impl NativeFunction for RemoveStatementsFunction {
-    fn run(
-        &self,
-        arguments: &Vec<wander::WanderValue>,
-    ) -> Result<wander::WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name), WanderValue::List(statements)] => {
-                let mut connection = self.connection.borrow_mut();
+                let mut connection = self.connection.lock().unwrap();
                 let tx = connection.transaction().unwrap();
                 let id = tx
                     .query_row_and_then("select id from dataset where name = ?1", [name], |row| {
@@ -345,22 +346,19 @@ fn fetch_dataset_id(dataset_name: &str, tx: &Transaction) -> Result<Option<u64>,
 }
 
 struct QueryFunction {
-    connection: Rc<RefCell<Connection>>,
+    connection: Arc<Mutex<Connection>>,
 }
 impl NativeFunction for QueryFunction {
-    fn run(
-        &self,
-        arguments: &Vec<wander::WanderValue>,
-    ) -> Result<wander::WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue]) -> Result<wander::WanderValue, LigatureError> {
         match &arguments[..] {
-            [WanderValue::String(dataset), entity, attribute, value] =>
-            {
-                let mut connection = self.connection.borrow_mut();
+            [WanderValue::String(dataset), entity, attribute, value] => {
+                let mut connection = self.connection.lock().unwrap();
                 let tx = connection.transaction().unwrap();
                 let dataset_id = fetch_dataset_id(dataset, &tx).unwrap().unwrap();
 
                 let mut builder = SqlBuilder::select_from("statement");
-                builder.field("entity")
+                builder
+                    .field("entity")
                     .field("attribute")
                     .field("value_identifier")
                     .field("value_int")
@@ -372,7 +370,9 @@ impl NativeFunction for QueryFunction {
                 } else if let WanderValue::Nothing = entity {
                     () //do nothing
                 } else {
-                    return Err(LigatureError("Invalid argument in Entity position in call to `query`.".to_owned()));
+                    return Err(LigatureError(
+                        "Invalid argument in Entity position in call to `query`.".to_owned(),
+                    ));
                 }
 
                 if let WanderValue::Identifier(attribute) = attribute {
@@ -380,21 +380,27 @@ impl NativeFunction for QueryFunction {
                 } else if let WanderValue::Nothing = attribute {
                     () //do nothing
                 } else {
-                    return Err(LigatureError("Invalid argument in Attribute position in call to `query`.".to_owned()));
+                    return Err(LigatureError(
+                        "Invalid argument in Attribute position in call to `query`.".to_owned(),
+                    ));
                 }
 
                 match value {
                     WanderValue::Int(value) => {
                         builder.and_where_eq("value_int", value);
-                    },
+                    }
                     WanderValue::String(value) => {
                         builder.and_where_eq("value_string", &quote(value));
-                    },
+                    }
                     WanderValue::Identifier(value) => {
                         builder.and_where_eq("value_identifier", &quote(value.id()));
-                    },
+                    }
                     WanderValue::Nothing => (), //do nothing
-                    _ => return Err(LigatureError("Invalid argument in Value position in call to `query`.".to_owned())),
+                    _ => {
+                        return Err(LigatureError(
+                            "Invalid argument in Value position in call to `query`.".to_owned(),
+                        ))
+                    }
                 }
                 let stmt = builder.sql().unwrap();
                 let mut stmt = tx.prepare(&stmt).unwrap();
@@ -407,7 +413,8 @@ impl NativeFunction for QueryFunction {
                         let value_string: Option<String> = e.get(4).unwrap();
 
                         let entity = WanderValue::Identifier(Identifier::new(&entity).unwrap());
-                        let attribute = WanderValue::Identifier(Identifier::new(&attribute).unwrap());
+                        let attribute =
+                            WanderValue::Identifier(Identifier::new(&attribute).unwrap());
                         let value = if let Some(value) = value_identifier {
                             WanderValue::Identifier(Identifier::new(&value).unwrap())
                         } else if let Some(value) = value_int {

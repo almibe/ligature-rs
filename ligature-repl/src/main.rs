@@ -21,7 +21,7 @@ struct ReplState {}
 
 fn main() -> Result<()> {
     //    let mut instance = LigatureRedb::default();
-    let mut instance = LigatureSQLite::new_memory_store().unwrap();
+    let instance = LigatureSQLite::new_memory_store().unwrap();
     let mut bindings = common();
     instance.add_bindings(&mut bindings);
     println!("Welcome to Ligature REPL!!!");
@@ -41,7 +41,10 @@ fn main() -> Result<()> {
                     }
                 } else {
                     let result = run(line.as_str(), &mut bindings);
-                    println!("Result: {:?}", result);
+                    match result {
+                        Ok(result) => println!("Result: {result}"),
+                        Err(err) => println!("Error: {err:?}"),
+                    }
                 }
             }
             Err(ReadlineError::Interrupted) => {
