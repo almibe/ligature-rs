@@ -44,7 +44,18 @@ impl Display for WanderValue {
             WanderValue::Identifier(value) => write!(f, "{}", value),
             WanderValue::Nothing => write!(f, "nothing"),
             WanderValue::NativeFunction(_) => write!(f, "[function]"),
-            WanderValue::List(_) => write!(f, "[list]"),
+            WanderValue::List(contents) => {
+                write!(f, "[").unwrap();
+                let mut i = 0;
+                for value in contents {
+                    write!(f, "{value}").unwrap();
+                    i += 1;
+                    if i < contents.len() {
+                        write!(f, " ").unwrap();
+                    }
+                }
+                write!(f, "]")
+            },
             WanderValue::Lambda(_, _) => write!(f, "[lambda]"),
         }
     }
