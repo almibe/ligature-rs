@@ -9,8 +9,9 @@
 
 use std::{cell::RefCell, path::PathBuf, rc::Rc};
 
-use ligature::{LigatureError, Identifier};
+use ligature::{LigatureError, Identifier, Value, Statement};
 use rusqlite::{params, Connection, Error, Transaction};
+use sql_builder::{SqlBuilder, quote};
 use wander::{bindings::BindingsProvider, NativeFunction, WanderValue};
 
 /// The main struct used for working with the SQLite stored version of Ligature.
@@ -352,22 +353,79 @@ impl NativeFunction for QueryFunction {
         arguments: &Vec<wander::WanderValue>,
     ) -> Result<wander::WanderValue, LigatureError> {
         match &arguments[..] {
-            [WanderValue::String(dataset), WanderValue::Identifier(entity), WanderValue::Identifier(attribute), v] =>
+            [WanderValue::String(dataset), entity, attribute, value] =>
             {
                 let mut connection = self.connection.borrow_mut();
                 let tx = connection.transaction().unwrap();
-                let dataset_id = fetch_dataset_id(dataset, &tx).unwrap();
-                let mut stmt = tx.prepare("select entity, attribute, value_identifier, value_int, value_string from statement where dataset_id = ?1").unwrap();
+                let dataset_id = fetch_dataset_id(dataset, &tx).unwrap().unwrap();
+
+                let mut builder = SqlBuilder::select_from("statement");
+                builder.field("entity")
+                    .field("attribute")
+                    .field("value_identifier")
+                    .field("value_int")
+                    .field("value_string")
+                    .and_where_eq("dataset_id", dataset_id);
+
+                if let WanderValue::Identifier(entity) = entity {
+                    builder.and_where_eq("entity", &quote(entity.id()));
+                } else if let WanderValue::Nothing = entity {
+                    () //do nothing
+                } else {
+                    return Err(LigatureError("Invalid argument in Entity position in call to `query`.".to_owned()));
+                }
+
+                if let WanderValue::Identifier(attribute) = attribute {
+                    builder.and_where_eq("attribute", &quote(attribute.id()));
+                } else if let WanderValue::Nothing = attribute {
+                    () //do nothing
+                } else {
+                    return Err(LigatureError("Invalid argument in Attribute position in call to `query`.".to_owned()));
+                }
+
+                match value {
+                    WanderValue::Int(value) => {
+                        builder.and_where_eq("value_int", value);
+                    },
+                    WanderValue::String(value) => {
+                        builder.and_where_eq("value_string", &quote(value));
+                    },
+                    WanderValue::Identifier(value) => {
+                        builder.and_where_eq("value_identifier", &quote(value.id()));
+                    },
+                    WanderValue::Nothing => (), //do nothing
+                    _ => return Err(LigatureError("Invalid argument in Value position in call to `query`.".to_owned())),
+                }
+                let stmt = builder.sql().unwrap();
+                let mut stmt = tx.prepare(&stmt).unwrap();
                 let x = stmt
-                    .query_map([dataset_id], |e| {
-                        let x: String = e.get(0).unwrap();
-                        Ok(x) //e.get(0)
+                    .query_map([], |e| {
+                        let entity: String = e.get(0).unwrap();
+                        let attribute: String = e.get(1).unwrap();
+                        let value_identifier: Option<String> = e.get(2).unwrap();
+                        let value_int: Option<i64> = e.get(3).unwrap();
+                        let value_string: Option<String> = e.get(4).unwrap();
+
+                        let entity = WanderValue::Identifier(Identifier::new(&entity).unwrap());
+                        let attribute = WanderValue::Identifier(Identifier::new(&attribute).unwrap());
+                        let value = if let Some(value) = value_identifier {
+                            WanderValue::Identifier(Identifier::new(&value).unwrap())
+                        } else if let Some(value) = value_int {
+                            WanderValue::Int(value)
+                        } else if let Some(value) = value_string {
+                            WanderValue::String(value)
+                        } else {
+                            todo!("err")
+                            //return Err(LigatureError("Invalid argument in Value position in call to `query`.".to_owned()))
+                        };
+                        Ok(WanderValue::List(vec![entity, attribute, value]))
                     })
                     .unwrap();
+                let mut results = vec![];
                 for y in x {
-                    println!("{y:?}")
+                    results.push(y.unwrap());
                 }
-                Ok(WanderValue::Nothing)
+                Ok(WanderValue::List(results))
             }
             _ => todo!(),
         }
