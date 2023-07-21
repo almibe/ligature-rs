@@ -201,9 +201,9 @@ impl NativeFunction for StatementsFunction {
             [WanderValue::String(name)] => {
                 let connection = self.connection.lock().unwrap();
                 let mut stmt = connection.prepare(
-                    "select entity, attribute, value_identifier, value_int, value_string from statement inner join dataset on statement.dataset_id = dataset.id").unwrap();
+                    "select entity, attribute, value_identifier, value_int, value_string from statement inner join dataset on statement.dataset_id = dataset.id where dataset.name = ?1").unwrap();
                 let iter = stmt
-                    .query_map([], |row| {
+                    .query_map([name], |row| {
                         let entity: String = row.get(0)?;
                         let attribute: String = row.get(1)?;
                         let value_id: Option<String> = row.get(2)?;
