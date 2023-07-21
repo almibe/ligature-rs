@@ -97,3 +97,22 @@ fn run_list() {
     ]));
     assert_eq!(res, expected);
 }
+
+#[test]
+fn run_lambda() {
+    let input = "let id = { x -> x } id(5)";
+    let res = run(input, &mut common());
+    let expected = Ok(WanderValue::Int(5));
+    assert_eq!(res, expected);
+}
+
+#[test]
+fn run_lambda_with_function() {
+    let input = "let id = { x -> x } id([not(true) not(false)])";
+    let res = run(input, &mut common());
+    let expected = Ok(WanderValue::List(vec![
+        WanderValue::Boolean(false),
+        WanderValue::Boolean(true),
+    ]));
+    assert_eq!(res, expected);
+}

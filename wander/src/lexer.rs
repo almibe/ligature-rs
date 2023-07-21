@@ -26,10 +26,10 @@ pub enum Token {
     #[regex("[-0-9]+", int)]
     Int(i64),
 
-    #[regex("\"[a-zA-Z0-9 ]*\"", string)] //TODO this is wrong
+    #[regex(r#""(([^\x00-\x1F"\\]|\\["\\/bfnrt]|\\u[0-9a-fA-F]{4})*)""#, string)]
     String(String),
 
-    #[regex("<[a-zA-Z0-9]+>", identifier)] //TODO this is wrong
+    #[regex("<[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;%=]+>", identifier)]
     Identifier(Identifier),
 
     #[regex("[_a-zA-Z]+[_a-zA-Z0-9]*", name)]
@@ -83,7 +83,6 @@ fn int(lex: &mut Lexer<Token>) -> Option<i64> {
     }
 }
 
-//TODO this is wrong
 fn string(lex: &mut Lexer<Token>) -> Option<String> {
     let slice = lex.slice();
     slice.slice(1..(slice.len() - 1)).map(|x| x.into())

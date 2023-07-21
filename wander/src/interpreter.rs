@@ -117,6 +117,27 @@ fn call_function(
         Some(WanderValue::NativeFunction(_)) => {
             todo!()
         }
+        Some(WanderValue::Lambda(parameters, body)) => {
+            if parameters.len() == arguments.len() {
+                bindings.add_scope();
+                for (i, parameter) in parameters.iter().enumerate() {
+                    bindings.bind(
+                        parameter.to_owned(),
+                        argument_values.get(i).unwrap().clone(),
+                    );
+                }
+                let res = eval(&body, bindings);
+                bindings.remove_scope();
+                res
+            } else {
+                Err(LigatureError(format!(
+                    "Incorrect number of arguments, {}, passed to {}, expecting {}.",
+                    arguments.len(),
+                    name,
+                    parameters.len()
+                )))
+            }
+        }
         //found other value (err), will evntually handle lambdas here
         Some(_) => Err(LigatureError(format!("Function {} is not defined.", &name))),
         None => match bindings.read_native_function(name) {
