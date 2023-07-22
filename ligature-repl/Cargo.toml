@@ -17,6 +17,6 @@ ligature-in-memory = "0.1"
 ligature-redb = { path = "../ligature-redb" }
 ligature-sqlite = { path = "../ligature-sqlite" }
 wander = { path = "../wander" }
-ligature-client = { path = "../ligature-client" }
+ligature-client = { path = "../ligature-zeromq-client" }
 rustyline = "10.0.0"
 anyhow = "1.0"
