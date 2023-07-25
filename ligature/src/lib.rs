@@ -88,7 +88,7 @@ impl Display for Identifier {
 
 /// Creates a new Identifier with an optional prefix.
 pub fn new_identifier(prefix: Option<String>) -> Result<Identifier, LigatureError> {
-    let uuid = Uuid::new_v4().to_hyphenated().to_string();
+    let uuid = Uuid::new_v4().hyphenated().to_string();
     let p = match prefix {
         Some(s) => s + &uuid,
         None => uuid,
