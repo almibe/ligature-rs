@@ -6,12 +6,12 @@ members = [
     "ligature-benchmark",
     "ligature-graph",
     "ligature-in-memory",
-    "ligature-redb",
+#    "ligature-redb",
     "ligature-repl",
     "ligature-sqlite",
     "ligature-test-suite",
     "ligature-wasm",
-    "ligature-zeromq-client",
-    "ligature-zeromq-server",
+#    "ligature-zeromq-client",
+#    "ligature-zeromq-server",
     "wander"
 ]

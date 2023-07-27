@@ -15,6 +15,18 @@ If you are interested in building this project, see https://rustwasm.github.io/ 
 
 ```bash
 wasm-pack build
+wasm-pack build --target web
 wasm-pack test --headless --firefox
 wasm-pack publish
 ```
+
+## Publishing
+
+To publish run `wasm-pack build` and then run (assuming you have https://deno.land installed):
+
+```bash
+deno run --allow-all .\merge_template.ts
+```
+
+This will update the package.json.
+From there just publish to npm as normal and update the template accordingly.

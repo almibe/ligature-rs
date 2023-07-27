@@ -61,7 +61,7 @@ pub fn validate_identifier_characters(id: &str) -> bool {
 }
 
 /// An Entity that is identified by a unique String id.
-#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Identifier(String);
 
 impl Identifier {
@@ -97,7 +97,7 @@ pub fn new_identifier(prefix: Option<String>) -> Result<Identifier, LigatureErro
 }
 
 /// An enum that represents all the currently supported Value types.
-#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq, Deserialize, Serialize)]
 pub enum Value {
     /// An Entity.
     Identifier(Identifier),
@@ -112,7 +112,7 @@ pub enum Value {
 }
 
 /// A set of enums used to express range queries when it makes sense for that type.
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub enum Range {
     /// Represents a String range using basic String comparisons.
     StringLiteralRange {
@@ -145,7 +145,7 @@ pub enum Range {
 }
 
 /// A Statement is a grouping of an Entity, an Attribute, and a Value.
-#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Statement {
     /// The Entity of a Statement
     pub entity: Identifier,
@@ -157,5 +157,5 @@ pub struct Statement {
 
 /// A general struct for representing errors involving Ligature.
 /// TODO should probably be an enum with a bunch of specific cases
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct LigatureError(pub String);

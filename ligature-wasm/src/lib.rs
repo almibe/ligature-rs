@@ -10,12 +10,9 @@ use ligature_in_memory::LigatureInMemory;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
-pub fn run(script: String) -> String {
+pub fn run(script: String) -> JsValue {
     let mut bindings = wander::preludes::common();
     let instance = LigatureInMemory::new();
     instance.add_bindings(&mut bindings);
-    match wander::run(&script, &mut bindings) {
-        Ok(value) => format!("{value}"),
-        Err(error) => format!("{}", error.0)
-    }
+    serde_wasm_bindgen::to_value(&wander::run(&script, &mut bindings).map(|v| v.to_script_value())).unwrap()
 }
