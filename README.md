@@ -26,12 +26,13 @@ Each project contains its own README with additional information when needed.
 | ligature              | Basic structs and traits used by Ligature implementations.          | lib    |
 | lig                   | Serialization support for Ligature using the Lig format.            | lib    |
 | wander                | The Wander scripting language.                                      | lib    |
-| ligature-test-suite   | A test suite for Ligature implementations.                          | lib    |
-| ligature-benchmark    | A simple benchmark for Ligature implementations.                    | lib    |
+| ligature-test-suite   | A test suite for Ligature implementations.                          | app    |
+| ligature-benchmark    | A simple benchmark for Ligature implementations.                    | app    |
 | ligature-in-memory    | An in-memory implementation of Ligature.                            | lib    |
 | ligature-sqlite       | An implementation of Ligature that uses sqlite3 for storage.        | lib    |
 | ligature-redb         | An implementation of Ligature that uses redb for storage.           | lib    |
 | ligature-repl         | A REPL for using Ligature and Wander.                               | app    |
+| ligature-http         | An HTTP server for working with Ligature and Wander.                | app    |
 
 ## Running Integration Tests
 
@@ -42,3 +43,8 @@ This project can be ran like any other normal Rust application.
 cd ligature-test-suite
 cargo run
 ```
+
+## Ligature HTTP
+
+ligature-http is an application that exposes an HTTP endpoint to run Wander code.
+It currently exists to aid with development and shouldn't be used for anything else.

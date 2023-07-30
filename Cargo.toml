@@ -5,6 +5,7 @@ members = [
     "ligature",
     "ligature-benchmark",
     "ligature-graph",
+    "ligature-http",
     "ligature-in-memory",
 #    "ligature-redb",
     "ligature-repl",
