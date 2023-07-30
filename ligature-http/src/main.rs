@@ -4,13 +4,10 @@
 
 //! A server for Ligature using ZeroMQ servers.
 
+use axum::{http::StatusCode, routing::post, Json, Router};
 use ligature::LigatureError;
-use wander::{run, bindings::BindingsProvider, preludes::common, ScriptValue};
-use axum::{
-    routing::post,
-    http::StatusCode,
-    Json, Router,};
 use std::net::SocketAddr;
+use wander::{bindings::BindingsProvider, preludes::common, run, ScriptValue};
 
 #[tokio::main]
 async fn main() {
@@ -30,7 +27,7 @@ async fn handler(query: String) -> (StatusCode, Json<Result<ScriptValue, Ligatur
     let mut bindings = common();
     instance.add_bindings(&mut bindings);
     match run(&query, &mut bindings) {
-        Ok(value) => (StatusCode::OK, Json(value.to_script_value())),
-        Err(err) => (StatusCode::BAD_REQUEST, Json(Err(err)))
+        Ok(value) => (StatusCode::OK, Json(Ok(value))),
+        Err(err) => (StatusCode::BAD_REQUEST, Json(Err(err))),
     }
 }

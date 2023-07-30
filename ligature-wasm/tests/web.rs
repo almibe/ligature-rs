@@ -3,10 +3,10 @@
 #![cfg(target_arch = "wasm32")]
 
 extern crate wasm_bindgen_test;
-use wasm_bindgen_test::*;
+use ligature_wasm::run;
 use wander::preludes::common;
 use wasm_bindgen::prelude::*;
-use ligature_wasm::run;
+use wasm_bindgen_test::*;
 
 wasm_bindgen_test_configure!(run_in_browser);
 
@@ -18,7 +18,7 @@ fn handle_basic_literals() {
     // assert_eq!(integer, JsValue::bigint_from_str("12345"));
     // let identifier = result_to_jsvalue(run("<hello>", &mut common()));
     // assert_eq!(identifier, JsValue::from_str("hello"));
-    
+
     // //boolean
     // let string = result_to_jsvalue(run("\"hello\"", &mut common()));
     // assert_eq!(string, JsValue::from_str("hello"));
