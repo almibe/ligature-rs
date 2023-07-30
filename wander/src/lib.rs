@@ -11,7 +11,7 @@ use interpreter::eval;
 use lexer::tokenize;
 use ligature::{Identifier, LigatureError};
 use parser::{parse, Element};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 pub mod bindings;
 pub mod interpreter;
@@ -44,8 +44,12 @@ impl WanderValue {
             WanderValue::String(value) => Ok(ScriptValue::String(value.to_owned())),
             WanderValue::Identifier(value) => Ok(ScriptValue::Identifier(value.to_owned())),
             WanderValue::Nothing => Ok(ScriptValue::Nothing),
-            WanderValue::NativeFunction(_) => Err(LigatureError("Cannot convert NativeFunction to ScriptValue.".to_owned())),
-            WanderValue::Lambda(_, _) => Err(LigatureError("Cannot convert Labda to ScriptValue.".to_owned())),
+            WanderValue::NativeFunction(_) => Err(LigatureError(
+                "Cannot convert NativeFunction to ScriptValue.".to_owned(),
+            )),
+            WanderValue::Lambda(_, _) => Err(LigatureError(
+                "Cannot convert Lambda to ScriptValue.".to_owned(),
+            )),
             WanderValue::List(values) => {
                 let mut script_values = vec![];
                 for value in values {
@@ -55,7 +59,7 @@ impl WanderValue {
                     }
                 }
                 Ok(ScriptValue::List(script_values))
-            },
+            }
         }
     }
 }
@@ -97,8 +101,33 @@ impl Display for WanderValue {
     }
 }
 
-pub fn run(script: &str, bindings: &mut Bindings) -> Result<WanderValue, LigatureError> {
+impl Display for ScriptValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ScriptValue::Boolean(value) => write!(f, "{}", value),
+            ScriptValue::Int(value) => write!(f, "{}", value),
+            ScriptValue::String(value) => write!(f, "\"{}\"", value),
+            ScriptValue::Identifier(value) => write!(f, "{}", value),
+            ScriptValue::Nothing => write!(f, "nothing"),
+            ScriptValue::List(contents) => {
+                write!(f, "[").unwrap();
+                let mut i = 0;
+                for value in contents {
+                    write!(f, "{value}").unwrap();
+                    i += 1;
+                    if i < contents.len() {
+                        write!(f, " ").unwrap();
+                    }
+                }
+                write!(f, "]")
+            }
+        }
+    }
+}
+
+pub fn run(script: &str, bindings: &mut Bindings) -> Result<ScriptValue, LigatureError> {
     let tokens = tokenize(script)?;
     let elements = parse(tokens)?;
-    eval(&elements, bindings)
+    let eval_result = eval(&elements, bindings)?;
+    eval_result.to_script_value()
 }
