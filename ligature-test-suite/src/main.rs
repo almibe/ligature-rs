@@ -13,18 +13,18 @@ use ligature_sqlite::LigatureSQLite;
 use wander::{
     bindings::{Bindings, BindingsProvider},
     preludes::common,
-    run, WanderValue,
+    run, ScriptValue,
 };
 
 struct LigatureTestCase<'a> {
     name: &'a str,
     input: &'a str,
-    result: Result<WanderValue, LigatureError>,
+    result: Result<ScriptValue, LigatureError>,
     skippable: bool,
 }
 
-fn ident(id: &str) -> WanderValue {
-    WanderValue::Identifier(Identifier::new(id).unwrap())
+fn ident(id: &str) -> ScriptValue {
+    ScriptValue::Identifier(Identifier::new(id).unwrap())
 }
 
 #[derive(Debug)]
@@ -87,25 +87,25 @@ pub fn main() {
         LigatureTestCase {
             name: "Empty test",
             input: "",
-            result: Ok(WanderValue::Nothing),
+            result: Ok(ScriptValue::Nothing),
             skippable: true,
         },
         LigatureTestCase {
             name: "Parse Boolean",
             input: "true",
-            result: Ok(WanderValue::Boolean(true)),
+            result: Ok(ScriptValue::Boolean(true)),
             skippable: true,
         },
         LigatureTestCase {
             name: "Datasets should start empty",
             input: "datasets()",
-            result: Ok(WanderValue::List(vec![])),
+            result: Ok(ScriptValue::List(vec![])),
             skippable: true,
         },
         LigatureTestCase {
             name: "add single Datasets",
             input: r#"addDataset("hello") datasets()"#,
-            result: Ok(WanderValue::List(vec![WanderValue::String(
+            result: Ok(ScriptValue::List(vec![ScriptValue::String(
                 "hello".to_owned(),
             )])),
             skippable: true,
@@ -113,7 +113,7 @@ pub fn main() {
         LigatureTestCase {
             name: "add and remove Datasets",
             input: r#"addDataset("hello") addDataset("world") removeDataset("hello") datasets()"#,
-            result: Ok(WanderValue::List(vec![WanderValue::String(
+            result: Ok(ScriptValue::List(vec![ScriptValue::String(
                 "world".to_owned(),
             )])),
             skippable: true,
@@ -121,13 +121,13 @@ pub fn main() {
         LigatureTestCase {
             name: "Datasets should start empty",
             input: r#"addDataset("hello") statements("hello")"#,
-            result: Ok(WanderValue::List(vec![])),
+            result: Ok(ScriptValue::List(vec![])),
             skippable: false,
         },
         LigatureTestCase {
             name: "Add Statements to Dataset",
             input: r#"addDataset("hello") addStatements("hello" [[<a> <b> <c>]]) statements("hello")"#,
-            result: Ok(WanderValue::List(vec![WanderValue::List(vec![
+            result: Ok(ScriptValue::List(vec![ScriptValue::List(vec![
                 ident("a"),
                 ident("b"),
                 ident("c"),
@@ -141,7 +141,7 @@ pub fn main() {
                 addStatements("hello" [[<a> <b> <c>] [<d> <e> <f>]])
                 removeStatements("hello" [[<a> <b> <c>]])
                 statements("hello")"#,
-            result: Ok(WanderValue::List(vec![WanderValue::List(vec![
+            result: Ok(ScriptValue::List(vec![ScriptValue::List(vec![
                 ident("d"),
                 ident("e"),
                 ident("f"),
@@ -155,9 +155,9 @@ pub fn main() {
                 addStatements("hello" [[<a> <b> <c>][<a> <b> <d>][<a> <c> <d>]])
                 query("hello" <a> <b> ?)
             "#,
-            result: Ok(WanderValue::List(vec![
-                WanderValue::List(vec![ident("a"), ident("b"), ident("c")]),
-                WanderValue::List(vec![ident("a"), ident("b"), ident("d")]),
+            result: Ok(ScriptValue::List(vec![
+                ScriptValue::List(vec![ident("a"), ident("b"), ident("c")]),
+                ScriptValue::List(vec![ident("a"), ident("b"), ident("d")]),
             ])),
             skippable: false,
         },

@@ -39,11 +39,82 @@ impl NativeFunction for NotFunction {
     }
 }
 
+struct EntityFunction {}
+impl NativeFunction for EntityFunction {
+    fn run(
+        &self,
+        arguments: &[WanderValue],
+    ) -> Result<WanderValue, LigatureError> {
+        if let [WanderValue::List(value)] = &arguments[..] {
+            if value.len() == 3 {
+                Ok(value.get(0).unwrap().clone())
+            } else {
+                Err(LigatureError(
+                    "`entity` function requires one Statement parameter.".to_owned(),
+                ))
+            }
+        } else {
+            Err(LigatureError(
+                "`entity` function requires one Statement parameter.".to_owned(),
+            ))
+        }
+    }
+}
+
+struct AttributeFunction {}
+impl NativeFunction for AttributeFunction {
+    fn run(
+        &self,
+        arguments: &[WanderValue],
+    ) -> Result<WanderValue, LigatureError> {
+        if let [WanderValue::List(value)] = &arguments[..] {
+            if value.len() == 3 {
+                Ok(value.get(1).unwrap().clone())
+            } else {
+                Err(LigatureError(
+                    "`attribute` function requires one Statement parameter.".to_owned(),
+                ))
+            }
+        } else {
+            Err(LigatureError(
+                "`attribute` function requires one Statement parameter.".to_owned(),
+            ))
+        }
+    }
+}
+
+struct ValueFunction {}
+impl NativeFunction for ValueFunction {
+    fn run(
+        &self,
+        arguments: &[WanderValue],
+    ) -> Result<WanderValue, LigatureError> {
+        if let [WanderValue::List(value)] = &arguments[..] {
+            if value.len() == 3 {
+                Ok(value.get(2).unwrap().clone())
+            } else {
+                Err(LigatureError(
+                    "`value` function requires one Statement parameter.".to_owned(),
+                ))
+            }
+        } else {
+            Err(LigatureError(
+                "`value` function requires one Statement parameter.".to_owned(),
+            ))
+        }
+    }
+}
+
+
 /// Creates a set of Bindings for Wander that consists of all of the common
 /// functionality, but doesn't interact with an instance of Ligature.
 pub fn common() -> Bindings {
     let mut bindings = Bindings::new();
     bindings.bind_native_function(String::from("and"), Rc::new(AndFunction {}));
     bindings.bind_native_function(String::from("not"), Rc::new(NotFunction {}));
+    bindings.bind_native_function(String::from("entity"), Rc::new(EntityFunction {}));
+    bindings.bind_native_function(String::from("attribute"), Rc::new(AttributeFunction {}));
+    bindings.bind_native_function(String::from("value"), Rc::new(ValueFunction {}));
+
     bindings
 }

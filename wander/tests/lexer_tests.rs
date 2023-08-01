@@ -99,3 +99,17 @@ fn tokenize_function_call() {
     ]);
     assert_eq!(res, expected);
 }
+
+#[test]
+fn tokenize_function_call_with_forward() {
+    let input = "false >> not()";
+    let res = tokenize(input);
+    let expected = Ok(vec![
+        Token::Boolean(false),
+        Token::Forward,
+        Token::Name(String::from("not")),
+        Token::OpenParen,
+        Token::CloseParen,
+    ]);
+    assert_eq!(res, expected);
+}

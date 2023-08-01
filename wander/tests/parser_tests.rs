@@ -4,6 +4,7 @@
 
 use wander::lexer::Token;
 use wander::parser::{parse, Element};
+use wander::translation::translate;
 
 #[test]
 fn parse_booleans() {
@@ -161,5 +162,29 @@ fn parse_list() {
         Element::Name("test".to_owned()),
         Element::Int(24601),
     ])]);
+    assert_eq!(res, expected);
+}
+
+#[test]
+fn parse_forward() {
+    // false >> not()
+    let input = vec![
+        Token::Boolean(false),
+        Token::Forward,
+        Token::Name("not".to_owned()),
+        Token::OpenParen,
+        Token::CloseParen,
+    ];
+    let res = parse(input);
+    let expected = Ok(vec![
+        Element::Boolean(false),
+        Element::Forward,
+        Element::FunctionCall("not".to_owned(), vec![]),
+    ]);
+    assert_eq!(res, expected);
+    let res = translate(res.unwrap());
+    let expected = Ok(vec![
+        Element::FunctionCall("not".to_owned(), vec![Element::Boolean(false)]),
+    ]);
     assert_eq!(res, expected);
 }

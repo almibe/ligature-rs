@@ -12,12 +12,14 @@ use lexer::tokenize;
 use ligature::{Identifier, LigatureError};
 use parser::{parse, Element};
 use serde::{Deserialize, Serialize};
+use translation::translate;
 
 pub mod bindings;
 pub mod interpreter;
 pub mod lexer;
 pub mod parser;
 pub mod preludes;
+pub mod translation;
 
 pub trait NativeFunction {
     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError>;
@@ -128,6 +130,7 @@ impl Display for ScriptValue {
 pub fn run(script: &str, bindings: &mut Bindings) -> Result<ScriptValue, LigatureError> {
     let tokens = tokenize(script)?;
     let elements = parse(tokens)?;
+    let elements = translate(elements)?;
     let eval_result = eval(&elements, bindings)?;
     eval_result.to_script_value()
 }

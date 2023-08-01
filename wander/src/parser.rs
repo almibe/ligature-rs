@@ -21,6 +21,7 @@ pub enum Element {
     Lambda(Vec<String>, Vec<Element>),
     List(Vec<Element>),
     Nothing,
+    Forward,
 }
 
 fn boolean(gaze: &mut Gaze<Token>) -> Option<Element> {
@@ -70,6 +71,13 @@ fn function_call(gaze: &mut Gaze<Token>) -> Option<Element> {
 fn nothing(gaze: &mut Gaze<Token>) -> Option<Element> {
     match gaze.next() {
         Some(Token::Nothing) | Some(Token::QuestionMark) => Some(Element::Nothing),
+        _ => None,
+    }
+}
+
+fn forward(gaze: &mut Gaze<Token>) -> Option<Element> {
+    match gaze.next() {
+        Some(Token::Forward) => Some(Element::Forward),
         _ => None,
     }
 }
@@ -198,6 +206,7 @@ fn element(gaze: &mut Gaze<Token>) -> Option<Element> {
         name,
         boolean,
         nothing,
+        forward,
         int,
         string,
         identifier,

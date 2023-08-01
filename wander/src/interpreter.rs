@@ -33,6 +33,7 @@ pub fn eval_element(
         Element::Lambda(params, body) => handle_lambda(params, body),
         Element::List(values) => handle_list(values, bindings),
         Element::Nothing => Ok(WanderValue::Nothing),
+        Element::Forward => panic!("Should never reach."),
     }
 }
 
