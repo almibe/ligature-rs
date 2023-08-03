@@ -434,7 +434,7 @@ impl NativeFunction for QueryFunction {
                 }
                 Ok(WanderValue::List(results))
             }
-            _ => todo!(),
+            _ => Err(LigatureError("Incorrect arguments.".to_owned())),
         }
     }
 }

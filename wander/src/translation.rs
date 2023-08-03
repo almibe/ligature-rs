@@ -22,7 +22,7 @@ fn process_forwards(elements: Vec<Element>) -> Result<Vec<Element>, LigatureErro
                 arguments.push(prev.clone());
                 results.push(Element::FunctionCall(name.to_owned(), arguments));
             } else {
-                return Err(LigatureError("Error handling forward operator.".to_owned()))
+                return Err(LigatureError("Error handling forward operator.".to_owned()));
             }
         } else {
             results.push(element.clone());

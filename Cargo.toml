@@ -12,7 +12,5 @@ members = [
     "ligature-sqlite",
     "ligature-test-suite",
     "ligature-wasm",
-#    "ligature-zeromq-client",
-#    "ligature-zeromq-server",
     "wander"
 ]

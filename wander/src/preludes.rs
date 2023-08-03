@@ -41,10 +41,7 @@ impl NativeFunction for NotFunction {
 
 struct EntityFunction {}
 impl NativeFunction for EntityFunction {
-    fn run(
-        &self,
-        arguments: &[WanderValue],
-    ) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
         if let [WanderValue::List(value)] = &arguments[..] {
             if value.len() == 3 {
                 Ok(value.get(0).unwrap().clone())
@@ -63,10 +60,7 @@ impl NativeFunction for EntityFunction {
 
 struct AttributeFunction {}
 impl NativeFunction for AttributeFunction {
-    fn run(
-        &self,
-        arguments: &[WanderValue],
-    ) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
         if let [WanderValue::List(value)] = &arguments[..] {
             if value.len() == 3 {
                 Ok(value.get(1).unwrap().clone())
@@ -85,10 +79,7 @@ impl NativeFunction for AttributeFunction {
 
 struct ValueFunction {}
 impl NativeFunction for ValueFunction {
-    fn run(
-        &self,
-        arguments: &[WanderValue],
-    ) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
         if let [WanderValue::List(value)] = &arguments[..] {
             if value.len() == 3 {
                 Ok(value.get(2).unwrap().clone())
@@ -105,6 +96,25 @@ impl NativeFunction for ValueFunction {
     }
 }
 
+struct AtFunction {}
+impl NativeFunction for AtFunction {
+    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+        if let [WanderValue::Int(index), WanderValue::List(value)] = &arguments[..] {
+            let index: usize = index.to_owned().try_into().unwrap();
+            if index < value.len() {
+                let t: Option<&WanderValue> = value.get(index);
+                match t {
+                    Some(t) => Ok(t.to_owned()),
+                    None => Err(LigatureError("`at` function err.".to_owned())),
+                }
+            } else {
+                Err(LigatureError("`at` function err.".to_owned()))
+            }
+        } else {
+            Err(LigatureError("`at` function err.".to_owned()))
+        }
+    }
+}
 
 /// Creates a set of Bindings for Wander that consists of all of the common
 /// functionality, but doesn't interact with an instance of Ligature.
@@ -115,6 +125,6 @@ pub fn common() -> Bindings {
     bindings.bind_native_function(String::from("entity"), Rc::new(EntityFunction {}));
     bindings.bind_native_function(String::from("attribute"), Rc::new(AttributeFunction {}));
     bindings.bind_native_function(String::from("value"), Rc::new(ValueFunction {}));
-
+    bindings.bind_native_function(String::from("at"), Rc::new(AtFunction {}));
     bindings
 }

@@ -183,8 +183,9 @@ fn parse_forward() {
     ]);
     assert_eq!(res, expected);
     let res = translate(res.unwrap());
-    let expected = Ok(vec![
-        Element::FunctionCall("not".to_owned(), vec![Element::Boolean(false)]),
-    ]);
+    let expected = Ok(vec![Element::FunctionCall(
+        "not".to_owned(),
+        vec![Element::Boolean(false)],
+    )]);
     assert_eq!(res, expected);
 }

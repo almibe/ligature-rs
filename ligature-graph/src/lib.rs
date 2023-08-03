@@ -4,5 +4,13 @@
 
 //! This module is an implementation of the an in-memory, non-transactional knowledge graph.
 
-struct Graph {
+use ligature::{LigatureError, Statement};
+
+pub trait Graph {
+    fn add_statements(statements: Vec<Statement>) -> Result<(), LigatureError>;
+    fn remove_statements(statements: Vec<Statement>) -> Result<(), LigatureError>;
+    fn all_statements() -> Result<Vec<Statement>, LigatureError>;
 }
+
+/// An implementation of the Graph trait that stores all Data in a sorted set.
+pub struct SetGraph {}

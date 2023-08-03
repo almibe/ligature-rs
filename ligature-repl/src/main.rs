@@ -14,17 +14,15 @@ use wander::bindings::BindingsProvider;
 use wander::preludes::common;
 use wander::run;
 
-enum Connection {}
-
-struct ReplState {}
-
 fn main() -> Result<()> {
     //    let mut instance = LigatureRedb::default();
     let instance = LigatureSQLite::default();
     let mut bindings = common();
     instance.add_bindings(&mut bindings);
-    println!("Welcome to Ligature REPL!!!");
-    println!("Press Ctrl+C or Ctrl+D or type `exit()` to quit.");
+    println!("Welcome to Ligature's REPL!");
+    println!("Press Ctrl+C or Ctrl+D or enter `:q` to quit.");
+    println!("Enter :help or :h for help.");
+    println!("---");
     let mut rl = Editor::<()>::new()?;
     if rl.load_history("history.txt").is_err() {
         println!("No previous history.");
@@ -68,14 +66,19 @@ fn handle_command(input: &str) -> bool {
     match parts.next().unwrap() {
         //":remote" => todo!(),
         //":local" => todo!(),
-        ":status" => status(),
+        ":status" | ":s" => status(),
         ":quit" | ":q" => quit(),
         ":bindings" | ":b" => bindings(),
+        ":help" | ":h" => help(),
         _ => todo!(),
     }
 }
 
 fn bindings() -> bool {
+    true
+}
+
+fn help() -> bool {
     true
 }
 

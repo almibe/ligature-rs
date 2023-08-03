@@ -122,7 +122,12 @@ fn call_function(
         Some(WanderValue::NativeFunction(nf_name)) => {
             match bindings.read_native_function(&nf_name) {
                 Some(nf) => nf.run(&argument_values),
-                None => return Err(LigatureError("Could not read function {name} that references NativeFunction {nf_name}".to_owned())),
+                None => {
+                    return Err(LigatureError(
+                        "Could not read function {name} that references NativeFunction {nf_name}"
+                            .to_owned(),
+                    ))
+                }
             }
         }
         Some(WanderValue::Lambda(parameters, body)) => {
