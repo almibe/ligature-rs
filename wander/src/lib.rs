@@ -8,7 +8,7 @@ use std::fmt::Display;
 
 use bindings::Bindings;
 use interpreter::eval;
-use lexer::tokenize;
+use lexer::{tokenize, Token, transform};
 use ligature::{Identifier, LigatureError};
 use parser::{parse, Element};
 use serde::{Deserialize, Serialize};
@@ -23,6 +23,10 @@ pub mod translation;
 
 pub trait NativeFunction {
     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError>;
+}
+
+pub trait TokenTransformer {
+    fn transform(&self, input: &[Token]) -> Result<Vec<Token>, LigatureError>;
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -129,6 +133,7 @@ impl Display for ScriptValue {
 
 pub fn run(script: &str, bindings: &mut Bindings) -> Result<ScriptValue, LigatureError> {
     let tokens = tokenize(script)?;
+    let tokens = transform(&tokens, &bindings)?;
     let elements = parse(tokens)?;
     let elements = translate(elements)?;
     let eval_result = eval(&elements, bindings)?;

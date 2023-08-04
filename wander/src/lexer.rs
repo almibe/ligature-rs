@@ -5,6 +5,8 @@
 use ligature::{Identifier, LigatureError};
 use logos::{Lexer, Logos, Source};
 
+use crate::bindings::Bindings;
+
 #[derive(Logos, Debug, PartialEq, Clone)]
 #[logos(skip r"[ \t\n\f\r]+")]
 pub enum Token {
@@ -67,6 +69,9 @@ pub enum Token {
 
     #[token("?")]
     QuestionMark,
+
+    #[token("`")]
+    Backtick,
 }
 
 fn bool(lex: &mut Lexer<Token>) -> Option<bool> {
@@ -111,6 +116,42 @@ pub fn tokenize(script: &str) -> Result<Vec<Token>, LigatureError> {
             Ok(token) => results.push(token),
             Err(_) => return Err(LigatureError(String::from("Error tokenizing input."))),
         }
+    }
+    Ok(results)
+}
+
+pub fn transform(input: &Vec<Token>, bindings: &Bindings) -> Result<Vec<Token>, LigatureError> {
+    let mut index = 0;
+    let mut results = vec![];
+    while let Some(token) = input.get(index) {
+        if token == &Token::Backtick {
+            let mut internal_results = vec![];
+            let transformer = match input.get(index - 1) {
+                Some(Token::Name(name)) => {
+                    match bindings.read_token_transformer(name) {
+                        Some(transformer) => {
+                            transformer
+                        },
+                        None => return Err(LigatureError(format!("{name} Token Transformer doesn't exist."))),
+                    }
+                },
+                _ => return Err(LigatureError("Token Transforms require a name.".to_owned())),
+            };
+            index += 1; //skip first `
+            while let Some(token) = input.get(index) {
+                if token == &Token::Backtick {
+                    let transformed_content = transformer.transform(&internal_results).unwrap();
+                    results.append(&mut transformed_content.to_vec());
+                    break;
+                } else {
+                    internal_results.push(token.to_owned());
+                }
+                index += 1;
+            }
+        } else {
+            results.push(token.to_owned());
+        }
+        index += 1;
     }
     Ok(results)
 }
