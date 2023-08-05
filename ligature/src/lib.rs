@@ -61,7 +61,7 @@ pub fn validate_identifier_characters(id: &str) -> bool {
 }
 
 /// An Entity that is identified by a unique String id.
-#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq, Deserialize, Serialize, Hash)]
 pub struct Identifier(String);
 
 impl Identifier {
@@ -97,7 +97,7 @@ pub fn new_identifier(prefix: Option<String>) -> Result<Identifier, LigatureErro
 }
 
 /// An enum that represents all the currently supported Value types.
-#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq, Deserialize, Serialize, Hash)]
 pub enum Value {
     /// An Entity.
     Identifier(Identifier),
@@ -145,7 +145,7 @@ pub enum Range {
 }
 
 /// A Statement is a grouping of an Entity, an Attribute, and a Value.
-#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq, Deserialize, Serialize, Hash)]
 pub struct Statement {
     /// The Entity of a Statement
     pub entity: Identifier,

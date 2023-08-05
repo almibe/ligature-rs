@@ -5,10 +5,11 @@ publish = true
 authors = ["Alex Michael Berry <alexmiberry@gmail.com>"]
 edition = "2021"
 license = "MPL-2.0"
-description = "An in-memory, non-transactional version of the Ligature knowledge graph."
+description = "An in-memory, non-transactional graph instance for use with Wander."
 repository = "https://github.com/almibe/ligature-rs/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 ligature = { path = "../ligature" }
+serde = { version = "1.0", features = ["derive"] }
