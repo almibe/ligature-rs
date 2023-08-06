@@ -26,7 +26,7 @@ pub fn write_integer(integer: &i64) -> String {
 
 pub fn write_float(float: &f64) -> String {
     let res = format!("{}", float);
-    if res.contains(".") {
+    if res.contains('.') {
         res
     } else {
         res + ".0"
@@ -36,13 +36,13 @@ pub fn write_float(float: &f64) -> String {
 pub fn write_string(string: &str) -> String {
     //TODO this could be done better
     let escaped_string = string
-        .replace("\"", "\\\"")
+        .replace('"', "\\\"")
         //.replace("\f", "\\b") <-- TODO not sure how to handle this or if I really need to
         //.replace("\b", "\\b") <-- TODO not sure how to handle this or if I really need to
-        .replace("\n", "\\n")
-        .replace("\r", "\\r")
-        .replace("\t", "\\t")
-        .replace("\\", "\\\\");
+        .replace('\n', "\\n")
+        .replace('\r', "\\r")
+        .replace('\t', "\\t")
+        .replace('\\', "\\\\");
     format!("\"{}\"", escaped_string)
 }
 

@@ -68,11 +68,14 @@ pub fn read(script: &str) -> Result<Vec<Statement>, LigatureError> {
                     Token::Identifier(value) => Value::Identifier(value.clone()),
                     Token::Int(value) => Value::IntegerLiteral(*value),
                     Token::String(value) => Value::StringLiteral(value.clone()),
-                    _ => return Err(LigatureError("Invalid input.".to_owned()))
                 };
-                results.push(Statement { entity: entity.clone(), attribute: attribute.clone(), value });
-            },
-            _ => return Err(LigatureError("".to_owned()))
+                results.push(Statement {
+                    entity: entity.clone(),
+                    attribute: attribute.clone(),
+                    value,
+                });
+            }
+            _ => return Err(LigatureError("".to_owned())),
         }
     }
     Ok(results)
