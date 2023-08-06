@@ -2,165 +2,78 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use crate::LigError;
-use gaze::steps::{ignore_all, take_string, take_while_str, NoMatch};
-use gaze::Gaze;
-use hex::decode;
-use ligature::{validate_identifier_characters, Identifier, Statement, Value};
+use ligature::{Identifier, LigatureError, Statement, Value};
+use logos::{Lexer, Logos, Source};
 
-/// Reads an Entity from the given &str.
-/// Will return an error if there is anything other than an Entity + whitespace in the input.
-pub fn read_identifier(input: &str) -> Result<Identifier, LigError> {
-    let mut gaze = Gaze::<&str>::from_str(input.trim());
-    gaze.attempt(&identifier_step)
-        .map_err(|_| LigError("Could not read Entity.".into()))
+#[derive(Logos, Debug, PartialEq, Clone)]
+#[logos(skip r"[ \t\n\f\r]+")]
+pub enum Token {
+    #[regex("[-0-9]+", int)]
+    Int(i64),
+
+    #[regex(r#""(([^\x00-\x1F"\\]|\\["\\/bfnrt]|\\u[0-9a-fA-F]{4})*)""#, string)]
+    String(String),
+
+    #[regex("<[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;%=]+>", identifier)]
+    Identifier(Identifier),
 }
 
-/// Reads a value from a passed str.
-/// Ignores white space but will return an Err if there is any input besides an encoded value.
-pub fn read_value(input: &str) -> Result<Value, LigError> {
-    let mut gaze = Gaze::<&str>::from_str(input.trim());
-    gaze.attempt(&value_step)
-        .map_err(|_| LigError("Could not read Value.".into()))
-}
-
-pub fn read(input: &str) -> Result<Vec<Statement>, LigError> {
-    let mut gaze = Gaze::<&str>::from_str(input);
-    let mut result: Vec<Statement> = Vec::new();
-    while !gaze.is_complete() {
-        gaze.ignore(&ws_step);
-        let entity = gaze
-            .attempt(&identifier_step)
-            .map_err(|_| LigError("Error reading Entity.".into()))?;
-        gaze.ignore(&ws_step);
-        let attribute = gaze
-            .attempt(&identifier_step)
-            .map_err(|_| LigError("Error reading Attribute.".into()))?;
-        gaze.ignore(&ws_step);
-        let value = gaze
-            .attempt(&value_step)
-            .map_err(|_| LigError("Error reading Value.".into()))?;
-        gaze.ignore(&ws_step);
-        gaze.ignore(&take_string("\n"));
-        result.push(Statement {
-            entity,
-            attribute,
-            value,
-        });
+fn int(lex: &mut Lexer<Token>) -> Option<i64> {
+    let slice = lex.slice();
+    match slice.parse::<i64>() {
+        Ok(value) => Some(value),
+        _ => None,
     }
-    Ok(result)
 }
 
-fn identifier_step(gaze: &mut Gaze<&str>) -> Result<Identifier, NoMatch> {
-    gaze.attempt(&take_string("<"))?; //.map_err(|_| LigError("Could not read Entity.".into()))?;
-    let res = gaze.attempt(&take_while_str(&|c: &str| {
-        validate_identifier_characters(c)
-    }))?;
-    gaze.attempt(&take_string(">"))?; //.map_err(|_| LigError("Could not read Entity.".into()))?;
-    Ok(Identifier::new(&res).map_err(|_| NoMatch)?)
+fn string(lex: &mut Lexer<Token>) -> Option<String> {
+    let slice = lex.slice();
+    slice.slice(1..(slice.len() - 1)).map(|x| x.into())
 }
 
-fn value_step(gaze: &mut Gaze<&str>) -> Result<Value, NoMatch> {
-    if let Ok(entity) = gaze.attempt(&identifier_step) {
-        return Ok(Value::Identifier(entity));
+fn identifier(lex: &mut Lexer<Token>) -> Option<Identifier> {
+    let slice = lex.slice();
+    match Identifier::new(slice.slice(1..(slice.len() - 1)).unwrap()) {
+        Ok(ident) => Some(ident),
+        Err(_) => None,
     }
-    if let Ok(string) = gaze.attempt(&string_step) {
-        return Ok(string);
-    }
-    if let Ok(hex) = gaze.attempt(&bytes_step) {
-        return Ok(hex);
-    }
-    if let Ok(number) = gaze.attempt(&number_step) {
-        return Ok(number);
-    }
-    Err(NoMatch) //Err(LigError("Could not match Value".into()))
 }
 
-fn is_digit(s: &str) -> bool {
-    s == "0"
-        || s == "1"
-        || s == "2"
-        || s == "3"
-        || s == "4"
-        || s == "5"
-        || s == "6"
-        || s == "7"
-        || s == "8"
-        || s == "9"
-}
-
-fn is_hex(s: &str) -> bool {
-    s == "0"
-        || s == "1"
-        || s == "2"
-        || s == "3"
-        || s == "4"
-        || s == "5"
-        || s == "6"
-        || s == "7"
-        || s == "8"
-        || s == "9"
-        || s == "a"
-        || s == "b"
-        || s == "c"
-        || s == "d"
-        || s == "e"
-        || s == "f"
-}
-
-fn ws_step(gaze: &mut Gaze<&str>) -> Result<(), NoMatch> {
-    let ws: Vec<&str> = vec![" ", "\t"];
-    ignore_all(ws)(gaze)
-}
-
-/// Attempts to parse an IntegerLiteral or FloatLiteral.
-fn number_step(gaze: &mut Gaze<&str>) -> Result<Value, NoMatch> {
-    let integer = gaze.attempt(&take_while_str(&is_digit))?;
-    // let is_float = gaze.attempt(&take_string("."));
-    // match is_float {
-    //     Ok(_) => {
-    //         let decimal = gaze.attempt(&take_while_str(&is_digit));
-    //         match decimal {
-    //             Ok(decimal) => {
-    //                 let float = format!("{}.{}", integer, decimal);
-    //                 Ok(Value::FloatLiteral(
-    //                     float.parse::<f64>().map_err(|_| NoMatch)?,
-    //                 ))
-    //             }
-    //             Err(_) => Err(NoMatch),
-    //         }
-    //     }
-    //     Err(_) => Ok(Value::IntegerLiteral(
-    Ok(Value::IntegerLiteral(
-        integer.parse::<i64>().map_err(|_| NoMatch)?,
-    )) //,
-       // )),
-       // }
-}
-
-fn bytes_step(gaze: &mut Gaze<&str>) -> Result<Value, NoMatch> {
-    gaze.attempt(&take_string("0x"))?;
-    let content = gaze.attempt(&take_while_str(&is_hex));
-    match content {
-        Ok(content) => {
-            let res = decode(content).map_err(|_| NoMatch)?;
-            Ok(Value::BytesLiteral(res))
+pub fn tokenize(script: &str) -> Result<Vec<Token>, LigatureError> {
+    let lexer = Token::lexer(script);
+    let mut results = vec![];
+    for token in lexer {
+        match token {
+            Ok(token) => results.push(token),
+            Err(_) => return Err(LigatureError(String::from("Error tokenizing input."))),
         }
-        Err(_) => Ok(Value::BytesLiteral(vec![])),
     }
+    Ok(results)
 }
 
-fn string_step(gaze: &mut Gaze<&str>) -> Result<Value, NoMatch> {
-    //TODO this doesn't handle escaping
-    gaze.attempt(&take_string("\""))?;
-    let content = gaze.attempt(&take_while_str(&|c| c != "\""));
-    gaze.attempt(&take_string("\""))?;
-    match content {
-        Ok(content) => Ok(Value::StringLiteral(content)),
-        Err(_) => Ok(Value::StringLiteral("".into())),
+pub fn read(script: &str) -> Result<Vec<Statement>, LigatureError> {
+    let tokens = tokenize(script)?;
+    let mut results = vec![];
+    let mut index = 0;
+    while index < tokens.len() {
+        let entity = &tokens.get(index);
+        index += 1;
+        let attribute = &tokens.get(index);
+        index += 1;
+        let value = &tokens.get(index);
+        index += 1;
+        match (entity, attribute, value) {
+            (Some(Token::Identifier(entity)), Some(Token::Identifier(attribute)), Some(value)) => {
+                let value: Value = match value {
+                    Token::Identifier(value) => Value::Identifier(value.clone()),
+                    Token::Int(value) => Value::IntegerLiteral(*value),
+                    Token::String(value) => Value::StringLiteral(value.clone()),
+                    _ => return Err(LigatureError("Invalid input.".to_owned()))
+                };
+                results.push(Statement { entity: entity.clone(), attribute: attribute.clone(), value });
+            },
+            _ => return Err(LigatureError("".to_owned()))
+        }
     }
-}
-
-fn statement_step(gaze: &mut Gaze<&str>) -> Result<Statement, NoMatch> {
-    todo!()
+    Ok(results)
 }
