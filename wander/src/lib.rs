@@ -8,8 +8,9 @@ use std::fmt::Display;
 
 use bindings::Bindings;
 use interpreter::eval;
-use lexer::{tokenize, Token, transform};
+use lexer::{tokenize, transform, Token};
 use ligature::{Identifier, LigatureError};
+use ligature_graph::Graph;
 use parser::{parse, Element};
 use serde::{Deserialize, Serialize};
 use translation::translate;
@@ -40,6 +41,7 @@ pub enum WanderValue {
     NativeFunction(String),
     Lambda(Vec<String>, Vec<Element>),
     List(Vec<WanderValue>),
+    Graph(Graph),
 }
 
 impl WanderValue {
@@ -66,6 +68,7 @@ impl WanderValue {
                 }
                 Ok(ScriptValue::List(script_values))
             }
+            WanderValue::Graph(_) => todo!(),
         }
     }
 }
@@ -79,6 +82,7 @@ pub enum ScriptValue {
     Identifier(Identifier),
     Nothing,
     List(Vec<ScriptValue>),
+    Graph(Graph),
 }
 
 impl Display for WanderValue {
@@ -103,6 +107,7 @@ impl Display for WanderValue {
                 write!(f, "]")
             }
             WanderValue::Lambda(_, _) => write!(f, "[lambda]"),
+            WanderValue::Graph(_) => write!(f, "[graph]"),
         }
     }
 }
@@ -127,6 +132,7 @@ impl Display for ScriptValue {
                 }
                 write!(f, "]")
             }
+            ScriptValue::Graph(_) => write!(f, "[graph]"),
         }
     }
 }

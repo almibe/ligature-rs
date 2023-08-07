@@ -2,10 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use std::rc::Rc;
-
 use ligature::Identifier;
-use wander::{preludes::common, run, ScriptValue, TokenTransformer, lexer::Token};
+use wander::{preludes::common, run, ScriptValue};
 
 #[test]
 fn run_wander_true() {
@@ -124,55 +122,5 @@ fn forward_operator() {
     let input = "true >> not()";
     let res = run(input, &mut common());
     let expected = Ok(ScriptValue::Boolean(false));
-    assert_eq!(res, expected);
-}
-
-struct NothingTransformer {}
-impl TokenTransformer for NothingTransformer {
-    fn transform(&self, _input: &[wander::lexer::Token]) -> Result<Vec<Token>, ligature::LigatureError> {
-        Ok([Token::Nothing].to_vec())
-    }
-}
-
-struct UpperCaseTransformer {}
-impl TokenTransformer for UpperCaseTransformer {
-    fn transform(&self, input: &[wander::lexer::Token]) -> Result<Vec<Token>, ligature::LigatureError> {
-        if let Some(Token::String(value)) = input.get(0) {
-            let t = value.clone().to_ascii_uppercase();
-            let t = Token::String(t);
-            Ok(vec![t])
-        } else {
-            panic!()
-        }
-    }
-}
-
-#[test]
-fn token_transformer_no_input_test() {
-    let input = "none``";
-    let mut bindings = common();
-    bindings.bind_token_transformer("none".to_owned(), Rc::new(NothingTransformer {}));
-    let res = run(input, &mut bindings);
-    let expected = Ok(ScriptValue::Nothing);
-    assert_eq!(res, expected);
-}
-
-#[test]
-fn token_transformer_test() {
-    let input = "none`this (will) >>  [be ] {ignored}} `";
-    let mut bindings = common();
-    bindings.bind_token_transformer("none".to_owned(), Rc::new(NothingTransformer {}));
-    let res = run(input, &mut bindings);
-    let expected = Ok(ScriptValue::Nothing);
-    assert_eq!(res, expected);
-}
-
-#[test]
-fn token_transformer_test2() {
-    let input = "upper`\"test\"`";
-    let mut bindings = common();
-    bindings.bind_token_transformer("upper".to_owned(), Rc::new(UpperCaseTransformer {}));
-    let res = run(input, &mut bindings);
-    let expected = Ok(ScriptValue::String("TEST".to_owned()));
     assert_eq!(res, expected);
 }

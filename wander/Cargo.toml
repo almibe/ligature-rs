@@ -15,3 +15,4 @@ ligature = { path = "../ligature" }
 logos = "0.13"
 gaze = "0.5.0"
 serde = { version = "1.0", features = ["derive"] }
+ligature-graph = { path = "../ligature-graph" }

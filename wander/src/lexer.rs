@@ -127,12 +127,12 @@ pub fn transform(input: &Vec<Token>, bindings: &Bindings) -> Result<Vec<Token>, 
         if token == &Token::Backtick {
             let mut internal_results = vec![];
             let transformer = match input.get(index - 1) {
-                Some(Token::Name(name)) => {
-                    match bindings.read_token_transformer(name) {
-                        Some(transformer) => {
-                            transformer
-                        },
-                        None => return Err(LigatureError(format!("{name} Token Transformer doesn't exist."))),
+                Some(Token::Name(name)) => match bindings.read_token_transformer(name) {
+                    Some(transformer) => transformer,
+                    None => {
+                        return Err(LigatureError(format!(
+                            "{name} Token Transformer doesn't exist."
+                        )))
                     }
                 },
                 _ => return Err(LigatureError("Token Transforms require a name.".to_owned())),

@@ -55,7 +55,7 @@ pub fn read(script: &str) -> Result<Vec<Statement>, LigatureError> {
     let tokens = tokenize(script)?;
     let mut results = vec![];
     let mut index = 0;
-    while index < tokens.len() {
+    while index <= tokens.len() {
         let entity = &tokens.get(index);
         index += 1;
         let attribute = &tokens.get(index);
@@ -69,13 +69,14 @@ pub fn read(script: &str) -> Result<Vec<Statement>, LigatureError> {
                     Token::Int(value) => Value::IntegerLiteral(*value),
                     Token::String(value) => Value::StringLiteral(value.clone()),
                 };
-                results.push(Statement {
+                let statement = Statement {
                     entity: entity.clone(),
                     attribute: attribute.clone(),
                     value,
-                });
+                };
+                results.push(statement.clone());
             }
-            _ => return Err(LigatureError("".to_owned())),
+            _ => return Err(LigatureError(format!("Could not match Statement. {:?} {:?} {:?}", entity, attribute, value))),
         }
     }
     Ok(results)

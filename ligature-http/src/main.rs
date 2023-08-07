@@ -4,7 +4,7 @@
 
 //! A simple HTTP server for Ligature using Axum.
 
-use axum::{http::StatusCode, routing::post, Json, Router, extract::State};
+use axum::{extract::State, http::StatusCode, routing::post, Json, Router};
 use ligature::LigatureError;
 use ligature_sqlite::LigatureSQLite;
 use std::{net::SocketAddr, sync::Arc};
@@ -25,7 +25,10 @@ async fn main() {
         .unwrap();
 }
 
-async fn handler(State(instance): State<Arc<LigatureSQLite>>, query: String) -> (StatusCode, Json<Result<ScriptValue, LigatureError>>) {
+async fn handler(
+    State(instance): State<Arc<LigatureSQLite>>,
+    query: String,
+) -> (StatusCode, Json<Result<ScriptValue, LigatureError>>) {
     println!("Received {}", query);
     let mut bindings = common();
     instance.add_bindings(&mut bindings);

@@ -236,12 +236,10 @@ fn elements(gaze: &mut Gaze<Token>) -> Option<Vec<Element>> {
     Some(results)
 }
 
-//const BOOLEAN: Nibbler<Token, Element> = ConvertNblr { to_match: To };
-
 pub fn parse(tokens: Vec<Token>) -> Result<Vec<Element>, LigatureError> {
     let mut gaze = Gaze::from_vec(tokens);
     match gaze.attemptf(&mut elements) {
         Some(value) => Ok(value),
-        None => Err(LigatureError(String::from("Error parsing"))),
+        None => Err(LigatureError(format!("Error parsing {:?}", gaze.peek()))),
     }
 }
