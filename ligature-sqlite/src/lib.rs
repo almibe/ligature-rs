@@ -14,11 +14,12 @@ use std::{
 };
 
 use dirs::data_local_dir;
-use ligature::{Identifier, LigatureError};
+use ligature::{Identifier, LigatureError, Ligature, Dataset, Value, Statement};
 use rusqlite::{params, Connection, Error, Transaction};
 use sql_builder::{quote, SqlBuilder};
 use wander::{bindings::BindingsProvider, NativeFunction, WanderValue};
 
+#[derive(Clone)]
 /// The main struct used for working with the SQLite stored version of Ligature.
 pub struct LigatureSQLite {
     connection: Arc<Mutex<Connection>>,
@@ -80,47 +81,132 @@ impl Default for LigatureSQLite {
     }
 }
 
+impl Ligature for LigatureSQLite {
+    fn datasets(&self) -> Result<Vec<Dataset>, LigatureError> {
+        let connection = self.connection.lock().unwrap();
+        let mut stmt = connection.prepare("select name from dataset").unwrap();
+        let iter = stmt
+            .query_map([], |row| {
+                let x: String = row.get(0)?;
+                Ok(x)
+            })
+            .unwrap();
+        let mut results: Vec<Dataset> = vec![];
+        for name in iter {
+            results.push(Dataset::new(&name.unwrap()).unwrap());
+        }
+        Ok(results)
+    }
+
+    fn add_dataset(&mut self, dataset: &ligature::Dataset) -> Result<(), LigatureError> {
+        self.connection
+            .lock()
+            .unwrap()
+            .execute("insert into dataset (name) values (?1)", [dataset.name()])
+            .unwrap();
+        Ok(())
+    }
+
+    fn remove_dataset(&mut self, dataset: &ligature::Dataset) -> Result<(), LigatureError> {
+        self.connection
+            .lock()
+            .unwrap()
+            .execute("delete from dataset where name = ?1", [dataset.name()])
+            .unwrap();
+        Ok(())
+    }
+
+    fn statements(&self, dataset: &ligature::Dataset) -> Result<Vec<ligature::Statement>, LigatureError> {
+        let connection = self.connection.lock().unwrap();
+        let mut stmt = connection.prepare(
+            "select entity, attribute, value_identifier, value_int, value_string from statement inner join dataset on statement.dataset_id = dataset.id where dataset.name = ?1").unwrap();
+        let iter = stmt
+            .query_map([dataset.name()], |row| {
+                let entity: String = row.get(0)?;
+                let attribute: String = row.get(1)?;
+                let value_id: Option<String> = row.get(2)?;
+                let value_int: Option<i64> = row.get(3)?;
+                let value_str: Option<String> = row.get(4)?;
+                let value = if let Some(value) = value_id {
+                    Value::Identifier(Identifier::new(&value).unwrap())
+                } else if let Some(value) = value_int {
+                    Value::IntegerLiteral(value)
+                } else if let Some(value) = value_str {
+                    Value::StringLiteral(value)
+                } else {
+                    todo!()
+                };
+                Ok(Statement {
+                    entity: Identifier::new(&entity).unwrap(),
+                    attribute: Identifier::new(&attribute).unwrap(),
+                    value,
+                })
+            })
+            .unwrap();
+        let mut results: Vec<Statement> = vec![];
+        for statement in iter {
+            results.push(statement.unwrap());
+        }
+        Ok(results)
+    }
+
+    fn add_statements(&self, dataset: &ligature::Dataset, statements: Vec<ligature::Statement>) -> Result<(), LigatureError> {
+        todo!()
+    }
+
+    fn remove_statements(&self, dataset: &ligature::Dataset, statements: Vec<ligature::Statement>) -> Result<(), LigatureError> {
+        todo!()
+    }
+
+    fn query(&self) -> Result<Box<dyn ligature::Query>, LigatureError> {
+        todo!()
+    }
+}
+
 impl BindingsProvider for LigatureSQLite {
     fn add_bindings(&self, bindings: &mut wander::bindings::Bindings) {
         bindings.bind_native_function(
             String::from("datasets"),
             Rc::new(DatasetsFunction {
-                connection: self.connection.clone(),
+                instance: Arc::new(Mutex::new(self.clone())),
             }),
         );
         bindings.bind_native_function(
             String::from("addDataset"),
             Rc::new(AddDatasetFunction {
-                connection: self.connection.clone(),
+                instance: Arc::new(Mutex::new(self.clone())),
             }),
         );
         bindings.bind_native_function(
             String::from("removeDataset"),
             Rc::new(RemoveDatasetFunction {
-                connection: self.connection.clone(),
+                instance: Arc::new(Mutex::new(self.clone())),
             }),
         );
         bindings.bind_native_function(
             String::from("statements"),
             Rc::new(StatementsFunction {
-                connection: self.connection.clone(),
+                instance: Arc::new(Mutex::new(self.clone())),
             }),
         );
         bindings.bind_native_function(
             String::from("addStatements"),
             Rc::new(AddStatementsFunction {
+                instance: Arc::new(Mutex::new(self.clone())),
                 connection: self.connection.clone(),
             }),
         );
         bindings.bind_native_function(
             String::from("removeStatements"),
             Rc::new(RemoveStatementsFunction {
+                instance: Arc::new(Mutex::new(self.clone())),
                 connection: self.connection.clone(),
             }),
         );
         bindings.bind_native_function(
             String::from("query"),
             Rc::new(QueryFunction {
+                instance: Arc::new(Mutex::new(self.clone())),
                 connection: self.connection.clone(),
             }),
         );
@@ -128,22 +214,15 @@ impl BindingsProvider for LigatureSQLite {
 }
 
 struct DatasetsFunction {
-    connection: Arc<Mutex<Connection>>,
+    instance: Arc<Mutex<dyn Ligature>>,
 }
 impl NativeFunction for DatasetsFunction {
     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
         if arguments.is_empty() {
-            let connection = self.connection.lock().unwrap();
-            let mut stmt = connection.prepare("select name from dataset").unwrap();
-            let iter = stmt
-                .query_map([], |row| {
-                    let x: String = row.get(0)?;
-                    Ok(x)
-                })
-                .unwrap();
-            let mut results: Vec<WanderValue> = vec![];
-            for name in iter {
-                results.push(WanderValue::String(name.unwrap()));
+            let ds = self.instance.lock().unwrap().datasets().unwrap();
+            let mut results = vec![];
+            for name in ds {
+                results.push(WanderValue::String(name.name().to_owned()));
             }
             Ok(WanderValue::List(results))
         } else {
@@ -155,17 +234,13 @@ impl NativeFunction for DatasetsFunction {
 }
 
 struct AddDatasetFunction {
-    connection: Arc<Mutex<Connection>>,
+    instance: Arc<Mutex<LigatureSQLite>>,
 }
 impl NativeFunction for AddDatasetFunction {
     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name)] => {
-                self.connection
-                    .lock()
-                    .unwrap()
-                    .execute("insert into dataset (name) values (?1)", [name])
-                    .unwrap();
+                self.instance.lock().unwrap().add_dataset(&Dataset::new(name).unwrap());
                 Ok(WanderValue::Nothing)
             }
             _ => todo!(),
@@ -174,16 +249,16 @@ impl NativeFunction for AddDatasetFunction {
 }
 
 struct RemoveDatasetFunction {
-    connection: Arc<Mutex<Connection>>,
+    instance: Arc<Mutex<LigatureSQLite>>,
 }
 impl NativeFunction for RemoveDatasetFunction {
     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name)] => {
-                self.connection
+                self.instance
                     .lock()
                     .unwrap()
-                    .execute("delete from dataset where name = ?1", [name])
+                    .remove_dataset(&Dataset::new(name).unwrap())
                     .unwrap();
                 Ok(WanderValue::Nothing)
             }
@@ -193,41 +268,26 @@ impl NativeFunction for RemoveDatasetFunction {
 }
 
 struct StatementsFunction {
-    connection: Arc<Mutex<Connection>>,
+    instance: Arc<Mutex<LigatureSQLite>>,
 }
 impl NativeFunction for StatementsFunction {
     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name)] => {
-                let connection = self.connection.lock().unwrap();
-                let mut stmt = connection.prepare(
-                    "select entity, attribute, value_identifier, value_int, value_string from statement inner join dataset on statement.dataset_id = dataset.id where dataset.name = ?1").unwrap();
-                let iter = stmt
-                    .query_map([name], |row| {
-                        let entity: String = row.get(0)?;
-                        let attribute: String = row.get(1)?;
-                        let value_id: Option<String> = row.get(2)?;
-                        let value_int: Option<i64> = row.get(3)?;
-                        let value_str: Option<String> = row.get(4)?;
-                        let value = if let Some(value) = value_id {
-                            WanderValue::Identifier(Identifier::new(&value).unwrap())
-                        } else if let Some(value) = value_int {
-                            WanderValue::Int(value)
-                        } else if let Some(value) = value_str {
-                            WanderValue::String(value)
-                        } else {
-                            todo!()
-                        };
-                        Ok(WanderValue::List(vec![
-                            WanderValue::Identifier(Identifier::new(&entity).unwrap()),
-                            WanderValue::Identifier(Identifier::new(&attribute).unwrap()),
-                            value,
-                        ]))
-                    })
-                    .unwrap();
+                let statements = self.instance.lock().unwrap().statements(&Dataset::new(name).unwrap()).unwrap();
                 let mut results: Vec<WanderValue> = vec![];
-                for statement in iter {
-                    results.push(statement.unwrap());
+                for statement in statements {
+                    let mut result = vec![];
+                    result.push(WanderValue::Identifier(statement.entity));
+                    result.push(WanderValue::Identifier(statement.attribute));
+                    let value = match statement.value {
+                        Value::Identifier(value) => WanderValue::Identifier(value),
+                        Value::StringLiteral(value) => WanderValue::String(value),
+                        Value::IntegerLiteral(value) => WanderValue::Int(value),
+                        Value::BytesLiteral(_value) => todo!(),
+                    };
+                    result.push(value);
+                    results.push(WanderValue::List(result));
                 }
                 Ok(WanderValue::List(results))
             }
@@ -237,6 +297,7 @@ impl NativeFunction for StatementsFunction {
 }
 
 struct AddStatementsFunction {
+    instance: Arc<Mutex<LigatureSQLite>>,
     connection: Arc<Mutex<Connection>>,
 }
 impl NativeFunction for AddStatementsFunction {
@@ -272,6 +333,7 @@ impl NativeFunction for AddStatementsFunction {
                                     WanderValue::Lambda(_, _) => todo!("err"),
                                     WanderValue::List(_) => todo!("err"),
                                     WanderValue::Boolean(_) => todo!("err"),
+                                    WanderValue::Graph(_) => todo!(),
                                 }
                             },
                             _ => todo!()
@@ -289,6 +351,7 @@ impl NativeFunction for AddStatementsFunction {
 }
 
 struct RemoveStatementsFunction {
+    instance: Arc<Mutex<LigatureSQLite>>,
     connection: Arc<Mutex<Connection>>,
 }
 impl NativeFunction for RemoveStatementsFunction {
@@ -346,6 +409,7 @@ fn fetch_dataset_id(dataset_name: &str, tx: &Transaction) -> Result<Option<u64>,
 }
 
 struct QueryFunction {
+    instance: Arc<Mutex<LigatureSQLite>>,
     connection: Arc<Mutex<Connection>>,
 }
 impl NativeFunction for QueryFunction {

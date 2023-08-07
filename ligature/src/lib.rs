@@ -111,6 +111,17 @@ pub enum Value {
     BytesLiteral(Bytes),
 }
 
+impl Display for Value {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Value::Identifier(value) => write!(f, "{value}"),
+            Value::StringLiteral(value) => write!(f, "{value}"),
+            Value::IntegerLiteral(value) => write!(f, "{value}"),
+            Value::BytesLiteral(value) => todo!(),
+        }
+    }
+}
+
 /// A set of enums used to express range queries when it makes sense for that type.
 #[derive(Debug, Deserialize, Serialize)]
 pub enum Range {
@@ -155,7 +166,44 @@ pub struct Statement {
     pub value: Value,
 }
 
+impl Display for Statement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} {} {}", self.entity, self.attribute, self.value)
+    }
+}
+
 /// A general struct for representing errors involving Ligature.
 /// TODO should probably be an enum with a bunch of specific cases
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct LigatureError(pub String);
+
+/// A trait that defines all the actions a Ligature instance can perform.
+pub trait Ligature {
+    /// Get all Datasets.
+    fn datasets(&self) -> Result<Vec<Dataset>, LigatureError>;
+    /// Add a new Dataset.
+    /// Does nothing if Dataset already exists.
+    fn add_dataset(&mut self, dataset: &Dataset) -> Result<(), LigatureError>;
+    /// Remove a Dataset.
+    /// Does nothing if Dataset doesn't exist.
+    fn remove_dataset(&mut self, dataset: &Dataset) -> Result<(), LigatureError>;
+    /// Get all Statements in a given Dataset.
+    fn statements(&self, dataset: &Dataset) -> Result<Vec<Statement>, LigatureError>;
+    /// Add Statements to a given Dataset.
+    /// Returns Error if Dataset doesn't exist.
+    /// Does nothing if Statement already exists in Dataset.
+    fn add_statements(&self, dataset: &Dataset, statements: Vec<Statement>) -> Result<(), LigatureError>;
+    /// Remove Statements from a given Dataset.
+    /// Returns Error if Dataset doesn't exist.
+    /// Does nothing if Statement doesn't exist in Dataset.
+    fn remove_statements(&self, dataset: &Dataset, statements: Vec<Statement>) -> Result<(), LigatureError>;
+    /// Run a query against the given Dataset.
+    fn query(&self) -> Result<Box<dyn Query>, LigatureError>; //TODO this is wrong
+}
+
+/// Query Ligature instances.
+pub trait Query {
+    /// Find Statements that match the given pattern.
+    /// (None, None, None) returns all Statements.
+    fn find(&self, entity: Option<Identifier>, attribute: Option<Identifier>, value: Option<Value>) -> Result<Vec<Statement>, LigatureError>;
+}
