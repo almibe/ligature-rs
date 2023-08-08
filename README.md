@@ -21,17 +21,17 @@ Each project contains its own README with additional information when needed.
 
 | Name                  | Description                                                             | Output |
 | --------------------- | ----------------------------------------------------------------------- | ------ |
-| ligature              | Basic structs and traits used by Ligature implementations.              | lib    |
 | lig                   | Serialization support for Ligature using the Lig format.                | lib    |
-| wander                | The Wander scripting language.                                          | lib    |
-| ligature-wasm         | Compile Ligature for Wasm, provides in memory store and Wander support. | wasm   |
-| ligature-test-suite   | A test suite for Ligature implementations.                              | app    |
+| ligature              | Basic structs and traits used by Ligature implementations.              | lib    |
 | ligature-benchmark    | A simple benchmark for Ligature implementations.                        | app    |
+| ligature-http         | An HTTP server for working with Ligature and Wander.                    | app    |
 | ligature-in-memory    | An in-memory implementation of Ligature.                                | lib    |
-| ligature-sqlite       | An implementation of Ligature that uses sqlite3 for storage.            | lib    |
 | ligature-redb         | An implementation of Ligature that uses redb for storage.               | lib    |
 | ligature-repl         | A REPL for using Ligature and Wander.                                   | app    |
-| ligature-http         | An HTTP server for working with Ligature and Wander.                    | app    |
+| ligature-sqlite       | An implementation of Ligature that uses sqlite3 for storage.            | lib    |
+| ligature-test-suite   | A test suite for Ligature implementations.                              | app    |
+| ligature-wasm         | Compile Ligature for Wasm, provides in memory store and Wander support. | wasm   |
+| wander                | The Wander scripting language.                                          | lib    |
 
 ## Running Integration Tests
 

@@ -12,6 +12,7 @@ repository = "https://github.com/almibe/ligature-rs/"
 
 [dependencies]
 ligature = { path = "../ligature" }
+lig = { path = "../lig" }
 wander = { path = "../wander" }
 ligature-sqlite = { path = "../ligature-sqlite" }
 axum = "0.6"

@@ -4,10 +4,11 @@
 
 //! A simple HTTP server for Ligature using Axum.
 
-use axum::{extract::State, http::StatusCode, routing::post, Json, Router};
-use ligature::LigatureError;
+use axum::{extract::{State, Path}, http::StatusCode, routing::post, Json, Router};
+use ligature::{LigatureError, Dataset, Ligature};
 use ligature_sqlite::LigatureSQLite;
-use std::{net::SocketAddr, sync::Arc};
+use lig::load_lig_from_str;
+use std::{net::SocketAddr, sync::Arc, borrow::BorrowMut};
 use wander::{bindings::BindingsProvider, preludes::common, run, ScriptValue};
 
 #[tokio::main]
@@ -16,6 +17,7 @@ async fn main() {
     let instance = Arc::new(LigatureSQLite::default());
     let app = Router::new()
         .route("/wander", post(handler))
+        .route("/lig/:dataset", post(lig_handler))
         .with_state(instance);
     let addr = SocketAddr::from(([127, 0, 0, 1], 4200));
     println!("listening on {}", addr);
@@ -23,6 +25,27 @@ async fn main() {
         .serve(app.into_make_service())
         .await
         .unwrap();
+}
+
+async fn lig_handler(
+    Path(dataset): Path<String>,
+    State(instance): State<Arc<LigatureSQLite>>,
+    lig: String,
+) -> (StatusCode, Json<Result<ScriptValue, LigatureError>>) {
+    let mut bindings = common();
+    instance.add_bindings(&mut bindings);
+    match Dataset::new(&dataset) {
+        Ok(dataset) => {
+            let ligature: &dyn Ligature = instance.as_ref();
+            match load_lig_from_str(dataset, &lig, ligature) {
+                Ok(_) => (StatusCode::OK, Json(Ok(ScriptValue::Nothing))),
+                Err(err) => (StatusCode::BAD_REQUEST, Json(Err(err))),
+            }
+        },
+        Err(err) => {
+            todo!()
+        },
+    }
 }
 
 async fn handler(

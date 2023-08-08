@@ -192,11 +192,19 @@ pub trait Ligature {
     /// Add Statements to a given Dataset.
     /// Returns Error if Dataset doesn't exist.
     /// Does nothing if Statement already exists in Dataset.
-    fn add_statements(&self, dataset: &Dataset, statements: Vec<Statement>) -> Result<(), LigatureError>;
+    fn add_statements(
+        &self,
+        dataset: &Dataset,
+        statements: Vec<Statement>,
+    ) -> Result<(), LigatureError>;
     /// Remove Statements from a given Dataset.
     /// Returns Error if Dataset doesn't exist.
     /// Does nothing if Statement doesn't exist in Dataset.
-    fn remove_statements(&self, dataset: &Dataset, statements: Vec<Statement>) -> Result<(), LigatureError>;
+    fn remove_statements(
+        &self,
+        dataset: &Dataset,
+        statements: Vec<Statement>,
+    ) -> Result<(), LigatureError>;
     /// Run a query against the given Dataset.
     fn query(&self) -> Result<Box<dyn Query>, LigatureError>; //TODO this is wrong
 }
@@ -205,5 +213,10 @@ pub trait Ligature {
 pub trait Query {
     /// Find Statements that match the given pattern.
     /// (None, None, None) returns all Statements.
-    fn find(&self, entity: Option<Identifier>, attribute: Option<Identifier>, value: Option<Value>) -> Result<Vec<Statement>, LigatureError>;
+    fn find(
+        &self,
+        entity: Option<Identifier>,
+        attribute: Option<Identifier>,
+        value: Option<Value>,
+    ) -> Result<Vec<Statement>, LigatureError>;
 }

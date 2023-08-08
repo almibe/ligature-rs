@@ -55,7 +55,7 @@ pub fn read(script: &str) -> Result<Vec<Statement>, LigatureError> {
     let tokens = tokenize(script)?;
     let mut results = vec![];
     let mut index = 0;
-    while index <= tokens.len() {
+    while index < tokens.len() {
         let entity = &tokens.get(index);
         index += 1;
         let attribute = &tokens.get(index);
@@ -76,7 +76,12 @@ pub fn read(script: &str) -> Result<Vec<Statement>, LigatureError> {
                 };
                 results.push(statement.clone());
             }
-            _ => return Err(LigatureError(format!("Could not match Statement. {:?} {:?} {:?}", entity, attribute, value))),
+            _ => {
+                return Err(LigatureError(format!(
+                    "Could not match Statement. {:?} {:?} {:?}",
+                    entity, attribute, value
+                )))
+            }
         }
     }
     Ok(results)

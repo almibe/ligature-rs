@@ -7,16 +7,19 @@
 
 #![deny(missing_docs)]
 
+use lig::read::read;
+use ligature::{Dataset, Ligature};
 use ligature_sqlite::LigatureSQLite;
 use rustyline::error::ReadlineError;
 use rustyline::{Editor, Result};
+use std::fs::read_to_string;
 use wander::bindings::BindingsProvider;
 use wander::preludes::common;
 use wander::run;
 
 fn main() -> Result<()> {
     //    let mut instance = LigatureRedb::default();
-    let instance = LigatureSQLite::default();
+    let mut instance = LigatureSQLite::default();
     let mut bindings = common();
     instance.add_bindings(&mut bindings);
     println!("Welcome to Ligature's REPL!");
@@ -33,7 +36,7 @@ fn main() -> Result<()> {
             Ok(line) => {
                 rl.add_history_entry(line.as_str());
                 if line.trim().starts_with(":") {
-                    if !handle_command(&line) {
+                    if !handle_command(&line, &mut instance) {
                         break;
                     }
                 } else {
@@ -61,7 +64,7 @@ fn main() -> Result<()> {
     rl.save_history("history.txt")
 }
 
-fn handle_command(input: &str) -> bool {
+fn handle_command(input: &str, instance: &mut dyn Ligature) -> bool {
     let mut parts = input.split_whitespace();
     match parts.next().unwrap() {
         //":remote" => todo!(),
@@ -70,8 +73,34 @@ fn handle_command(input: &str) -> bool {
         ":quit" | ":q" => quit(),
         ":bindings" | ":b" => bindings(),
         ":help" | ":h" => help(),
+        ":load" => load(input, instance),
         _ => todo!(),
     }
+}
+
+fn load(input: &str, instance: &mut dyn Ligature) -> bool {
+    let input: Vec<&str> = input.split(" ").collect();
+    let dataset_name = input[1];
+    let file = input[2];
+    let dataset = if let Ok(dataset) = Dataset::new(dataset_name.trim_end()) {
+        dataset
+    } else {
+        println!("Invalid Dataset name.");
+        return true;
+    };
+    match read_to_string(file.trim_end()) {
+        Ok(lig) => match read(&lig) {
+            Ok(statements) => match instance.add_statements(&dataset, statements) {
+                Ok(_) => println!("Loaded."),
+                Err(e) => println!("Error adding Statements: {e:?}"),
+            },
+            Err(e) => {
+                println!("Error reading lig from file: {e:?}");
+            }
+        },
+        Err(_) => println!("Error reading file."),
+    }
+    true
 }
 
 fn bindings() -> bool {
