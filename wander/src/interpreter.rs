@@ -34,7 +34,22 @@ pub fn eval_element(
         Element::List(values) => handle_list(values, bindings),
         Element::Nothing => Ok(WanderValue::Nothing),
         Element::Forward => panic!("Should never reach."),
+        Element::Tuple(values) => handle_tuple(values, bindings),
     }
+}
+
+fn handle_tuple(
+    elements: &Vec<Element>,
+    bindings: &mut Bindings,
+) -> Result<WanderValue, LigatureError> {
+    let mut results = vec![];
+    for element in elements {
+        match eval_element(element, bindings) {
+            Ok(value) => results.push(value),
+            Err(err) => return Err(err),
+        }
+    }
+    Ok(WanderValue::Tuple(results))
 }
 
 fn handle_list(

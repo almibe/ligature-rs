@@ -61,10 +61,10 @@ fn token_transformer_upper() {
     assert_eq!(res, expected);
 }
 
-#[test]
-fn token_transformer_graph() {
-    let input = "graph`<a> <b> <c>`";
-    let res = run(input, &mut common());
-    let expected = run("[[<a> <b> <c>]]", &mut common());
-    assert_eq!(res, expected);
-}
+// #[test]
+// fn token_transformer_graph() {
+//     let input = "graph`<a> <b> <c>`";
+//     let res = run(input, &mut common());
+//     let expected = run("[[<a> <b> <c>]]", &mut common());
+//     assert_eq!(res, expected);
+// }

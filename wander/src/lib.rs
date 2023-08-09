@@ -41,6 +41,7 @@ pub enum WanderValue {
     NativeFunction(String),
     Lambda(Vec<String>, Vec<Element>),
     List(Vec<WanderValue>),
+    Tuple(Vec<WanderValue>),
     Graph(Graph),
 }
 
@@ -68,6 +69,16 @@ impl WanderValue {
                 }
                 Ok(ScriptValue::List(script_values))
             }
+            WanderValue::Tuple(values) => {
+                let mut script_values = vec![];
+                for value in values {
+                    match value.to_script_value() {
+                        Ok(value) => script_values.push(value),
+                        Err(err) => return Err(err),
+                    }
+                }
+                Ok(ScriptValue::Tuple(script_values))
+            }
             WanderValue::Graph(_) => todo!(),
         }
     }
@@ -82,8 +93,36 @@ pub enum ScriptValue {
     Identifier(Identifier),
     Nothing,
     List(Vec<ScriptValue>),
+    Tuple(Vec<ScriptValue>),
     Graph(Graph),
 }
+
+fn write_list_or_tuple_wander_value(open: char, close: char, contents: &Vec<WanderValue>, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "{open}").unwrap();
+    let mut i = 0;
+    for value in contents {
+        write!(f, "{value}").unwrap();
+        i += 1;
+        if i < contents.len() {
+            write!(f, " ").unwrap();
+        }
+    }
+    write!(f, "{close}")
+}
+
+fn write_list_or_tuple_script_value(open: char, close: char, contents: &Vec<ScriptValue>, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "{open}").unwrap();
+    let mut i = 0;
+    for value in contents {
+        write!(f, "{value}").unwrap();
+        i += 1;
+        if i < contents.len() {
+            write!(f, " ").unwrap();
+        }
+    }
+    write!(f, "{close}")
+}
+
 
 impl Display for WanderValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -94,20 +133,10 @@ impl Display for WanderValue {
             WanderValue::Identifier(value) => write!(f, "{}", value),
             WanderValue::Nothing => write!(f, "nothing"),
             WanderValue::NativeFunction(_) => write!(f, "[function]"),
-            WanderValue::List(contents) => {
-                write!(f, "[").unwrap();
-                let mut i = 0;
-                for value in contents {
-                    write!(f, "{value}").unwrap();
-                    i += 1;
-                    if i < contents.len() {
-                        write!(f, " ").unwrap();
-                    }
-                }
-                write!(f, "]")
-            }
+            WanderValue::List(contents) => write_list_or_tuple_wander_value('[', ']', contents, f),
             WanderValue::Lambda(_, _) => write!(f, "[lambda]"),
             WanderValue::Graph(_) => write!(f, "[graph]"),
+            WanderValue::Tuple(contents) => write_list_or_tuple_wander_value('(', ')', contents, f),
         }
     }
 }
@@ -120,19 +149,9 @@ impl Display for ScriptValue {
             ScriptValue::String(value) => write!(f, "\"{}\"", value),
             ScriptValue::Identifier(value) => write!(f, "{}", value),
             ScriptValue::Nothing => write!(f, "nothing"),
-            ScriptValue::List(contents) => {
-                write!(f, "[").unwrap();
-                let mut i = 0;
-                for value in contents {
-                    write!(f, "{value}").unwrap();
-                    i += 1;
-                    if i < contents.len() {
-                        write!(f, " ").unwrap();
-                    }
-                }
-                write!(f, "]")
-            }
+            ScriptValue::List(contents) => write_list_or_tuple_script_value('[', ']', contents, f),
             ScriptValue::Graph(_) => write!(f, "[graph]"),
+            ScriptValue::Tuple(contents) => write_list_or_tuple_script_value('(', ')', contents, f),
         }
     }
 }

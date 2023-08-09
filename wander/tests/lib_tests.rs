@@ -99,6 +99,18 @@ fn run_list() {
 }
 
 #[test]
+fn run_tuple() {
+    let input = "() (1 (2) ())";
+    let res = run(input, &mut common());
+    let expected = Ok(ScriptValue::Tuple(vec![
+        ScriptValue::Int(1),
+        ScriptValue::Tuple(vec![ScriptValue::Int(2)]),
+        ScriptValue::Tuple(vec![]),
+    ]));
+    assert_eq!(res, expected);
+}
+
+#[test]
 fn run_lambda() {
     let input = "let id = { x -> x } id(5)";
     let res = run(input, &mut common());

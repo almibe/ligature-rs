@@ -5,7 +5,7 @@
 use ligature::LigatureError;
 use std::rc::Rc;
 
-use crate::{bindings::Bindings, NativeFunction, WanderValue, TokenTransformer};
+use crate::{bindings::Bindings, NativeFunction, TokenTransformer, WanderValue};
 
 struct AndFunction {}
 impl NativeFunction for AndFunction {
@@ -118,7 +118,10 @@ impl NativeFunction for AtFunction {
 
 struct GraphTransformer {}
 impl TokenTransformer for GraphTransformer {
-    fn transform(&self, input: &[crate::lexer::Token]) -> Result<Vec<crate::lexer::Token>, LigatureError> {
+    fn transform(
+        &self,
+        input: &[crate::lexer::Token],
+    ) -> Result<Vec<crate::lexer::Token>, LigatureError> {
         todo!()
     }
 }

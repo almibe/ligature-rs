@@ -19,6 +19,7 @@ pub enum Element {
     Scope(Vec<Element>),
     Conditional(Box<Element>, Box<Element>, Box<Element>),
     Lambda(Vec<String>, Vec<Element>),
+    Tuple(Vec<Element>),
     List(Vec<Element>),
     Nothing,
     Forward,
@@ -191,6 +192,23 @@ fn list(gaze: &mut Gaze<Token>) -> Option<Element> {
     }
 }
 
+fn tuple(gaze: &mut Gaze<Token>) -> Option<Element> {
+    match gaze.next() {
+        Some(Token::OpenParen) => (),
+        _ => return None,
+    }
+
+    let mut contents = vec![];
+    while let Some(e) = gaze.attemptf(&mut element) {
+        contents.push(e)
+    }
+
+    match gaze.next() {
+        Some(Token::CloseParen) => Some(Element::Tuple(contents)),
+        _ => None,
+    }
+}
+
 fn let_binding(gaze: &mut Gaze<Token>) -> Option<Element> {
     let name = match (gaze.next(), gaze.next(), gaze.next()) {
         (Some(Token::Let), Some(Token::Name(name)), Some(Token::EqualSign)) => name,
@@ -202,6 +220,7 @@ fn let_binding(gaze: &mut Gaze<Token>) -> Option<Element> {
 
 fn element(gaze: &mut Gaze<Token>) -> Option<Element> {
     let mut parsers = vec![
+        tuple,
         function_call,
         name,
         boolean,

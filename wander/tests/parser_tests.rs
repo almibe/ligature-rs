@@ -166,6 +166,22 @@ fn parse_list() {
 }
 
 #[test]
+fn parse_tuple() {
+    let input = vec![
+        Token::OpenParen,
+        Token::Name("test".to_owned()),
+        Token::Int(24601),
+        Token::CloseParen,
+    ];
+    let res = parse(input);
+    let expected = Ok(vec![Element::Tuple(vec![
+        Element::Name("test".to_owned()),
+        Element::Int(24601),
+    ])]);
+    assert_eq!(res, expected);
+}
+
+#[test]
 fn parse_forward() {
     // false >> not()
     let input = vec![
