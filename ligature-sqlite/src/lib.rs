@@ -14,7 +14,7 @@ use std::{
 };
 
 use dirs::data_local_dir;
-use ligature::{Identifier, LigatureError, Ligature, Dataset, Value, Statement};
+use ligature::{Dataset, Identifier, Ligature, LigatureError, Statement, Value};
 use rusqlite::{params, Connection, Error, Transaction};
 use sql_builder::{quote, SqlBuilder};
 use wander::{bindings::BindingsProvider, NativeFunction, WanderValue};
@@ -116,7 +116,10 @@ impl Ligature for LigatureSQLite {
         Ok(())
     }
 
-    fn statements(&self, dataset: &ligature::Dataset) -> Result<Vec<ligature::Statement>, LigatureError> {
+    fn statements(
+        &self,
+        dataset: &ligature::Dataset,
+    ) -> Result<Vec<ligature::Statement>, LigatureError> {
         let connection = self.connection.lock().unwrap();
         let mut stmt = connection.prepare(
             "select entity, attribute, value_identifier, value_int, value_string from statement inner join dataset on statement.dataset_id = dataset.id where dataset.name = ?1").unwrap();
@@ -150,12 +153,78 @@ impl Ligature for LigatureSQLite {
         Ok(results)
     }
 
-    fn add_statements(&self, dataset: &ligature::Dataset, statements: Vec<ligature::Statement>) -> Result<(), LigatureError> {
-        todo!()
+    fn add_statements(
+        &self,
+        dataset: &ligature::Dataset,
+        statements: Vec<ligature::Statement>,
+    ) -> Result<(), LigatureError> {
+        let mut connection = self.connection.lock().unwrap();
+        let mut tx = connection.transaction().unwrap();
+        let id = tx
+            .query_row_and_then(
+                "select id from dataset where name = ?1",
+                [dataset.name()],
+                |row| {
+                    let id: i64 = row.get(0).unwrap();
+                    Ok::<i64, Error>(id)
+                },
+            )
+            .unwrap();
+        statements.iter().for_each(|statement| {
+                        let entity = statement.entity.id();
+                        let attribute = statement.attribute.id();
+                        match &statement.value {
+                            Value::IntegerLiteral(value) => {
+                                tx.execute("insert into statement (dataset_id, entity, attribute, value_int) values (?1, ?2, ?3, ?4)", params![id, entity, attribute, value]).unwrap();
+                            },
+                            Value::StringLiteral(value) => {
+                                tx.execute("insert into statement (dataset_id, entity, attribute, value_string) values (?1, ?2, ?3, ?4)", params![id, entity, attribute, value]).unwrap();
+                            },
+                            Value::Identifier(value) => {
+                                tx.execute("insert into statement (dataset_id, entity, attribute, value_identifier) values (?1, ?2, ?3, ?4)", params![id, entity, attribute, value.id()]).unwrap();
+                            },
+                            Value::BytesLiteral(_) => todo!(),
+                        }
+                });
+        tx.commit().unwrap();
+        Ok(())
     }
 
-    fn remove_statements(&self, dataset: &ligature::Dataset, statements: Vec<ligature::Statement>) -> Result<(), LigatureError> {
-        todo!()
+    fn remove_statements(
+        &self,
+        dataset: &ligature::Dataset,
+        statements: Vec<ligature::Statement>,
+    ) -> Result<(), LigatureError> {
+        let mut connection = self.connection.lock().unwrap();
+        let tx = connection.transaction().unwrap();
+        let id = tx
+            .query_row_and_then(
+                "select id from dataset where name = ?1",
+                [dataset.name()],
+                |row| {
+                    let id: i64 = row.get(0).unwrap();
+                    Ok::<i64, Error>(id)
+                },
+            )
+            .unwrap();
+        statements.iter().for_each(|statement| {
+                        let entity = statement.entity.id();
+                        let attribute = statement.attribute.id();
+                        match &statement.value {
+                            Value::Identifier(value) => {
+                                tx.execute("delete from statement where dataset_id = ?1 and entity = ?2 and attribute = ?3 and value_identifier = ?4", params![id, entity, attribute, value.id()]).unwrap();
+                            },
+                            Value::StringLiteral(value) => {
+                                tx.execute("delete from statement where dataset_id = ?1 and entity = ?2 and attribute = ?3 and value_string = ?4", params![id, entity, attribute, value]).unwrap();
+                            },
+                            Value::IntegerLiteral(value) => {
+                                tx.execute("delete from statement where dataset_id = ?1 and entity = ?2 and attribute = ?3 and value_int = ?4", params![id, entity, attribute, value]).unwrap();
+                            },
+                            Value::BytesLiteral(_) => todo!(),
+                        };
+        });
+        tx.commit().unwrap();
+        Ok(())
     }
 
     fn query(&self) -> Result<Box<dyn ligature::Query>, LigatureError> {
@@ -193,14 +262,12 @@ impl BindingsProvider for LigatureSQLite {
             String::from("addStatements"),
             Rc::new(AddStatementsFunction {
                 instance: Arc::new(Mutex::new(self.clone())),
-                connection: self.connection.clone(),
             }),
         );
         bindings.bind_native_function(
             String::from("removeStatements"),
             Rc::new(RemoveStatementsFunction {
                 instance: Arc::new(Mutex::new(self.clone())),
-                connection: self.connection.clone(),
             }),
         );
         bindings.bind_native_function(
@@ -240,7 +307,10 @@ impl NativeFunction for AddDatasetFunction {
     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name)] => {
-                self.instance.lock().unwrap().add_dataset(&Dataset::new(name).unwrap());
+                self.instance
+                    .lock()
+                    .unwrap()
+                    .add_dataset(&Dataset::new(name).unwrap());
                 Ok(WanderValue::Nothing)
             }
             _ => todo!(),
@@ -274,7 +344,12 @@ impl NativeFunction for StatementsFunction {
     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name)] => {
-                let statements = self.instance.lock().unwrap().statements(&Dataset::new(name).unwrap()).unwrap();
+                let statements = self
+                    .instance
+                    .lock()
+                    .unwrap()
+                    .statements(&Dataset::new(name).unwrap())
+                    .unwrap();
                 let mut results: Vec<WanderValue> = vec![];
                 for statement in statements {
                     let mut result = vec![];
@@ -296,53 +371,46 @@ impl NativeFunction for StatementsFunction {
     }
 }
 
+fn wander_value_to_statement(values: &Vec<WanderValue>) -> Result<Vec<Statement>, LigatureError> {
+    let mut results = vec![];
+    for value in values {
+        match value {
+            WanderValue::List(contents) => match &contents[..] {
+                [WanderValue::Identifier(entity), WanderValue::Identifier(attribute), value] => {
+                    let value = match value {
+                        WanderValue::Int(value) => Value::IntegerLiteral(*value),
+                        WanderValue::String(value) => Value::StringLiteral(value.to_string()),
+                        WanderValue::Identifier(value) => Value::Identifier(value.clone()),
+                        _ => todo!(),
+                    };
+                    let statement = Statement {
+                        entity: entity.clone(),
+                        attribute: attribute.clone(),
+                        value,
+                    };
+                    results.push(statement);
+                }
+                _ => todo!(),
+            },
+            _ => todo!(),
+        }
+    }
+    Ok(results)
+}
+
 struct AddStatementsFunction {
     instance: Arc<Mutex<LigatureSQLite>>,
-    connection: Arc<Mutex<Connection>>,
 }
 impl NativeFunction for AddStatementsFunction {
     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name), WanderValue::List(statements)] => {
-                let mut connection = self.connection.lock().unwrap();
-                let mut tx = connection.transaction().unwrap();
-                let id = tx
-                    .query_row_and_then("select id from dataset where name = ?1", [name], |row| {
-                        let id: i64 = row.get(0).unwrap();
-                        Ok::<i64, Error>(id)
-                    })
-                    .unwrap();
-                statements.iter().for_each(|statement| {
-                    if let WanderValue::List(contents) = statement {
-                        match &contents[..] {
-                            [WanderValue::Identifier(entity), WanderValue::Identifier(attribute), value] => {
-                                let entity = entity.id();
-                                let attribute = attribute.id();
-                                match value {
-                                    WanderValue::Int(value) => {
-                                        tx.execute("insert into statement (dataset_id, entity, attribute, value_int) values (?1, ?2, ?3, ?4)", params![id, entity, attribute, value]).unwrap();
-                                    },
-                                    WanderValue::String(value) => {
-                                        tx.execute("insert into statement (dataset_id, entity, attribute, value_string) values (?1, ?2, ?3, ?4)", params![id, entity, attribute, value]).unwrap();
-                                    },
-                                    WanderValue::Identifier(value) => {
-                                        tx.execute("insert into statement (dataset_id, entity, attribute, value_identifier) values (?1, ?2, ?3, ?4)", params![id, entity, attribute, value.id()]).unwrap();
-                                    },
-                                    WanderValue::Nothing => todo!("err"),
-                                    WanderValue::NativeFunction(_) => todo!("err"),
-                                    WanderValue::Lambda(_, _) => todo!("err"),
-                                    WanderValue::List(_) => todo!("err"),
-                                    WanderValue::Boolean(_) => todo!("err"),
-                                    WanderValue::Graph(_) => todo!(),
-                                }
-                            },
-                            _ => todo!()
-                        }
-                    } else {
-                        todo!()
-                    }
-                });
-                tx.commit().unwrap();
+                let dataset = Dataset::new(name).unwrap();
+                let statements = wander_value_to_statement(statements)?;
+                self.instance
+                    .lock()
+                    .unwrap()
+                    .add_statements(&dataset, statements)?;
                 Ok(WanderValue::Nothing)
             }
             _ => todo!(),
@@ -351,41 +419,18 @@ impl NativeFunction for AddStatementsFunction {
 }
 
 struct RemoveStatementsFunction {
-    instance: Arc<Mutex<LigatureSQLite>>,
-    connection: Arc<Mutex<Connection>>,
+    instance: Arc<Mutex<dyn Ligature>>,
 }
 impl NativeFunction for RemoveStatementsFunction {
     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name), WanderValue::List(statements)] => {
-                let mut connection = self.connection.lock().unwrap();
-                let tx = connection.transaction().unwrap();
-                let id = tx
-                    .query_row_and_then("select id from dataset where name = ?1", [name], |row| {
-                        let id: i64 = row.get(0).unwrap();
-                        Ok::<i64, Error>(id)
-                    })
-                    .unwrap();
-                statements.iter().for_each(|statement| {
-                    if let WanderValue::List(contents) = statement {
-                        match &contents[..] {
-                            [WanderValue::Identifier(entity), WanderValue::Identifier(attribute), x] => {
-                                let entity = entity.id();
-                                let attribute = attribute.id();
-                                let value = if let WanderValue::Identifier(value) = x {
-                                    value.id()
-                                } else {
-                                    todo!();
-                                };
-                                tx.execute("delete from statement where dataset_id = ?1 and entity = ?2 and attribute = ?3 and value_identifier = ?4", params![id, entity, attribute, value]).unwrap();
-                            },
-                            _ => todo!()
-                        }
-                    } else {
-                        todo!()
-                    }
-                });
-                tx.commit().unwrap();
+                let dataset = Dataset::new(name)?;
+                let statements = wander_value_to_statement(statements)?;
+                self.instance
+                    .lock()
+                    .unwrap()
+                    .remove_statements(&dataset, statements)?;
                 Ok(WanderValue::Nothing)
             }
             _ => todo!(),
