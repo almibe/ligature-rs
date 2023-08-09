@@ -169,8 +169,8 @@ pub fn main() {
             continue;
         }
         // let mut bindings = create_redb_bindings();
-        let mut bindings = create_sqlite_bindings();
-        // let mut bindings = create_memory_bindings();
+        // let mut bindings = create_sqlite_bindings();
+        let mut bindings = create_memory_bindings();
         let result = run(test.input, &mut bindings);
         if result == test.result {
             results.passed_tests.push(test.name);

@@ -116,6 +116,41 @@ impl NativeFunction for AtFunction {
     }
 }
 
+struct GraphFunction {}
+impl NativeFunction for GraphFunction {
+    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+        todo!()
+    }
+}
+
+struct AddFunction {}
+impl NativeFunction for AddFunction {
+    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+        todo!()
+    }
+}
+
+struct RemoveFunction {}
+impl NativeFunction for RemoveFunction {
+    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+        todo!()
+    }
+}
+
+struct StatementsFunction {}
+impl NativeFunction for StatementsFunction {
+    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+        todo!()
+    }
+}
+
+struct FindFunction {}
+impl NativeFunction for FindFunction {
+    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+        todo!()
+    }
+}
+
 struct GraphTransformer {}
 impl TokenTransformer for GraphTransformer {
     fn transform(
@@ -132,10 +167,19 @@ pub fn common() -> Bindings {
     let mut bindings = Bindings::new();
     bindings.bind_native_function(String::from("and"), Rc::new(AndFunction {}));
     bindings.bind_native_function(String::from("not"), Rc::new(NotFunction {}));
+
     bindings.bind_native_function(String::from("entity"), Rc::new(EntityFunction {}));
     bindings.bind_native_function(String::from("attribute"), Rc::new(AttributeFunction {}));
     bindings.bind_native_function(String::from("value"), Rc::new(ValueFunction {}));
+
     bindings.bind_native_function(String::from("at"), Rc::new(AtFunction {}));
+
+    bindings.bind_native_function(String::from("graph"), Rc::new(GraphFunction {}));
+    bindings.bind_native_function(String::from("add"), Rc::new(AddFunction {}));
+    bindings.bind_native_function(String::from("remove"), Rc::new(RemoveFunction {}));
+    bindings.bind_native_function(String::from("statements"), Rc::new(StatementsFunction {}));
+    bindings.bind_native_function(String::from("find"), Rc::new(FindFunction {}));
+
     bindings.bind_token_transformer(String::from("graph"), Rc::new(GraphTransformer {}));
     bindings
 }

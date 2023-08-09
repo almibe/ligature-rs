@@ -13,12 +13,50 @@ use std::{
     sync::RwLock,
 };
 
-use ligature::{LigatureError, Statement, Value};
+use ligature::{Dataset, Ligature, LigatureError, Query, Statement, Value};
 use wander::{bindings::Bindings, NativeFunction, WanderValue};
 
 #[derive(Default)]
 pub struct LigatureInMemory {
     datasets: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
+}
+
+impl Ligature for LigatureInMemory {
+    fn datasets(&self) -> Result<Vec<Dataset>, LigatureError> {
+        todo!()
+    }
+
+    fn add_dataset(&mut self, dataset: &Dataset) -> Result<(), LigatureError> {
+        todo!()
+    }
+
+    fn remove_dataset(&mut self, dataset: &Dataset) -> Result<(), LigatureError> {
+        todo!()
+    }
+
+    fn statements(&self, dataset: &Dataset) -> Result<Vec<Statement>, LigatureError> {
+        todo!()
+    }
+
+    fn add_statements(
+        &self,
+        dataset: &Dataset,
+        statements: Vec<Statement>,
+    ) -> Result<(), LigatureError> {
+        todo!()
+    }
+
+    fn remove_statements(
+        &self,
+        dataset: &Dataset,
+        statements: Vec<Statement>,
+    ) -> Result<(), LigatureError> {
+        todo!()
+    }
+
+    fn query(&self) -> Result<Box<dyn Query>, LigatureError> {
+        todo!()
+    }
 }
 
 impl LigatureInMemory {
@@ -80,12 +118,12 @@ struct DatasetsFunction {
 impl NativeFunction for DatasetsFunction {
     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
         if arguments.is_empty() {
-            let x = self.lim.read().unwrap();
-            let x = x
+            let datasets = self.lim.read().unwrap();
+            let datasets = datasets
                 .keys()
-                .map(|e| WanderValue::String(e.to_owned()))
+                .map(|name| WanderValue::String(name.to_owned()))
                 .collect();
-            Ok(WanderValue::List(x))
+            Ok(WanderValue::List(datasets))
         } else {
             Err(LigatureError(
                 "`datasets` function requires no arguments.".to_owned(),
@@ -377,6 +415,8 @@ impl NativeFunction for QueryFunction {
                                     WanderValue::NativeFunction(_) => false,
                                     WanderValue::Lambda(_, _) => false,
                                     WanderValue::List(_) => false,
+                                    WanderValue::Graph(_) => false,
+                                    WanderValue::Tuple(_) => false,
                                 }
                             })
                             .map(|statement| {
