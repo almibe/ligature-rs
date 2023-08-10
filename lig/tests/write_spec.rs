@@ -15,14 +15,14 @@ fn write_entities() -> Result<(), LigatureError> {
 #[test]
 fn write_string_literals() {
     assert_eq!(
-        write_value(&Value::StringLiteral("test".to_string())),
+        write_value(&Value::String("test".to_string())),
         "\"test\""
     );
 }
 
 #[test]
 fn write_integer_literals() {
-    assert_eq!(write_value(&Value::IntegerLiteral(5)), "5");
+    assert_eq!(write_value(&Value::Integer(5)), "5");
 }
 
 // #[test]
@@ -33,7 +33,7 @@ fn write_integer_literals() {
 
 #[test]
 fn write_bytes_literals() {
-    assert_eq!(write_value(&Value::BytesLiteral(vec![0, 255])), "0x00ff");
+    assert_eq!(write_value(&Value::Bytes(vec![0, 255])), "0x00ff");
 }
 
 #[test]
@@ -42,12 +42,12 @@ fn write_set_of_statements() -> Result<(), LigatureError> {
         Statement {
             entity: Identifier::new("e")?,
             attribute: Identifier::new("a")?,
-            value: Value::IntegerLiteral(234),
+            value: Value::Integer(234),
         },
         Statement {
             entity: Identifier::new("e")?,
             attribute: Identifier::new("a2")?,
-            value: Value::StringLiteral("test".to_string()),
+            value: Value::String("test".to_string()),
         },
     ];
     let expected = "<e> <a> 234\n<e> <a2> \"test\"\n";

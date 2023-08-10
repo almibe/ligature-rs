@@ -65,7 +65,7 @@ fn read_set_of_statements() -> Result<(), LigError> {
         Statement {
             entity: Identifier::new("e")?,
             attribute: Identifier::new("a")?,
-            value: Value::IntegerLiteral(123),
+            value: Value::Integer(123),
         },
         Statement {
             entity: Identifier::new("e2")?,
