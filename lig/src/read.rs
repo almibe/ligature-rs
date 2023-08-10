@@ -66,8 +66,8 @@ pub fn read(script: &str) -> Result<Vec<Statement>, LigatureError> {
             (Some(Token::Identifier(entity)), Some(Token::Identifier(attribute)), Some(value)) => {
                 let value: Value = match value {
                     Token::Identifier(value) => Value::Identifier(value.clone()),
-                    Token::Int(value) => Value::IntegerLiteral(*value),
-                    Token::String(value) => Value::StringLiteral(value.clone()),
+                    Token::Int(value) => Value::Integer(*value),
+                    Token::String(value) => Value::String(value.clone()),
                 };
                 let statement = Statement {
                     entity: entity.clone(),

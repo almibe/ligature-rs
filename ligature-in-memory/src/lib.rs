@@ -68,42 +68,49 @@ impl LigatureInMemory {
 
     pub fn add_bindings(&self, bindings: &mut Bindings) {
         bindings.bind_native_function(
+            "Ligature".to_owned(),
             String::from("datasets"),
             Rc::new(DatasetsFunction {
                 lim: self.datasets.clone(),
             }),
         );
         bindings.bind_native_function(
+            "Ligature".to_owned(),
             String::from("addDataset"),
             Rc::new(AddDatasetFunction {
                 lim: self.datasets.clone(),
             }),
         );
         bindings.bind_native_function(
+            "Ligature".to_owned(),
             String::from("removeDataset"),
             Rc::new(RemoveDatasetFunction {
                 lim: self.datasets.clone(),
             }),
         );
         bindings.bind_native_function(
+            "Ligature".to_owned(),
             String::from("statements"),
             Rc::new(StatementsFunction {
                 lim: self.datasets.clone(),
             }),
         );
         bindings.bind_native_function(
+            "Ligature".to_owned(),
             String::from("addStatements"),
             Rc::new(AddStatementsFunction {
                 lim: self.datasets.clone(),
             }),
         );
         bindings.bind_native_function(
+            "Ligature".to_owned(),
             String::from("removeStatements"),
             Rc::new(RemoveStatementsFunction {
                 lim: self.datasets.clone(),
             }),
         );
         bindings.bind_native_function(
+            "Ligature".to_owned(),
             String::from("query"),
             Rc::new(QueryFunction {
                 lim: self.datasets.clone(),
@@ -205,9 +212,9 @@ impl NativeFunction for StatementsFunction {
                                 ligature::Value::Identifier(value) => {
                                     WanderValue::Identifier(value)
                                 }
-                                ligature::Value::StringLiteral(value) => WanderValue::String(value),
-                                ligature::Value::IntegerLiteral(value) => WanderValue::Int(value),
-                                ligature::Value::BytesLiteral(_) => todo!(),
+                                ligature::Value::String(value) => WanderValue::String(value),
+                                ligature::Value::Integer(value) => WanderValue::Int(value),
+                                ligature::Value::Bytes(_) => todo!(),
                             };
                             results.push(WanderValue::List(vec![entity, attribute, value]));
                         }
@@ -244,10 +251,10 @@ impl NativeFunction for AddStatementsFunction {
                                     {
                                         let value: Value = match value {
                                             WanderValue::Int(value) => {
-                                                Value::IntegerLiteral(value.to_owned())
+                                                Value::Integer(value.to_owned())
                                             }
                                             WanderValue::String(value) => {
-                                                Value::StringLiteral(value.to_owned())
+                                                Value::String(value.to_owned())
                                             }
                                             WanderValue::Identifier(value) => {
                                                 Value::Identifier(value.to_owned())
@@ -286,8 +293,8 @@ impl NativeFunction for AddStatementsFunction {
 
 fn wander_value_to_value(value: &WanderValue) -> Result<Value, LigatureError> {
     match value {
-        WanderValue::Int(value) => Ok(Value::IntegerLiteral(value.to_owned())),
-        WanderValue::String(value) => Ok(Value::StringLiteral(value.to_owned())),
+        WanderValue::Int(value) => Ok(Value::Integer(value.to_owned())),
+        WanderValue::String(value) => Ok(Value::String(value.to_owned())),
         WanderValue::Identifier(value) => Ok(Value::Identifier(value.to_owned())),
         _ => Err(LigatureError("Invalid Statement".to_owned())),
     }
@@ -296,9 +303,9 @@ fn wander_value_to_value(value: &WanderValue) -> Result<Value, LigatureError> {
 fn value_to_wander_value(value: &Value) -> WanderValue {
     match value {
         Value::Identifier(value) => WanderValue::Identifier(value.to_owned()),
-        Value::StringLiteral(value) => WanderValue::String(value.to_owned()),
-        Value::IntegerLiteral(value) => WanderValue::Int(value.to_owned()),
-        Value::BytesLiteral(_) => todo!(),
+        Value::String(value) => WanderValue::String(value.to_owned()),
+        Value::Integer(value) => WanderValue::Int(value.to_owned()),
+        Value::Bytes(_) => todo!(),
     }
 }
 
@@ -391,14 +398,14 @@ impl NativeFunction for QueryFunction {
                                 match value {
                                     WanderValue::Boolean(_) => false,
                                     WanderValue::Int(ovalue) => {
-                                        if let Value::IntegerLiteral(ivalue) = &statement.value {
+                                        if let Value::Integer(ivalue) = &statement.value {
                                             ovalue == ivalue
                                         } else {
                                             false
                                         }
                                     }
                                     WanderValue::String(ovalue) => {
-                                        if let Value::StringLiteral(ivalue) = &statement.value {
+                                        if let Value::String(ivalue) = &statement.value {
                                             ovalue == ivalue
                                         } else {
                                             false

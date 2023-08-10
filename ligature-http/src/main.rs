@@ -4,11 +4,16 @@
 
 //! A simple HTTP server for Ligature using Axum.
 
-use axum::{extract::{State, Path}, http::StatusCode, routing::post, Json, Router};
-use ligature::{LigatureError, Dataset, Ligature};
-use ligature_sqlite::LigatureSQLite;
+use axum::{
+    extract::{Path, State},
+    http::StatusCode,
+    routing::post,
+    Json, Router,
+};
 use lig::load_lig_from_str;
-use std::{net::SocketAddr, sync::Arc, borrow::BorrowMut};
+use ligature::{Dataset, Ligature, LigatureError};
+use ligature_sqlite::LigatureSQLite;
+use std::{borrow::BorrowMut, net::SocketAddr, sync::Arc};
 use wander::{bindings::BindingsProvider, preludes::common, run, ScriptValue};
 
 #[tokio::main]
@@ -41,10 +46,10 @@ async fn lig_handler(
                 Ok(_) => (StatusCode::OK, Json(Ok(ScriptValue::Nothing))),
                 Err(err) => (StatusCode::BAD_REQUEST, Json(Err(err))),
             }
-        },
+        }
         Err(err) => {
             todo!()
-        },
+        }
     }
 }
 

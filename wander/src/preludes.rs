@@ -130,10 +130,8 @@ impl NativeFunction for GraphFunction {
                             [WanderValue::Identifier(entity), WanderValue::Identifier(attribute), value] =>
                             {
                                 let value = match value {
-                                    WanderValue::Int(value) => Value::IntegerLiteral(*value),
-                                    WanderValue::String(value) => {
-                                        Value::StringLiteral(value.to_owned())
-                                    }
+                                    WanderValue::Int(value) => Value::Integer(*value),
+                                    WanderValue::String(value) => Value::String(value.to_owned()),
                                     WanderValue::Identifier(value) => {
                                         Value::Identifier(value.to_owned())
                                     }
@@ -208,9 +206,9 @@ impl NativeFunction for StatementsFunction {
                         let attribute = WanderValue::Identifier(s.attribute);
                         let value = match s.value {
                             Value::Identifier(value) => WanderValue::Identifier(value),
-                            Value::StringLiteral(value) => WanderValue::String(value),
-                            Value::IntegerLiteral(value) => WanderValue::Int(value),
-                            Value::BytesLiteral(_value) => todo!(),
+                            Value::String(value) => WanderValue::String(value),
+                            Value::Integer(value) => WanderValue::Int(value),
+                            Value::Bytes(_value) => todo!(),
                         };
                         WanderValue::Tuple(vec![entity, attribute, value])
                     })
@@ -230,8 +228,8 @@ impl NativeFunction for FindFunction {
         match &arguments[..] {
             [WanderValue::String(datasetName), entity, attribute, value] => {
                 todo!()
-            },
-            _ => todo!()
+            }
+            _ => todo!(),
         }
     }
 }
@@ -250,21 +248,53 @@ impl TokenTransformer for GraphTransformer {
 /// functionality, but doesn't interact with an instance of Ligature.
 pub fn common() -> Bindings {
     let mut bindings = Bindings::new();
-    bindings.bind_native_function(String::from("and"), Rc::new(AndFunction {}));
-    bindings.bind_native_function(String::from("not"), Rc::new(NotFunction {}));
+    bindings.bind_native_function("Bool".to_owned(), "and".to_owned(), Rc::new(AndFunction {}));
+    bindings.bind_native_function("Bool".to_owned(), "not".to_owned(), Rc::new(NotFunction {}));
 
-    bindings.bind_native_function(String::from("entity"), Rc::new(EntityFunction {}));
-    bindings.bind_native_function(String::from("attribute"), Rc::new(AttributeFunction {}));
-    bindings.bind_native_function(String::from("value"), Rc::new(ValueFunction {}));
+    bindings.bind_native_function(
+        "Statement".to_owned(),
+        "entity".to_owned(),
+        Rc::new(EntityFunction {}),
+    );
+    bindings.bind_native_function(
+        "Statement".to_owned(),
+        "attribute".to_owned(),
+        Rc::new(AttributeFunction {}),
+    );
+    bindings.bind_native_function(
+        "Statement".to_owned(),
+        "value".to_owned(),
+        Rc::new(ValueFunction {}),
+    );
 
-    bindings.bind_native_function(String::from("at"), Rc::new(AtFunction {}));
+    bindings.bind_native_function("List".to_owned(), "at".to_owned(), Rc::new(AtFunction {}));
 
-    bindings.bind_native_function(String::from("graph"), Rc::new(GraphFunction {}));
-    bindings.bind_native_function(String::from("union"), Rc::new(UnionFunction {}));
-    bindings.bind_native_function(String::from("difference"), Rc::new(DifferenceFunction {}));
-    bindings.bind_native_function(String::from("statements"), Rc::new(StatementsFunction {}));
-    bindings.bind_native_function(String::from("find"), Rc::new(FindFunction {}));
+    bindings.bind_native_function(
+        "Graph".to_owned(),
+        "graph".to_owned(),
+        Rc::new(GraphFunction {}),
+    );
+    bindings.bind_native_function(
+        "Graph".to_owned(),
+        "union".to_owned(),
+        Rc::new(UnionFunction {}),
+    );
+    bindings.bind_native_function(
+        "Graph".to_owned(),
+        "difference".to_owned(),
+        Rc::new(DifferenceFunction {}),
+    );
+    bindings.bind_native_function(
+        "Graph".to_owned(),
+        "statements".to_owned(),
+        Rc::new(StatementsFunction {}),
+    );
+    bindings.bind_native_function(
+        "Graph".to_owned(),
+        "find".to_owned(),
+        Rc::new(FindFunction {}),
+    );
 
-    bindings.bind_token_transformer(String::from("graph"), Rc::new(GraphTransformer {}));
+    bindings.bind_token_transformer("graph".to_owned(), Rc::new(GraphTransformer {}));
     bindings
 }

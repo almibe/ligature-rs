@@ -133,9 +133,9 @@ impl Ligature for LigatureSQLite {
                 let value = if let Some(value) = value_id {
                     Value::Identifier(Identifier::new(&value).unwrap())
                 } else if let Some(value) = value_int {
-                    Value::IntegerLiteral(value)
+                    Value::Integer(value)
                 } else if let Some(value) = value_str {
-                    Value::StringLiteral(value)
+                    Value::String(value)
                 } else {
                     todo!()
                 };
@@ -174,16 +174,16 @@ impl Ligature for LigatureSQLite {
                         let entity = statement.entity.id();
                         let attribute = statement.attribute.id();
                         match &statement.value {
-                            Value::IntegerLiteral(value) => {
+                            Value::Integer(value) => {
                                 tx.execute("insert into statement (dataset_id, entity, attribute, value_int) values (?1, ?2, ?3, ?4)", params![id, entity, attribute, value]).unwrap();
                             },
-                            Value::StringLiteral(value) => {
+                            Value::String(value) => {
                                 tx.execute("insert into statement (dataset_id, entity, attribute, value_string) values (?1, ?2, ?3, ?4)", params![id, entity, attribute, value]).unwrap();
                             },
                             Value::Identifier(value) => {
                                 tx.execute("insert into statement (dataset_id, entity, attribute, value_identifier) values (?1, ?2, ?3, ?4)", params![id, entity, attribute, value.id()]).unwrap();
                             },
-                            Value::BytesLiteral(_) => todo!(),
+                            Value::Bytes(_) => todo!(),
                         }
                 });
         tx.commit().unwrap();
@@ -214,13 +214,13 @@ impl Ligature for LigatureSQLite {
                             Value::Identifier(value) => {
                                 tx.execute("delete from statement where dataset_id = ?1 and entity = ?2 and attribute = ?3 and value_identifier = ?4", params![id, entity, attribute, value.id()]).unwrap();
                             },
-                            Value::StringLiteral(value) => {
+                            Value::String(value) => {
                                 tx.execute("delete from statement where dataset_id = ?1 and entity = ?2 and attribute = ?3 and value_string = ?4", params![id, entity, attribute, value]).unwrap();
                             },
-                            Value::IntegerLiteral(value) => {
+                            Value::Integer(value) => {
                                 tx.execute("delete from statement where dataset_id = ?1 and entity = ?2 and attribute = ?3 and value_int = ?4", params![id, entity, attribute, value]).unwrap();
                             },
-                            Value::BytesLiteral(_) => todo!(),
+                            Value::Bytes(_) => todo!(),
                         };
         });
         tx.commit().unwrap();
@@ -235,42 +235,49 @@ impl Ligature for LigatureSQLite {
 impl BindingsProvider for LigatureSQLite {
     fn add_bindings(&self, bindings: &mut wander::bindings::Bindings) {
         bindings.bind_native_function(
+            "Ligature".to_owned(),
             String::from("datasets"),
             Rc::new(DatasetsFunction {
                 instance: Arc::new(Mutex::new(self.clone())),
             }),
         );
         bindings.bind_native_function(
+            "Ligature".to_owned(),
             String::from("addDataset"),
             Rc::new(AddDatasetFunction {
                 instance: Arc::new(Mutex::new(self.clone())),
             }),
         );
         bindings.bind_native_function(
+            "Ligature".to_owned(),
             String::from("removeDataset"),
             Rc::new(RemoveDatasetFunction {
                 instance: Arc::new(Mutex::new(self.clone())),
             }),
         );
         bindings.bind_native_function(
+            "Ligature".to_owned(),
             String::from("statements"),
             Rc::new(StatementsFunction {
                 instance: Arc::new(Mutex::new(self.clone())),
             }),
         );
         bindings.bind_native_function(
+            "Ligature".to_owned(),
             String::from("addStatements"),
             Rc::new(AddStatementsFunction {
                 instance: Arc::new(Mutex::new(self.clone())),
             }),
         );
         bindings.bind_native_function(
+            "Ligature".to_owned(),
             String::from("removeStatements"),
             Rc::new(RemoveStatementsFunction {
                 instance: Arc::new(Mutex::new(self.clone())),
             }),
         );
         bindings.bind_native_function(
+            "Ligature".to_owned(),
             String::from("query"),
             Rc::new(QueryFunction {
                 instance: Arc::new(Mutex::new(self.clone())),
@@ -357,9 +364,9 @@ impl NativeFunction for StatementsFunction {
                     result.push(WanderValue::Identifier(statement.attribute));
                     let value = match statement.value {
                         Value::Identifier(value) => WanderValue::Identifier(value),
-                        Value::StringLiteral(value) => WanderValue::String(value),
-                        Value::IntegerLiteral(value) => WanderValue::Int(value),
-                        Value::BytesLiteral(_value) => todo!(),
+                        Value::String(value) => WanderValue::String(value),
+                        Value::Integer(value) => WanderValue::Int(value),
+                        Value::Bytes(_value) => todo!(),
                     };
                     result.push(value);
                     results.push(WanderValue::List(result));
@@ -378,8 +385,8 @@ fn wander_value_to_statement(values: &Vec<WanderValue>) -> Result<Vec<Statement>
             WanderValue::List(contents) => match &contents[..] {
                 [WanderValue::Identifier(entity), WanderValue::Identifier(attribute), value] => {
                     let value = match value {
-                        WanderValue::Int(value) => Value::IntegerLiteral(*value),
-                        WanderValue::String(value) => Value::StringLiteral(value.to_string()),
+                        WanderValue::Int(value) => Value::Integer(*value),
+                        WanderValue::String(value) => Value::String(value.to_string()),
                         WanderValue::Identifier(value) => Value::Identifier(value.clone()),
                         _ => todo!(),
                     };

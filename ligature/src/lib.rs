@@ -102,22 +102,22 @@ pub enum Value {
     /// An Entity.
     Identifier(Identifier),
     /// A String used for a Ligature literal
-    StringLiteral(String),
+    String(String),
     /// An i64 used for a Ligature literal
-    IntegerLiteral(i64),
+    Integer(i64),
     // /// An f64 used for a Ligature literal
     // FloatLiteral(f64),
     /// An array of bytes
-    BytesLiteral(Bytes),
+    Bytes(Bytes),
 }
 
 impl Display for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Value::Identifier(value) => write!(f, "{value}"),
-            Value::StringLiteral(value) => write!(f, "{value}"),
-            Value::IntegerLiteral(value) => write!(f, "{value}"),
-            Value::BytesLiteral(value) => todo!(),
+            Value::String(value) => write!(f, "{value}"),
+            Value::Integer(value) => write!(f, "{value}"),
+            Value::Bytes(value) => todo!(),
         }
     }
 }

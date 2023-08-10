@@ -78,8 +78,7 @@ fn graph_difference() {
 
 #[test]
 fn graph_statements() {
-    let input =
-        "statements(graph([(<a> <b> <c>)]))";
+    let input = "statements(graph([(<a> <b> <c>)]))";
     let res = run(input, &mut common());
     let mut statements = BTreeSet::default();
     statements.insert(Statement {

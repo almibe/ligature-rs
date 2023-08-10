@@ -59,7 +59,12 @@ impl Bindings {
         self.scopes.push(current_scope);
     }
 
-    pub fn bind_native_function(&mut self, name: String, function: Rc<dyn NativeFunction>) {
+    pub fn bind_native_function(
+        &mut self,
+        module: String,
+        name: String,
+        function: Rc<dyn NativeFunction>,
+    ) {
         self.native_functions.borrow_mut().insert(name, function);
     }
 

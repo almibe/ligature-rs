@@ -115,10 +115,7 @@ fn write_list_or_tuple_wander_value(
     write!(f, "{close}")
 }
 
-fn write_graph(
-    graph: &Graph,
-    f: &mut std::fmt::Formatter<'_>,
-) -> std::fmt::Result {
+fn write_graph(graph: &Graph, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     write!(f, "graph([").unwrap();
     graph.all_statements().into_iter().for_each(|statement| {
         write!(f, "({statement})").unwrap();

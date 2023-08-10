@@ -123,24 +123,28 @@ impl LigatureRedb {
 impl BindingsProvider for LigatureRedb {
     fn add_bindings(&self, bindings: &mut Bindings) {
         bindings.bind_native_function(
+            "Ligature".to_owned(),
             String::from("datasets"),
             Rc::new(DatasetsFunction {
                 db: self.db.clone(),
             }),
         );
         bindings.bind_native_function(
+            "Ligature".to_owned(),
             String::from("addDataset"),
             Rc::new(AddDatasetFunction {
                 db: self.db.clone(),
             }),
         );
         bindings.bind_native_function(
+            "Ligature".to_owned(),
             String::from("removeDataset"),
             Rc::new(RemoveDatasetFunction {
                 db: self.db.clone(),
             }),
         );
         bindings.bind_native_function(
+            "Ligature".to_owned(),
             String::from("statements"),
             Rc::new(StatementsFunction {
                 db: self.db.clone(),

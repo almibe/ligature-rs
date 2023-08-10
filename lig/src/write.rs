@@ -13,10 +13,10 @@ pub fn write_identifier(entity: &Identifier) -> String {
 pub fn write_value(value: &Value) -> String {
     match value {
         Value::Identifier(entity) => write_identifier(entity),
-        Value::IntegerLiteral(integer) => write_integer(integer),
+        Value::Integer(integer) => write_integer(integer),
         //Value::FloatLiteral(float) => write_float(float),
-        Value::StringLiteral(string) => write_string(string),
-        Value::BytesLiteral(bytes) => write_bytes(bytes),
+        Value::String(string) => write_string(string),
+        Value::Bytes(bytes) => write_bytes(bytes),
     }
 }
 

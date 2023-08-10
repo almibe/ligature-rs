@@ -4,7 +4,7 @@
 
 //! This module is the main module for the lig serialization format for Ligature.
 
-use ligature::{LigatureError, Ligature, Dataset};
+use ligature::{Dataset, Ligature, LigatureError};
 
 use crate::read::read;
 
@@ -21,7 +21,11 @@ impl From<LigatureError> for LigError {
     }
 }
 
-pub fn load_lig_from_str(dataset: Dataset, input: &str, ligature: &dyn Ligature) -> Result<(), LigatureError> {
+pub fn load_lig_from_str(
+    dataset: Dataset,
+    input: &str,
+    ligature: &dyn Ligature,
+) -> Result<(), LigatureError> {
     println!("parsing lig {input}");
     let statements = read(input)?;
     println!("after parse");
