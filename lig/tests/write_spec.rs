@@ -14,10 +14,7 @@ fn write_entities() -> Result<(), LigatureError> {
 
 #[test]
 fn write_string_literals() {
-    assert_eq!(
-        write_value(&Value::String("test".to_string())),
-        "\"test\""
-    );
+    assert_eq!(write_value(&Value::String("test".to_string())), "\"test\"");
 }
 
 #[test]

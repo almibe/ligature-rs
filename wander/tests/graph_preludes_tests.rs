@@ -36,7 +36,7 @@ fn graph_with_statements_list() {
     statements.insert(Statement {
         entity: Identifier::new("a").unwrap(),
         attribute: Identifier::new("b").unwrap(),
-        value: Value::IntegerLiteral(123),
+        value: Value::Integer(123),
     });
     let expected = Ok(ScriptValue::Graph(Graph::new(statements)));
     assert_eq!(res, expected);
