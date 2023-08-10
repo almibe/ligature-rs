@@ -115,6 +115,17 @@ fn write_list_or_tuple_wander_value(
     write!(f, "{close}")
 }
 
+fn write_graph(
+    graph: &Graph,
+    f: &mut std::fmt::Formatter<'_>,
+) -> std::fmt::Result {
+    write!(f, "graph([").unwrap();
+    graph.all_statements().into_iter().for_each(|statement| {
+        write!(f, "({statement})").unwrap();
+    });
+    write!(f, "])")
+}
+
 fn write_list_or_tuple_script_value(
     open: char,
     close: char,
@@ -144,7 +155,7 @@ impl Display for WanderValue {
             WanderValue::NativeFunction(_) => write!(f, "[function]"),
             WanderValue::List(contents) => write_list_or_tuple_wander_value('[', ']', contents, f),
             WanderValue::Lambda(_, _) => write!(f, "[lambda]"),
-            WanderValue::Graph(_) => write!(f, "[graph]"),
+            WanderValue::Graph(graph) => write_graph(graph, f),
             WanderValue::Tuple(contents) => write_list_or_tuple_wander_value('(', ')', contents, f),
         }
     }
@@ -159,7 +170,7 @@ impl Display for ScriptValue {
             ScriptValue::Identifier(value) => write!(f, "{}", value),
             ScriptValue::Nothing => write!(f, "nothing"),
             ScriptValue::List(contents) => write_list_or_tuple_script_value('[', ']', contents, f),
-            ScriptValue::Graph(_) => write!(f, "[graph]"),
+            ScriptValue::Graph(graph) => write_graph(graph, f),
             ScriptValue::Tuple(contents) => write_list_or_tuple_script_value('(', ')', contents, f),
         }
     }

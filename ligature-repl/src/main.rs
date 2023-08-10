@@ -42,7 +42,7 @@ fn main() -> Result<()> {
                 } else {
                     let result = run(line.as_str(), &mut bindings);
                     match result {
-                        Ok(result) => println!("Result: {result}"),
+                        Ok(result) => println!("{result}"),
                         Err(err) => println!("Error: {err:?}"),
                     }
                 }
