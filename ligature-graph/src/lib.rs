@@ -36,7 +36,11 @@ impl Graph {
     }
 
     pub fn remove_all(&self, graph: Self) -> Self {
-        todo!()
+        let mut res = self.statements.clone();
+        for statement in graph.statements {
+            res.remove(&statement);
+        }
+        Graph { statements: res }
     }
 
     pub fn all_statements(&self) -> BTreeSet<Statement> {

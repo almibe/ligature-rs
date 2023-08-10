@@ -79,7 +79,7 @@ impl WanderValue {
                 }
                 Ok(ScriptValue::Tuple(script_values))
             }
-            WanderValue::Graph(_) => todo!(),
+            WanderValue::Graph(graph) => Ok(ScriptValue::Graph(graph.clone())),
         }
     }
 }
@@ -97,7 +97,12 @@ pub enum ScriptValue {
     Graph(Graph),
 }
 
-fn write_list_or_tuple_wander_value(open: char, close: char, contents: &Vec<WanderValue>, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+fn write_list_or_tuple_wander_value(
+    open: char,
+    close: char,
+    contents: &Vec<WanderValue>,
+    f: &mut std::fmt::Formatter<'_>,
+) -> std::fmt::Result {
     write!(f, "{open}").unwrap();
     let mut i = 0;
     for value in contents {
@@ -110,7 +115,12 @@ fn write_list_or_tuple_wander_value(open: char, close: char, contents: &Vec<Wand
     write!(f, "{close}")
 }
 
-fn write_list_or_tuple_script_value(open: char, close: char, contents: &Vec<ScriptValue>, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+fn write_list_or_tuple_script_value(
+    open: char,
+    close: char,
+    contents: &Vec<ScriptValue>,
+    f: &mut std::fmt::Formatter<'_>,
+) -> std::fmt::Result {
     write!(f, "{open}").unwrap();
     let mut i = 0;
     for value in contents {
@@ -122,7 +132,6 @@ fn write_list_or_tuple_script_value(open: char, close: char, contents: &Vec<Scri
     }
     write!(f, "{close}")
 }
-
 
 impl Display for WanderValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
