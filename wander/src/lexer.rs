@@ -137,6 +137,7 @@ pub fn transform(input: &Vec<Token>, bindings: &Bindings) -> Result<Vec<Token>, 
                 },
                 _ => return Err(LigatureError("Token Transforms require a name.".to_owned())),
             };
+            results.pop(); //remove transformer's name token
             index += 1; //skip first `
             while let Some(token) = input.get(index) {
                 if token == &Token::Backtick {

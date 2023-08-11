@@ -5,11 +5,21 @@
 use std::rc::Rc;
 use wander::{lexer::Token, preludes::common, run, ScriptValue, TokenTransformer};
 
+struct EmptyTransformer {}
+impl TokenTransformer for EmptyTransformer {
+    fn transform(
+        &self,
+        _input: &Vec<wander::lexer::Token>,
+    ) -> Result<Vec<Token>, ligature::LigatureError> {
+        Ok(vec![])
+    }
+}
+
 struct NothingTransformer {}
 impl TokenTransformer for NothingTransformer {
     fn transform(
         &self,
-        _input: &[wander::lexer::Token],
+        _input: &Vec<wander::lexer::Token>,
     ) -> Result<Vec<Token>, ligature::LigatureError> {
         Ok([Token::Nothing].to_vec())
     }
@@ -19,7 +29,7 @@ struct UpperCaseTransformer {}
 impl TokenTransformer for UpperCaseTransformer {
     fn transform(
         &self,
-        input: &[wander::lexer::Token],
+        input: &Vec<wander::lexer::Token>,
     ) -> Result<Vec<Token>, ligature::LigatureError> {
         if let Some(Token::String(value)) = input.get(0) {
             let t = value.clone().to_ascii_uppercase();
@@ -29,6 +39,16 @@ impl TokenTransformer for UpperCaseTransformer {
             panic!()
         }
     }
+}
+
+#[test]
+fn empty_transformer_no_input_test() {
+    let input = "empty``";
+    let mut bindings = common();
+    bindings.bind_token_transformer("empty".to_owned(), Rc::new(EmptyTransformer {}));
+    let res = run(input, &mut bindings);
+    let expected = Ok(ScriptValue::Nothing);
+    assert_eq!(res, expected);
 }
 
 #[test]
@@ -61,10 +81,18 @@ fn token_transformer_upper() {
     assert_eq!(res, expected);
 }
 
-// #[test]
-// fn token_transformer_graph() {
-//     let input = "graph`<a> <b> <c>`";
-//     let res = run(input, &mut common());
-//     let expected = run("[[<a> <b> <c>]]", &mut common());
-//     assert_eq!(res, expected);
-// }
+#[test]
+fn token_transformer_graph_empty() {
+    let input = "graph``";
+    let res = run(input, &mut common());
+    let expected = run("graph([])", &mut common());
+    assert_eq!(res, expected);
+}
+
+#[test]
+fn token_transformer_graph() {
+    let input = "graph`<a> <b> <c>`";
+    let res = run(input, &mut common());
+    let expected = run("graph([(<a> <b> <c>)])", &mut common());
+    assert_eq!(res, expected);
+}

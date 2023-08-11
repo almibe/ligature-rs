@@ -27,7 +27,7 @@ pub trait NativeFunction {
 }
 
 pub trait TokenTransformer {
-    fn transform(&self, input: &[Token]) -> Result<Vec<Token>, LigatureError>;
+    fn transform(&self, input: &Vec<Token>) -> Result<Vec<Token>, LigatureError>;
 }
 
 #[derive(Debug, Clone, PartialEq)]

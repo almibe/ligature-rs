@@ -6,7 +6,7 @@ use ligature::{LigatureError, Statement, Value};
 use ligature_graph::Graph;
 use std::{collections::BTreeSet, rc::Rc};
 
-use crate::{bindings::Bindings, NativeFunction, TokenTransformer, WanderValue};
+use crate::{bindings::Bindings, lexer::Token, NativeFunction, TokenTransformer, WanderValue};
 
 struct AndFunction {}
 impl NativeFunction for AndFunction {
@@ -238,10 +238,50 @@ struct GraphTransformer {}
 impl TokenTransformer for GraphTransformer {
     fn transform(
         &self,
-        input: &[crate::lexer::Token],
+        input: &Vec<crate::lexer::Token>,
     ) -> Result<Vec<crate::lexer::Token>, LigatureError> {
-        todo!()
+        let tokens: Vec<lig::read::Token> = wander_to_lig_token(input)?;
+        let statements: Vec<Statement> = lig::read::read_tokens(&tokens)?;
+        let mut results = vec![];
+        results.append(&mut vec![
+            Token::Name("graph".to_owned()),
+            Token::OpenParen,
+            Token::OpenSquare,
+        ]);
+        for statement in statements {
+            results.push(Token::OpenParen);
+            results.push(Token::Identifier(statement.entity));
+            results.push(Token::Identifier(statement.attribute));
+            match statement.value {
+                Value::Identifier(value) => results.push(Token::Identifier(value)),
+                Value::String(value) => results.push(Token::String(value)),
+                Value::Integer(value) => results.push(Token::Int(value)),
+                Value::Bytes(_) => todo!(),
+            }
+            results.push(Token::CloseParen);
+        }
+        results.push(Token::CloseSquare);
+        results.push(Token::CloseParen);
+        Ok(results)
     }
+}
+
+fn wander_to_lig_token(
+    input: &Vec<crate::lexer::Token>,
+) -> Result<Vec<lig::read::Token>, LigatureError> {
+    let mut results = vec![];
+    for token in input {
+        let token = match token {
+            crate::lexer::Token::Identifier(value) => {
+                lig::read::Token::Identifier(value.to_owned())
+            }
+            crate::lexer::Token::Int(value) => lig::read::Token::Int(*value),
+            crate::lexer::Token::String(value) => lig::read::Token::String(value.to_owned()),
+            _ => return Err(LigatureError("Invalid graph token.".to_owned())),
+        };
+        results.push(token);
+    }
+    Ok(results)
 }
 
 /// Creates a set of Bindings for Wander that consists of all of the common
