@@ -8,6 +8,19 @@ use std::{collections::BTreeSet, rc::Rc};
 
 use crate::{bindings::Bindings, lexer::Token, NativeFunction, TokenTransformer, WanderValue};
 
+struct EqFunction {}
+impl NativeFunction for EqFunction {
+    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+        if let [left, right] = &arguments[..] {
+            Ok(crate::WanderValue::Boolean(left == right))
+        } else {
+            Err(LigatureError(
+                "`eq` function requires two parameters.".to_owned(),
+            ))
+        }
+    }
+}
+
 struct AndFunction {}
 impl NativeFunction for AndFunction {
     fn run(
@@ -241,7 +254,7 @@ impl TokenTransformer for GraphTransformer {
         input: &Vec<crate::lexer::Token>,
     ) -> Result<Vec<crate::lexer::Token>, LigatureError> {
         let tokens: Vec<lig::read::Token> = wander_to_lig_token(input)?;
-        let statements: Vec<Statement> = lig::read::read_tokens(&tokens)?;
+        let statements: Vec<Statement> = lig::read::read_tokens(tokens)?;
         let mut results = vec![];
         results.append(&mut vec![
             Token::Name("graph".to_owned()),
@@ -272,11 +285,15 @@ fn wander_to_lig_token(
     let mut results = vec![];
     for token in input {
         let token = match token {
-            crate::lexer::Token::Identifier(value) => {
+            Token::Identifier(value) => {
                 lig::read::Token::Identifier(value.to_owned())
             }
-            crate::lexer::Token::Int(value) => lig::read::Token::Int(*value),
-            crate::lexer::Token::String(value) => lig::read::Token::String(value.to_owned()),
+            Token::Int(value) => lig::read::Token::Int(*value),
+            Token::String(value) => lig::read::Token::String(value.to_owned()),
+            Token::OpenBrace => lig::read::Token::OpenBrace,
+            Token::CloseBrace => lig::read::Token::CloseBrace,
+            Token::OpenSquare => lig::read::Token::OpenSquare,
+            Token::CloseSquare => lig::read::Token::CloseSquare,
             _ => return Err(LigatureError("Invalid graph token.".to_owned())),
         };
         results.push(token);
@@ -288,6 +305,8 @@ fn wander_to_lig_token(
 /// functionality, but doesn't interact with an instance of Ligature.
 pub fn common() -> Bindings {
     let mut bindings = Bindings::new();
+    bindings.bind_native_function("Core".to_owned(), "eq".to_owned(), Rc::new(EqFunction {}));
+
     bindings.bind_native_function("Bool".to_owned(), "and".to_owned(), Rc::new(AndFunction {}));
     bindings.bind_native_function("Bool".to_owned(), "not".to_owned(), Rc::new(NotFunction {}));
 
