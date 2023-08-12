@@ -124,6 +124,7 @@ fn handle_value_expression(entity: &Identifier, attribute: &Identifier, gaze: &m
                     Some(Token::String(value)) => values.push(Value::String(value)),
                     Some(Token::Identifier(value)) => {
                         if gaze.peek() == Some(Token::OpenBrace) {
+                            gaze.next(); //read {
                             add_statement(entity, attribute, Value::Identifier(value.to_owned()), results)?;
                             handle_entity_expansion(value.to_owned(), gaze, results)?;
                         } else {
@@ -148,7 +149,6 @@ fn handle_value_expression(entity: &Identifier, attribute: &Identifier, gaze: &m
 }
 
 fn handle_entity_expansion(entity: Identifier, gaze: &mut Gaze<Token>, results: &mut Vec<Statement>) -> Result<(), LigatureError> {
-    gaze.next(); //read {
     loop {
         match gaze.next() {
             Some(Token::Identifier(attribute)) => {
@@ -156,8 +156,7 @@ fn handle_entity_expansion(entity: Identifier, gaze: &mut Gaze<Token>, results: 
             },
             Some(Token::CloseBrace) => {
                 return Ok(())
-            }
-            
+            },
             token => return Err(LigatureError(format!("Error handling Entity Expansion - {:?}.", token))),
         }    
     }
