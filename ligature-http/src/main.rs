@@ -8,12 +8,12 @@ use axum::{
     extract::{Path, State},
     http::StatusCode,
     routing::post,
-    Json, Router,
+    Router,
 };
 use lig::load_lig_from_str;
-use ligature::{Dataset, Ligature, LigatureError};
+use ligature::{Dataset, Ligature};
 use ligature_sqlite::LigatureSQLite;
-use std::{borrow::BorrowMut, net::SocketAddr, sync::Arc};
+use std::{net::SocketAddr, sync::Arc};
 use wander::{bindings::BindingsProvider, preludes::common, run, ScriptValue};
 
 #[tokio::main]
@@ -25,7 +25,7 @@ async fn main() {
         .route("/lig/:dataset", post(lig_handler))
         .with_state(instance);
     let addr = SocketAddr::from(([127, 0, 0, 1], 4200));
-    println!("listening on {}", addr);
+    println!("Ligature HTTP is listening on {addr}");
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .await
@@ -36,19 +36,19 @@ async fn lig_handler(
     Path(dataset): Path<String>,
     State(instance): State<Arc<LigatureSQLite>>,
     lig: String,
-) -> (StatusCode, Json<Result<ScriptValue, LigatureError>>) {
+) -> (StatusCode, String) {
     let mut bindings = common();
     instance.add_bindings(&mut bindings);
     match Dataset::new(&dataset) {
         Ok(dataset) => {
             let ligature: &dyn Ligature = instance.as_ref();
             match load_lig_from_str(dataset, &lig, ligature) {
-                Ok(_) => (StatusCode::OK, Json(Ok(ScriptValue::Nothing))),
-                Err(err) => (StatusCode::BAD_REQUEST, Json(Err(err))),
+                Ok(_) => (StatusCode::OK, ScriptValue::Nothing.to_string()),
+                Err(err) => (StatusCode::BAD_REQUEST, err.0),
             }
         }
         Err(err) => {
-            todo!()
+            (StatusCode::BAD_REQUEST, err.0)
         }
     }
 }
@@ -56,12 +56,11 @@ async fn lig_handler(
 async fn handler(
     State(instance): State<Arc<LigatureSQLite>>,
     query: String,
-) -> (StatusCode, Json<Result<ScriptValue, LigatureError>>) {
-    println!("Received {}", query);
+) -> (StatusCode, String) {
     let mut bindings = common();
     instance.add_bindings(&mut bindings);
     match run(&query, &mut bindings) {
-        Ok(value) => (StatusCode::OK, Json(Ok(value))),
-        Err(err) => (StatusCode::BAD_REQUEST, Json(Err(err))),
+        Ok(value) => (StatusCode::OK, value.to_string()),
+        Err(err) => (StatusCode::BAD_REQUEST, err.0)
     }
 }
