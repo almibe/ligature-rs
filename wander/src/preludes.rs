@@ -21,6 +21,23 @@ impl NativeFunction for EqFunction {
     }
 }
 
+struct AssertEqFunction {}
+impl NativeFunction for AssertEqFunction {
+    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+        if let [left, right] = &arguments[..] {
+            if left == right {
+                Ok(crate::WanderValue::Nothing)                
+            } else {
+                Err(LigatureError("Assertion failed!".to_owned()))
+            }
+        } else {
+            Err(LigatureError(
+                "`assertEq` function requires two parameters.".to_owned(),
+            ))
+        }
+    }
+}
+
 struct AndFunction {}
 impl NativeFunction for AndFunction {
     fn run(
@@ -306,6 +323,8 @@ fn wander_to_lig_token(
 pub fn common() -> Bindings {
     let mut bindings = Bindings::new();
     bindings.bind_native_function("Core".to_owned(), "eq".to_owned(), Rc::new(EqFunction {}));
+
+    bindings.bind_native_function("Assert".to_owned(), "assertEq".to_owned(), Rc::new(AssertEqFunction {}));
 
     bindings.bind_native_function("Bool".to_owned(), "and".to_owned(), Rc::new(AndFunction {}));
     bindings.bind_native_function("Bool".to_owned(), "not".to_owned(), Rc::new(NotFunction {}));
