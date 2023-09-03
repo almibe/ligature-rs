@@ -25,7 +25,7 @@ pub enum Token {
     #[token(".")]
     Period,
 
-    #[regex("[-0-9]+", int)]
+    #[regex("-?[0-9]+", int)]
     Int(i64),
 
     #[regex(r#""(([^\x00-\x1F"\\]|\\["\\/bfnrt]|\\u[0-9a-fA-F]{4})*)""#, string)]
@@ -72,6 +72,9 @@ pub enum Token {
 
     #[token("`")]
     Backtick,
+
+    #[regex("--.*\n?")]
+    Comment,
 }
 
 fn bool(lex: &mut Lexer<Token>) -> Option<bool> {
@@ -117,6 +120,12 @@ pub fn tokenize(script: &str) -> Result<Vec<Token>, LigatureError> {
             Err(_) => return Err(LigatureError(String::from("Error tokenizing input."))),
         }
     }
+    results.retain(|token| {
+        match token {
+            Token::Comment => false,
+            _ => true
+        }
+    });
     Ok(results)
 }
 

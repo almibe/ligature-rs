@@ -113,3 +113,27 @@ fn tokenize_function_call_with_forward() {
     ]);
     assert_eq!(res, expected);
 }
+
+#[test]
+fn tokenize_comment() {
+    let input = "--hello";
+    let res = tokenize(input);
+    let expected = Ok(vec![]);
+    assert_eq!(res, expected);
+}
+
+#[test]
+fn tokenize_complex_comment() {
+    let input = "-- <<<>>> () {} }{ )( ><";
+    let res = tokenize(input);
+    let expected = Ok(vec![]);
+    assert_eq!(res, expected);
+}
+
+#[test]
+fn multiline_comment() {
+    let input = "-- <<<>>> () {} }{ )( ><\n5--five\n--comment";
+    let res = tokenize(input);
+    let expected = Ok(vec![Token::Int(5)]);
+    assert_eq!(res, expected);
+}
