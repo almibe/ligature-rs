@@ -12,6 +12,9 @@ pub fn eval(script: &Vec<Element>, bindings: &mut Bindings) -> Result<WanderValu
     let mut result = Ok(WanderValue::Nothing);
     for element in script {
         result = eval_element(element, bindings);
+        if result.is_err() {
+            return result
+        }
     }
     result
 }
