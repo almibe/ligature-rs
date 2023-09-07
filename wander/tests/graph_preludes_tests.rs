@@ -93,3 +93,27 @@ fn graph_statements() {
     ])]));
     assert_eq!(res, expected);
 }
+
+#[test]
+fn graph_transformer_test() {
+    let input = "graph`<a> <b> [<c> \"c\" 20]`";
+    let res = run(input, &mut common());
+    let mut statements = BTreeSet::default();
+    statements.insert(Statement { 
+        entity: Identifier::new("a").unwrap(),
+        attribute: Identifier::new("b").unwrap(),
+        value: Value::Identifier(Identifier::new("c").unwrap()) }
+    );
+    statements.insert(Statement { 
+        entity: Identifier::new("a").unwrap(),
+        attribute: Identifier::new("b").unwrap(),
+        value: Value::String("c".to_owned()) }
+    );
+    statements.insert(Statement { 
+        entity: Identifier::new("a").unwrap(),
+        attribute: Identifier::new("b").unwrap(),
+        value: Value::Integer(20) }
+    );
+    let expected = Ok(ScriptValue::Graph(Graph::new(statements)));
+    assert_eq!(res, expected);
+}

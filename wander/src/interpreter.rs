@@ -26,7 +26,7 @@ pub fn eval_element(
     match element {
         Element::Boolean(value) => Ok(WanderValue::Boolean(*value)),
         Element::Int(value) => Ok(WanderValue::Int(*value)),
-        Element::String(value) => Ok(WanderValue::String(value.to_string())),
+        Element::String(value) => Ok(WanderValue::String(unescape_string(value.to_string()))),
         Element::Identifier(value) => Ok(WanderValue::Identifier(value.clone())),
         Element::Let(name, value) => handle_let(name, value, bindings),
         Element::Name(name) => read_name(name, bindings),
@@ -39,6 +39,50 @@ pub fn eval_element(
         Element::Forward => panic!("Should never reach."),
         Element::Tuple(values) => handle_tuple(values, bindings),
     }
+}
+
+fn unescape_string(value: String) -> String {
+    println!("in unescape_string {value}");
+    let mut result = String::new();
+    let mut last_char = ' ';
+    let mut idx = 0;
+    value.chars().for_each(|c| {
+        if idx == 0 || idx == value.chars().count() - 1 {
+            idx += 1;
+        } else {
+            idx += 1;
+            if last_char == '\\' {
+                match c {
+                    'n' => {
+                        result.push('\n');
+                        last_char = c
+                    }
+                    '\\' => {
+                        result.push('\\');
+                        last_char = ' '
+                    }
+                    't' => {
+                        result.push('\t');
+                        last_char = c
+                    }
+                    '"' => {
+                        result.push(c);
+                        last_char = c
+                    }
+                    _ => todo!()
+                }
+            } else if c == '\\' {
+                last_char = c
+            } else {
+                result.push(c);
+                last_char = c
+            }                
+        }
+    });
+    if last_char == '\\' {
+        panic!()
+    }
+    result
 }
 
 fn handle_tuple(

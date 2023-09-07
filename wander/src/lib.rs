@@ -4,11 +4,12 @@
 
 //! This module is an implementation of the Wander scripting language.
 
-use std::fmt::Display;
+use std::fmt::{Display, Write};
 
 use bindings::Bindings;
 use interpreter::eval;
 use lexer::{tokenize, transform, Token};
+use lig::write::{write_statement, write_string};
 use ligature::{Identifier, LigatureError};
 use ligature_graph::Graph;
 use parser::{parse, Element};
@@ -103,7 +104,7 @@ fn write_list_or_tuple_wander_value(
     contents: &Vec<WanderValue>,
     f: &mut std::fmt::Formatter<'_>,
 ) -> std::fmt::Result {
-    write!(f, "{open}").unwrap();
+    f.write_char(open).unwrap();
     let mut i = 0;
     for value in contents {
         write!(f, "{value}").unwrap();
@@ -116,11 +117,11 @@ fn write_list_or_tuple_wander_value(
 }
 
 fn write_graph(graph: &Graph, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    write!(f, "graph([").unwrap();
+    f.write_str("graph`").unwrap();
     graph.all_statements().into_iter().for_each(|statement| {
-        write!(f, "({statement})").unwrap();
+        f.write_str(write_statement(&statement).as_str()).unwrap();
     });
-    write!(f, "])")
+    f.write_str("`")
 }
 
 fn write_list_or_tuple_script_value(
@@ -146,7 +147,7 @@ impl Display for WanderValue {
         match self {
             WanderValue::Boolean(value) => write!(f, "{}", value),
             WanderValue::Int(value) => write!(f, "{}", value),
-            WanderValue::String(value) => write!(f, "\"{}\"", value),
+            WanderValue::String(value) => f.write_str(&write_string(value)),
             WanderValue::Identifier(value) => write!(f, "{}", value),
             WanderValue::Nothing => write!(f, "nothing"),
             WanderValue::NativeFunction(_) => write!(f, "[function]"),
@@ -163,7 +164,7 @@ impl Display for ScriptValue {
         match self {
             ScriptValue::Boolean(value) => write!(f, "{}", value),
             ScriptValue::Int(value) => write!(f, "{}", value),
-            ScriptValue::String(value) => write!(f, "\"{}\"", value),
+            ScriptValue::String(value) => f.write_str(&write_string(value)),
             ScriptValue::Identifier(value) => write!(f, "{}", value),
             ScriptValue::Nothing => write!(f, "nothing"),
             ScriptValue::List(contents) => write_list_or_tuple_script_value('[', ']', contents, f),

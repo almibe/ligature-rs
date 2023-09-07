@@ -95,8 +95,7 @@ fn int(lex: &mut Lexer<Token>) -> Option<i64> {
 }
 
 fn string(lex: &mut Lexer<Token>) -> Option<String> {
-    let slice = lex.slice();
-    slice.slice(1..(slice.len() - 1)).map(|x| x.into())
+    Some(lex.slice().to_string())
 }
 
 fn identifier(lex: &mut Lexer<Token>) -> Option<Identifier> {

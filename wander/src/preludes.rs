@@ -6,7 +6,7 @@ use ligature::{LigatureError, Statement, Value};
 use ligature_graph::Graph;
 use std::{collections::BTreeSet, rc::Rc};
 
-use crate::{bindings::Bindings, lexer::Token, NativeFunction, TokenTransformer, WanderValue};
+use crate::{bindings::Bindings, lexer::Token, NativeFunction, TokenTransformer, WanderValue, run};
 
 struct EqFunction {}
 impl NativeFunction for EqFunction {

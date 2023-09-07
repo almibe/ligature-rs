@@ -51,9 +51,17 @@ fn tokenize_integers() {
 
 #[test]
 fn tokenize_strings() {
-    let input = "\"Hello world\"";
+    let input = "\"Hello, world\"";
     let res = tokenize(input);
-    let expected = Ok(vec![Token::String(String::from("Hello world"))]);
+    let expected = Ok(vec![Token::String(String::from("\"Hello, world\""))]);
+    assert_eq!(res, expected);
+}
+
+#[test]
+fn tokenize_strings_with_quotes() {
+    let input = "\"\\\"Hello, world\\\"\"";
+    let res = tokenize(input);
+    let expected = Ok(vec![Token::String(String::from("\"\\\"Hello, world\\\"\""))]);
     assert_eq!(res, expected);
 }
 
@@ -135,5 +143,20 @@ fn multiline_comment() {
     let input = "-- <<<>>> () {} }{ )( ><\n5--five\n--comment";
     let res = tokenize(input);
     let expected = Ok(vec![Token::Int(5)]);
+    assert_eq!(res, expected);
+}
+
+#[test]
+fn graph_literal_with_string() {
+    let input = "graph`<a> <b> \"\\\"\"`";
+    let res = tokenize(input);
+    let expected = Ok(vec![
+        Token::Name("graph".to_owned()),
+        Token::Backtick,
+        Token::Identifier(Identifier::new("a").unwrap()),
+        Token::Identifier(Identifier::new("b").unwrap()),
+        Token::String("\"\\\"\"".to_owned()),
+        Token::Backtick
+    ]);
     assert_eq!(res, expected);
 }

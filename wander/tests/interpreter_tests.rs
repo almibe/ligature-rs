@@ -14,3 +14,11 @@ fn eval_boolean_true() {
     let expected = Ok(WanderValue::Boolean(true));
     assert_eq!(res, expected);
 }
+
+#[test]
+fn eval_string_with_quotes() {
+    let input = vec![Element::String("\"\\\"\"".to_owned())];
+    let res = eval(&input, &mut common());
+    let expected = Ok(WanderValue::String("\"".to_owned()));
+    assert_eq!(res, expected);
+}
