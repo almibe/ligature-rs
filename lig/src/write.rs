@@ -2,62 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use hex::encode;
-use ligature::{Bytes, Identifier, Statement, Value};
-
-/// Writes out an Entity to a String.
-pub fn write_identifier(entity: &Identifier) -> String {
-    format!("<{}>", entity.id())
-}
-
-pub fn write_value(value: &Value) -> String {
-    match value {
-        Value::Identifier(entity) => write_identifier(entity),
-        Value::Integer(integer) => write_integer(integer),
-        //Value::FloatLiteral(float) => write_float(float),
-        Value::String(string) => write_string(string),
-        Value::Bytes(bytes) => write_bytes(bytes),
-    }
-}
-
-pub fn write_integer(integer: &i64) -> String {
-    format!("{}", integer)
-}
-
-pub fn write_float(float: &f64) -> String {
-    let res = format!("{}", float);
-    if res.contains('.') {
-        res
-    } else {
-        res + ".0"
-    }
-}
-
-pub fn write_string(string: &str) -> String {
-    //TODO this could be done better
-    let escaped_string = string
-        .replace('\\', "\\\\")
-        .replace('"', "\\\"")
-        //.replace("\f", "\\b") <-- TODO not sure how to handle this or if I really need to
-        //.replace("\b", "\\b") <-- TODO not sure how to handle this or if I really need to
-        .replace('\n', "\\n")
-        .replace('\r', "\\r")
-        .replace('\t', "\\t");
-    format!("\"{}\"", escaped_string)
-}
-
-pub fn write_bytes(bytes: &Bytes) -> String {
-    format!("0x{}", encode(bytes))
-}
-
-pub fn write_statement(statement: &Statement) -> String {
-    format!(
-        "{} {} {}\n",
-        write_identifier(&statement.entity),
-        write_identifier(&statement.attribute),
-        write_value(&statement.value),
-    )
-}
+use ligature::Statement;
+use wander::write_statement;
 
 pub fn write(statements: std::slice::Iter<Statement>) -> String {
     let mut result = String::new();
