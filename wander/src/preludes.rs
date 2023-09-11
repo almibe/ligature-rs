@@ -270,8 +270,8 @@ impl TokenTransformer for GraphTransformer {
         &self,
         input: &Vec<crate::lexer::Token>,
     ) -> Result<Vec<crate::lexer::Token>, LigatureError> {
-        let tokens: Vec<lig::read::Token> = wander_to_lig_token(input)?;
-        let statements: Vec<Statement> = lig::read::read_tokens(tokens)?;
+        let tokens: Vec<Token> = input.to_owned();
+        let statements: Vec<Statement> = crate::lig::read_tokens(tokens)?;
         let mut results = vec![];
         results.append(&mut vec![
             Token::Name("graph".to_owned()),
@@ -294,26 +294,6 @@ impl TokenTransformer for GraphTransformer {
         results.push(Token::CloseParen);
         Ok(results)
     }
-}
-
-fn wander_to_lig_token(
-    input: &Vec<crate::lexer::Token>,
-) -> Result<Vec<lig::read::Token>, LigatureError> {
-    let mut results = vec![];
-    for token in input {
-        let token = match token {
-            Token::Identifier(value) => lig::read::Token::Identifier(value.to_owned()),
-            Token::Int(value) => lig::read::Token::Int(*value),
-            Token::String(value) => lig::read::Token::String(value.to_owned()),
-            Token::OpenBrace => lig::read::Token::OpenBrace,
-            Token::CloseBrace => lig::read::Token::CloseBrace,
-            Token::OpenSquare => lig::read::Token::OpenSquare,
-            Token::CloseSquare => lig::read::Token::CloseSquare,
-            _ => return Err(LigatureError("Invalid graph token.".to_owned())),
-        };
-        results.push(token);
-    }
-    Ok(results)
 }
 
 /// Creates a set of Bindings for Wander that consists of all of the common
