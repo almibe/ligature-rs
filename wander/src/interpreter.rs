@@ -11,10 +11,7 @@ use crate::WanderValue;
 pub fn eval(script: &Vec<Element>, bindings: &mut Bindings) -> Result<WanderValue, LigatureError> {
     let mut result = Ok(WanderValue::Nothing);
     for element in script {
-        result = eval_element(element, bindings);
-        if result.is_err() {
-            return result
-        }
+        result = Ok(eval_element(element, bindings)?);
     }
     result
 }
@@ -69,14 +66,14 @@ fn unescape_string(value: String) -> String {
                         result.push(c);
                         last_char = c
                     }
-                    _ => todo!()
+                    _ => todo!(),
                 }
             } else if c == '\\' {
                 last_char = c
             } else {
                 result.push(c);
                 last_char = c
-            }                
+            }
         }
     });
     if last_char == '\\' {
@@ -184,12 +181,10 @@ fn call_function(
         Some(WanderValue::NativeFunction(nf_name)) => {
             match bindings.read_native_function(&nf_name) {
                 Some(nf) => nf.run(&argument_values),
-                None => {
-                    return Err(LigatureError(
-                        "Could not read function {name} that references NativeFunction {nf_name}"
-                            .to_owned(),
-                    ))
-                }
+                None => Err(LigatureError(
+                    "Could not read function {name} that references NativeFunction {nf_name}"
+                        .to_owned(),
+                )),
             }
         }
         Some(WanderValue::Lambda(parameters, body)) => {

@@ -8,18 +8,10 @@ use ligature::{Identifier, Statement, Value};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
-#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq, Deserialize, Serialize, Hash)]
+#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq, Deserialize, Serialize, Hash, Default)]
 /// An implementation of the Graph trait that stores all Data in a sorted set.
 pub struct Graph {
     statements: BTreeSet<Statement>,
-}
-
-impl Default for Graph {
-    fn default() -> Self {
-        Self {
-            statements: Default::default(),
-        }
-    }
 }
 
 impl Graph {

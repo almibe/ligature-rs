@@ -61,7 +61,9 @@ fn tokenize_strings() {
 fn tokenize_strings_with_quotes() {
     let input = "\"\\\"Hello, world\\\"\"";
     let res = tokenize(input);
-    let expected = Ok(vec![Token::String(String::from("\"\\\"Hello, world\\\"\""))]);
+    let expected = Ok(vec![Token::String(String::from(
+        "\"\\\"Hello, world\\\"\"",
+    ))]);
     assert_eq!(res, expected);
 }
 
@@ -156,7 +158,7 @@ fn graph_literal_with_string() {
         Token::Identifier(Identifier::new("a").unwrap()),
         Token::Identifier(Identifier::new("b").unwrap()),
         Token::String("\"\\\"\"".to_owned()),
-        Token::Backtick
+        Token::Backtick,
     ]);
     assert_eq!(res, expected);
 }

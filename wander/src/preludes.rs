@@ -6,12 +6,12 @@ use ligature::{LigatureError, Statement, Value};
 use ligature_graph::Graph;
 use std::{collections::BTreeSet, rc::Rc};
 
-use crate::{bindings::Bindings, lexer::Token, NativeFunction, TokenTransformer, WanderValue, run};
+use crate::{bindings::Bindings, lexer::Token, NativeFunction, TokenTransformer, WanderValue};
 
 struct EqFunction {}
 impl NativeFunction for EqFunction {
     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
-        if let [left, right] = &arguments[..] {
+        if let [left, right] = arguments {
             Ok(crate::WanderValue::Boolean(left == right))
         } else {
             Err(LigatureError(
@@ -24,9 +24,9 @@ impl NativeFunction for EqFunction {
 struct AssertEqFunction {}
 impl NativeFunction for AssertEqFunction {
     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
-        if let [left, right] = &arguments[..] {
+        if let [left, right] = arguments {
             if left == right {
-                Ok(crate::WanderValue::Nothing)                
+                Ok(crate::WanderValue::Nothing)
             } else {
                 Err(LigatureError("Assertion failed!".to_owned()))
             }
@@ -73,7 +73,7 @@ impl NativeFunction for NotFunction {
 struct EntityFunction {}
 impl NativeFunction for EntityFunction {
     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
-        if let [WanderValue::List(value)] = &arguments[..] {
+        if let [WanderValue::List(value)] = arguments {
             if value.len() == 3 {
                 Ok(value.get(0).unwrap().clone())
             } else {
@@ -92,7 +92,7 @@ impl NativeFunction for EntityFunction {
 struct AttributeFunction {}
 impl NativeFunction for AttributeFunction {
     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
-        if let [WanderValue::List(value)] = &arguments[..] {
+        if let [WanderValue::List(value)] = arguments {
             if value.len() == 3 {
                 Ok(value.get(1).unwrap().clone())
             } else {
@@ -111,7 +111,7 @@ impl NativeFunction for AttributeFunction {
 struct ValueFunction {}
 impl NativeFunction for ValueFunction {
     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
-        if let [WanderValue::List(value)] = &arguments[..] {
+        if let [WanderValue::List(value)] = arguments {
             if value.len() == 3 {
                 Ok(value.get(2).unwrap().clone())
             } else {
@@ -130,7 +130,7 @@ impl NativeFunction for ValueFunction {
 struct AtFunction {}
 impl NativeFunction for AtFunction {
     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
-        if let [WanderValue::Int(index), WanderValue::List(value)] = &arguments[..] {
+        if let [WanderValue::Int(index), WanderValue::List(value)] = arguments {
             let index: usize = index.to_owned().try_into().unwrap();
             if index < value.len() {
                 let t: Option<&WanderValue> = value.get(index);
@@ -150,7 +150,7 @@ impl NativeFunction for AtFunction {
 struct GraphFunction {}
 impl NativeFunction for GraphFunction {
     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
-        match &arguments[..] {
+        match arguments {
             [] => Ok(WanderValue::Graph(Graph::default())),
             [WanderValue::List(statements)] => {
                 let mut contents = BTreeSet::new();
@@ -198,7 +198,7 @@ impl NativeFunction for GraphFunction {
 struct UnionFunction {}
 impl NativeFunction for UnionFunction {
     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
-        match &arguments[..] {
+        match arguments {
             [WanderValue::Graph(g1), WanderValue::Graph(g2)] => {
                 Ok(WanderValue::Graph(g1.add_all(g2.clone())))
             }
@@ -212,7 +212,7 @@ impl NativeFunction for UnionFunction {
 struct DifferenceFunction {}
 impl NativeFunction for DifferenceFunction {
     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
-        match &arguments[..] {
+        match arguments {
             [WanderValue::Graph(g1), WanderValue::Graph(g2)] => {
                 Ok(WanderValue::Graph(g1.remove_all(g2.clone())))
             }
@@ -226,7 +226,7 @@ impl NativeFunction for DifferenceFunction {
 struct StatementsFunction {}
 impl NativeFunction for StatementsFunction {
     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
-        match &arguments[..] {
+        match arguments {
             [WanderValue::Graph(graph)] => {
                 let g: Vec<WanderValue> = graph
                     .all_statements()
@@ -252,17 +252,17 @@ impl NativeFunction for StatementsFunction {
     }
 }
 
-struct FindFunction {}
-impl NativeFunction for FindFunction {
-    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
-        match &arguments[..] {
-            [WanderValue::String(datasetName), entity, attribute, value] => {
-                todo!()
-            }
-            _ => todo!(),
-        }
-    }
-}
+// struct FindFunction {}
+// impl NativeFunction for FindFunction {
+//     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+//         match &arguments[..] {
+//             [WanderValue::String(dataset_name), entity, attribute, value] => {
+//                 todo!()
+//             }
+//             _ => todo!(),
+//         }
+//     }
+// }
 
 struct GraphTransformer {}
 impl TokenTransformer for GraphTransformer {
@@ -302,9 +302,7 @@ fn wander_to_lig_token(
     let mut results = vec![];
     for token in input {
         let token = match token {
-            Token::Identifier(value) => {
-                lig::read::Token::Identifier(value.to_owned())
-            }
+            Token::Identifier(value) => lig::read::Token::Identifier(value.to_owned()),
             Token::Int(value) => lig::read::Token::Int(*value),
             Token::String(value) => lig::read::Token::String(value.to_owned()),
             Token::OpenBrace => lig::read::Token::OpenBrace,
@@ -324,7 +322,11 @@ pub fn common() -> Bindings {
     let mut bindings = Bindings::new();
     bindings.bind_native_function("Core".to_owned(), "eq".to_owned(), Rc::new(EqFunction {}));
 
-    bindings.bind_native_function("Assert".to_owned(), "assertEq".to_owned(), Rc::new(AssertEqFunction {}));
+    bindings.bind_native_function(
+        "Assert".to_owned(),
+        "assertEq".to_owned(),
+        Rc::new(AssertEqFunction {}),
+    );
 
     bindings.bind_native_function("Bool".to_owned(), "and".to_owned(), Rc::new(AndFunction {}));
     bindings.bind_native_function("Bool".to_owned(), "not".to_owned(), Rc::new(NotFunction {}));
@@ -367,11 +369,11 @@ pub fn common() -> Bindings {
         "statements".to_owned(),
         Rc::new(StatementsFunction {}),
     );
-    bindings.bind_native_function(
-        "Graph".to_owned(),
-        "find".to_owned(),
-        Rc::new(FindFunction {}),
-    );
+    // bindings.bind_native_function(
+    //     "Graph".to_owned(),
+    //     "find".to_owned(),
+    //     Rc::new(FindFunction {}),
+    // );
 
     bindings.bind_token_transformer("graph".to_owned(), Rc::new(GraphTransformer {}));
     bindings

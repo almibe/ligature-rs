@@ -176,7 +176,7 @@ impl Display for ScriptValue {
 
 pub fn run(script: &str, bindings: &mut Bindings) -> Result<ScriptValue, LigatureError> {
     let tokens = tokenize(script)?;
-    let tokens = transform(&tokens, &bindings)?;
+    let tokens = transform(&tokens, bindings)?;
     let elements = parse(tokens)?;
     let elements = translate(elements)?;
     let eval_result = eval(&elements, bindings)?;

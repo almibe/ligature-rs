@@ -7,7 +7,6 @@ use logos::{Lexer, Logos, Source};
 
 use crate::bindings::Bindings;
 
-
 #[derive(Logos, Debug, PartialEq, Clone)]
 #[logos(skip r"[ \t\n\f\r]+")]
 pub enum Token {
@@ -120,11 +119,9 @@ pub fn tokenize(script: &str) -> Result<Vec<Token>, LigatureError> {
             Err(_) => return Err(LigatureError(String::from("Error tokenizing input."))),
         }
     }
-    results.retain(|token| {
-        match token {
-            Token::Comment => false,
-            _ => true
-        }
+    results.retain(|token| match token {
+        Token::Comment => false,
+        _ => true,
     });
     Ok(results)
 }
