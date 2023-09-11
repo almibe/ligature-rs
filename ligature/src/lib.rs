@@ -117,7 +117,7 @@ impl Display for Value {
             Value::Identifier(value) => write!(f, "{value}"),
             Value::String(value) => write!(f, "{value}"),
             Value::Integer(value) => write!(f, "{value}"),
-            Value::Bytes(value) => todo!(),
+            Value::Bytes(value) => write!(f, "{value:?}"),
         }
     }
 }

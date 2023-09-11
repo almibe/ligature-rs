@@ -86,36 +86,56 @@ pub fn read_tokens(tokens: Vec<Token>) -> Result<Vec<Statement>, LigatureError> 
     Ok(results)
 }
 
-fn handle_expression(gaze: &mut Gaze<Token>, results: &mut Vec<Statement>) -> Result<(), LigatureError> {
+fn handle_expression(
+    gaze: &mut Gaze<Token>,
+    results: &mut Vec<Statement>,
+) -> Result<(), LigatureError> {
     if let Some(entity) = gaze.attemptf(&mut identifier_nib) {
         match gaze.next() {
             Some(Token::Identifier(attribute)) => {
                 handle_value_expression(&entity, &attribute, gaze, results)
-            },
-            Some(Token::OpenBrace) => {
-                handle_entity_expansion(entity, gaze, results)
-            },
-            _ => return Err(LigatureError("Invalid input expecting Identifier or Entity Expansion.".to_owned())),
+            }
+            Some(Token::OpenBrace) => handle_entity_expansion(entity, gaze, results),
+            _ => Err(LigatureError(
+                "Invalid input expecting Identifier or Entity Expansion.".to_owned(),
+            )),
         }
     } else {
-        return Err(LigatureError(format!("Lig expressions must start with an Identifier found {:?}.", gaze.peek())))
+        Err(LigatureError(format!(
+            "Lig expressions must start with an Identifier found {:?}.",
+            gaze.peek()
+        )))
     }
 }
 
-fn add_statement(entity: &Identifier, attribuate: &Identifier, value: Value, results: &mut Vec<Statement>) -> Result<(), LigatureError> {
+fn add_statement(
+    entity: &Identifier,
+    attribuate: &Identifier,
+    value: Value,
+    results: &mut Vec<Statement>,
+) -> Result<(), LigatureError> {
     results.push(Statement {
         entity: entity.to_owned(),
         attribute: attribuate.to_owned(),
-        value
+        value,
     });
     Ok(())
 }
 
-fn handle_value_expression(entity: &Identifier, attribute: &Identifier, gaze: &mut Gaze<Token>, results: &mut Vec<Statement>) -> Result<(), LigatureError> {
+fn handle_value_expression(
+    entity: &Identifier,
+    attribute: &Identifier,
+    gaze: &mut Gaze<Token>,
+    results: &mut Vec<Statement>,
+) -> Result<(), LigatureError> {
     match gaze.next() {
         Some(Token::Int(value)) => add_statement(entity, attribute, Value::Integer(value), results),
-        Some(Token::String(value)) => add_statement(entity, attribute, Value::String(value), results),
-        Some(Token::Identifier(value)) => add_statement(entity, attribute, Value::Identifier(value), results),
+        Some(Token::String(value)) => {
+            add_statement(entity, attribute, Value::String(value), results)
+        }
+        Some(Token::Identifier(value)) => {
+            add_statement(entity, attribute, Value::Identifier(value), results)
+        }
         Some(Token::OpenSquare) => {
             let mut values = vec![];
             loop {
@@ -125,12 +145,17 @@ fn handle_value_expression(entity: &Identifier, attribute: &Identifier, gaze: &m
                     Some(Token::Identifier(value)) => {
                         if gaze.peek() == Some(Token::OpenBrace) {
                             gaze.next(); //read {
-                            add_statement(entity, attribute, Value::Identifier(value.to_owned()), results)?;
+                            add_statement(
+                                entity,
+                                attribute,
+                                Value::Identifier(value.to_owned()),
+                                results,
+                            )?;
                             handle_entity_expansion(value.to_owned(), gaze, results)?;
                         } else {
                             values.push(Value::Identifier(value))
                         }
-                    },
+                    }
                     Some(Token::CloseSquare) => break,
                     _ => return Err(LigatureError("Expecting Value.".to_owned())),
                 }
@@ -139,7 +164,7 @@ fn handle_value_expression(entity: &Identifier, attribute: &Identifier, gaze: &m
                 results.push(Statement {
                     entity: entity.to_owned(),
                     attribute: attribute.to_owned(),
-                    value
+                    value,
                 });
             }
             Ok(())
@@ -148,16 +173,23 @@ fn handle_value_expression(entity: &Identifier, attribute: &Identifier, gaze: &m
     }
 }
 
-fn handle_entity_expansion(entity: Identifier, gaze: &mut Gaze<Token>, results: &mut Vec<Statement>) -> Result<(), LigatureError> {
+fn handle_entity_expansion(
+    entity: Identifier,
+    gaze: &mut Gaze<Token>,
+    results: &mut Vec<Statement>,
+) -> Result<(), LigatureError> {
     loop {
         match gaze.next() {
             Some(Token::Identifier(attribute)) => {
                 handle_value_expression(&entity, &attribute, gaze, results)?
-            },
-            Some(Token::CloseBrace) => {
-                return Ok(())
-            },
-            token => return Err(LigatureError(format!("Error handling Entity Expansion - {:?}.", token))),
-        }    
+            }
+            Some(Token::CloseBrace) => return Ok(()),
+            token => {
+                return Err(LigatureError(format!(
+                    "Error handling Entity Expansion - {:?}.",
+                    token
+                )))
+            }
+        }
     }
 }
