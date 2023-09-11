@@ -4,53 +4,8 @@
 
 use gaze::Gaze;
 use ligature::{Identifier, LigatureError, Statement, Value};
-use logos::{Lexer, Logos, Source};
-
-#[derive(Logos, Debug, PartialEq, Clone)]
-#[logos(skip r"[ \t\n\f\r]+")]
-pub enum Token {
-    #[regex("[-0-9]+", int)]
-    Int(i64),
-
-    #[regex(r#""(([^\x00-\x1F"\\]|\\["\\/bfnrt]|\\u[0-9a-fA-F]{4})*)""#, string)]
-    String(String),
-
-    #[regex("<[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;%=]+>", identifier)]
-    Identifier(Identifier),
-
-    #[token("{")]
-    OpenBrace,
-
-    #[token("}")]
-    CloseBrace,
-
-    #[token("[")]
-    OpenSquare,
-
-    #[token("]")]
-    CloseSquare,
-}
-
-fn int(lex: &mut Lexer<Token>) -> Option<i64> {
-    let slice = lex.slice();
-    match slice.parse::<i64>() {
-        Ok(value) => Some(value),
-        _ => None,
-    }
-}
-
-fn string(lex: &mut Lexer<Token>) -> Option<String> {
-    let slice = lex.slice();
-    slice.slice(1..(slice.len() - 1)).map(|x| x.into())
-}
-
-fn identifier(lex: &mut Lexer<Token>) -> Option<Identifier> {
-    let slice = lex.slice();
-    match Identifier::new(slice.slice(1..(slice.len() - 1)).unwrap()) {
-        Ok(ident) => Some(ident),
-        Err(_) => None,
-    }
-}
+use logos::Logos;
+use wander::lexer::Token;
 
 pub fn tokenize(script: &str) -> Result<Vec<Token>, LigatureError> {
     let lexer = Token::lexer(script);
