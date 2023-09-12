@@ -39,7 +39,6 @@ pub fn eval_element(
 }
 
 fn unescape_string(value: String) -> String {
-    println!("in unescape_string {value}");
     let mut result = String::new();
     let mut last_char = ' ';
     let mut idx = 0;

@@ -26,8 +26,6 @@ pub fn load_lig_from_str(
     input: &str,
     ligature: &dyn Ligature,
 ) -> Result<(), LigatureError> {
-    println!("parsing lig {input}");
     let statements = read(input)?;
-    println!("after parse");
     ligature.add_statements(&dataset, statements)
 }
