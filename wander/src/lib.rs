@@ -172,7 +172,7 @@ fn write_list_or_tuple_wander_value(
 }
 
 fn write_graph(graph: &Graph, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.write_str("graph`").unwrap();
+    f.write_str("Graph.graph`").unwrap();
     graph.all_statements().into_iter().for_each(|statement| {
         f.write_str(write_statement(&statement).as_str()).unwrap();
     });

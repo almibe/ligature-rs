@@ -65,7 +65,8 @@ impl Bindings {
         name: String,
         function: Rc<dyn NativeFunction>,
     ) {
-        self.native_functions.borrow_mut().insert(name, function);
+        let full_name = format!("{module}.{name}");
+        self.native_functions.borrow_mut().insert(full_name, function);
     }
 
     pub fn read_native_function(&self, name: &String) -> Option<Rc<dyn NativeFunction>> {
@@ -75,10 +76,11 @@ impl Bindings {
         }
     }
 
-    pub fn bind_token_transformer(&mut self, name: String, transformer: Rc<dyn TokenTransformer>) {
+    pub fn bind_token_transformer(&mut self, module: String, name: String, transformer: Rc<dyn TokenTransformer>) {
+        let full_name = format!("{module}.{name}");
         self.token_transformers
             .borrow_mut()
-            .insert(name, transformer);
+            .insert(full_name, transformer);
     }
 
     pub fn read_token_transformer(&self, name: &String) -> Option<Rc<dyn TokenTransformer>> {

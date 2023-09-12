@@ -56,7 +56,7 @@ fn run_wander_let_binding_and_reference() {
 
 #[test]
 fn run_native_function() {
-    let input = "not(true)";
+    let input = "Bool.not(true)";
     let res = run(input, &mut common());
     let expected = Ok(ScriptValue::Boolean(false));
     assert_eq!(res, expected);
@@ -64,7 +64,7 @@ fn run_native_function() {
 
 #[test]
 fn run_nested_function_calls() {
-    let input = "not(not(false))";
+    let input = "Bool.not(Bool.not(false))";
     let res = run(input, &mut common());
     let expected = Ok(ScriptValue::Boolean(false));
     assert_eq!(res, expected);
@@ -80,7 +80,7 @@ fn run_scope() {
 
 #[test]
 fn run_conditional() {
-    let input = "if true if not(true) 5 else 6 else 7";
+    let input = "if true if Bool.not(true) 5 else 6 else 7";
     let res = run(input, &mut common());
     let expected = Ok(ScriptValue::Int(6));
     assert_eq!(res, expected);
@@ -120,7 +120,7 @@ fn run_lambda() {
 
 #[test]
 fn run_lambda_with_function() {
-    let input = "let id = { x -> x } id([not(true) not(false)])";
+    let input = "let id = { x -> x } id([Bool.not(true) Bool.not(false)])";
     let res = run(input, &mut common());
     let expected = Ok(ScriptValue::List(vec![
         ScriptValue::Boolean(false),
@@ -131,7 +131,7 @@ fn run_lambda_with_function() {
 
 #[test]
 fn forward_operator() {
-    let input = "true >> not()";
+    let input = "true >> Bool.not()";
     let res = run(input, &mut common());
     let expected = Ok(ScriptValue::Boolean(false));
     assert_eq!(res, expected);

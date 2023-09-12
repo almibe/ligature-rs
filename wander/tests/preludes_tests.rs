@@ -6,7 +6,7 @@ use wander::{preludes::common, run, ScriptValue};
 
 #[test]
 fn passing_assert_eq_call() {
-    let input = "assertEq(true true)";
+    let input = "Assert.assertEq(true true)";
     let res = run(input, &mut common());
     let expected = Ok(ScriptValue::Nothing);
     assert_eq!(res, expected);
@@ -14,7 +14,7 @@ fn passing_assert_eq_call() {
 
 #[test]
 fn failing_assert_eq_call() {
-    let input = "assertEq(true \"true\")";
+    let input = "Assert.assertEq(true \"true\")";
     let res = run(input, &mut common());
     assert!(res.is_err());
 }

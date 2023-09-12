@@ -43,9 +43,9 @@ impl TokenTransformer for UpperCaseTransformer {
 
 #[test]
 fn empty_transformer_no_input_test() {
-    let input = "empty``";
+    let input = "Empty.empty``";
     let mut bindings = common();
-    bindings.bind_token_transformer("empty".to_owned(), Rc::new(EmptyTransformer {}));
+    bindings.bind_token_transformer("Empty".to_owned(), "empty".to_owned(), Rc::new(EmptyTransformer {}));
     let res = run(input, &mut bindings);
     let expected = Ok(ScriptValue::Nothing);
     assert_eq!(res, expected);
@@ -53,9 +53,9 @@ fn empty_transformer_no_input_test() {
 
 #[test]
 fn token_transformer_no_input_test() {
-    let input = "none``";
+    let input = "None.none``";
     let mut bindings = common();
-    bindings.bind_token_transformer("none".to_owned(), Rc::new(NothingTransformer {}));
+    bindings.bind_token_transformer("None".to_owned(),"none".to_owned(), Rc::new(NothingTransformer {}));
     let res = run(input, &mut bindings);
     let expected = Ok(ScriptValue::Nothing);
     assert_eq!(res, expected);
@@ -63,9 +63,9 @@ fn token_transformer_no_input_test() {
 
 #[test]
 fn token_transformer_none() {
-    let input = "none`this (will) >>  [be ] {ignored}} `";
+    let input = "None.none`this (will) >>  [be ] {ignored}} `";
     let mut bindings = common();
-    bindings.bind_token_transformer("none".to_owned(), Rc::new(NothingTransformer {}));
+    bindings.bind_token_transformer("None".to_owned(), "none".to_owned(), Rc::new(NothingTransformer {}));
     let res = run(input, &mut bindings);
     let expected = Ok(ScriptValue::Nothing);
     assert_eq!(res, expected);
@@ -73,9 +73,9 @@ fn token_transformer_none() {
 
 #[test]
 fn token_transformer_upper() {
-    let input = "upper`\"test\"`";
+    let input = "Case.upper`\"test\"`";
     let mut bindings = common();
-    bindings.bind_token_transformer("upper".to_owned(), Rc::new(UpperCaseTransformer {}));
+    bindings.bind_token_transformer("Case".to_owned(), "upper".to_owned(), Rc::new(UpperCaseTransformer {}));
     let res = run(input, &mut bindings);
     let expected = Ok(ScriptValue::String("TEST".to_owned()));
     assert_eq!(res, expected);
@@ -83,16 +83,16 @@ fn token_transformer_upper() {
 
 #[test]
 fn token_transformer_graph_empty() {
-    let input = "graph``";
+    let input = "Graph.graph``";
     let res = run(input, &mut common());
-    let expected = run("graph([])", &mut common());
+    let expected = run("Graph.graph([])", &mut common());
     assert_eq!(res, expected);
 }
 
 #[test]
 fn token_transformer_graph() {
-    let input = "graph`<a> <b> <c>`";
+    let input = "Graph.graph`<a> <b> <c>`";
     let res = run(input, &mut common());
-    let expected = run("graph([(<a> <b> <c>)])", &mut common());
+    let expected = run("Graph.graph([(<a> <b> <c>)])", &mut common());
     assert_eq!(res, expected);
 }

@@ -9,7 +9,7 @@ use wander::{preludes::common, run, ScriptValue};
 
 #[test]
 fn empty_graph() {
-    let input = "graph()";
+    let input = "Graph.graph()";
     let res = run(input, &mut common());
     let expected = Ok(ScriptValue::Graph(Graph::default()));
     assert_eq!(res, expected);
@@ -17,7 +17,7 @@ fn empty_graph() {
 
 #[test]
 fn graph_with_empty_statements_list() {
-    let input = "graph([])";
+    let input = "Graph.graph([])";
     let res = run(input, &mut common());
     let expected = Ok(ScriptValue::Graph(Graph::default()));
     assert_eq!(res, expected);
@@ -25,7 +25,7 @@ fn graph_with_empty_statements_list() {
 
 #[test]
 fn graph_with_statements_list() {
-    let input = "graph([(<a> <b> <c>)(<a> <b> 123)])";
+    let input = "Graph.graph([(<a> <b> <c>)(<a> <b> 123)])";
     let res = run(input, &mut common());
     let mut statements = BTreeSet::default();
     statements.insert(Statement {
@@ -44,7 +44,7 @@ fn graph_with_statements_list() {
 
 #[test]
 fn graph_union() {
-    let input = "union(graph([(<a> <b> <c>)]) graph([(<a> <b> 123)]))";
+    let input = "Graph.union(Graph.graph([(<a> <b> <c>)]) Graph.graph([(<a> <b> 123)]))";
     let res = run(input, &mut common());
     let mut statements = BTreeSet::default();
     statements.insert(Statement {
@@ -64,7 +64,7 @@ fn graph_union() {
 #[test]
 fn graph_difference() {
     let input =
-        "difference(graph([(<a> <b> <c>)(<a> <b> \"dog\")]) graph([(<a> <b> <c>) (<a> <b> 123)]))";
+        "Graph.difference(Graph.graph([(<a> <b> <c>)(<a> <b> \"dog\")]) Graph.graph([(<a> <b> <c>) (<a> <b> 123)]))";
     let res = run(input, &mut common());
     let mut statements = BTreeSet::default();
     statements.insert(Statement {
@@ -78,7 +78,7 @@ fn graph_difference() {
 
 #[test]
 fn graph_statements() {
-    let input = "statements(graph([(<a> <b> <c>)]))";
+    let input = "Graph.statements(Graph.graph([(<a> <b> <c>)]))";
     let res = run(input, &mut common());
     let mut statements = BTreeSet::default();
     statements.insert(Statement {
@@ -96,7 +96,7 @@ fn graph_statements() {
 
 #[test]
 fn graph_transformer_test() {
-    let input = "graph`<a> <b> [<c> \"c\" 20]`";
+    let input = "Graph.graph`<a> <b> [<c> \"c\" 20]`";
     let res = run(input, &mut common());
     let mut statements = BTreeSet::default();
     statements.insert(Statement {

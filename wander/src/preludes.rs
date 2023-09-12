@@ -274,7 +274,7 @@ impl TokenTransformer for GraphTransformer {
         let statements: Vec<Statement> = crate::lig::read_tokens(tokens)?;
         let mut results = vec![];
         results.append(&mut vec![
-            Token::Name("graph".to_owned()),
+            Token::Name("Graph.graph".to_owned()),
             Token::OpenParen,
             Token::OpenSquare,
         ]);
@@ -355,6 +355,6 @@ pub fn common() -> Bindings {
     //     Rc::new(FindFunction {}),
     // );
 
-    bindings.bind_token_transformer("graph".to_owned(), Rc::new(GraphTransformer {}));
+    bindings.bind_token_transformer("Graph".to_owned(), "graph".to_owned(), Rc::new(GraphTransformer {}));
     bindings
 }
