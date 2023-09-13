@@ -17,7 +17,7 @@ use dirs::data_local_dir;
 use ligature::{Dataset, Identifier, Ligature, LigatureError, Statement, Value};
 use rusqlite::{params, Connection, Error, Transaction};
 use sql_builder::{quote, SqlBuilder};
-use wander::{bindings::BindingsProvider, NativeFunction, WanderValue};
+use wander::{bindings::{BindingsProvider, Bindings}, NativeFunction, WanderValue, WanderType};
 
 #[derive(Clone)]
 /// The main struct used for working with the SQLite stored version of Ligature.
@@ -291,7 +291,7 @@ struct DatasetsFunction {
     instance: Arc<Mutex<dyn Ligature>>,
 }
 impl NativeFunction for DatasetsFunction {
-    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
         if arguments.is_empty() {
             let ds = self.instance.lock().unwrap().datasets().unwrap();
             let mut results = vec![];
@@ -305,13 +305,25 @@ impl NativeFunction for DatasetsFunction {
             ))
         }
     }
+
+    fn doc(&self) -> String {
+        "Get a list of all Datasets.".to_owned()
+    }
+
+    fn params(&self) -> Vec<WanderType> {
+        vec![]
+    }
+
+    fn returns(&self) -> WanderType {
+        WanderType::List
+    }
 }
 
 struct AddDatasetFunction {
     instance: Arc<Mutex<LigatureSQLite>>,
 }
 impl NativeFunction for AddDatasetFunction {
-    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name)] => {
                 self.instance
@@ -323,13 +335,25 @@ impl NativeFunction for AddDatasetFunction {
             _ => todo!(),
         }
     }
+
+    fn doc(&self) -> String {
+        "Add a new Dataset.".to_owned()
+    }
+
+    fn params(&self) -> Vec<WanderType> {
+        vec![WanderType::String]
+    }
+
+    fn returns(&self) -> WanderType {
+        WanderType::Nothing
+    }
 }
 
 struct RemoveDatasetFunction {
     instance: Arc<Mutex<LigatureSQLite>>,
 }
 impl NativeFunction for RemoveDatasetFunction {
-    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name)] => {
                 self.instance
@@ -342,13 +366,25 @@ impl NativeFunction for RemoveDatasetFunction {
             _ => todo!(),
         }
     }
+
+    fn doc(&self) -> String {
+        "Remove a Dataset.".to_owned()
+    }
+
+    fn params(&self) -> Vec<WanderType> {
+        vec![WanderType::String]
+    }
+
+    fn returns(&self) -> WanderType {
+        WanderType::Nothing
+    }
 }
 
 struct StatementsFunction {
     instance: Arc<Mutex<LigatureSQLite>>,
 }
 impl NativeFunction for StatementsFunction {
-    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name)] => {
                 let statements = self
@@ -375,6 +411,18 @@ impl NativeFunction for StatementsFunction {
             }
             _ => todo!(),
         }
+    }
+
+    fn doc(&self) -> String {
+        "Get all of the Statements in a Dataset.".to_owned()
+    }
+
+    fn params(&self) -> Vec<WanderType> {
+        vec![WanderType::String]
+    }
+
+    fn returns(&self) -> WanderType {
+        WanderType::List
     }
 }
 
@@ -409,7 +457,7 @@ struct AddStatementsFunction {
     instance: Arc<Mutex<LigatureSQLite>>,
 }
 impl NativeFunction for AddStatementsFunction {
-    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name), WanderValue::List(statements)] => {
                 let dataset = Dataset::new(name).unwrap();
@@ -423,13 +471,25 @@ impl NativeFunction for AddStatementsFunction {
             _ => todo!(),
         }
     }
+
+    fn doc(&self) -> String {
+        "Add Statements to Dataset.".to_owned()
+    }
+
+    fn params(&self) -> Vec<WanderType> {
+        vec![WanderType::String, WanderType::List]
+    }
+
+    fn returns(&self) -> WanderType {
+        WanderType::Nothing
+    }
 }
 
 struct RemoveStatementsFunction {
     instance: Arc<Mutex<dyn Ligature>>,
 }
 impl NativeFunction for RemoveStatementsFunction {
-    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name), WanderValue::List(statements)] => {
                 let dataset = Dataset::new(name)?;
@@ -442,6 +502,18 @@ impl NativeFunction for RemoveStatementsFunction {
             }
             _ => todo!(),
         }
+    }
+
+    fn doc(&self) -> String {
+        "Remove Statements from the given Dataset.".to_owned()
+    }
+
+    fn params(&self) -> Vec<WanderType> {
+        vec![WanderType::String, WanderType::List]
+    }
+
+    fn returns(&self) -> WanderType {
+        WanderType::Nothing
     }
 }
 
@@ -465,7 +537,7 @@ struct QueryFunction {
     connection: Arc<Mutex<Connection>>,
 }
 impl NativeFunction for QueryFunction {
-    fn run(&self, arguments: &[WanderValue]) -> Result<wander::WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<wander::WanderValue, LigatureError> {
         match &arguments[..] {
             [WanderValue::String(dataset), entity, attribute, value] => {
                 let mut connection = self.connection.lock().unwrap();
@@ -552,5 +624,21 @@ impl NativeFunction for QueryFunction {
             }
             _ => Err(LigatureError("Incorrect arguments.".to_owned())),
         }
+    }
+
+    fn doc(&self) -> String {
+        "Run a query against a Dataset.".to_owned()
+    }
+
+    fn params(&self) -> Vec<wander::WanderType> {
+        vec![
+            WanderType::String, 
+            WanderType::Optional(Box::new(WanderType::Identifier)),
+            WanderType::Optional(Box::new(WanderType::Identifier)), 
+            WanderType::Optional(Box::new(WanderType::Value))]
+    }
+
+    fn returns(&self) -> wander::WanderType {
+        WanderType::List
     }
 }

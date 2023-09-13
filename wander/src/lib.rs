@@ -4,7 +4,7 @@
 
 //! This module is an implementation of the Wander scripting language.
 
-use std::fmt::{Display, Write};
+use std::{fmt::{Display, Write}};
 
 use bindings::Bindings;
 use hex::encode;
@@ -25,7 +25,7 @@ pub mod preludes;
 pub mod translation;
 
 pub trait NativeFunction {
-    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError>;
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError>;
     fn doc(&self) -> String;
     fn params(&self) -> Vec<WanderType>;
     fn returns(&self) -> WanderType;
@@ -35,7 +35,7 @@ pub trait TokenTransformer {
     fn transform(&self, input: &Vec<Token>) -> Result<Vec<Token>, LigatureError>;
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum WanderType {
     Any,
     Value, // String | Int | Identifier
@@ -50,6 +50,7 @@ pub enum WanderType {
     List,
     Tuple,
     Graph,
+    Optional(Box<WanderType>)
 }
 
 #[derive(Debug, Clone, PartialEq)]

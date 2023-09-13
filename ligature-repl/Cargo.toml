@@ -18,4 +18,5 @@ ligature-redb = { path = "../ligature-redb" }
 ligature-sqlite = { path = "../ligature-sqlite" }
 wander = { path = "../wander" }
 rustyline = "10.0.0"
+tabled = "0.14.0"
 anyhow = "1.0"

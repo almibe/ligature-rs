@@ -14,7 +14,7 @@ use std::{
 };
 
 use ligature::{Dataset, Ligature, LigatureError, Query, Statement, Value};
-use wander::{bindings::Bindings, NativeFunction, WanderValue};
+use wander::{bindings::Bindings, NativeFunction, WanderValue, WanderType};
 
 #[derive(Default)]
 pub struct LigatureInMemory {
@@ -123,7 +123,7 @@ struct DatasetsFunction {
     lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
 }
 impl NativeFunction for DatasetsFunction {
-    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
         if arguments.is_empty() {
             let datasets = self.lim.read().unwrap();
             let datasets = datasets
@@ -137,6 +137,18 @@ impl NativeFunction for DatasetsFunction {
             ))
         }
     }
+
+    fn doc(&self) -> String {
+        todo!()
+    }
+
+    fn params(&self) -> Vec<WanderType> {
+        todo!()
+    }
+
+    fn returns(&self) -> WanderType {
+        todo!()
+    }
 }
 
 struct AddDatasetFunction {
@@ -146,6 +158,7 @@ impl NativeFunction for AddDatasetFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
+        bindings: &Bindings
     ) -> Result<wander::WanderValue, ligature::LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name)] => {
@@ -163,6 +176,18 @@ impl NativeFunction for AddDatasetFunction {
             )),
         }
     }
+
+    fn doc(&self) -> String {
+        todo!()
+    }
+
+    fn params(&self) -> Vec<WanderType> {
+        todo!()
+    }
+
+    fn returns(&self) -> WanderType {
+        todo!()
+    }
 }
 
 struct RemoveDatasetFunction {
@@ -172,6 +197,7 @@ impl NativeFunction for RemoveDatasetFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
+        bindings: &Bindings
     ) -> Result<wander::WanderValue, ligature::LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name)] => {
@@ -188,6 +214,18 @@ impl NativeFunction for RemoveDatasetFunction {
             )),
         }
     }
+
+    fn doc(&self) -> String {
+        todo!()
+    }
+
+    fn params(&self) -> Vec<WanderType> {
+        todo!()
+    }
+
+    fn returns(&self) -> WanderType {
+        todo!()
+    }
 }
 
 struct StatementsFunction {
@@ -197,6 +235,7 @@ impl NativeFunction for StatementsFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
+        bindings: &Bindings
     ) -> Result<wander::WanderValue, ligature::LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name)] => {
@@ -228,6 +267,18 @@ impl NativeFunction for StatementsFunction {
             )),
         }
     }
+
+    fn doc(&self) -> String {
+        todo!()
+    }
+
+    fn params(&self) -> Vec<WanderType> {
+        todo!()
+    }
+
+    fn returns(&self) -> WanderType {
+        todo!()
+    }
 }
 
 struct AddStatementsFunction {
@@ -237,6 +288,7 @@ impl NativeFunction for AddStatementsFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
+        bindings: &Bindings
     ) -> Result<wander::WanderValue, ligature::LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name), WanderValue::List(statements)] => {
@@ -289,6 +341,18 @@ impl NativeFunction for AddStatementsFunction {
             )),
         }
     }
+
+    fn doc(&self) -> String {
+        todo!()
+    }
+
+    fn params(&self) -> Vec<WanderType> {
+        todo!()
+    }
+
+    fn returns(&self) -> WanderType {
+        todo!()
+    }
 }
 
 fn wander_value_to_value(value: &WanderValue) -> Result<Value, LigatureError> {
@@ -316,6 +380,7 @@ impl NativeFunction for RemoveStatementsFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
+        bindings: &Bindings
     ) -> Result<wander::WanderValue, ligature::LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name), WanderValue::List(statements)] => {
@@ -352,6 +417,18 @@ impl NativeFunction for RemoveStatementsFunction {
             )),
         }
     }
+
+    fn doc(&self) -> String {
+        todo!()
+    }
+
+    fn params(&self) -> Vec<WanderType> {
+        todo!()
+    }
+
+    fn returns(&self) -> WanderType {
+        todo!()
+    }
 }
 
 struct QueryFunction {
@@ -361,6 +438,7 @@ impl NativeFunction for QueryFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
+        bindings: &Bindings
     ) -> Result<wander::WanderValue, ligature::LigatureError> {
         match &arguments[..] {
             [WanderValue::String(name), entity, attribute, value] => {
@@ -441,5 +519,22 @@ impl NativeFunction for QueryFunction {
             }
             _ => Err(LigatureError("Error calling `query` function.".to_owned())),
         }
+    }
+
+    fn doc(&self) -> String {
+        "Query Dataset.".to_owned()
+    }
+
+    fn params(&self) -> Vec<wander::WanderType> {
+        vec![
+            WanderType::String,
+            WanderType::Optional(Box::new(WanderType::Identifier)),
+            WanderType::Optional(Box::new(WanderType::Identifier)),
+            WanderType::Optional(Box::new(WanderType::Value))
+        ]
+    }
+
+    fn returns(&self) -> wander::WanderType {
+        WanderType::Nothing
     }
 }

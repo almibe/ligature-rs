@@ -2,15 +2,15 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use ligature::{LigatureError, Statement, Value};
+use ligature::{LigatureError, Statement, Value, Identifier};
 use ligature_graph::Graph;
-use std::{collections::BTreeSet, rc::Rc};
+use std::{collections::BTreeSet, rc::Rc, borrow::BorrowMut};
 
-use crate::{bindings::Bindings, lexer::Token, NativeFunction, TokenTransformer, WanderValue, WanderType};
+use crate::{bindings::{Bindings, EnvironmentBinding, self}, lexer::Token, NativeFunction, TokenTransformer, WanderValue, WanderType};
 
 struct EqFunction {}
 impl NativeFunction for EqFunction {
-    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
         if let [left, right] = arguments {
             Ok(crate::WanderValue::Boolean(left == right))
         } else {
@@ -35,7 +35,7 @@ impl NativeFunction for EqFunction {
 
 struct AssertEqFunction {}
 impl NativeFunction for AssertEqFunction {
-    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
         if let [left, right] = arguments {
             if left == right {
                 Ok(crate::WanderValue::Nothing)
@@ -67,6 +67,7 @@ impl NativeFunction for AndFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
+        bindings: &Bindings
     ) -> Result<crate::WanderValue, ligature::LigatureError> {
         if let [WanderValue::Boolean(left), WanderValue::Boolean(right)] = arguments[..] {
             Ok(crate::WanderValue::Boolean(left && right))
@@ -95,6 +96,7 @@ impl NativeFunction for NotFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
+        bindings: &Bindings
     ) -> Result<crate::WanderValue, ligature::LigatureError> {
         if let [WanderValue::Boolean(value)] = arguments[..] {
             Ok(crate::WanderValue::Boolean(!value))
@@ -120,7 +122,7 @@ impl NativeFunction for NotFunction {
 
 struct EntityFunction {}
 impl NativeFunction for EntityFunction {
-    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
         if let [WanderValue::Tuple(value)] = arguments {
             if value.len() == 3 {
                 Ok(value.get(0).unwrap().clone())
@@ -151,7 +153,7 @@ impl NativeFunction for EntityFunction {
 
 struct AttributeFunction {}
 impl NativeFunction for AttributeFunction {
-    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
         if let [WanderValue::List(value)] = arguments {
             if value.len() == 3 {
                 Ok(value.get(1).unwrap().clone())
@@ -182,7 +184,7 @@ impl NativeFunction for AttributeFunction {
 
 struct ValueFunction {}
 impl NativeFunction for ValueFunction {
-    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
         if let [WanderValue::List(value)] = arguments {
             if value.len() == 3 {
                 Ok(value.get(2).unwrap().clone())
@@ -213,7 +215,7 @@ impl NativeFunction for ValueFunction {
 
 struct AtFunction {}
 impl NativeFunction for AtFunction {
-    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, LigatureError> {
         if let [WanderValue::Int(index), WanderValue::List(value)] = arguments {
             let index: usize = index.to_owned().try_into().unwrap();
             if index < value.len() {
@@ -245,7 +247,7 @@ impl NativeFunction for AtFunction {
 
 struct GraphFunction {}
 impl NativeFunction for GraphFunction {
-    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, LigatureError> {
         match arguments {
             [WanderValue::List(statements)] => {
                 let mut contents = BTreeSet::new();
@@ -304,7 +306,7 @@ impl NativeFunction for GraphFunction {
 
 struct EmptyGraphFunction {}
 impl NativeFunction for EmptyGraphFunction {
-    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, LigatureError> {
         match arguments {
             [] => Ok(WanderValue::Graph(Graph::default())),
             _ => Err(LigatureError(
@@ -328,7 +330,7 @@ impl NativeFunction for EmptyGraphFunction {
 
 struct UnionFunction {}
 impl NativeFunction for UnionFunction {
-    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, LigatureError> {
         match arguments {
             [WanderValue::Graph(g1), WanderValue::Graph(g2)] => {
                 Ok(WanderValue::Graph(g1.add_all(g2.clone())))
@@ -354,7 +356,7 @@ impl NativeFunction for UnionFunction {
 
 struct DifferenceFunction {}
 impl NativeFunction for DifferenceFunction {
-    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, LigatureError> {
         match arguments {
             [WanderValue::Graph(g1), WanderValue::Graph(g2)] => {
                 Ok(WanderValue::Graph(g1.remove_all(g2.clone())))
@@ -380,7 +382,7 @@ impl NativeFunction for DifferenceFunction {
 
 struct StatementsFunction {}
 impl NativeFunction for StatementsFunction {
-    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, LigatureError> {
         match arguments {
             [WanderValue::Graph(graph)] => {
                 let g: Vec<WanderValue> = graph
@@ -430,6 +432,46 @@ impl NativeFunction for StatementsFunction {
 //         }
 //     }
 // }
+
+struct EnvironmentFunction {}
+impl NativeFunction for EnvironmentFunction {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
+        if arguments.is_empty() {
+            let b: BTreeSet<Statement> = bindings.environment().iter().flat_map(|e| {
+                let mut statements = vec![];
+                let name = Identifier::new(e.name.as_str()).unwrap();
+                statements.push(Statement { 
+                    entity: name.clone(),
+                    attribute: Identifier::new("doc").unwrap(),
+                    value: Value::String(e.doc_string.clone()) });
+                statements.push(Statement { 
+                    entity: name.clone(),
+                    attribute: Identifier::new("parameters").unwrap(),
+                    value: Value::String(format!("{:?}", e.parameters)) });
+                statements.push(Statement {
+                    entity: name.clone(),
+                    attribute: Identifier::new("result").unwrap(),
+                    value: Value::String(format!("{:?}", e.result)) });
+                statements
+            }).collect();
+            Ok(WanderValue::Graph(Graph::new(b)))
+        } else {
+            panic!("should never reach")
+        }
+    }
+
+    fn doc(&self) -> String {
+        "All Functions in the current Environment.".to_owned()
+    }
+
+    fn params(&self) -> Vec<WanderType> {
+        vec![]
+    }
+
+    fn returns(&self) -> WanderType {
+        WanderType::Graph
+    }
+}
 
 struct GraphTransformer {}
 impl TokenTransformer for GraphTransformer {
@@ -521,6 +563,7 @@ pub fn common() -> Bindings {
         "statements".to_owned(),
         Rc::new(StatementsFunction {}),
     );
+    bindings.bind_native_function("Halp".to_owned(), "environment".to_owned(), Rc::new(EnvironmentFunction {}));
     // bindings.bind_native_function(
     //     "Graph".to_owned(),
     //     "find".to_owned(),

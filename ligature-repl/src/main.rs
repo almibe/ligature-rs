@@ -13,7 +13,8 @@ use ligature_sqlite::LigatureSQLite;
 use rustyline::error::ReadlineError;
 use rustyline::{Editor, Result};
 use std::fs::read_to_string;
-use wander::bindings::{BindingsProvider, Bindings};
+use tabled::{Table, Tabled, settings::{Modify, Width, object::Rows}};
+use wander::bindings::{BindingsProvider, Bindings, EnvironmentBinding};
 use wander::preludes::common;
 use wander::run;
 
@@ -78,6 +79,7 @@ fn handle_command(input: &str, instance: &mut REPLState) -> bool {
         ":status" | ":s" => status(),
         ":quit" | ":q" => quit(),
         ":bindings" | ":b" => bindings(&instance.bindings),
+        ":environment" | ":e" => environment(&mut instance.bindings),
         ":help" | ":h" => help(),
         ":load" => load(input, &mut instance.instance),
         ":broadcast" => broadcast(input, &mut instance.instance),
@@ -115,7 +117,20 @@ fn load(input: &str, instance: &mut dyn Ligature) -> bool {
 }
 
 fn bindings(bindings: &Bindings) -> bool {
-    bindings.bound_names().iter().for_each(|binding| println!("{binding}"));
+    bindings.bound_names().iter().for_each(|binding| { 
+        println!("{binding}")
+    });
+    true
+}
+
+fn environment(bindings: &mut Bindings) -> bool {
+    let mut display: Vec<EnvironmentDisplay> = bindings.environment().into_iter().map(EnvironmentDisplay::from).collect();
+    display.sort();
+    let mut table = Table::new(display);
+    table
+        .with(Modify::new(Rows::new(1..)).with(Width::wrap(30).keep_words()).with(Width::increase(20)))
+        .with(Width::increase(150));
+    println!("{table}");
     true
 }
 
@@ -130,4 +145,27 @@ fn status() -> bool {
 
 fn quit() -> bool {
     false
+}
+
+///
+#[derive(PartialEq, Eq, PartialOrd, Ord, Tabled)]
+pub struct EnvironmentDisplay {
+    ///
+    pub name: String,
+    ///
+    pub parameters: String,
+    ///
+    pub result: String,
+    ///
+    pub doc_string: String
+}
+
+impl From<EnvironmentBinding> for EnvironmentDisplay {
+    fn from(value: EnvironmentBinding) -> Self {
+        EnvironmentDisplay { 
+            name: value.name, 
+            parameters: format!("{:?}", value.parameters), 
+            result: format!("{:?}", value.result),
+            doc_string: value.doc_string }
+    }
 }

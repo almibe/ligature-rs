@@ -13,7 +13,7 @@ use std::{path::PathBuf, rc::Rc};
 use tables::IdTypes;
 use wander::{
     bindings::{Bindings, BindingsProvider},
-    NativeFunction, WanderValue,
+    NativeFunction, WanderValue, WanderType,
 };
 
 mod tables {
@@ -198,7 +198,7 @@ struct DatasetsFunction {
     db: Rc<Database>,
 }
 impl NativeFunction for DatasetsFunction {
-    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
         if arguments.is_empty() {
             let mut datasets = vec![];
             {
@@ -218,13 +218,25 @@ impl NativeFunction for DatasetsFunction {
             ))
         }
     }
+
+    fn doc(&self) -> String {
+        todo!()
+    }
+
+    fn params(&self) -> Vec<WanderType> {
+        todo!()
+    }
+
+    fn returns(&self) -> WanderType {
+        todo!()
+    }
 }
 
 struct AddDatasetFunction {
     db: Rc<Database>,
 }
 impl NativeFunction for AddDatasetFunction {
-    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
         match arguments {
             [WanderValue::String(name)] => {
                 let tx = self.db.begin_write().map_err(tx_err)?;
@@ -253,13 +265,25 @@ impl NativeFunction for AddDatasetFunction {
             )),
         }
     }
+
+    fn doc(&self) -> String {
+        "Add Dataset.".to_owned()
+    }
+
+    fn params(&self) -> Vec<wander::WanderType> {
+        vec![WanderType::String]
+    }
+
+    fn returns(&self) -> wander::WanderType {
+        WanderType::Nothing
+    }
 }
 
 struct RemoveDatasetFunction {
     db: Rc<Database>,
 }
 impl NativeFunction for RemoveDatasetFunction {
-    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
         match arguments {
             [WanderValue::String(name)] => {
                 let tx = self.db.begin_write().map_err(tx_err)?;
@@ -289,13 +313,25 @@ impl NativeFunction for RemoveDatasetFunction {
             )),
         }
     }
+
+    fn doc(&self) -> String {
+        "Remove a Dataset.".to_owned()
+    }
+
+    fn params(&self) -> Vec<WanderType> {
+        vec![WanderType::String]
+    }
+
+    fn returns(&self) -> WanderType {
+        WanderType::Nothing
+    }
 }
 
 struct StatementsFunction {
     db: Rc<Database>,
 }
 impl NativeFunction for StatementsFunction {
-    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
         match arguments {
             [WanderValue::String(name)] => {
                 let tx = self.db.begin_write().map_err(tx_err)?;
@@ -329,13 +365,25 @@ impl NativeFunction for StatementsFunction {
             )),
         }
     }
+
+    fn doc(&self) -> String {
+        "".to_owned()
+    }
+
+    fn params(&self) -> Vec<WanderType> {
+        todo!()
+    }
+
+    fn returns(&self) -> WanderType {
+        todo!()
+    }
 }
 
 struct AddStatementsFunction {
     db: Rc<Database>,
 }
 impl NativeFunction for AddStatementsFunction {
-    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
         match arguments {
             [WanderValue::String(name)] => {
                 let tx = self.db.begin_write().map_err(tx_err)?;
@@ -367,5 +415,17 @@ impl NativeFunction for AddStatementsFunction {
                 "`addDatasets` requires a single string argument.".to_owned(),
             )),
         }
+    }
+
+    fn doc(&self) -> String {
+        todo!()
+    }
+
+    fn params(&self) -> Vec<WanderType> {
+        todo!()
+    }
+
+    fn returns(&self) -> WanderType {
+        todo!()
     }
 }

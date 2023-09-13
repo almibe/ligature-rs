@@ -2,7 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use crate::{NativeFunction, TokenTransformer, WanderValue};
+use crate::{NativeFunction, TokenTransformer, WanderValue, WanderType};
 use std::{
     cell::RefCell,
     collections::{HashMap, HashSet},
@@ -14,6 +14,13 @@ pub struct Bindings {
     token_transformers: RefCell<HashMap<String, Rc<dyn TokenTransformer>>>,
     native_functions: RefCell<HashMap<String, Rc<dyn NativeFunction>>>,
     scopes: Vec<HashMap<String, WanderValue>>,
+}
+
+pub struct EnvironmentBinding {
+    pub name: String,
+    pub parameters: Vec<WanderType>,
+    pub result: WanderType,
+    pub doc_string: String
 }
 
 pub trait BindingsProvider {
@@ -92,14 +99,28 @@ impl Bindings {
 
     pub fn bound_names(&self) -> HashSet<String> {
         let mut names = HashSet::new();
+        for native_function in self.native_functions.borrow().keys() {
+            names.insert(native_function.clone());
+        }
         for scope in self.scopes.iter() {
             for name in scope.keys() {
                 names.insert(name.clone());
             }
         }
-        for native_function in self.native_functions.borrow().keys() {
-            names.insert(native_function.clone());
-        }
         names
+    }
+
+    pub fn environment(&self) -> Vec<EnvironmentBinding> {
+        let mut env_bindings = Vec::new();
+        for native_function in self.native_functions.borrow().iter() {
+            let binding = EnvironmentBinding {
+                name: native_function.0.to_owned(),
+                doc_string: native_function.1.doc(),
+                parameters: native_function.1.params(),
+                result: native_function.1.returns(),
+            };
+            env_bindings.push(binding);
+        }
+        env_bindings
     }
 }
