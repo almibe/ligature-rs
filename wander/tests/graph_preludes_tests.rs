@@ -9,7 +9,7 @@ use wander::{preludes::common, run, ScriptValue};
 
 #[test]
 fn empty_graph() {
-    let input = "Graph.graph()";
+    let input = "Graph.empty()";
     let res = run(input, &mut common());
     let expected = Ok(ScriptValue::Graph(Graph::default()));
     assert_eq!(res, expected);

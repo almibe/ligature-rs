@@ -6,7 +6,7 @@ use ligature::{LigatureError, Statement, Value};
 use ligature_graph::Graph;
 use std::{collections::BTreeSet, rc::Rc};
 
-use crate::{bindings::Bindings, lexer::Token, NativeFunction, TokenTransformer, WanderValue};
+use crate::{bindings::Bindings, lexer::Token, NativeFunction, TokenTransformer, WanderValue, WanderType};
 
 struct EqFunction {}
 impl NativeFunction for EqFunction {
@@ -18,6 +18,18 @@ impl NativeFunction for EqFunction {
                 "`eq` function requires two parameters.".to_owned(),
             ))
         }
+    }
+
+    fn doc(&self) -> String {
+        "Check if two values are equal.".to_owned()
+    }
+
+    fn params(&self) -> Vec<crate::WanderType> {
+        vec![WanderType::Any, WanderType::Any]
+    }
+
+    fn returns(&self) -> crate::WanderType {
+        WanderType::Any
     }
 }
 
@@ -36,6 +48,18 @@ impl NativeFunction for AssertEqFunction {
             ))
         }
     }
+
+    fn doc(&self) -> String {
+        "Assert that two values are equal.".to_owned()
+    }
+
+    fn params(&self) -> Vec<crate::WanderType> {
+        vec![WanderType::Any, WanderType::Any]
+    }
+
+    fn returns(&self) -> crate::WanderType {
+        WanderType::Nothing
+    }
 }
 
 struct AndFunction {}
@@ -51,6 +75,18 @@ impl NativeFunction for AndFunction {
                 "`and` function requires two boolean parameters.".to_owned(),
             ))
         }
+    }
+
+    fn doc(&self) -> String {
+        "Check if two boolean values are both true.".to_owned()
+    }
+
+    fn params(&self) -> Vec<crate::WanderType> {
+        vec![WanderType::Boolean, WanderType::Boolean]
+    }
+
+    fn returns(&self) -> crate::WanderType {
+        WanderType::Boolean
     }
 }
 
@@ -68,12 +104,24 @@ impl NativeFunction for NotFunction {
             ))
         }
     }
+
+    fn doc(&self) -> String {
+        "Return the opposite of the boolean value passed.".to_owned()
+    }
+
+    fn params(&self) -> Vec<crate::WanderType> {
+        vec![WanderType::Boolean]
+    }
+
+    fn returns(&self) -> crate::WanderType {
+        WanderType::Boolean
+    }
 }
 
 struct EntityFunction {}
 impl NativeFunction for EntityFunction {
     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
-        if let [WanderValue::List(value)] = arguments {
+        if let [WanderValue::Tuple(value)] = arguments {
             if value.len() == 3 {
                 Ok(value.get(0).unwrap().clone())
             } else {
@@ -86,6 +134,18 @@ impl NativeFunction for EntityFunction {
                 "`entity` function requires one Statement parameter.".to_owned(),
             ))
         }
+    }
+
+    fn doc(&self) -> String {
+        "Retrieve the Entity from a Statement.".to_owned()
+    }
+
+    fn params(&self) -> Vec<crate::WanderType> {
+        vec![WanderType::Tuple]
+    }
+
+    fn returns(&self) -> crate::WanderType {
+        WanderType::Identifier
     }
 }
 
@@ -106,6 +166,18 @@ impl NativeFunction for AttributeFunction {
             ))
         }
     }
+
+    fn doc(&self) -> String {
+        "Retrieve the Attribute from a Statement.".to_owned()
+    }
+
+    fn params(&self) -> Vec<crate::WanderType> {
+        vec![WanderType::Tuple]
+    }
+
+    fn returns(&self) -> crate::WanderType {
+        WanderType::Identifier
+    }
 }
 
 struct ValueFunction {}
@@ -124,6 +196,18 @@ impl NativeFunction for ValueFunction {
                 "`value` function requires one Statement parameter.".to_owned(),
             ))
         }
+    }
+
+    fn doc(&self) -> String {
+        "Retrieve the Value from a Statement.".to_owned()
+    }
+
+    fn params(&self) -> Vec<crate::WanderType> {
+        vec![WanderType::Tuple]
+    }
+
+    fn returns(&self) -> crate::WanderType {
+        WanderType::Value
     }
 }
 
@@ -145,13 +229,24 @@ impl NativeFunction for AtFunction {
             Err(LigatureError("`at` function err.".to_owned()))
         }
     }
+
+    fn doc(&self) -> String {
+        "Get the value at a given location.".to_owned()
+    }
+
+    fn params(&self) -> Vec<crate::WanderType> {
+        vec![WanderType::Int, WanderType::List]
+    }
+
+    fn returns(&self) -> crate::WanderType {
+        WanderType::Any
+    }
 }
 
 struct GraphFunction {}
 impl NativeFunction for GraphFunction {
     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
         match arguments {
-            [] => Ok(WanderValue::Graph(Graph::default())),
             [WanderValue::List(statements)] => {
                 let mut contents = BTreeSet::new();
                 for statement in statements {
@@ -193,6 +288,42 @@ impl NativeFunction for GraphFunction {
             )),
         }
     }
+
+    fn doc(&self) -> String {
+        "Create a graph with the given Statements.".to_owned()
+    }
+
+    fn params(&self) -> Vec<crate::WanderType> {
+        vec![WanderType::List]
+    }
+
+    fn returns(&self) -> crate::WanderType {
+        WanderType::Graph
+    }
+}
+
+struct EmptyGraphFunction {}
+impl NativeFunction for EmptyGraphFunction {
+    fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+        match arguments {
+            [] => Ok(WanderValue::Graph(Graph::default())),
+            _ => Err(LigatureError(
+                "`graph` function takes a list of Statements or no arguments.".to_owned(),
+            )),
+        }
+    }
+
+    fn doc(&self) -> String {
+        "Create an empty graph.".to_owned()
+    }
+
+    fn params(&self) -> Vec<crate::WanderType> {
+        vec![]
+    }
+
+    fn returns(&self) -> crate::WanderType {
+        WanderType::Graph
+    }
 }
 
 struct UnionFunction {}
@@ -207,6 +338,18 @@ impl NativeFunction for UnionFunction {
             )),
         }
     }
+
+    fn doc(&self) -> String {
+        "Compute the union of two graphs.".to_owned()
+    }
+
+    fn params(&self) -> Vec<crate::WanderType> {
+        vec![WanderType::Graph, WanderType::Graph]
+    }
+
+    fn returns(&self) -> crate::WanderType {
+        WanderType::Graph
+    }
 }
 
 struct DifferenceFunction {}
@@ -220,6 +363,18 @@ impl NativeFunction for DifferenceFunction {
                 "`difference` function takes two graphs as arguments.".to_owned(),
             )),
         }
+    }
+
+    fn doc(&self) -> String {
+        "Compute the difference of two graphs.".to_owned()
+    }
+
+    fn params(&self) -> Vec<crate::WanderType> {
+        vec![WanderType::Graph, WanderType::Graph]
+    }
+
+    fn returns(&self) -> crate::WanderType {
+        WanderType::Graph
     }
 }
 
@@ -249,6 +404,18 @@ impl NativeFunction for StatementsFunction {
                 "`statements` function takes one graphs as an argument.".to_owned(),
             )),
         }
+    }
+
+    fn doc(&self) -> String {
+        "Get all of the Statements in a Dataset.".to_owned()
+    }
+
+    fn params(&self) -> Vec<crate::WanderType> {
+        vec![WanderType::Graph]
+    }
+
+    fn returns(&self) -> crate::WanderType {
+        WanderType::List
     }
 }
 
@@ -329,6 +496,11 @@ pub fn common() -> Bindings {
 
     bindings.bind_native_function("List".to_owned(), "at".to_owned(), Rc::new(AtFunction {}));
 
+    bindings.bind_native_function(
+        "Graph".to_owned(),
+        "empty".to_owned(),
+        Rc::new(EmptyGraphFunction {}),
+    );
     bindings.bind_native_function(
         "Graph".to_owned(),
         "graph".to_owned(),

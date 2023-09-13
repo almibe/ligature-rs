@@ -26,10 +26,30 @@ pub mod translation;
 
 pub trait NativeFunction {
     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError>;
+    fn doc(&self) -> String;
+    fn params(&self) -> Vec<WanderType>;
+    fn returns(&self) -> WanderType;
 }
 
 pub trait TokenTransformer {
     fn transform(&self, input: &Vec<Token>) -> Result<Vec<Token>, LigatureError>;
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum WanderType {
+    Any,
+    Value, // String | Int | Identifier
+    Boolean,
+    Int,
+    String,
+    Identifier,
+    Nothing,
+    /// A named reference to a NativeFunction.
+    NativeFunction,
+    Lambda,
+    List,
+    Tuple,
+    Graph,
 }
 
 #[derive(Debug, Clone, PartialEq)]
