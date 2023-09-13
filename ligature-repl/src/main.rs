@@ -13,15 +13,21 @@ use ligature_sqlite::LigatureSQLite;
 use rustyline::error::ReadlineError;
 use rustyline::{Editor, Result};
 use std::fs::read_to_string;
-use wander::bindings::BindingsProvider;
+use wander::bindings::{BindingsProvider, Bindings};
 use wander::preludes::common;
 use wander::run;
+
+struct REPLState {
+    instance: LigatureSQLite,
+    bindings: Bindings,
+}
 
 fn main() -> Result<()> {
     //    let mut instance = LigatureRedb::default();
     let mut instance = LigatureSQLite::default();
     let mut bindings = common();
     instance.add_bindings(&mut bindings);
+    let mut state = REPLState { instance, bindings };
     println!("Welcome to Ligature's REPL!");
     println!("Press Ctrl+C or Ctrl+D or enter `:q` to quit.");
     println!("Enter :help or :h for help.");
@@ -36,11 +42,11 @@ fn main() -> Result<()> {
             Ok(line) => {
                 rl.add_history_entry(line.as_str());
                 if line.trim().starts_with(":") {
-                    if !handle_command(&line, &mut instance) {
+                    if !handle_command(&line, &mut state) {
                         break;
                     }
                 } else {
-                    let result = run(line.as_str(), &mut bindings);
+                    let result = run(line.as_str(), &mut state.bindings);
                     match result {
                         Ok(result) => println!("{result}"),
                         Err(err) => println!("Error: {err:?}"),
@@ -64,18 +70,23 @@ fn main() -> Result<()> {
     rl.save_history("history.txt")
 }
 
-fn handle_command(input: &str, instance: &mut dyn Ligature) -> bool {
+fn handle_command(input: &str, instance: &mut REPLState) -> bool {
     let mut parts = input.split_whitespace();
     match parts.next().unwrap() {
         //":remote" => todo!(),
         //":local" => todo!(),
         ":status" | ":s" => status(),
         ":quit" | ":q" => quit(),
-        ":bindings" | ":b" => bindings(),
+        ":bindings" | ":b" => bindings(&instance.bindings),
         ":help" | ":h" => help(),
-        ":load" => load(input, instance),
+        ":load" => load(input, &mut instance.instance),
+        ":broadcast" => broadcast(input, &mut instance.instance),
         _ => todo!(),
     }
+}
+
+fn broadcast(input: &str, instance: &mut dyn Ligature) -> bool {
+    true
 }
 
 fn load(input: &str, instance: &mut dyn Ligature) -> bool {
@@ -103,7 +114,8 @@ fn load(input: &str, instance: &mut dyn Ligature) -> bool {
     true
 }
 
-fn bindings() -> bool {
+fn bindings(bindings: &Bindings) -> bool {
+    bindings.bound_names().iter().for_each(|binding| println!("{binding}"));
     true
 }
 
