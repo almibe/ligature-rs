@@ -14,10 +14,10 @@ use std::{
 };
 
 use dirs::data_local_dir;
-use ligature::{Dataset, Identifier, Ligature, LigatureError, Statement, Value};
+use ligature::{Dataset, Identifier, Ligature, Statement, Value, LigatureError};
 use rusqlite::{params, Connection, Error, Transaction};
 use sql_builder::{quote, SqlBuilder};
-use wander::{bindings::{BindingsProvider, Bindings}, NativeFunction, WanderValue, WanderType};
+use wander::{bindings::{BindingsProvider, Bindings}, NativeFunction, WanderValue, WanderType, WanderError};
 
 #[derive(Clone)]
 /// The main struct used for working with the SQLite stored version of Ligature.
@@ -291,7 +291,7 @@ struct DatasetsFunction {
     instance: Arc<Mutex<dyn Ligature>>,
 }
 impl NativeFunction for DatasetsFunction {
-    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, WanderError> {
         if arguments.is_empty() {
             let ds = self.instance.lock().unwrap().datasets().unwrap();
             let mut results = vec![];
@@ -300,7 +300,7 @@ impl NativeFunction for DatasetsFunction {
             }
             Ok(WanderValue::List(results))
         } else {
-            Err(LigatureError(
+            Err(WanderError(
                 "`datasets` function take no arguments.".to_owned(),
             ))
         }
@@ -323,7 +323,7 @@ struct AddDatasetFunction {
     instance: Arc<Mutex<LigatureSQLite>>,
 }
 impl NativeFunction for AddDatasetFunction {
-    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, WanderError> {
         match &arguments[..] {
             [WanderValue::String(name)] => {
                 self.instance
@@ -353,7 +353,7 @@ struct RemoveDatasetFunction {
     instance: Arc<Mutex<LigatureSQLite>>,
 }
 impl NativeFunction for RemoveDatasetFunction {
-    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, WanderError> {
         match &arguments[..] {
             [WanderValue::String(name)] => {
                 self.instance
@@ -384,7 +384,7 @@ struct StatementsFunction {
     instance: Arc<Mutex<LigatureSQLite>>,
 }
 impl NativeFunction for StatementsFunction {
-    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, WanderError> {
         match &arguments[..] {
             [WanderValue::String(name)] => {
                 let statements = self
@@ -426,7 +426,7 @@ impl NativeFunction for StatementsFunction {
     }
 }
 
-fn wander_value_to_statement(values: &Vec<WanderValue>) -> Result<Vec<Statement>, LigatureError> {
+fn wander_value_to_statement(values: &Vec<WanderValue>) -> Result<Vec<Statement>, WanderError> {
     let mut results = vec![];
     for value in values {
         match value {
@@ -457,7 +457,7 @@ struct AddStatementsFunction {
     instance: Arc<Mutex<LigatureSQLite>>,
 }
 impl NativeFunction for AddStatementsFunction {
-    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, WanderError> {
         match &arguments[..] {
             [WanderValue::String(name), WanderValue::List(statements)] => {
                 let dataset = Dataset::new(name).unwrap();
@@ -465,7 +465,7 @@ impl NativeFunction for AddStatementsFunction {
                 self.instance
                     .lock()
                     .unwrap()
-                    .add_statements(&dataset, statements)?;
+                    .add_statements(&dataset, statements).map_err(|e| WanderError(e.0))?;
                 Ok(WanderValue::Nothing)
             }
             _ => todo!(),
@@ -489,15 +489,15 @@ struct RemoveStatementsFunction {
     instance: Arc<Mutex<dyn Ligature>>,
 }
 impl NativeFunction for RemoveStatementsFunction {
-    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, WanderError> {
         match &arguments[..] {
             [WanderValue::String(name), WanderValue::List(statements)] => {
-                let dataset = Dataset::new(name)?;
+                let dataset = Dataset::new(name).map_err(|e| WanderError(e.0))?;
                 let statements = wander_value_to_statement(statements)?;
                 self.instance
                     .lock()
                     .unwrap()
-                    .remove_statements(&dataset, statements)?;
+                    .remove_statements(&dataset, statements).map_err(|e| WanderError(e.0))?;
                 Ok(WanderValue::Nothing)
             }
             _ => todo!(),
@@ -537,7 +537,7 @@ struct QueryFunction {
     connection: Arc<Mutex<Connection>>,
 }
 impl NativeFunction for QueryFunction {
-    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<wander::WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, WanderError> {
         match &arguments[..] {
             [WanderValue::String(dataset), entity, attribute, value] => {
                 let mut connection = self.connection.lock().unwrap();
@@ -558,7 +558,7 @@ impl NativeFunction for QueryFunction {
                 } else if let WanderValue::Nothing = entity {
                     () //do nothing
                 } else {
-                    return Err(LigatureError(
+                    return Err(WanderError(
                         "Invalid argument in Entity position in call to `query`.".to_owned(),
                     ));
                 }
@@ -568,7 +568,7 @@ impl NativeFunction for QueryFunction {
                 } else if let WanderValue::Nothing = attribute {
                     () //do nothing
                 } else {
-                    return Err(LigatureError(
+                    return Err(WanderError(
                         "Invalid argument in Attribute position in call to `query`.".to_owned(),
                     ));
                 }
@@ -585,7 +585,7 @@ impl NativeFunction for QueryFunction {
                     }
                     WanderValue::Nothing => (), //do nothing
                     _ => {
-                        return Err(LigatureError(
+                        return Err(WanderError(
                             "Invalid argument in Value position in call to `query`.".to_owned(),
                         ))
                     }
@@ -611,7 +611,7 @@ impl NativeFunction for QueryFunction {
                             WanderValue::String(value)
                         } else {
                             todo!("err")
-                            //return Err(LigatureError("Invalid argument in Value position in call to `query`.".to_owned()))
+                            //return Err(WanderError("Invalid argument in Value position in call to `query`.".to_owned()))
                         };
                         Ok(WanderValue::List(vec![entity, attribute, value]))
                     })
@@ -622,7 +622,7 @@ impl NativeFunction for QueryFunction {
                 }
                 Ok(WanderValue::List(results))
             }
-            _ => Err(LigatureError("Incorrect arguments.".to_owned())),
+            _ => Err(WanderError("Incorrect arguments.".to_owned())),
         }
     }
 

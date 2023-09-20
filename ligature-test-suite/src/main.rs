@@ -13,13 +13,13 @@ use ligature_sqlite::LigatureSQLite;
 use wander::{
     bindings::{Bindings, BindingsProvider},
     preludes::common,
-    run, ScriptValue,
+    run, ScriptValue, WanderError,
 };
 
 struct LigatureTestCase<'a> {
     name: &'a str,
     input: &'a str,
-    result: Result<ScriptValue, LigatureError>,
+    result: Result<ScriptValue, WanderError>,
     skippable: bool,
 }
 

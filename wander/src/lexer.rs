@@ -119,14 +119,11 @@ pub fn tokenize(script: &str) -> Result<Vec<Token>, WanderError> {
             Err(_) => return Err(WanderError(String::from("Error tokenizing input."))),
         }
     }
-    results.retain(|token| match token {
-        Token::Comment => false,
-        _ => true,
-    });
+    results.retain(|token| !matches!(token, Token::Comment));
     Ok(results)
 }
 
-pub fn transform(input: &Vec<Token>, bindings: &Bindings) -> Result<Vec<Token>, WanderError> {
+pub fn transform(input: &[Token], bindings: &Bindings) -> Result<Vec<Token>, WanderError> {
     let mut index = 0;
     let mut results = vec![];
     while let Some(token) = input.get(index) {

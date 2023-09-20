@@ -13,7 +13,7 @@ use std::{path::PathBuf, rc::Rc};
 use tables::IdTypes;
 use wander::{
     bindings::{Bindings, BindingsProvider},
-    NativeFunction, WanderValue, WanderType,
+    NativeFunction, WanderValue, WanderType, WanderError,
 };
 
 mod tables {
@@ -182,23 +182,23 @@ fn next_id(id_type: IdTypes, table: &mut Table<'_, '_, &str, u64>) -> Result<u64
     }
 }
 
-fn tx_err(err: TransactionError) -> LigatureError {
-    LigatureError(format!("Redb Error - {}", err.to_string()))
+fn tx_err(err: TransactionError) -> WanderError {
+    WanderError(format!("Redb Error - {}", err.to_string()))
 }
 
-fn tbl_err(err: TableError) -> LigatureError {
-    LigatureError(format!("Redb Error - {}", err.to_string()))
+fn tbl_err(err: TableError) -> WanderError {
+    WanderError(format!("Redb Error - {}", err.to_string()))
 }
 
-fn stor_err(err: StorageError) -> LigatureError {
-    LigatureError(format!("Redb Error - {}", err.to_string()))
+fn stor_err(err: StorageError) -> WanderError {
+    WanderError(format!("Redb Error - {}", err.to_string()))
 }
 
 struct DatasetsFunction {
     db: Rc<Database>,
 }
 impl NativeFunction for DatasetsFunction {
-    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, WanderError> {
         if arguments.is_empty() {
             let mut datasets = vec![];
             {
@@ -213,7 +213,7 @@ impl NativeFunction for DatasetsFunction {
             }
             Ok(WanderValue::List(datasets))
         } else {
-            Err(LigatureError(
+            Err(WanderError(
                 "`datasets` function have no arguments.".to_owned(),
             ))
         }
@@ -236,7 +236,7 @@ struct AddDatasetFunction {
     db: Rc<Database>,
 }
 impl NativeFunction for AddDatasetFunction {
-    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, WanderError> {
         match arguments {
             [WanderValue::String(name)] => {
                 let tx = self.db.begin_write().map_err(tx_err)?;
@@ -260,7 +260,7 @@ impl NativeFunction for AddDatasetFunction {
                     Ok(WanderValue::Nothing)
                 }
             }
-            _ => Err(LigatureError(
+            _ => Err(WanderError(
                 "`addDatasets` requires a single string argument.".to_owned(),
             )),
         }
@@ -283,7 +283,7 @@ struct RemoveDatasetFunction {
     db: Rc<Database>,
 }
 impl NativeFunction for RemoveDatasetFunction {
-    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, WanderError> {
         match arguments {
             [WanderValue::String(name)] => {
                 let tx = self.db.begin_write().map_err(tx_err)?;
@@ -308,7 +308,7 @@ impl NativeFunction for RemoveDatasetFunction {
                     None => Ok(WanderValue::Nothing), //doesn't exist
                 }
             }
-            _ => Err(LigatureError(
+            _ => Err(WanderError(
                 "`addDatasets` requires a single string argument.".to_owned(),
             )),
         }
@@ -331,7 +331,7 @@ struct StatementsFunction {
     db: Rc<Database>,
 }
 impl NativeFunction for StatementsFunction {
-    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, WanderError> {
         match arguments {
             [WanderValue::String(name)] => {
                 let tx = self.db.begin_write().map_err(tx_err)?;
@@ -357,10 +357,10 @@ impl NativeFunction for StatementsFunction {
                     // });
                     todo!()
                 } else {
-                    Err(LigatureError(format!("Dataset `{name}` doesn't exist.")))
+                    Err(WanderError(format!("Dataset `{name}` doesn't exist.")))
                 }
             }
-            _ => Err(LigatureError(
+            _ => Err(WanderError(
                 "`addDatasets` requires a single string argument.".to_owned(),
             )),
         }
@@ -383,7 +383,7 @@ struct AddStatementsFunction {
     db: Rc<Database>,
 }
 impl NativeFunction for AddStatementsFunction {
-    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, WanderError> {
         match arguments {
             [WanderValue::String(name)] => {
                 let tx = self.db.begin_write().map_err(tx_err)?;
@@ -408,10 +408,10 @@ impl NativeFunction for AddStatementsFunction {
                     //eav.range(&[]..&[]).unwrap();
                     todo!()
                 } else {
-                    Err(LigatureError(format!("Dataset `{name}` doesn't exist.")))
+                    Err(WanderError(format!("Dataset `{name}` doesn't exist.")))
                 }
             }
-            _ => Err(LigatureError(
+            _ => Err(WanderError(
                 "`addDatasets` requires a single string argument.".to_owned(),
             )),
         }

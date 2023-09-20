@@ -8,21 +8,21 @@ use wander::{lexer::Token, run, ScriptValue, TokenTransformer, WanderError};
 
 struct EmptyTransformer {}
 impl TokenTransformer for EmptyTransformer {
-    fn transform(&self, _input: &Vec<wander::lexer::Token>) -> Result<Vec<Token>, WanderError> {
+    fn transform(&self, _input: &[Token]) -> Result<Vec<Token>, WanderError> {
         Ok(vec![])
     }
 }
 
 struct NothingTransformer {}
 impl TokenTransformer for NothingTransformer {
-    fn transform(&self, _input: &Vec<wander::lexer::Token>) -> Result<Vec<Token>, WanderError> {
+    fn transform(&self, _input: &[Token]) -> Result<Vec<Token>, WanderError> {
         Ok([Token::Nothing].to_vec())
     }
 }
 
 struct UpperCaseTransformer {}
 impl TokenTransformer for UpperCaseTransformer {
-    fn transform(&self, input: &Vec<wander::lexer::Token>) -> Result<Vec<Token>, WanderError> {
+    fn transform(&self, input: &[Token]) -> Result<Vec<Token>, WanderError> {
         if let Some(Token::String(value)) = input.get(0) {
             let t = value.clone().to_ascii_uppercase();
             let t = Token::String(t);

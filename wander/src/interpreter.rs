@@ -174,7 +174,7 @@ fn call_function(
         //corner case of this name shadowing with a native function
         Some(WanderValue::NativeFunction(nf_name)) => {
             match bindings.read_native_function(&nf_name) {
-                Some(nf) => nf.run(&argument_values, &bindings),
+                Some(nf) => nf.run(&argument_values, bindings),
                 None => Err(WanderError(
                     "Could not read function {name} that references NativeFunction {nf_name}"
                         .to_owned(),
@@ -206,7 +206,7 @@ fn call_function(
         Some(_) => Err(WanderError(format!("Function {} is not defined.", &name))),
         None => match bindings.read_native_function(name) {
             None => Err(WanderError(format!("Function {} is not defined.", name))),
-            Some(nf) => nf.run(&argument_values, &bindings),
+            Some(nf) => nf.run(&argument_values, bindings),
         },
     }
 }

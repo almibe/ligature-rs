@@ -14,7 +14,7 @@ use std::{
 };
 
 use ligature::{Dataset, Ligature, LigatureError, Query, Statement, Value};
-use wander::{bindings::Bindings, NativeFunction, WanderValue, WanderType};
+use wander::{bindings::Bindings, NativeFunction, WanderValue, WanderType, WanderError};
 
 #[derive(Default)]
 pub struct LigatureInMemory {
@@ -123,7 +123,7 @@ struct DatasetsFunction {
     lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
 }
 impl NativeFunction for DatasetsFunction {
-    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, WanderError> {
         if arguments.is_empty() {
             let datasets = self.lim.read().unwrap();
             let datasets = datasets
@@ -132,7 +132,7 @@ impl NativeFunction for DatasetsFunction {
                 .collect();
             Ok(WanderValue::List(datasets))
         } else {
-            Err(LigatureError(
+            Err(WanderError(
                 "`datasets` function requires no arguments.".to_owned(),
             ))
         }
@@ -159,7 +159,7 @@ impl NativeFunction for AddDatasetFunction {
         &self,
         arguments: &[WanderValue],
         bindings: &Bindings
-    ) -> Result<wander::WanderValue, ligature::LigatureError> {
+    ) -> Result<wander::WanderValue, WanderError> {
         match &arguments[..] {
             [WanderValue::String(name)] => {
                 let mut instance = self.lim.write().unwrap();
@@ -171,7 +171,7 @@ impl NativeFunction for AddDatasetFunction {
                     Ok(WanderValue::Nothing)
                 }
             }
-            _ => Err(LigatureError(
+            _ => Err(WanderError(
                 "`addDataset` function requires one string parameter.".to_owned(),
             )),
         }
@@ -198,7 +198,7 @@ impl NativeFunction for RemoveDatasetFunction {
         &self,
         arguments: &[WanderValue],
         bindings: &Bindings
-    ) -> Result<wander::WanderValue, ligature::LigatureError> {
+    ) -> Result<wander::WanderValue, WanderError> {
         match &arguments[..] {
             [WanderValue::String(name)] => {
                 let mut instance = self.lim.write().unwrap();
@@ -209,7 +209,7 @@ impl NativeFunction for RemoveDatasetFunction {
                     Ok(WanderValue::Nothing) // do nothing
                 }
             }
-            _ => Err(LigatureError(
+            _ => Err(WanderError(
                 "`removeDataset` function requires one string parameter.".to_owned(),
             )),
         }
@@ -236,7 +236,7 @@ impl NativeFunction for StatementsFunction {
         &self,
         arguments: &[WanderValue],
         bindings: &Bindings
-    ) -> Result<wander::WanderValue, ligature::LigatureError> {
+    ) -> Result<wander::WanderValue, WanderError> {
         match &arguments[..] {
             [WanderValue::String(name)] => {
                 let instance = self.lim.read().unwrap();
@@ -262,7 +262,7 @@ impl NativeFunction for StatementsFunction {
                     _ => Ok(WanderValue::Nothing), // do nothing
                 }
             }
-            _ => Err(LigatureError(
+            _ => Err(WanderError(
                 "`removeDataset` function requires one string parameter.".to_owned(),
             )),
         }
@@ -289,7 +289,7 @@ impl NativeFunction for AddStatementsFunction {
         &self,
         arguments: &[WanderValue],
         bindings: &Bindings
-    ) -> Result<wander::WanderValue, ligature::LigatureError> {
+    ) -> Result<wander::WanderValue, WanderError> {
         match &arguments[..] {
             [WanderValue::String(name), WanderValue::List(statements)] => {
                 let instance = self.lim.write().unwrap();
@@ -312,7 +312,7 @@ impl NativeFunction for AddStatementsFunction {
                                                 Value::Identifier(value.to_owned())
                                             }
                                             _ => {
-                                                return Err(LigatureError(
+                                                return Err(WanderError(
                                                     "Invalid Statement".to_owned(),
                                                 ))
                                             }
@@ -335,7 +335,7 @@ impl NativeFunction for AddStatementsFunction {
                     _ => Ok(WanderValue::Nothing), // do nothing
                 }
             }
-            _ => Err(LigatureError(
+            _ => Err(WanderError(
                 "`addStatements` function requires one string parameter and a list of Statements."
                     .to_owned(),
             )),
@@ -355,12 +355,12 @@ impl NativeFunction for AddStatementsFunction {
     }
 }
 
-fn wander_value_to_value(value: &WanderValue) -> Result<Value, LigatureError> {
+fn wander_value_to_value(value: &WanderValue) -> Result<Value, WanderError> {
     match value {
         WanderValue::Int(value) => Ok(Value::Integer(value.to_owned())),
         WanderValue::String(value) => Ok(Value::String(value.to_owned())),
         WanderValue::Identifier(value) => Ok(Value::Identifier(value.to_owned())),
-        _ => Err(LigatureError("Invalid Statement".to_owned())),
+        _ => Err(WanderError("Invalid Statement".to_owned())),
     }
 }
 
@@ -381,7 +381,7 @@ impl NativeFunction for RemoveStatementsFunction {
         &self,
         arguments: &[WanderValue],
         bindings: &Bindings
-    ) -> Result<wander::WanderValue, ligature::LigatureError> {
+    ) -> Result<wander::WanderValue, WanderError> {
         match &arguments[..] {
             [WanderValue::String(name), WanderValue::List(statements)] => {
                 let instance = self.lim.write().unwrap();
@@ -412,7 +412,7 @@ impl NativeFunction for RemoveStatementsFunction {
                     _ => Ok(WanderValue::Nothing), // do nothing
                 }
             }
-            _ => Err(LigatureError(
+            _ => Err(WanderError(
                 "`removeStatements` function requires one string parameter and a list of Statements.".to_owned(),
             )),
         }
@@ -439,7 +439,7 @@ impl NativeFunction for QueryFunction {
         &self,
         arguments: &[WanderValue],
         bindings: &Bindings
-    ) -> Result<wander::WanderValue, ligature::LigatureError> {
+    ) -> Result<wander::WanderValue, WanderError> {
         match &arguments[..] {
             [WanderValue::String(name), entity, attribute, value] => {
                 let instance = self.lim.read().unwrap();
@@ -517,7 +517,7 @@ impl NativeFunction for QueryFunction {
                     _ => Ok(WanderValue::Nothing), // do nothing
                 }
             }
-            _ => Err(LigatureError("Error calling `query` function.".to_owned())),
+            _ => Err(WanderError("Error calling `query` function.".to_owned())),
         }
     }
 

@@ -16,7 +16,7 @@ impl NativeFunction for EqFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
-        bindings: &Bindings,
+        _bindings: &Bindings,
     ) -> Result<WanderValue, WanderError> {
         if let [left, right] = arguments {
             Ok(crate::WanderValue::Boolean(left == right))
@@ -45,7 +45,7 @@ impl NativeFunction for AssertEqFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
-        bindings: &Bindings,
+        _bindings: &Bindings,
     ) -> Result<WanderValue, WanderError> {
         if let [left, right] = arguments {
             if left == right {
@@ -78,7 +78,7 @@ impl NativeFunction for AndFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
-        bindings: &Bindings,
+        _bindings: &Bindings,
     ) -> Result<crate::WanderValue, WanderError> {
         if let [WanderValue::Boolean(left), WanderValue::Boolean(right)] = arguments[..] {
             Ok(crate::WanderValue::Boolean(left && right))
@@ -107,7 +107,7 @@ impl NativeFunction for NotFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
-        bindings: &Bindings,
+        _bindings: &Bindings,
     ) -> Result<crate::WanderValue, WanderError> {
         if let [WanderValue::Boolean(value)] = arguments[..] {
             Ok(crate::WanderValue::Boolean(!value))
@@ -136,7 +136,7 @@ impl NativeFunction for EntityFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
-        bindings: &Bindings,
+        _bindings: &Bindings,
     ) -> Result<WanderValue, WanderError> {
         if let [WanderValue::Tuple(value)] = arguments {
             if value.len() == 3 {
@@ -171,7 +171,7 @@ impl NativeFunction for AttributeFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
-        bindings: &Bindings,
+        _bindings: &Bindings,
     ) -> Result<WanderValue, WanderError> {
         if let [WanderValue::List(value)] = arguments {
             if value.len() == 3 {
@@ -206,7 +206,7 @@ impl NativeFunction for ValueFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
-        bindings: &Bindings,
+        _bindings: &Bindings,
     ) -> Result<WanderValue, WanderError> {
         if let [WanderValue::List(value)] = arguments {
             if value.len() == 3 {
@@ -511,7 +511,7 @@ struct GraphTransformer {}
 impl TokenTransformer for GraphTransformer {
     fn transform(
         &self,
-        input: &Vec<crate::lexer::Token>,
+        input: &[crate::lexer::Token],
     ) -> Result<Vec<crate::lexer::Token>, WanderError> {
         let tokens: Vec<Token> = input.to_owned();
         let statements: Vec<Statement> =

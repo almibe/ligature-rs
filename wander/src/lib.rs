@@ -25,7 +25,7 @@ pub mod preludes;
 pub mod translation;
 
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
-pub struct WanderError(String);
+pub struct WanderError(pub String);
 
 pub trait NativeFunction {
     fn run(
@@ -39,7 +39,7 @@ pub trait NativeFunction {
 }
 
 pub trait TokenTransformer {
-    fn transform(&self, input: &Vec<Token>) -> Result<Vec<Token>, WanderError>;
+    fn transform(&self, input: &[Token]) -> Result<Vec<Token>, WanderError>;
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
