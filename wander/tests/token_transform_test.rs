@@ -3,14 +3,15 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use std::rc::Rc;
-use wander::{lexer::Token, preludes::common, run, ScriptValue, TokenTransformer};
+use wander::{lexer::Token, run, ScriptValue, TokenTransformer, WanderError};
+use wander::preludes::common;
 
 struct EmptyTransformer {}
 impl TokenTransformer for EmptyTransformer {
     fn transform(
         &self,
         _input: &Vec<wander::lexer::Token>,
-    ) -> Result<Vec<Token>, ligature::LigatureError> {
+    ) -> Result<Vec<Token>, WanderError> {
         Ok(vec![])
     }
 }
@@ -20,7 +21,7 @@ impl TokenTransformer for NothingTransformer {
     fn transform(
         &self,
         _input: &Vec<wander::lexer::Token>,
-    ) -> Result<Vec<Token>, ligature::LigatureError> {
+    ) -> Result<Vec<Token>, WanderError> {
         Ok([Token::Nothing].to_vec())
     }
 }
@@ -30,7 +31,7 @@ impl TokenTransformer for UpperCaseTransformer {
     fn transform(
         &self,
         input: &Vec<wander::lexer::Token>,
-    ) -> Result<Vec<Token>, ligature::LigatureError> {
+    ) -> Result<Vec<Token>, WanderError> {
         if let Some(Token::String(value)) = input.get(0) {
             let t = value.clone().to_ascii_uppercase();
             let t = Token::String(t);

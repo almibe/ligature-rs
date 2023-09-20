@@ -2,10 +2,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use ligature::{Identifier, LigatureError};
+use ligature::Identifier;
 use logos::{Lexer, Logos, Source};
 
-use crate::bindings::Bindings;
+use crate::{bindings::Bindings, WanderError};
 
 #[derive(Logos, Debug, PartialEq, Clone)]
 #[logos(skip r"[ \t\n\f\r]+")]
@@ -110,13 +110,13 @@ fn name(lex: &mut Lexer<Token>) -> Option<String> {
     Some(lex.slice().to_string())
 }
 
-pub fn tokenize(script: &str) -> Result<Vec<Token>, LigatureError> {
+pub fn tokenize(script: &str) -> Result<Vec<Token>, WanderError> {
     let lexer = Token::lexer(script);
     let mut results = vec![];
     for token in lexer {
         match token {
             Ok(token) => results.push(token),
-            Err(_) => return Err(LigatureError(String::from("Error tokenizing input."))),
+            Err(_) => return Err(WanderError(String::from("Error tokenizing input."))),
         }
     }
     results.retain(|token| match token {
@@ -126,7 +126,7 @@ pub fn tokenize(script: &str) -> Result<Vec<Token>, LigatureError> {
     Ok(results)
 }
 
-pub fn transform(input: &Vec<Token>, bindings: &Bindings) -> Result<Vec<Token>, LigatureError> {
+pub fn transform(input: &Vec<Token>, bindings: &Bindings) -> Result<Vec<Token>, WanderError> {
     let mut index = 0;
     let mut results = vec![];
     while let Some(token) = input.get(index) {
@@ -136,12 +136,12 @@ pub fn transform(input: &Vec<Token>, bindings: &Bindings) -> Result<Vec<Token>, 
                 Some(Token::Name(name)) => match bindings.read_token_transformer(name) {
                     Some(transformer) => transformer,
                     None => {
-                        return Err(LigatureError(format!(
+                        return Err(WanderError(format!(
                             "{name} Token Transformer doesn't exist."
                         )))
                     }
                 },
-                _ => return Err(LigatureError("Token Transforms require a name.".to_owned())),
+                _ => return Err(WanderError("Token Transforms require a name.".to_owned())),
             };
             results.pop(); //remove transformer's name token
             index += 1; //skip first `

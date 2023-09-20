@@ -3,9 +3,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use gaze::Gaze;
-use ligature::{Identifier, LigatureError};
+use ligature::Identifier;
 
-use crate::lexer::Token;
+use crate::{lexer::Token, WanderError};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Element {
@@ -255,10 +255,10 @@ fn elements(gaze: &mut Gaze<Token>) -> Option<Vec<Element>> {
     Some(results)
 }
 
-pub fn parse(tokens: Vec<Token>) -> Result<Vec<Element>, LigatureError> {
+pub fn parse(tokens: Vec<Token>) -> Result<Vec<Element>, WanderError> {
     let mut gaze = Gaze::from_vec(tokens);
     match gaze.attemptf(&mut elements) {
         Some(value) => Ok(value),
-        None => Err(LigatureError(format!("Error parsing {:?}", gaze.peek()))),
+        None => Err(WanderError(format!("Error parsing {:?}", gaze.peek()))),
     }
 }

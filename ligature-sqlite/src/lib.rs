@@ -409,7 +409,7 @@ impl NativeFunction for StatementsFunction {
                 }
                 Ok(WanderValue::List(results))
             }
-            _ => todo!(),
+            _ => panic!("Should not reach."),
         }
     }
 

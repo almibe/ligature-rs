@@ -2,19 +2,19 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use ligature::{LigatureError, Statement, Value, Identifier};
+use ligature::{Statement, Value, Identifier};
 use ligature_graph::Graph;
-use std::{collections::BTreeSet, rc::Rc, borrow::BorrowMut};
+use std::{collections::BTreeSet, rc::Rc};
 
-use crate::{bindings::{Bindings, EnvironmentBinding, self}, lexer::Token, NativeFunction, TokenTransformer, WanderValue, WanderType};
+use crate::{bindings::Bindings, lexer::Token, NativeFunction, TokenTransformer, WanderValue, WanderType, WanderError};
 
 struct EqFunction {}
 impl NativeFunction for EqFunction {
-    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, WanderError> {
         if let [left, right] = arguments {
             Ok(crate::WanderValue::Boolean(left == right))
         } else {
-            Err(LigatureError(
+            Err(WanderError(
                 "`eq` function requires two parameters.".to_owned(),
             ))
         }
@@ -35,15 +35,15 @@ impl NativeFunction for EqFunction {
 
 struct AssertEqFunction {}
 impl NativeFunction for AssertEqFunction {
-    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, WanderError> {
         if let [left, right] = arguments {
             if left == right {
                 Ok(crate::WanderValue::Nothing)
             } else {
-                Err(LigatureError("Assertion failed!".to_owned()))
+                Err(WanderError("Assertion failed!".to_owned()))
             }
         } else {
-            Err(LigatureError(
+            Err(WanderError(
                 "`assertEq` function requires two parameters.".to_owned(),
             ))
         }
@@ -68,11 +68,11 @@ impl NativeFunction for AndFunction {
         &self,
         arguments: &[WanderValue],
         bindings: &Bindings
-    ) -> Result<crate::WanderValue, ligature::LigatureError> {
+    ) -> Result<crate::WanderValue, WanderError> {
         if let [WanderValue::Boolean(left), WanderValue::Boolean(right)] = arguments[..] {
             Ok(crate::WanderValue::Boolean(left && right))
         } else {
-            Err(LigatureError(
+            Err(WanderError(
                 "`and` function requires two boolean parameters.".to_owned(),
             ))
         }
@@ -97,11 +97,11 @@ impl NativeFunction for NotFunction {
         &self,
         arguments: &[WanderValue],
         bindings: &Bindings
-    ) -> Result<crate::WanderValue, ligature::LigatureError> {
+    ) -> Result<crate::WanderValue, WanderError> {
         if let [WanderValue::Boolean(value)] = arguments[..] {
             Ok(crate::WanderValue::Boolean(!value))
         } else {
-            Err(LigatureError(
+            Err(WanderError(
                 "`not` function requires one boolean parameter.".to_owned(),
             ))
         }
@@ -122,17 +122,17 @@ impl NativeFunction for NotFunction {
 
 struct EntityFunction {}
 impl NativeFunction for EntityFunction {
-    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, WanderError> {
         if let [WanderValue::Tuple(value)] = arguments {
             if value.len() == 3 {
                 Ok(value.get(0).unwrap().clone())
             } else {
-                Err(LigatureError(
+                Err(WanderError(
                     "`entity` function requires one Statement parameter.".to_owned(),
                 ))
             }
         } else {
-            Err(LigatureError(
+            Err(WanderError(
                 "`entity` function requires one Statement parameter.".to_owned(),
             ))
         }
@@ -153,17 +153,17 @@ impl NativeFunction for EntityFunction {
 
 struct AttributeFunction {}
 impl NativeFunction for AttributeFunction {
-    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, WanderError> {
         if let [WanderValue::List(value)] = arguments {
             if value.len() == 3 {
                 Ok(value.get(1).unwrap().clone())
             } else {
-                Err(LigatureError(
+                Err(WanderError(
                     "`attribute` function requires one Statement parameter.".to_owned(),
                 ))
             }
         } else {
-            Err(LigatureError(
+            Err(WanderError(
                 "`attribute` function requires one Statement parameter.".to_owned(),
             ))
         }
@@ -184,17 +184,17 @@ impl NativeFunction for AttributeFunction {
 
 struct ValueFunction {}
 impl NativeFunction for ValueFunction {
-    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, WanderError> {
         if let [WanderValue::List(value)] = arguments {
             if value.len() == 3 {
                 Ok(value.get(2).unwrap().clone())
             } else {
-                Err(LigatureError(
+                Err(WanderError(
                     "`value` function requires one Statement parameter.".to_owned(),
                 ))
             }
         } else {
-            Err(LigatureError(
+            Err(WanderError(
                 "`value` function requires one Statement parameter.".to_owned(),
             ))
         }
@@ -215,20 +215,20 @@ impl NativeFunction for ValueFunction {
 
 struct AtFunction {}
 impl NativeFunction for AtFunction {
-    fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, WanderError> {
         if let [WanderValue::Int(index), WanderValue::List(value)] = arguments {
             let index: usize = index.to_owned().try_into().unwrap();
             if index < value.len() {
                 let t: Option<&WanderValue> = value.get(index);
                 match t {
                     Some(t) => Ok(t.to_owned()),
-                    None => Err(LigatureError("`at` function err.".to_owned())),
+                    None => Err(WanderError("`at` function err.".to_owned())),
                 }
             } else {
-                Err(LigatureError("`at` function err.".to_owned()))
+                Err(WanderError("`at` function err.".to_owned()))
             }
         } else {
-            Err(LigatureError("`at` function err.".to_owned()))
+            Err(WanderError("`at` function err.".to_owned()))
         }
     }
 
@@ -247,7 +247,7 @@ impl NativeFunction for AtFunction {
 
 struct GraphFunction {}
 impl NativeFunction for GraphFunction {
-    fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, WanderError> {
         match arguments {
             [WanderValue::List(statements)] => {
                 let mut contents = BTreeSet::new();
@@ -271,13 +271,13 @@ impl NativeFunction for GraphFunction {
                                 });
                             }
                             _ => {
-                                return Err(LigatureError(
+                                return Err(WanderError(
                                     "Invalid Statement passsed to graph.".to_owned(),
                                 ))
                             }
                         },
                         _ => {
-                            return Err(LigatureError(
+                            return Err(WanderError(
                                 "Invalid Statement passsed to graph.".to_owned(),
                             ))
                         }
@@ -285,7 +285,7 @@ impl NativeFunction for GraphFunction {
                 }
                 Ok(WanderValue::Graph(Graph::new(contents)))
             }
-            _ => Err(LigatureError(
+            _ => Err(WanderError(
                 "`graph` function takes a list of Statements or no arguments.".to_owned(),
             )),
         }
@@ -306,10 +306,10 @@ impl NativeFunction for GraphFunction {
 
 struct EmptyGraphFunction {}
 impl NativeFunction for EmptyGraphFunction {
-    fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, WanderError> {
         match arguments {
             [] => Ok(WanderValue::Graph(Graph::default())),
-            _ => Err(LigatureError(
+            _ => Err(WanderError(
                 "`graph` function takes a list of Statements or no arguments.".to_owned(),
             )),
         }
@@ -330,12 +330,12 @@ impl NativeFunction for EmptyGraphFunction {
 
 struct UnionFunction {}
 impl NativeFunction for UnionFunction {
-    fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, WanderError> {
         match arguments {
             [WanderValue::Graph(g1), WanderValue::Graph(g2)] => {
                 Ok(WanderValue::Graph(g1.add_all(g2.clone())))
             }
-            _ => Err(LigatureError(
+            _ => Err(WanderError(
                 "`union` function takes two graphs as arguments.".to_owned(),
             )),
         }
@@ -356,12 +356,12 @@ impl NativeFunction for UnionFunction {
 
 struct DifferenceFunction {}
 impl NativeFunction for DifferenceFunction {
-    fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, WanderError> {
         match arguments {
             [WanderValue::Graph(g1), WanderValue::Graph(g2)] => {
                 Ok(WanderValue::Graph(g1.remove_all(g2.clone())))
             }
-            _ => Err(LigatureError(
+            _ => Err(WanderError(
                 "`difference` function takes two graphs as arguments.".to_owned(),
             )),
         }
@@ -382,7 +382,7 @@ impl NativeFunction for DifferenceFunction {
 
 struct StatementsFunction {}
 impl NativeFunction for StatementsFunction {
-    fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, WanderError> {
         match arguments {
             [WanderValue::Graph(graph)] => {
                 let g: Vec<WanderValue> = graph
@@ -402,7 +402,7 @@ impl NativeFunction for StatementsFunction {
                     .collect();
                 Ok(WanderValue::List(g))
             }
-            _ => Err(LigatureError(
+            _ => Err(WanderError(
                 "`statements` function takes one graphs as an argument.".to_owned(),
             )),
         }
@@ -423,7 +423,7 @@ impl NativeFunction for StatementsFunction {
 
 // struct FindFunction {}
 // impl NativeFunction for FindFunction {
-//     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, LigatureError> {
+//     fn run(&self, arguments: &[WanderValue]) -> Result<WanderValue, WanderError> {
 //         match &arguments[..] {
 //             [WanderValue::String(dataset_name), entity, attribute, value] => {
 //                 todo!()
@@ -435,7 +435,7 @@ impl NativeFunction for StatementsFunction {
 
 struct EnvironmentFunction {}
 impl NativeFunction for EnvironmentFunction {
-    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError> {
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, WanderError> {
         if arguments.is_empty() {
             let b: BTreeSet<Statement> = bindings.environment().iter().flat_map(|e| {
                 let mut statements = vec![];
@@ -478,9 +478,9 @@ impl TokenTransformer for GraphTransformer {
     fn transform(
         &self,
         input: &Vec<crate::lexer::Token>,
-    ) -> Result<Vec<crate::lexer::Token>, LigatureError> {
+    ) -> Result<Vec<crate::lexer::Token>, WanderError> {
         let tokens: Vec<Token> = input.to_owned();
-        let statements: Vec<Statement> = crate::lig::read_tokens(tokens)?;
+        let statements: Vec<Statement> = crate::lig::read_tokens(tokens).map_err(|e| WanderError(e.0))?;
         let mut results = vec![];
         results.append(&mut vec![
             Token::Name("Graph.graph".to_owned()),

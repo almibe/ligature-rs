@@ -2,13 +2,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use ligature::LigatureError;
-
 use crate::bindings::Bindings;
 use crate::parser::Element;
-use crate::WanderValue;
+use crate::{WanderValue, WanderError};
 
-pub fn eval(script: &Vec<Element>, bindings: &mut Bindings) -> Result<WanderValue, LigatureError> {
+pub fn eval(script: &Vec<Element>, bindings: &mut Bindings) -> Result<WanderValue, WanderError> {
     let mut result = Ok(WanderValue::Nothing);
     for element in script {
         result = Ok(eval_element(element, bindings)?);
@@ -19,7 +17,7 @@ pub fn eval(script: &Vec<Element>, bindings: &mut Bindings) -> Result<WanderValu
 pub fn eval_element(
     element: &Element,
     bindings: &mut Bindings,
-) -> Result<WanderValue, LigatureError> {
+) -> Result<WanderValue, WanderError> {
     match element {
         Element::Boolean(value) => Ok(WanderValue::Boolean(*value)),
         Element::Int(value) => Ok(WanderValue::Int(*value)),
@@ -84,7 +82,7 @@ fn unescape_string(value: String) -> String {
 fn handle_tuple(
     elements: &Vec<Element>,
     bindings: &mut Bindings,
-) -> Result<WanderValue, LigatureError> {
+) -> Result<WanderValue, WanderError> {
     let mut results = vec![];
     for element in elements {
         match eval_element(element, bindings) {
@@ -98,7 +96,7 @@ fn handle_tuple(
 fn handle_list(
     elements: &Vec<Element>,
     bindings: &mut Bindings,
-) -> Result<WanderValue, LigatureError> {
+) -> Result<WanderValue, WanderError> {
     let mut results = vec![];
     for element in elements {
         match eval_element(element, bindings) {
@@ -109,7 +107,7 @@ fn handle_list(
     Ok(WanderValue::List(results))
 }
 
-fn handle_lambda(params: &Vec<String>, body: &Vec<Element>) -> Result<WanderValue, LigatureError> {
+fn handle_lambda(params: &Vec<String>, body: &Vec<Element>) -> Result<WanderValue, WanderError> {
     Ok(WanderValue::Lambda(params.to_owned(), body.to_owned()))
 }
 
@@ -118,11 +116,11 @@ fn handle_conditional(
     ife: &Element,
     elsee: &Element,
     bindings: &mut Bindings,
-) -> Result<WanderValue, LigatureError> {
+) -> Result<WanderValue, WanderError> {
     match eval_element(cond, bindings)? {
         WanderValue::Boolean(true) => eval_element(ife, bindings),
         WanderValue::Boolean(false) => eval_element(elsee, bindings),
-        value => Err(LigatureError(format!(
+        value => Err(WanderError(format!(
             "Conditionals require a bool value found, {value}"
         ))),
     }
@@ -131,7 +129,7 @@ fn handle_conditional(
 fn handle_scope(
     body: &Vec<Element>,
     bindings: &mut Bindings,
-) -> Result<WanderValue, LigatureError> {
+) -> Result<WanderValue, WanderError> {
     bindings.add_scope();
     let res = eval(body, bindings);
     bindings.remove_scope();
@@ -142,7 +140,7 @@ fn handle_let(
     name: &String,
     element: &Element,
     bindings: &mut Bindings,
-) -> Result<WanderValue, LigatureError> {
+) -> Result<WanderValue, WanderError> {
     match eval_element(element, bindings) {
         Ok(value) => {
             bindings.bind(name.to_string(), value);
@@ -152,13 +150,13 @@ fn handle_let(
     }
 }
 
-fn read_name(name: &String, bindings: &mut Bindings) -> Result<WanderValue, LigatureError> {
+fn read_name(name: &String, bindings: &mut Bindings) -> Result<WanderValue, WanderError> {
     if let Some(value) = bindings.read(name) {
         Ok(value)
     } else {
         match bindings.read_native_function(name) {
             Some(_) => Ok(WanderValue::NativeFunction(name.to_owned())),
-            None => Err(LigatureError(format!("Error looking up {name}"))),
+            None => Err(WanderError(format!("Error looking up {name}"))),
         }
     }
 }
@@ -167,7 +165,7 @@ fn call_function(
     name: &String,
     arguments: &Vec<Element>,
     bindings: &mut Bindings,
-) -> Result<WanderValue, LigatureError> {
+) -> Result<WanderValue, WanderError> {
     let mut argument_values = vec![];
     for argument in arguments {
         match eval_element(argument, bindings) {
@@ -180,7 +178,7 @@ fn call_function(
         Some(WanderValue::NativeFunction(nf_name)) => {
             match bindings.read_native_function(&nf_name) {
                 Some(nf) => nf.run(&argument_values, &bindings),
-                None => Err(LigatureError(
+                None => Err(WanderError(
                     "Could not read function {name} that references NativeFunction {nf_name}"
                         .to_owned(),
                 )),
@@ -199,7 +197,7 @@ fn call_function(
                 bindings.remove_scope();
                 res
             } else {
-                Err(LigatureError(format!(
+                Err(WanderError(format!(
                     "Incorrect number of arguments, {}, passed to {}, expecting {}.",
                     arguments.len(),
                     name,
@@ -208,9 +206,9 @@ fn call_function(
             }
         }
         //found other value (err), will evntually handle lambdas here
-        Some(_) => Err(LigatureError(format!("Function {} is not defined.", &name))),
+        Some(_) => Err(WanderError(format!("Function {} is not defined.", &name))),
         None => match bindings.read_native_function(name) {
-            None => Err(LigatureError(format!("Function {} is not defined.", name))),
+            None => Err(WanderError(format!("Function {} is not defined.", name))),
             Some(nf) => nf.run(&argument_values, &bindings),
         },
     }

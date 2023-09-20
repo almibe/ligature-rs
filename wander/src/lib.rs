@@ -4,13 +4,13 @@
 
 //! This module is an implementation of the Wander scripting language.
 
-use std::{fmt::{Display, Write}};
+use std::fmt::{Display, Write};
 
 use bindings::Bindings;
 use hex::encode;
 use interpreter::eval;
 use lexer::{tokenize, transform, Token};
-use ligature::{Bytes, Identifier, LigatureError, Statement, Value};
+use ligature::{Bytes, Identifier, Statement, Value};
 use ligature_graph::Graph;
 use parser::{parse, Element};
 use serde::{Deserialize, Serialize};
@@ -21,18 +21,21 @@ pub mod interpreter;
 pub mod lexer;
 pub mod lig;
 pub mod parser;
-pub mod preludes;
 pub mod translation;
+pub mod preludes;
+
+#[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
+pub struct WanderError(String);
 
 pub trait NativeFunction {
-    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, LigatureError>;
+    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, WanderError>;
     fn doc(&self) -> String;
     fn params(&self) -> Vec<WanderType>;
     fn returns(&self) -> WanderType;
 }
 
 pub trait TokenTransformer {
-    fn transform(&self, input: &Vec<Token>) -> Result<Vec<Token>, LigatureError>;
+    fn transform(&self, input: &Vec<Token>) -> Result<Vec<Token>, WanderError>;
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -69,17 +72,17 @@ pub enum WanderValue {
 }
 
 impl WanderValue {
-    pub fn to_script_value(&self) -> Result<ScriptValue, LigatureError> {
+    pub fn to_script_value(&self) -> Result<ScriptValue, WanderError> {
         match self {
             WanderValue::Boolean(value) => Ok(ScriptValue::Boolean(value.to_owned())),
             WanderValue::Int(value) => Ok(ScriptValue::Int(value.to_owned())),
             WanderValue::String(value) => Ok(ScriptValue::String(value.to_owned())),
             WanderValue::Identifier(value) => Ok(ScriptValue::Identifier(value.to_owned())),
             WanderValue::Nothing => Ok(ScriptValue::Nothing),
-            WanderValue::NativeFunction(_) => Err(LigatureError(
+            WanderValue::NativeFunction(_) => Err(WanderError(
                 "Cannot convert NativeFunction to ScriptValue.".to_owned(),
             )),
-            WanderValue::Lambda(_, _) => Err(LigatureError(
+            WanderValue::Lambda(_, _) => Err(WanderError(
                 "Cannot convert Lambda to ScriptValue.".to_owned(),
             )),
             WanderValue::List(values) => {
@@ -250,7 +253,7 @@ impl Display for ScriptValue {
     }
 }
 
-pub fn run(script: &str, bindings: &mut Bindings) -> Result<ScriptValue, LigatureError> {
+pub fn run(script: &str, bindings: &mut Bindings) -> Result<ScriptValue, WanderError> {
     let tokens = tokenize(script)?;
     let tokens = transform(&tokens, bindings)?;
     let elements = parse(tokens)?;
