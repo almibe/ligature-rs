@@ -21,14 +21,18 @@ pub mod interpreter;
 pub mod lexer;
 pub mod lig;
 pub mod parser;
-pub mod translation;
 pub mod preludes;
+pub mod translation;
 
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct WanderError(String);
 
 pub trait NativeFunction {
-    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, WanderError>;
+    fn run(
+        &self,
+        arguments: &[WanderValue],
+        bindings: &Bindings,
+    ) -> Result<WanderValue, WanderError>;
     fn doc(&self) -> String;
     fn params(&self) -> Vec<WanderType>;
     fn returns(&self) -> WanderType;
@@ -53,7 +57,7 @@ pub enum WanderType {
     List,
     Tuple,
     Graph,
-    Optional(Box<WanderType>)
+    Optional(Box<WanderType>),
 }
 
 #[derive(Debug, Clone, PartialEq)]

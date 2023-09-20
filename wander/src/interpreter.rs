@@ -4,7 +4,7 @@
 
 use crate::bindings::Bindings;
 use crate::parser::Element;
-use crate::{WanderValue, WanderError};
+use crate::{WanderError, WanderValue};
 
 pub fn eval(script: &Vec<Element>, bindings: &mut Bindings) -> Result<WanderValue, WanderError> {
     let mut result = Ok(WanderValue::Nothing);
@@ -126,10 +126,7 @@ fn handle_conditional(
     }
 }
 
-fn handle_scope(
-    body: &Vec<Element>,
-    bindings: &mut Bindings,
-) -> Result<WanderValue, WanderError> {
+fn handle_scope(body: &Vec<Element>, bindings: &mut Bindings) -> Result<WanderValue, WanderError> {
     bindings.add_scope();
     let res = eval(body, bindings);
     bindings.remove_scope();

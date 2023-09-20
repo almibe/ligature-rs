@@ -2,7 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use crate::{NativeFunction, TokenTransformer, WanderValue, WanderType};
+use crate::{NativeFunction, TokenTransformer, WanderType, WanderValue};
 use std::{
     cell::RefCell,
     collections::{HashMap, HashSet},
@@ -20,7 +20,7 @@ pub struct EnvironmentBinding {
     pub name: String,
     pub parameters: Vec<WanderType>,
     pub result: WanderType,
-    pub doc_string: String
+    pub doc_string: String,
 }
 
 pub trait BindingsProvider {
@@ -73,7 +73,9 @@ impl Bindings {
         function: Rc<dyn NativeFunction>,
     ) {
         let full_name = format!("{module}.{name}");
-        self.native_functions.borrow_mut().insert(full_name, function);
+        self.native_functions
+            .borrow_mut()
+            .insert(full_name, function);
     }
 
     pub fn read_native_function(&self, name: &String) -> Option<Rc<dyn NativeFunction>> {
@@ -83,7 +85,12 @@ impl Bindings {
         }
     }
 
-    pub fn bind_token_transformer(&mut self, module: String, name: String, transformer: Rc<dyn TokenTransformer>) {
+    pub fn bind_token_transformer(
+        &mut self,
+        module: String,
+        name: String,
+        transformer: Rc<dyn TokenTransformer>,
+    ) {
         let full_name = format!("{module}.{name}");
         self.token_transformers
             .borrow_mut()

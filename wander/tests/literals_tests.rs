@@ -24,7 +24,8 @@ fn read_write_test_strings() {
 
 #[test]
 fn read_write_test_strings_in_graph() {
-    let input = "Graph.graph`<a> <b> [<c> \"\" \"hello, world\" \"\\\"\" \"\\\"hello,\\nworld\\\"\"]`";
+    let input =
+        "Graph.graph`<a> <b> [<c> \"\" \"hello, world\" \"\\\"\" \"\\\"hello,\\nworld\\\"\"]`";
     let res = run(input, &mut common()).unwrap();
     let res = format!("{res}");
     let res = run(&res, &mut common()).unwrap();
