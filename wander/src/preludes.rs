@@ -38,6 +38,10 @@ impl NativeFunction for EqFunction {
     fn returns(&self) -> crate::WanderType {
         WanderType::Any
     }
+
+    fn name(&self) -> String {
+        "Core.eq".to_owned()
+    }
 }
 
 struct AssertEqFunction {}
@@ -71,6 +75,10 @@ impl NativeFunction for AssertEqFunction {
     fn returns(&self) -> crate::WanderType {
         WanderType::Nothing
     }
+
+    fn name(&self) -> String {
+        "Assert.assertEq".to_owned()
+    }
 }
 
 struct AndFunction {}
@@ -100,6 +108,10 @@ impl NativeFunction for AndFunction {
     fn returns(&self) -> crate::WanderType {
         WanderType::Boolean
     }
+
+    fn name(&self) -> String {
+        "Bool.and".to_owned()
+    }
 }
 
 struct NotFunction {}
@@ -128,6 +140,10 @@ impl NativeFunction for NotFunction {
 
     fn returns(&self) -> crate::WanderType {
         WanderType::Boolean
+    }
+
+    fn name(&self) -> String {
+        "Bool.not".to_owned()
     }
 }
 
@@ -164,6 +180,10 @@ impl NativeFunction for EntityFunction {
     fn returns(&self) -> crate::WanderType {
         WanderType::Identifier
     }
+
+    fn name(&self) -> String {
+        "Statement.entity".to_owned()
+    }
 }
 
 struct AttributeFunction {}
@@ -198,6 +218,10 @@ impl NativeFunction for AttributeFunction {
 
     fn returns(&self) -> crate::WanderType {
         WanderType::Identifier
+    }
+
+    fn name(&self) -> String {
+        "Statement.attribute".to_owned()
     }
 }
 
@@ -234,6 +258,10 @@ impl NativeFunction for ValueFunction {
     fn returns(&self) -> crate::WanderType {
         WanderType::Value
     }
+
+    fn name(&self) -> String {
+        "Statement.value".to_owned()
+    }
 }
 
 struct AtFunction {}
@@ -265,6 +293,10 @@ impl NativeFunction for AtFunction {
 
     fn returns(&self) -> crate::WanderType {
         WanderType::Any
+    }
+
+    fn name(&self) -> String {
+        "List.at".to_owned()
     }
 }
 
@@ -325,6 +357,10 @@ impl NativeFunction for GraphFunction {
     fn returns(&self) -> crate::WanderType {
         WanderType::Graph
     }
+
+    fn name(&self) -> String {
+        "Graph.graph".to_owned()
+    }
 }
 
 struct EmptyGraphFunction {}
@@ -348,6 +384,10 @@ impl NativeFunction for EmptyGraphFunction {
 
     fn returns(&self) -> crate::WanderType {
         WanderType::Graph
+    }
+
+    fn name(&self) -> String {
+        "Graph.empty".to_owned()
     }
 }
 
@@ -375,6 +415,10 @@ impl NativeFunction for UnionFunction {
     fn returns(&self) -> crate::WanderType {
         WanderType::Graph
     }
+
+    fn name(&self) -> String {
+        "Graph.union".to_owned()
+    }
 }
 
 struct DifferenceFunction {}
@@ -400,6 +444,10 @@ impl NativeFunction for DifferenceFunction {
 
     fn returns(&self) -> crate::WanderType {
         WanderType::Graph
+    }
+
+    fn name(&self) -> String {
+        "Graph.difference".to_owned()
     }
 }
 
@@ -441,6 +489,10 @@ impl NativeFunction for StatementsFunction {
 
     fn returns(&self) -> crate::WanderType {
         WanderType::List
+    }
+
+    fn name(&self) -> String {
+        "Graph.statements".to_owned()
     }
 }
 
@@ -505,6 +557,10 @@ impl NativeFunction for EnvironmentFunction {
     fn returns(&self) -> WanderType {
         WanderType::Graph
     }
+
+    fn name(&self) -> String {
+        "Halp.environment".to_owned()
+    }
 }
 
 fn graph_transform(
@@ -540,63 +596,43 @@ fn graph_transform(
 /// functionality, but doesn't interact with an instance of Ligature.
 pub fn common() -> Bindings {
     let mut bindings = Bindings::new();
-    bindings.bind_native_function("Core".to_owned(), "eq".to_owned(), Rc::new(EqFunction {}));
+    bindings.bind_native_function(Rc::new(EqFunction {}));
 
     bindings.bind_native_function(
-        "Assert".to_owned(),
-        "assertEq".to_owned(),
         Rc::new(AssertEqFunction {}),
     );
 
-    bindings.bind_native_function("Bool".to_owned(), "and".to_owned(), Rc::new(AndFunction {}));
-    bindings.bind_native_function("Bool".to_owned(), "not".to_owned(), Rc::new(NotFunction {}));
+    bindings.bind_native_function(Rc::new(AndFunction {}));
+    bindings.bind_native_function(Rc::new(NotFunction {}));
 
     bindings.bind_native_function(
-        "Statement".to_owned(),
-        "entity".to_owned(),
         Rc::new(EntityFunction {}),
     );
     bindings.bind_native_function(
-        "Statement".to_owned(),
-        "attribute".to_owned(),
         Rc::new(AttributeFunction {}),
     );
     bindings.bind_native_function(
-        "Statement".to_owned(),
-        "value".to_owned(),
         Rc::new(ValueFunction {}),
     );
 
-    bindings.bind_native_function("List".to_owned(), "at".to_owned(), Rc::new(AtFunction {}));
+    bindings.bind_native_function(Rc::new(AtFunction {}));
 
     bindings.bind_native_function(
-        "Graph".to_owned(),
-        "empty".to_owned(),
         Rc::new(EmptyGraphFunction {}),
     );
     bindings.bind_native_function(
-        "Graph".to_owned(),
-        "graph".to_owned(),
         Rc::new(GraphFunction {}),
     );
     bindings.bind_native_function(
-        "Graph".to_owned(),
-        "union".to_owned(),
         Rc::new(UnionFunction {}),
     );
     bindings.bind_native_function(
-        "Graph".to_owned(),
-        "difference".to_owned(),
         Rc::new(DifferenceFunction {}),
     );
     bindings.bind_native_function(
-        "Graph".to_owned(),
-        "statements".to_owned(),
         Rc::new(StatementsFunction {}),
     );
     bindings.bind_native_function(
-        "Halp".to_owned(),
-        "environment".to_owned(),
         Rc::new(EnvironmentFunction {}),
     );
     // bindings.bind_native_function(

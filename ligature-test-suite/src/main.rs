@@ -6,9 +6,8 @@
 
 use std::fmt::Display;
 
-use ligature::{Identifier, LigatureError};
+use ligature::Identifier;
 use ligature_in_memory::LigatureInMemory;
-use ligature_redb::LigatureRedb;
 use ligature_sqlite::LigatureSQLite;
 use wander::{
     bindings::{Bindings, BindingsProvider},
@@ -60,13 +59,13 @@ fn create_sqlite_bindings() -> Bindings {
     bindings
 }
 
-#[allow(dead_code)]
-fn create_redb_bindings() -> Bindings {
-    let mut bindings = common();
-    let instance = LigatureRedb::temp().unwrap();
-    instance.add_bindings(&mut bindings);
-    bindings
-}
+// #[allow(dead_code)]
+// fn create_redb_bindings() -> Bindings {
+//     let mut bindings = common();
+//     let instance = LigatureRedb::temp().unwrap();
+//     instance.add_bindings(&mut bindings);
+//     bindings
+// }
 
 #[allow(dead_code)]
 fn create_memory_bindings() -> Bindings {

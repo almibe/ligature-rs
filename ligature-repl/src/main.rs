@@ -25,7 +25,7 @@ struct REPLState {
 
 fn main() -> Result<()> {
     //    let mut instance = LigatureRedb::default();
-    let mut instance = LigatureSQLite::default();
+    let instance = LigatureSQLite::default();
     let mut bindings = common();
     instance.add_bindings(&mut bindings);
     let mut state = REPLState { instance, bindings };
@@ -42,7 +42,7 @@ fn main() -> Result<()> {
         match readline {
             Ok(line) => {
                 rl.add_history_entry(line.as_str());
-                if line.trim().starts_with(":") {
+                if line.trim().starts_with(':') {
                     if !handle_command(&line, &mut state) {
                         break;
                     }
@@ -87,12 +87,12 @@ fn handle_command(input: &str, instance: &mut REPLState) -> bool {
     }
 }
 
-fn broadcast(input: &str, instance: &mut dyn Ligature) -> bool {
+fn broadcast(_input: &str, _instance: &mut dyn Ligature) -> bool {
     true
 }
 
 fn load(input: &str, instance: &mut dyn Ligature) -> bool {
-    let input: Vec<&str> = input.split(" ").collect();
+    let input: Vec<&str> = input.split(' ').collect();
     let dataset_name = input[1];
     let file = input[2];
     let dataset = if let Ok(dataset) = Dataset::new(dataset_name.trim_end()) {

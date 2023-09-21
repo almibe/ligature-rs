@@ -14,7 +14,6 @@ repository = "https://github.com/almibe/ligature-rs/"
 ligature = { path = "../ligature" }
 lig = { path = "../lig" }
 ligature-in-memory = { path = "../ligature-in-memory" }
-ligature-redb = { path = "../ligature-redb" }
 ligature-sqlite = { path = "../ligature-sqlite" }
 wander = { path = "../wander" }
 rustyline = "10.0.0"

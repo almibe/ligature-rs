@@ -26,30 +26,30 @@ impl Ligature for LigatureInMemory {
         todo!()
     }
 
-    fn add_dataset(&mut self, dataset: &Dataset) -> Result<(), LigatureError> {
+    fn add_dataset(&mut self, _dataset: &Dataset) -> Result<(), LigatureError> {
         todo!()
     }
 
-    fn remove_dataset(&mut self, dataset: &Dataset) -> Result<(), LigatureError> {
+    fn remove_dataset(&mut self, _dataset: &Dataset) -> Result<(), LigatureError> {
         todo!()
     }
 
-    fn statements(&self, dataset: &Dataset) -> Result<Vec<Statement>, LigatureError> {
+    fn statements(&self, _dataset: &Dataset) -> Result<Vec<Statement>, LigatureError> {
         todo!()
     }
 
     fn add_statements(
         &self,
-        dataset: &Dataset,
-        statements: Vec<Statement>,
+        _dataset: &Dataset,
+        _statements: Vec<Statement>,
     ) -> Result<(), LigatureError> {
         todo!()
     }
 
     fn remove_statements(
         &self,
-        dataset: &Dataset,
-        statements: Vec<Statement>,
+        _dataset: &Dataset,
+        _statements: Vec<Statement>,
     ) -> Result<(), LigatureError> {
         todo!()
     }
@@ -68,50 +68,36 @@ impl LigatureInMemory {
 
     pub fn add_bindings(&self, bindings: &mut Bindings) {
         bindings.bind_native_function(
-            "Ligature".to_owned(),
-            String::from("datasets"),
             Rc::new(DatasetsFunction {
                 lim: self.datasets.clone(),
             }),
         );
         bindings.bind_native_function(
-            "Ligature".to_owned(),
-            String::from("addDataset"),
             Rc::new(AddDatasetFunction {
                 lim: self.datasets.clone(),
             }),
         );
         bindings.bind_native_function(
-            "Ligature".to_owned(),
-            String::from("removeDataset"),
             Rc::new(RemoveDatasetFunction {
                 lim: self.datasets.clone(),
             }),
         );
         bindings.bind_native_function(
-            "Ligature".to_owned(),
-            String::from("statements"),
             Rc::new(StatementsFunction {
                 lim: self.datasets.clone(),
             }),
         );
         bindings.bind_native_function(
-            "Ligature".to_owned(),
-            String::from("addStatements"),
             Rc::new(AddStatementsFunction {
                 lim: self.datasets.clone(),
             }),
         );
         bindings.bind_native_function(
-            "Ligature".to_owned(),
-            String::from("removeStatements"),
             Rc::new(RemoveStatementsFunction {
                 lim: self.datasets.clone(),
             }),
         );
         bindings.bind_native_function(
-            "Ligature".to_owned(),
-            String::from("query"),
             Rc::new(QueryFunction {
                 lim: self.datasets.clone(),
             }),
@@ -123,7 +109,7 @@ struct DatasetsFunction {
     lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
 }
 impl NativeFunction for DatasetsFunction {
-    fn run(&self, arguments: &[WanderValue], bindings: &Bindings) -> Result<WanderValue, WanderError> {
+    fn run(&self, arguments: &[WanderValue], _bindings: &Bindings) -> Result<WanderValue, WanderError> {
         if arguments.is_empty() {
             let datasets = self.lim.read().unwrap();
             let datasets = datasets
@@ -149,6 +135,10 @@ impl NativeFunction for DatasetsFunction {
     fn returns(&self) -> WanderType {
         todo!()
     }
+
+    fn name(&self) -> String {
+        "Ligature.datasets".to_owned()
+    }
 }
 
 struct AddDatasetFunction {
@@ -158,9 +148,9 @@ impl NativeFunction for AddDatasetFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
-        bindings: &Bindings
+        _bindings: &Bindings
     ) -> Result<wander::WanderValue, WanderError> {
-        match &arguments[..] {
+        match arguments {
             [WanderValue::String(name)] => {
                 let mut instance = self.lim.write().unwrap();
                 if instance.contains_key(name) {
@@ -188,6 +178,10 @@ impl NativeFunction for AddDatasetFunction {
     fn returns(&self) -> WanderType {
         todo!()
     }
+
+    fn name(&self) -> String {
+        "Ligature.addDataset".to_owned()
+    }
 }
 
 struct RemoveDatasetFunction {
@@ -197,9 +191,9 @@ impl NativeFunction for RemoveDatasetFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
-        bindings: &Bindings
+        _bindings: &Bindings
     ) -> Result<wander::WanderValue, WanderError> {
-        match &arguments[..] {
+        match arguments {
             [WanderValue::String(name)] => {
                 let mut instance = self.lim.write().unwrap();
                 if instance.contains_key(name) {
@@ -226,6 +220,10 @@ impl NativeFunction for RemoveDatasetFunction {
     fn returns(&self) -> WanderType {
         todo!()
     }
+
+    fn name(&self) -> String {
+        "Ligature.removeDataset".to_owned()
+    }
 }
 
 struct StatementsFunction {
@@ -235,9 +233,9 @@ impl NativeFunction for StatementsFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
-        bindings: &Bindings
+        _bindings: &Bindings
     ) -> Result<wander::WanderValue, WanderError> {
-        match &arguments[..] {
+        match arguments {
             [WanderValue::String(name)] => {
                 let instance = self.lim.read().unwrap();
                 match instance.get(name) {
@@ -279,6 +277,10 @@ impl NativeFunction for StatementsFunction {
     fn returns(&self) -> WanderType {
         todo!()
     }
+
+    fn name(&self) -> String {
+        "Ligature.statements".to_owned()
+    }
 }
 
 struct AddStatementsFunction {
@@ -288,9 +290,9 @@ impl NativeFunction for AddStatementsFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
-        bindings: &Bindings
+        _bindings: &Bindings
     ) -> Result<wander::WanderValue, WanderError> {
-        match &arguments[..] {
+        match arguments {
             [WanderValue::String(name), WanderValue::List(statements)] => {
                 let instance = self.lim.write().unwrap();
                 match instance.get(name) {
@@ -353,6 +355,10 @@ impl NativeFunction for AddStatementsFunction {
     fn returns(&self) -> WanderType {
         todo!()
     }
+
+    fn name(&self) -> String {
+        "Ligature.addStatements".to_owned()
+    }
 }
 
 fn wander_value_to_value(value: &WanderValue) -> Result<Value, WanderError> {
@@ -380,9 +386,9 @@ impl NativeFunction for RemoveStatementsFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
-        bindings: &Bindings
+        _bindings: &Bindings
     ) -> Result<wander::WanderValue, WanderError> {
-        match &arguments[..] {
+        match arguments {
             [WanderValue::String(name), WanderValue::List(statements)] => {
                 let instance = self.lim.write().unwrap();
                 match instance.get(name) {
@@ -429,6 +435,10 @@ impl NativeFunction for RemoveStatementsFunction {
     fn returns(&self) -> WanderType {
         todo!()
     }
+
+    fn name(&self) -> String {
+        "Ligature.removeStatements".to_owned()
+    }
 }
 
 struct QueryFunction {
@@ -438,9 +448,9 @@ impl NativeFunction for QueryFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
-        bindings: &Bindings
+        _bindings: &Bindings
     ) -> Result<wander::WanderValue, WanderError> {
-        match &arguments[..] {
+        match arguments {
             [WanderValue::String(name), entity, attribute, value] => {
                 let instance = self.lim.read().unwrap();
                 match instance.get(name) {
@@ -536,5 +546,9 @@ impl NativeFunction for QueryFunction {
 
     fn returns(&self) -> wander::WanderType {
         WanderType::Nothing
+    }
+
+    fn name(&self) -> String {
+        "Ligature.query".to_owned()
     }
 }
