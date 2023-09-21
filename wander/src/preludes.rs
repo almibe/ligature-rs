@@ -6,9 +6,7 @@ use ligature::{Identifier, Statement, Value};
 use ligature_graph::Graph;
 use std::{collections::BTreeSet, rc::Rc};
 
-use crate::{
-    bindings::Bindings, lexer::Token, HostFunction, WanderError, WanderType, WanderValue,
-};
+use crate::{bindings::Bindings, lexer::Token, HostFunction, WanderError, WanderType, WanderValue};
 
 struct EqFunction {}
 impl HostFunction for EqFunction {

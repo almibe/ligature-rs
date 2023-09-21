@@ -172,15 +172,13 @@ fn call_function(
     }
     match bindings.read(name) {
         //corner case of this name shadowing with a native function
-        Some(WanderValue::NativeFunction(nf_name)) => {
-            match bindings.read_host_function(&nf_name) {
-                Some(nf) => nf.run(&argument_values, bindings),
-                None => Err(WanderError(
-                    "Could not read function {name} that references NativeFunction {nf_name}"
-                        .to_owned(),
-                )),
-            }
-        }
+        Some(WanderValue::NativeFunction(nf_name)) => match bindings.read_host_function(&nf_name) {
+            Some(nf) => nf.run(&argument_values, bindings),
+            None => Err(WanderError(
+                "Could not read function {name} that references NativeFunction {nf_name}"
+                    .to_owned(),
+            )),
+        },
         Some(WanderValue::Lambda(parameters, body)) => {
             if parameters.len() == arguments.len() {
                 bindings.add_scope();
