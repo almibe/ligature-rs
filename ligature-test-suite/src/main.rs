@@ -98,13 +98,13 @@ pub fn main() {
         },
         LigatureTestCase {
             name: "Datasets should start empty",
-            input: "datasets()",
+            input: "Ligature.datasets()",
             result: Ok(ScriptValue::List(vec![])),
             skippable: true,
         },
         LigatureTestCase {
             name: "add single Datasets",
-            input: r#"addDataset("hello") datasets()"#,
+            input: r#"Ligature.addDataset("hello") Ligature.datasets()"#,
             result: Ok(ScriptValue::List(vec![ScriptValue::String(
                 "hello".to_owned(),
             )])),
@@ -112,7 +112,7 @@ pub fn main() {
         },
         LigatureTestCase {
             name: "add and remove Datasets",
-            input: r#"addDataset("hello") addDataset("world") removeDataset("hello") datasets()"#,
+            input: r#"Ligature.addDataset("hello") Ligature.addDataset("world") Ligature.removeDataset("hello") Ligature.datasets()"#,
             result: Ok(ScriptValue::List(vec![ScriptValue::String(
                 "world".to_owned(),
             )])),
@@ -120,13 +120,13 @@ pub fn main() {
         },
         LigatureTestCase {
             name: "Datasets should start empty",
-            input: r#"addDataset("hello") statements("hello")"#,
+            input: r#"Ligature.addDataset("hello") Ligature.statements("hello")"#,
             result: Ok(ScriptValue::List(vec![])),
             skippable: false,
         },
         LigatureTestCase {
             name: "Add Statements to Dataset",
-            input: r#"addDataset("hello") addStatements("hello" [[<a> <b> <c>]]) statements("hello")"#,
+            input: r#"Ligature.addDataset("hello") Ligature.addStatements("hello" [[<a> <b> <c>]]) Ligature.statements("hello")"#,
             result: Ok(ScriptValue::List(vec![ScriptValue::List(vec![
                 ident("a"),
                 ident("b"),
@@ -137,10 +137,10 @@ pub fn main() {
         LigatureTestCase {
             name: "Remove Statements from Dataset",
             input: r#"
-                addDataset("hello") 
-                addStatements("hello" [[<a> <b> <c>] [<d> <e> <f>]])
-                removeStatements("hello" [[<a> <b> <c>]])
-                statements("hello")"#,
+                Ligature.addDataset("hello") 
+                Ligature.addStatements("hello" [[<a> <b> <c>] [<d> <e> <f>]])
+                Ligature.removeStatements("hello" [[<a> <b> <c>]])
+                Ligature.statements("hello")"#,
             result: Ok(ScriptValue::List(vec![ScriptValue::List(vec![
                 ident("d"),
                 ident("e"),
@@ -151,10 +151,9 @@ pub fn main() {
         LigatureTestCase {
             name: "Query Statements",
             input: r#"
-                addDataset("hello")
-                addStatements("hello" [[<a> <b> <c>][<a> <b> <d>][<a> <c> <d>]])
-                query("hello" <a> <b> ?)
-            "#,
+                Ligature.addDataset("hello")
+                Ligature.addStatements("hello" [[<a> <b> <c>][<a> <b> <d>][<a> <c> <d>]])
+                Ligature.query("hello" <a> <b> ?)"#,
             result: Ok(ScriptValue::List(vec![
                 ScriptValue::List(vec![ident("a"), ident("b"), ident("c")]),
                 ScriptValue::List(vec![ident("a"), ident("b"), ident("d")]),

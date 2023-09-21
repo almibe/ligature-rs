@@ -2,7 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use crate::{NativeFunction, TokenTransformer, WanderType, WanderValue};
+use crate::{NativeFunction, TokenTransformer, WanderType, WanderValue, HostFunction};
 use std::{
     cell::RefCell,
     collections::{HashMap, HashSet},
@@ -13,6 +13,7 @@ use std::{
 pub struct Bindings {
     token_transformers: RefCell<HashMap<String, Rc<TokenTransformer>>>,
     native_functions: RefCell<HashMap<String, Rc<dyn NativeFunction>>>,
+    host_functions: RefCell<HashMap<String, Rc<HostFunction>>>,
     scopes: Vec<HashMap<String, WanderValue>>,
 }
 
@@ -32,6 +33,7 @@ impl Bindings {
         Bindings {
             token_transformers: RefCell::new(HashMap::new()),
             native_functions: RefCell::new(HashMap::new()),
+            host_functions: RefCell::new(HashMap::new()),
             scopes: vec![HashMap::new()],
         }
     }
@@ -64,6 +66,22 @@ impl Bindings {
         let mut current_scope = self.scopes.pop().unwrap();
         current_scope.insert(name, value);
         self.scopes.push(current_scope);
+    }
+
+    pub fn bind_host_function(
+        &mut self,
+        function: Rc<HostFunction>,
+    ) {
+        self.host_functions
+            .borrow_mut()
+            .insert(function.name.clone(), function);
+    }
+
+    pub fn read_host_function(&self, name: &String) -> Option<Rc<HostFunction>> {
+        match self.host_functions.borrow().get(name) {
+            None => None,
+            Some(value) => Some(value.clone()),
+        }
     }
 
     pub fn bind_native_function(
