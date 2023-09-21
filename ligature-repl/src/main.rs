@@ -13,8 +13,11 @@ use ligature_sqlite::LigatureSQLite;
 use rustyline::error::ReadlineError;
 use rustyline::{Editor, Result};
 use std::fs::read_to_string;
-use tabled::{Table, Tabled, settings::{Modify, Width, object::Rows}};
-use wander::bindings::{BindingsProvider, Bindings, EnvironmentBinding};
+use tabled::{
+    settings::{object::Rows, Modify, Width},
+    Table, Tabled,
+};
+use wander::bindings::{Bindings, BindingsProvider, EnvironmentBinding};
 use wander::preludes::common;
 use wander::run;
 
@@ -117,18 +120,27 @@ fn load(input: &str, instance: &mut dyn Ligature) -> bool {
 }
 
 fn bindings(bindings: &Bindings) -> bool {
-    bindings.bound_names().iter().for_each(|binding| { 
-        println!("{binding}")
-    });
+    bindings
+        .bound_names()
+        .iter()
+        .for_each(|binding| println!("{binding}"));
     true
 }
 
 fn environment(bindings: &mut Bindings) -> bool {
-    let mut display: Vec<EnvironmentDisplay> = bindings.environment().into_iter().map(EnvironmentDisplay::from).collect();
+    let mut display: Vec<EnvironmentDisplay> = bindings
+        .environment()
+        .into_iter()
+        .map(EnvironmentDisplay::from)
+        .collect();
     display.sort();
     let mut table = Table::new(display);
     table
-        .with(Modify::new(Rows::new(1..)).with(Width::wrap(30).keep_words()).with(Width::increase(20)))
+        .with(
+            Modify::new(Rows::new(1..))
+                .with(Width::wrap(30).keep_words())
+                .with(Width::increase(20)),
+        )
         .with(Width::increase(150));
     println!("{table}");
     true
@@ -157,15 +169,16 @@ pub struct EnvironmentDisplay {
     ///
     pub result: String,
     ///
-    pub doc_string: String
+    pub doc_string: String,
 }
 
 impl From<EnvironmentBinding> for EnvironmentDisplay {
     fn from(value: EnvironmentBinding) -> Self {
-        EnvironmentDisplay { 
-            name: value.name, 
-            parameters: format!("{:?}", value.parameters), 
+        EnvironmentDisplay {
+            name: value.name,
+            parameters: format!("{:?}", value.parameters),
             result: format!("{:?}", value.result),
-            doc_string: value.doc_string }
+            doc_string: value.doc_string,
+        }
     }
 }

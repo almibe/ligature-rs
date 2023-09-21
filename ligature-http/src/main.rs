@@ -47,9 +47,7 @@ async fn lig_handler(
                 Err(err) => (StatusCode::BAD_REQUEST, err.0),
             }
         }
-        Err(err) => {
-            (StatusCode::BAD_REQUEST, err.0)
-        }
+        Err(err) => (StatusCode::BAD_REQUEST, err.0),
     }
 }
 
@@ -61,6 +59,6 @@ async fn handler(
     instance.add_bindings(&mut bindings);
     match run(&query, &mut bindings) {
         Ok(value) => (StatusCode::OK, value.to_string()),
-        Err(err) => (StatusCode::BAD_REQUEST, err.0)
+        Err(err) => (StatusCode::BAD_REQUEST, err.0),
     }
 }

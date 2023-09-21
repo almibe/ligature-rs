@@ -66,10 +66,7 @@ impl Bindings {
         self.scopes.push(current_scope);
     }
 
-    pub fn bind_native_function(
-        &mut self,
-        function: Rc<dyn NativeFunction>,
-    ) {
+    pub fn bind_native_function(&mut self, function: Rc<dyn NativeFunction>) {
         let full_name = format!("{}", function.name());
         self.native_functions
             .borrow_mut()
@@ -96,11 +93,11 @@ impl Bindings {
     }
 
     pub fn read_token_transformer(&self, name: &String) -> Option<Rc<TokenTransformer>> {
-        self.token_transformers.borrow().get(name).cloned()//.map(|value| value.clone())
-        // match self.token_transformers.borrow().get(name) {
-        //     None => None,
-        //     Some(value) => Some(value.clone()),
-        // }
+        self.token_transformers.borrow().get(name).cloned() //.map(|value| value.clone())
+                                                            // match self.token_transformers.borrow().get(name) {
+                                                            //     None => None,
+                                                            //     Some(value) => Some(value.clone()),
+                                                            // }
     }
 
     pub fn bound_names(&self) -> HashSet<String> {

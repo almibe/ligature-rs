@@ -7,8 +7,7 @@ use ligature_graph::Graph;
 use std::{collections::BTreeSet, rc::Rc};
 
 use crate::{
-    bindings::Bindings, lexer::Token, NativeFunction, WanderError, WanderType,
-    WanderValue,
+    bindings::Bindings, lexer::Token, NativeFunction, WanderError, WanderType, WanderValue,
 };
 
 struct EqFunction {}
@@ -563,9 +562,7 @@ impl NativeFunction for EnvironmentFunction {
     }
 }
 
-fn graph_transform(
-    input: &[crate::lexer::Token],
-) -> Result<Vec<crate::lexer::Token>, WanderError> {
+fn graph_transform(input: &[crate::lexer::Token]) -> Result<Vec<crate::lexer::Token>, WanderError> {
     let tokens: Vec<Token> = input.to_owned();
     let statements: Vec<Statement> =
         crate::lig::read_tokens(tokens).map_err(|e| WanderError(e.0))?;
@@ -598,43 +595,23 @@ pub fn common() -> Bindings {
     let mut bindings = Bindings::new();
     bindings.bind_native_function(Rc::new(EqFunction {}));
 
-    bindings.bind_native_function(
-        Rc::new(AssertEqFunction {}),
-    );
+    bindings.bind_native_function(Rc::new(AssertEqFunction {}));
 
     bindings.bind_native_function(Rc::new(AndFunction {}));
     bindings.bind_native_function(Rc::new(NotFunction {}));
 
-    bindings.bind_native_function(
-        Rc::new(EntityFunction {}),
-    );
-    bindings.bind_native_function(
-        Rc::new(AttributeFunction {}),
-    );
-    bindings.bind_native_function(
-        Rc::new(ValueFunction {}),
-    );
+    bindings.bind_native_function(Rc::new(EntityFunction {}));
+    bindings.bind_native_function(Rc::new(AttributeFunction {}));
+    bindings.bind_native_function(Rc::new(ValueFunction {}));
 
     bindings.bind_native_function(Rc::new(AtFunction {}));
 
-    bindings.bind_native_function(
-        Rc::new(EmptyGraphFunction {}),
-    );
-    bindings.bind_native_function(
-        Rc::new(GraphFunction {}),
-    );
-    bindings.bind_native_function(
-        Rc::new(UnionFunction {}),
-    );
-    bindings.bind_native_function(
-        Rc::new(DifferenceFunction {}),
-    );
-    bindings.bind_native_function(
-        Rc::new(StatementsFunction {}),
-    );
-    bindings.bind_native_function(
-        Rc::new(EnvironmentFunction {}),
-    );
+    bindings.bind_native_function(Rc::new(EmptyGraphFunction {}));
+    bindings.bind_native_function(Rc::new(GraphFunction {}));
+    bindings.bind_native_function(Rc::new(UnionFunction {}));
+    bindings.bind_native_function(Rc::new(DifferenceFunction {}));
+    bindings.bind_native_function(Rc::new(StatementsFunction {}));
+    bindings.bind_native_function(Rc::new(EnvironmentFunction {}));
     // bindings.bind_native_function(
     //     "Graph".to_owned(),
     //     "find".to_owned(),

@@ -14,7 +14,7 @@ use std::{
 };
 
 use ligature::{Dataset, Ligature, LigatureError, Query, Statement, Value};
-use wander::{bindings::Bindings, NativeFunction, WanderValue, WanderType, WanderError};
+use wander::{bindings::Bindings, NativeFunction, WanderError, WanderType, WanderValue};
 
 #[derive(Default)]
 pub struct LigatureInMemory {
@@ -67,41 +67,27 @@ impl LigatureInMemory {
     }
 
     pub fn add_bindings(&self, bindings: &mut Bindings) {
-        bindings.bind_native_function(
-            Rc::new(DatasetsFunction {
-                lim: self.datasets.clone(),
-            }),
-        );
-        bindings.bind_native_function(
-            Rc::new(AddDatasetFunction {
-                lim: self.datasets.clone(),
-            }),
-        );
-        bindings.bind_native_function(
-            Rc::new(RemoveDatasetFunction {
-                lim: self.datasets.clone(),
-            }),
-        );
-        bindings.bind_native_function(
-            Rc::new(StatementsFunction {
-                lim: self.datasets.clone(),
-            }),
-        );
-        bindings.bind_native_function(
-            Rc::new(AddStatementsFunction {
-                lim: self.datasets.clone(),
-            }),
-        );
-        bindings.bind_native_function(
-            Rc::new(RemoveStatementsFunction {
-                lim: self.datasets.clone(),
-            }),
-        );
-        bindings.bind_native_function(
-            Rc::new(QueryFunction {
-                lim: self.datasets.clone(),
-            }),
-        );
+        bindings.bind_native_function(Rc::new(DatasetsFunction {
+            lim: self.datasets.clone(),
+        }));
+        bindings.bind_native_function(Rc::new(AddDatasetFunction {
+            lim: self.datasets.clone(),
+        }));
+        bindings.bind_native_function(Rc::new(RemoveDatasetFunction {
+            lim: self.datasets.clone(),
+        }));
+        bindings.bind_native_function(Rc::new(StatementsFunction {
+            lim: self.datasets.clone(),
+        }));
+        bindings.bind_native_function(Rc::new(AddStatementsFunction {
+            lim: self.datasets.clone(),
+        }));
+        bindings.bind_native_function(Rc::new(RemoveStatementsFunction {
+            lim: self.datasets.clone(),
+        }));
+        bindings.bind_native_function(Rc::new(QueryFunction {
+            lim: self.datasets.clone(),
+        }));
     }
 }
 
@@ -109,7 +95,11 @@ struct DatasetsFunction {
     lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
 }
 impl NativeFunction for DatasetsFunction {
-    fn run(&self, arguments: &[WanderValue], _bindings: &Bindings) -> Result<WanderValue, WanderError> {
+    fn run(
+        &self,
+        arguments: &[WanderValue],
+        _bindings: &Bindings,
+    ) -> Result<WanderValue, WanderError> {
         if arguments.is_empty() {
             let datasets = self.lim.read().unwrap();
             let datasets = datasets
@@ -148,7 +138,7 @@ impl NativeFunction for AddDatasetFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
-        _bindings: &Bindings
+        _bindings: &Bindings,
     ) -> Result<wander::WanderValue, WanderError> {
         match arguments {
             [WanderValue::String(name)] => {
@@ -191,7 +181,7 @@ impl NativeFunction for RemoveDatasetFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
-        _bindings: &Bindings
+        _bindings: &Bindings,
     ) -> Result<wander::WanderValue, WanderError> {
         match arguments {
             [WanderValue::String(name)] => {
@@ -233,7 +223,7 @@ impl NativeFunction for StatementsFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
-        _bindings: &Bindings
+        _bindings: &Bindings,
     ) -> Result<wander::WanderValue, WanderError> {
         match arguments {
             [WanderValue::String(name)] => {
@@ -290,7 +280,7 @@ impl NativeFunction for AddStatementsFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
-        _bindings: &Bindings
+        _bindings: &Bindings,
     ) -> Result<wander::WanderValue, WanderError> {
         match arguments {
             [WanderValue::String(name), WanderValue::List(statements)] => {
@@ -386,7 +376,7 @@ impl NativeFunction for RemoveStatementsFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
-        _bindings: &Bindings
+        _bindings: &Bindings,
     ) -> Result<wander::WanderValue, WanderError> {
         match arguments {
             [WanderValue::String(name), WanderValue::List(statements)] => {
@@ -448,7 +438,7 @@ impl NativeFunction for QueryFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
-        _bindings: &Bindings
+        _bindings: &Bindings,
     ) -> Result<wander::WanderValue, WanderError> {
         match arguments {
             [WanderValue::String(name), entity, attribute, value] => {
@@ -540,7 +530,7 @@ impl NativeFunction for QueryFunction {
             WanderType::String,
             WanderType::Optional(Box::new(WanderType::Identifier)),
             WanderType::Optional(Box::new(WanderType::Identifier)),
-            WanderType::Optional(Box::new(WanderType::Value))
+            WanderType::Optional(Box::new(WanderType::Value)),
         ]
     }
 
