@@ -38,9 +38,15 @@ pub trait NativeFunction {
     fn returns(&self) -> WanderType;
 }
 
-pub trait TokenTransformer {
-    fn transform(&self, input: &[Token]) -> Result<Vec<Token>, WanderError>;
+pub struct HostFunction {
+    pub name: String,
+    pub parameters: Vec<WanderType>,
+    pub result: WanderType,
+    pub doc_string: String,
+    pub function: fn(&[WanderValue], &Bindings) -> Result<WanderValue, WanderError>
 }
+
+pub type TokenTransformer = fn(&[Token]) -> Result<Vec<Token>, WanderError>;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum WanderType {

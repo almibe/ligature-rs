@@ -7,7 +7,7 @@ use ligature_graph::Graph;
 use std::{collections::BTreeSet, rc::Rc};
 
 use crate::{
-    bindings::Bindings, lexer::Token, NativeFunction, TokenTransformer, WanderError, WanderType,
+    bindings::Bindings, lexer::Token, NativeFunction, WanderError, WanderType,
     WanderValue,
 };
 
@@ -507,37 +507,33 @@ impl NativeFunction for EnvironmentFunction {
     }
 }
 
-struct GraphTransformer {}
-impl TokenTransformer for GraphTransformer {
-    fn transform(
-        &self,
-        input: &[crate::lexer::Token],
-    ) -> Result<Vec<crate::lexer::Token>, WanderError> {
-        let tokens: Vec<Token> = input.to_owned();
-        let statements: Vec<Statement> =
-            crate::lig::read_tokens(tokens).map_err(|e| WanderError(e.0))?;
-        let mut results = vec![];
-        results.append(&mut vec![
-            Token::Name("Graph.graph".to_owned()),
-            Token::OpenParen,
-            Token::OpenSquare,
-        ]);
-        for statement in statements {
-            results.push(Token::OpenParen);
-            results.push(Token::Identifier(statement.entity));
-            results.push(Token::Identifier(statement.attribute));
-            match statement.value {
-                Value::Identifier(value) => results.push(Token::Identifier(value)),
-                Value::String(value) => results.push(Token::String(value)),
-                Value::Integer(value) => results.push(Token::Int(value)),
-                Value::Bytes(_) => todo!(),
-            }
-            results.push(Token::CloseParen);
+fn graph_transform(
+    input: &[crate::lexer::Token],
+) -> Result<Vec<crate::lexer::Token>, WanderError> {
+    let tokens: Vec<Token> = input.to_owned();
+    let statements: Vec<Statement> =
+        crate::lig::read_tokens(tokens).map_err(|e| WanderError(e.0))?;
+    let mut results = vec![];
+    results.append(&mut vec![
+        Token::Name("Graph.graph".to_owned()),
+        Token::OpenParen,
+        Token::OpenSquare,
+    ]);
+    for statement in statements {
+        results.push(Token::OpenParen);
+        results.push(Token::Identifier(statement.entity));
+        results.push(Token::Identifier(statement.attribute));
+        match statement.value {
+            Value::Identifier(value) => results.push(Token::Identifier(value)),
+            Value::String(value) => results.push(Token::String(value)),
+            Value::Integer(value) => results.push(Token::Int(value)),
+            Value::Bytes(_) => todo!(),
         }
-        results.push(Token::CloseSquare);
         results.push(Token::CloseParen);
-        Ok(results)
     }
+    results.push(Token::CloseSquare);
+    results.push(Token::CloseParen);
+    Ok(results)
 }
 
 /// Creates a set of Bindings for Wander that consists of all of the common
@@ -612,7 +608,7 @@ pub fn common() -> Bindings {
     bindings.bind_token_transformer(
         "Graph".to_owned(),
         "graph".to_owned(),
-        Rc::new(GraphTransformer {}),
+        Rc::new(graph_transform),
     );
     bindings
 }

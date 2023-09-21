@@ -144,7 +144,7 @@ pub fn transform(input: &[Token], bindings: &Bindings) -> Result<Vec<Token>, Wan
             index += 1; //skip first `
             while let Some(token) = input.get(index) {
                 if token == &Token::Backtick {
-                    let transformed_content = transformer.transform(&internal_results).unwrap();
+                    let transformed_content = transformer(&internal_results).unwrap();
                     results.append(&mut transformed_content.to_vec());
                     break;
                 } else {

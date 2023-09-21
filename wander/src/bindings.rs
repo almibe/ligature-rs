@@ -11,7 +11,7 @@ use std::{
 
 #[derive(Default)]
 pub struct Bindings {
-    token_transformers: RefCell<HashMap<String, Rc<dyn TokenTransformer>>>,
+    token_transformers: RefCell<HashMap<String, Rc<TokenTransformer>>>,
     native_functions: RefCell<HashMap<String, Rc<dyn NativeFunction>>>,
     scopes: Vec<HashMap<String, WanderValue>>,
 }
@@ -89,7 +89,7 @@ impl Bindings {
         &mut self,
         module: String,
         name: String,
-        transformer: Rc<dyn TokenTransformer>,
+        transformer: Rc<TokenTransformer>,
     ) {
         let full_name = format!("{module}.{name}");
         self.token_transformers
@@ -97,7 +97,7 @@ impl Bindings {
             .insert(full_name, transformer);
     }
 
-    pub fn read_token_transformer(&self, name: &String) -> Option<Rc<dyn TokenTransformer>> {
+    pub fn read_token_transformer(&self, name: &String) -> Option<Rc<TokenTransformer>> {
         match self.token_transformers.borrow().get(name) {
             None => None,
             Some(value) => Some(value.clone()),

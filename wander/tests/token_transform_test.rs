@@ -6,30 +6,21 @@ use std::rc::Rc;
 use wander::preludes::common;
 use wander::{lexer::Token, run, ScriptValue, TokenTransformer, WanderError};
 
-struct EmptyTransformer {}
-impl TokenTransformer for EmptyTransformer {
-    fn transform(&self, _input: &[Token]) -> Result<Vec<Token>, WanderError> {
-        Ok(vec![])
-    }
+fn empty_transform(_input: &[Token]) -> Result<Vec<Token>, WanderError> {
+    Ok(vec![])
 }
 
-struct NothingTransformer {}
-impl TokenTransformer for NothingTransformer {
-    fn transform(&self, _input: &[Token]) -> Result<Vec<Token>, WanderError> {
-        Ok([Token::Nothing].to_vec())
-    }
+fn nothing_transform(_input: &[Token]) -> Result<Vec<Token>, WanderError> {
+    Ok([Token::Nothing].to_vec())
 }
 
-struct UpperCaseTransformer {}
-impl TokenTransformer for UpperCaseTransformer {
-    fn transform(&self, input: &[Token]) -> Result<Vec<Token>, WanderError> {
-        if let Some(Token::String(value)) = input.get(0) {
-            let t = value.clone().to_ascii_uppercase();
-            let t = Token::String(t);
-            Ok(vec![t])
-        } else {
-            panic!()
-        }
+fn upper_case_transform(input: &[Token]) -> Result<Vec<Token>, WanderError> {
+    if let Some(Token::String(value)) = input.get(0) {
+        let t = value.clone().to_ascii_uppercase();
+        let t = Token::String(t);
+        Ok(vec![t])
+    } else {
+        panic!()
     }
 }
 
@@ -40,7 +31,7 @@ fn empty_transformer_no_input_test() {
     bindings.bind_token_transformer(
         "Empty".to_owned(),
         "empty".to_owned(),
-        Rc::new(EmptyTransformer {}),
+        Rc::new(empty_transform),
     );
     let res = run(input, &mut bindings);
     let expected = Ok(ScriptValue::Nothing);
@@ -54,7 +45,7 @@ fn token_transformer_no_input_test() {
     bindings.bind_token_transformer(
         "None".to_owned(),
         "none".to_owned(),
-        Rc::new(NothingTransformer {}),
+        Rc::new(nothing_transform),
     );
     let res = run(input, &mut bindings);
     let expected = Ok(ScriptValue::Nothing);
@@ -68,7 +59,7 @@ fn token_transformer_none() {
     bindings.bind_token_transformer(
         "None".to_owned(),
         "none".to_owned(),
-        Rc::new(NothingTransformer {}),
+        Rc::new(nothing_transform),
     );
     let res = run(input, &mut bindings);
     let expected = Ok(ScriptValue::Nothing);
@@ -82,7 +73,7 @@ fn token_transformer_upper() {
     bindings.bind_token_transformer(
         "Case".to_owned(),
         "upper".to_owned(),
-        Rc::new(UpperCaseTransformer {}),
+        Rc::new(upper_case_transform),
     );
     let res = run(input, &mut bindings);
     let expected = Ok(ScriptValue::String("TEST".to_owned()));
