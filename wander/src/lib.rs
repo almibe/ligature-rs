@@ -27,7 +27,7 @@ pub mod translation;
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct WanderError(pub String);
 
-pub trait NativeFunction {
+pub trait HostFunction {
     fn run(
         &self,
         arguments: &[WanderValue],

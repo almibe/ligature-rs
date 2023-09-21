@@ -14,7 +14,7 @@ use std::{
 };
 
 use ligature::{Dataset, Ligature, LigatureError, Query, Statement, Value};
-use wander::{bindings::Bindings, NativeFunction, WanderError, WanderType, WanderValue};
+use wander::{bindings::Bindings, HostFunction, WanderError, WanderType, WanderValue};
 
 #[derive(Default)]
 pub struct LigatureInMemory {
@@ -67,25 +67,25 @@ impl LigatureInMemory {
     }
 
     pub fn add_bindings(&self, bindings: &mut Bindings) {
-        bindings.bind_native_function(Rc::new(DatasetsFunction {
+        bindings.bind_host_function(Rc::new(DatasetsFunction {
             lim: self.datasets.clone(),
         }));
-        bindings.bind_native_function(Rc::new(AddDatasetFunction {
+        bindings.bind_host_function(Rc::new(AddDatasetFunction {
             lim: self.datasets.clone(),
         }));
-        bindings.bind_native_function(Rc::new(RemoveDatasetFunction {
+        bindings.bind_host_function(Rc::new(RemoveDatasetFunction {
             lim: self.datasets.clone(),
         }));
-        bindings.bind_native_function(Rc::new(StatementsFunction {
+        bindings.bind_host_function(Rc::new(StatementsFunction {
             lim: self.datasets.clone(),
         }));
-        bindings.bind_native_function(Rc::new(AddStatementsFunction {
+        bindings.bind_host_function(Rc::new(AddStatementsFunction {
             lim: self.datasets.clone(),
         }));
-        bindings.bind_native_function(Rc::new(RemoveStatementsFunction {
+        bindings.bind_host_function(Rc::new(RemoveStatementsFunction {
             lim: self.datasets.clone(),
         }));
-        bindings.bind_native_function(Rc::new(QueryFunction {
+        bindings.bind_host_function(Rc::new(QueryFunction {
             lim: self.datasets.clone(),
         }));
     }
@@ -94,7 +94,7 @@ impl LigatureInMemory {
 struct DatasetsFunction {
     lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
 }
-impl NativeFunction for DatasetsFunction {
+impl HostFunction for DatasetsFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
@@ -134,7 +134,7 @@ impl NativeFunction for DatasetsFunction {
 struct AddDatasetFunction {
     lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
 }
-impl NativeFunction for AddDatasetFunction {
+impl HostFunction for AddDatasetFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
@@ -177,7 +177,7 @@ impl NativeFunction for AddDatasetFunction {
 struct RemoveDatasetFunction {
     lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
 }
-impl NativeFunction for RemoveDatasetFunction {
+impl HostFunction for RemoveDatasetFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
@@ -219,7 +219,7 @@ impl NativeFunction for RemoveDatasetFunction {
 struct StatementsFunction {
     lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
 }
-impl NativeFunction for StatementsFunction {
+impl HostFunction for StatementsFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
@@ -276,7 +276,7 @@ impl NativeFunction for StatementsFunction {
 struct AddStatementsFunction {
     lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
 }
-impl NativeFunction for AddStatementsFunction {
+impl HostFunction for AddStatementsFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
@@ -372,7 +372,7 @@ fn value_to_wander_value(value: &Value) -> WanderValue {
 struct RemoveStatementsFunction {
     lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
 }
-impl NativeFunction for RemoveStatementsFunction {
+impl HostFunction for RemoveStatementsFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
@@ -434,7 +434,7 @@ impl NativeFunction for RemoveStatementsFunction {
 struct QueryFunction {
     lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
 }
-impl NativeFunction for QueryFunction {
+impl HostFunction for QueryFunction {
     fn run(
         &self,
         arguments: &[WanderValue],

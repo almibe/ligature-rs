@@ -151,7 +151,7 @@ fn read_name(name: &String, bindings: &mut Bindings) -> Result<WanderValue, Wand
     if let Some(value) = bindings.read(name) {
         Ok(value)
     } else {
-        match bindings.read_native_function(name) {
+        match bindings.read_host_function(name) {
             Some(_) => Ok(WanderValue::NativeFunction(name.to_owned())),
             None => Err(WanderError(format!("Error looking up {name}"))),
         }
@@ -173,7 +173,7 @@ fn call_function(
     match bindings.read(name) {
         //corner case of this name shadowing with a native function
         Some(WanderValue::NativeFunction(nf_name)) => {
-            match bindings.read_native_function(&nf_name) {
+            match bindings.read_host_function(&nf_name) {
                 Some(nf) => nf.run(&argument_values, bindings),
                 None => Err(WanderError(
                     "Could not read function {name} that references NativeFunction {nf_name}"
@@ -204,7 +204,7 @@ fn call_function(
         }
         //found other value (err), will evntually handle lambdas here
         Some(_) => Err(WanderError(format!("Function {} is not defined.", &name))),
-        None => match bindings.read_native_function(name) {
+        None => match bindings.read_host_function(name) {
             None => Err(WanderError(format!("Function {} is not defined.", name))),
             Some(nf) => nf.run(&argument_values, bindings),
         },

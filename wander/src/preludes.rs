@@ -7,11 +7,11 @@ use ligature_graph::Graph;
 use std::{collections::BTreeSet, rc::Rc};
 
 use crate::{
-    bindings::Bindings, lexer::Token, NativeFunction, WanderError, WanderType, WanderValue,
+    bindings::Bindings, lexer::Token, HostFunction, WanderError, WanderType, WanderValue,
 };
 
 struct EqFunction {}
-impl NativeFunction for EqFunction {
+impl HostFunction for EqFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
@@ -44,7 +44,7 @@ impl NativeFunction for EqFunction {
 }
 
 struct AssertEqFunction {}
-impl NativeFunction for AssertEqFunction {
+impl HostFunction for AssertEqFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
@@ -81,7 +81,7 @@ impl NativeFunction for AssertEqFunction {
 }
 
 struct AndFunction {}
-impl NativeFunction for AndFunction {
+impl HostFunction for AndFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
@@ -114,7 +114,7 @@ impl NativeFunction for AndFunction {
 }
 
 struct NotFunction {}
-impl NativeFunction for NotFunction {
+impl HostFunction for NotFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
@@ -147,7 +147,7 @@ impl NativeFunction for NotFunction {
 }
 
 struct EntityFunction {}
-impl NativeFunction for EntityFunction {
+impl HostFunction for EntityFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
@@ -186,7 +186,7 @@ impl NativeFunction for EntityFunction {
 }
 
 struct AttributeFunction {}
-impl NativeFunction for AttributeFunction {
+impl HostFunction for AttributeFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
@@ -225,7 +225,7 @@ impl NativeFunction for AttributeFunction {
 }
 
 struct ValueFunction {}
-impl NativeFunction for ValueFunction {
+impl HostFunction for ValueFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
@@ -264,7 +264,7 @@ impl NativeFunction for ValueFunction {
 }
 
 struct AtFunction {}
-impl NativeFunction for AtFunction {
+impl HostFunction for AtFunction {
     fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, WanderError> {
         if let [WanderValue::Int(index), WanderValue::List(value)] = arguments {
             let index: usize = index.to_owned().try_into().unwrap();
@@ -300,7 +300,7 @@ impl NativeFunction for AtFunction {
 }
 
 struct GraphFunction {}
-impl NativeFunction for GraphFunction {
+impl HostFunction for GraphFunction {
     fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, WanderError> {
         match arguments {
             [WanderValue::List(statements)] => {
@@ -363,7 +363,7 @@ impl NativeFunction for GraphFunction {
 }
 
 struct EmptyGraphFunction {}
-impl NativeFunction for EmptyGraphFunction {
+impl HostFunction for EmptyGraphFunction {
     fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, WanderError> {
         match arguments {
             [] => Ok(WanderValue::Graph(Graph::default())),
@@ -391,7 +391,7 @@ impl NativeFunction for EmptyGraphFunction {
 }
 
 struct UnionFunction {}
-impl NativeFunction for UnionFunction {
+impl HostFunction for UnionFunction {
     fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, WanderError> {
         match arguments {
             [WanderValue::Graph(g1), WanderValue::Graph(g2)] => {
@@ -421,7 +421,7 @@ impl NativeFunction for UnionFunction {
 }
 
 struct DifferenceFunction {}
-impl NativeFunction for DifferenceFunction {
+impl HostFunction for DifferenceFunction {
     fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, WanderError> {
         match arguments {
             [WanderValue::Graph(g1), WanderValue::Graph(g2)] => {
@@ -451,7 +451,7 @@ impl NativeFunction for DifferenceFunction {
 }
 
 struct StatementsFunction {}
-impl NativeFunction for StatementsFunction {
+impl HostFunction for StatementsFunction {
     fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, WanderError> {
         match arguments {
             [WanderValue::Graph(graph)] => {
@@ -508,7 +508,7 @@ impl NativeFunction for StatementsFunction {
 // }
 
 struct EnvironmentFunction {}
-impl NativeFunction for EnvironmentFunction {
+impl HostFunction for EnvironmentFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
@@ -593,25 +593,25 @@ fn graph_transform(input: &[crate::lexer::Token]) -> Result<Vec<crate::lexer::To
 /// functionality, but doesn't interact with an instance of Ligature.
 pub fn common() -> Bindings {
     let mut bindings = Bindings::new();
-    bindings.bind_native_function(Rc::new(EqFunction {}));
+    bindings.bind_host_function(Rc::new(EqFunction {}));
 
-    bindings.bind_native_function(Rc::new(AssertEqFunction {}));
+    bindings.bind_host_function(Rc::new(AssertEqFunction {}));
 
-    bindings.bind_native_function(Rc::new(AndFunction {}));
-    bindings.bind_native_function(Rc::new(NotFunction {}));
+    bindings.bind_host_function(Rc::new(AndFunction {}));
+    bindings.bind_host_function(Rc::new(NotFunction {}));
 
-    bindings.bind_native_function(Rc::new(EntityFunction {}));
-    bindings.bind_native_function(Rc::new(AttributeFunction {}));
-    bindings.bind_native_function(Rc::new(ValueFunction {}));
+    bindings.bind_host_function(Rc::new(EntityFunction {}));
+    bindings.bind_host_function(Rc::new(AttributeFunction {}));
+    bindings.bind_host_function(Rc::new(ValueFunction {}));
 
-    bindings.bind_native_function(Rc::new(AtFunction {}));
+    bindings.bind_host_function(Rc::new(AtFunction {}));
 
-    bindings.bind_native_function(Rc::new(EmptyGraphFunction {}));
-    bindings.bind_native_function(Rc::new(GraphFunction {}));
-    bindings.bind_native_function(Rc::new(UnionFunction {}));
-    bindings.bind_native_function(Rc::new(DifferenceFunction {}));
-    bindings.bind_native_function(Rc::new(StatementsFunction {}));
-    bindings.bind_native_function(Rc::new(EnvironmentFunction {}));
+    bindings.bind_host_function(Rc::new(EmptyGraphFunction {}));
+    bindings.bind_host_function(Rc::new(GraphFunction {}));
+    bindings.bind_host_function(Rc::new(UnionFunction {}));
+    bindings.bind_host_function(Rc::new(DifferenceFunction {}));
+    bindings.bind_host_function(Rc::new(StatementsFunction {}));
+    bindings.bind_host_function(Rc::new(EnvironmentFunction {}));
     // bindings.bind_native_function(
     //     "Graph".to_owned(),
     //     "find".to_owned(),

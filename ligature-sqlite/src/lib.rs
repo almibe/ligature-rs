@@ -19,7 +19,7 @@ use rusqlite::{params, Connection, Error, Transaction};
 use sql_builder::{quote, SqlBuilder};
 use wander::{
     bindings::{Bindings, BindingsProvider},
-    NativeFunction, WanderError, WanderType, WanderValue,
+    HostFunction, WanderError, WanderType, WanderValue,
 };
 
 #[derive(Clone)]
@@ -237,22 +237,22 @@ impl Ligature for LigatureSQLite {
 
 impl BindingsProvider for LigatureSQLite {
     fn add_bindings(&self, bindings: &mut Bindings) {
-        bindings.bind_native_function(Rc::new(DatasetsFunction {
+        bindings.bind_host_function(Rc::new(DatasetsFunction {
             instance: Arc::new(Mutex::new(self.clone())),
         }));
-        bindings.bind_native_function(Rc::new(AddDatasetFunction {
+        bindings.bind_host_function(Rc::new(AddDatasetFunction {
             instance: Arc::new(Mutex::new(self.clone())),
         }));
-        bindings.bind_native_function(Rc::new(RemoveDatasetFunction {
+        bindings.bind_host_function(Rc::new(RemoveDatasetFunction {
             instance: Arc::new(Mutex::new(self.clone())),
         }));
-        bindings.bind_native_function(Rc::new(StatementsFunction {
+        bindings.bind_host_function(Rc::new(StatementsFunction {
             instance: Arc::new(Mutex::new(self.clone())),
         }));
-        bindings.bind_native_function(Rc::new(AddStatementsFunction {
+        bindings.bind_host_function(Rc::new(AddStatementsFunction {
             instance: Arc::new(Mutex::new(self.clone())),
         }));
-        bindings.bind_native_function(Rc::new(RemoveStatementsFunction {
+        bindings.bind_host_function(Rc::new(RemoveStatementsFunction {
             instance: Arc::new(Mutex::new(self.clone())),
         }));
         // bindings.bind_native_function(
@@ -269,7 +269,7 @@ impl BindingsProvider for LigatureSQLite {
 struct DatasetsFunction {
     instance: Arc<Mutex<dyn Ligature>>,
 }
-impl NativeFunction for DatasetsFunction {
+impl HostFunction for DatasetsFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
@@ -309,7 +309,7 @@ impl NativeFunction for DatasetsFunction {
 struct AddDatasetFunction {
     instance: Arc<Mutex<LigatureSQLite>>,
 }
-impl NativeFunction for AddDatasetFunction {
+impl HostFunction for AddDatasetFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
@@ -348,7 +348,7 @@ impl NativeFunction for AddDatasetFunction {
 struct RemoveDatasetFunction {
     instance: Arc<Mutex<LigatureSQLite>>,
 }
-impl NativeFunction for RemoveDatasetFunction {
+impl HostFunction for RemoveDatasetFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
@@ -387,7 +387,7 @@ impl NativeFunction for RemoveDatasetFunction {
 struct StatementsFunction {
     instance: Arc<Mutex<LigatureSQLite>>,
 }
-impl NativeFunction for StatementsFunction {
+impl HostFunction for StatementsFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
@@ -468,7 +468,7 @@ fn wander_value_to_statement(values: &Vec<WanderValue>) -> Result<Vec<Statement>
 struct AddStatementsFunction {
     instance: Arc<Mutex<LigatureSQLite>>,
 }
-impl NativeFunction for AddStatementsFunction {
+impl HostFunction for AddStatementsFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
@@ -509,7 +509,7 @@ impl NativeFunction for AddStatementsFunction {
 struct RemoveStatementsFunction {
     instance: Arc<Mutex<dyn Ligature>>,
 }
-impl NativeFunction for RemoveStatementsFunction {
+impl HostFunction for RemoveStatementsFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
@@ -566,7 +566,7 @@ struct QueryFunction {
     _instance: Arc<Mutex<LigatureSQLite>>,
     connection: Arc<Mutex<Connection>>,
 }
-impl NativeFunction for QueryFunction {
+impl HostFunction for QueryFunction {
     fn run(
         &self,
         arguments: &[WanderValue],

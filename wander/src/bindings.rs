@@ -2,7 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use crate::{NativeFunction, TokenTransformer, WanderType, WanderValue};
+use crate::{HostFunction, TokenTransformer, WanderType, WanderValue};
 use std::{
     cell::RefCell,
     collections::{HashMap, HashSet},
@@ -12,7 +12,7 @@ use std::{
 #[derive(Default)]
 pub struct Bindings {
     token_transformers: RefCell<HashMap<String, Rc<TokenTransformer>>>,
-    native_functions: RefCell<HashMap<String, Rc<dyn NativeFunction>>>,
+    host_functions: RefCell<HashMap<String, Rc<dyn HostFunction>>>,
     scopes: Vec<HashMap<String, WanderValue>>,
 }
 
@@ -31,7 +31,7 @@ impl Bindings {
     pub fn new() -> Bindings {
         Bindings {
             token_transformers: RefCell::new(HashMap::new()),
-            native_functions: RefCell::new(HashMap::new()),
+            host_functions: RefCell::new(HashMap::new()),
             scopes: vec![HashMap::new()],
         }
     }
@@ -66,15 +66,15 @@ impl Bindings {
         self.scopes.push(current_scope);
     }
 
-    pub fn bind_native_function(&mut self, function: Rc<dyn NativeFunction>) {
+    pub fn bind_host_function(&mut self, function: Rc<dyn HostFunction>) {
         let full_name = format!("{}", function.name());
-        self.native_functions
+        self.host_functions
             .borrow_mut()
             .insert(full_name, function);
     }
 
-    pub fn read_native_function(&self, name: &String) -> Option<Rc<dyn NativeFunction>> {
-        match self.native_functions.borrow().get(name) {
+    pub fn read_host_function(&self, name: &String) -> Option<Rc<dyn HostFunction>> {
+        match self.host_functions.borrow().get(name) {
             None => None,
             Some(value) => Some(value.clone()),
         }
@@ -93,16 +93,12 @@ impl Bindings {
     }
 
     pub fn read_token_transformer(&self, name: &String) -> Option<Rc<TokenTransformer>> {
-        self.token_transformers.borrow().get(name).cloned() //.map(|value| value.clone())
-                                                            // match self.token_transformers.borrow().get(name) {
-                                                            //     None => None,
-                                                            //     Some(value) => Some(value.clone()),
-                                                            // }
+        self.token_transformers.borrow().get(name).cloned()
     }
 
     pub fn bound_names(&self) -> HashSet<String> {
         let mut names = HashSet::new();
-        for native_function in self.native_functions.borrow().keys() {
+        for native_function in self.host_functions.borrow().keys() {
             names.insert(native_function.clone());
         }
         for scope in self.scopes.iter() {
@@ -115,7 +111,7 @@ impl Bindings {
 
     pub fn environment(&self) -> Vec<EnvironmentBinding> {
         let mut env_bindings = Vec::new();
-        for native_function in self.native_functions.borrow().iter() {
+        for native_function in self.host_functions.borrow().iter() {
             let binding = EnvironmentBinding {
                 name: native_function.0.to_owned(),
                 doc_string: native_function.1.doc(),
