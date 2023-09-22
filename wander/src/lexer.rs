@@ -25,6 +25,12 @@ pub enum Token {
     #[token(".")]
     Period,
 
+    #[token(":")]
+    Colon,
+
+    #[token("::")]
+    DoubleColon,
+
     #[regex("-?[0-9]+", int)]
     Int(i64),
 

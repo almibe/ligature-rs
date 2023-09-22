@@ -67,7 +67,7 @@ impl Bindings {
     }
 
     pub fn bind_host_function(&mut self, function: Rc<dyn HostFunction>) {
-        let full_name = format!("{}", function.name());
+        let full_name = function.name().to_string();
         self.host_functions.borrow_mut().insert(full_name, function);
     }
 

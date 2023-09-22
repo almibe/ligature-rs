@@ -17,3 +17,4 @@ gaze = "0.5.0"
 serde = { version = "1.0", features = ["derive"] }
 ligature-graph = { path = "../ligature-graph" }
 hex = "0.4"
+rpds = "1.0.1"

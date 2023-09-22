@@ -5,7 +5,7 @@
 use ligature::{Identifier, Statement, Value};
 use ligature_graph::Graph;
 use std::collections::BTreeSet;
-use wander::{preludes::common, run, ScriptValue};
+use wander::{preludes::common, run, WanderValue};
 
 #[test]
 fn read_write_test_strings() {
@@ -14,7 +14,7 @@ fn read_write_test_strings() {
         "\"hello, world\"".to_owned(),
         "\"hello,\\nworld\"".to_owned(),
     ];
-    let res: Vec<ScriptValue> = input
+    let res: Vec<WanderValue> = input
         .iter()
         .map(|s| run(s, &mut common()).unwrap())
         .collect();
@@ -55,6 +55,6 @@ fn read_write_test_strings_in_graph() {
         attribute: Identifier::new("b").unwrap(),
         value: Value::String("\"hello,\nworld\"".to_owned()),
     });
-    let expected = ScriptValue::Graph(Graph::new(statements));
+    let expected = WanderValue::Graph(Graph::new(statements));
     assert_eq!(res, expected);
 }

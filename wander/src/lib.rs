@@ -4,7 +4,10 @@
 
 //! This module is an implementation of the Wander scripting language.
 
-use std::fmt::{Display, Write};
+use std::{
+    collections::HashMap,
+    fmt::{Display, Write},
+};
 
 use bindings::Bindings;
 use hex::encode;
@@ -59,7 +62,7 @@ pub enum WanderType {
     Optional(Box<WanderType>),
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub enum WanderValue {
     Boolean(bool),
     Int(i64),
@@ -71,58 +74,7 @@ pub enum WanderValue {
     Lambda(Vec<String>, Vec<Element>),
     List(Vec<WanderValue>),
     Tuple(Vec<WanderValue>),
-    Graph(Graph),
-}
-
-impl WanderValue {
-    pub fn to_script_value(&self) -> Result<ScriptValue, WanderError> {
-        match self {
-            WanderValue::Boolean(value) => Ok(ScriptValue::Boolean(value.to_owned())),
-            WanderValue::Int(value) => Ok(ScriptValue::Int(value.to_owned())),
-            WanderValue::String(value) => Ok(ScriptValue::String(value.to_owned())),
-            WanderValue::Identifier(value) => Ok(ScriptValue::Identifier(value.to_owned())),
-            WanderValue::Nothing => Ok(ScriptValue::Nothing),
-            WanderValue::NativeFunction(_) => Err(WanderError(
-                "Cannot convert NativeFunction to ScriptValue.".to_owned(),
-            )),
-            WanderValue::Lambda(_, _) => Err(WanderError(
-                "Cannot convert Lambda to ScriptValue.".to_owned(),
-            )),
-            WanderValue::List(values) => {
-                let mut script_values = vec![];
-                for value in values {
-                    match value.to_script_value() {
-                        Ok(value) => script_values.push(value),
-                        Err(err) => return Err(err),
-                    }
-                }
-                Ok(ScriptValue::List(script_values))
-            }
-            WanderValue::Tuple(values) => {
-                let mut script_values = vec![];
-                for value in values {
-                    match value.to_script_value() {
-                        Ok(value) => script_values.push(value),
-                        Err(err) => return Err(err),
-                    }
-                }
-                Ok(ScriptValue::Tuple(script_values))
-            }
-            WanderValue::Graph(graph) => Ok(ScriptValue::Graph(graph.clone())),
-        }
-    }
-}
-
-/// A ScriptValue is a subset of WanderValue that can be returned from a script.
-#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
-pub enum ScriptValue {
-    Boolean(bool),
-    Int(i64),
-    String(String),
-    Identifier(Identifier),
-    Nothing,
-    List(Vec<ScriptValue>),
-    Tuple(Vec<ScriptValue>),
+    Record(HashMap<String, WanderValue>),
     Graph(Graph),
 }
 
@@ -206,22 +158,20 @@ fn write_graph(graph: &Graph, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Resu
     f.write_str("`")
 }
 
-fn write_list_or_tuple_script_value(
-    open: char,
-    close: char,
-    contents: &Vec<ScriptValue>,
+fn write_record(
+    contents: &HashMap<String, WanderValue>,
     f: &mut std::fmt::Formatter<'_>,
 ) -> std::fmt::Result {
-    write!(f, "{open}").unwrap();
+    write!(f, "(").unwrap();
     let mut i = 0;
-    for value in contents {
-        write!(f, "{value}").unwrap();
+    for (name, value) in contents {
+        write!(f, "{name}: {value}").unwrap();
         i += 1;
         if i < contents.len() {
             write!(f, " ").unwrap();
         }
     }
-    write!(f, "{close}")
+    write!(f, ")")
 }
 
 impl Display for WanderValue {
@@ -237,30 +187,15 @@ impl Display for WanderValue {
             WanderValue::Lambda(_, _) => write!(f, "[lambda]"),
             WanderValue::Graph(graph) => write_graph(graph, f),
             WanderValue::Tuple(contents) => write_list_or_tuple_wander_value('(', ')', contents, f),
+            WanderValue::Record(values) => write_record(values, f),
         }
     }
 }
 
-impl Display for ScriptValue {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ScriptValue::Boolean(value) => write!(f, "{}", value),
-            ScriptValue::Int(value) => write!(f, "{}", value),
-            ScriptValue::String(value) => f.write_str(&write_string(value)),
-            ScriptValue::Identifier(value) => write!(f, "{}", value),
-            ScriptValue::Nothing => write!(f, "nothing"),
-            ScriptValue::List(contents) => write_list_or_tuple_script_value('[', ']', contents, f),
-            ScriptValue::Graph(graph) => write_graph(graph, f),
-            ScriptValue::Tuple(contents) => write_list_or_tuple_script_value('(', ')', contents, f),
-        }
-    }
-}
-
-pub fn run(script: &str, bindings: &mut Bindings) -> Result<ScriptValue, WanderError> {
+pub fn run(script: &str, bindings: &mut Bindings) -> Result<WanderValue, WanderError> {
     let tokens = tokenize(script)?;
     let tokens = transform(&tokens, bindings)?;
     let elements = parse(tokens)?;
     let elements = translate(elements)?;
-    let eval_result = eval(&elements, bindings)?;
-    eval_result.to_script_value()
+    eval(&elements, bindings)
 }

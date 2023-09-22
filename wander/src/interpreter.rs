@@ -2,6 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+use std::collections::HashMap;
+
 use crate::bindings::Bindings;
 use crate::parser::Element;
 use crate::{WanderError, WanderValue};
@@ -33,6 +35,7 @@ pub fn eval_element(
         Element::Nothing => Ok(WanderValue::Nothing),
         Element::Forward => panic!("Should never reach."),
         Element::Tuple(values) => handle_tuple(values, bindings),
+        Element::Record(values) => handle_record(values, bindings),
     }
 }
 
@@ -91,6 +94,20 @@ fn handle_tuple(
         }
     }
     Ok(WanderValue::Tuple(results))
+}
+
+fn handle_record(
+    elements: &HashMap<String, Element>,
+    bindings: &mut Bindings,
+) -> Result<WanderValue, WanderError> {
+    let mut results = HashMap::new();
+    for (name, element) in elements {
+        match eval_element(element, bindings) {
+            Ok(value) => results.insert(name.to_owned(), value),
+            Err(err) => return Err(err),
+        };
+    }
+    Ok(WanderValue::Record(results))
 }
 
 fn handle_list(

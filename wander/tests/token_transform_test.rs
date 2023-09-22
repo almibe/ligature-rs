@@ -4,7 +4,7 @@
 
 use std::rc::Rc;
 use wander::preludes::common;
-use wander::{lexer::Token, run, ScriptValue, TokenTransformer, WanderError};
+use wander::{lexer::Token, run, TokenTransformer, WanderError, WanderValue};
 
 fn empty_transform(_input: &[Token]) -> Result<Vec<Token>, WanderError> {
     Ok(vec![])
@@ -34,7 +34,7 @@ fn empty_transformer_no_input_test() {
         Rc::new(empty_transform),
     );
     let res = run(input, &mut bindings);
-    let expected = Ok(ScriptValue::Nothing);
+    let expected = Ok(WanderValue::Nothing);
     assert_eq!(res, expected);
 }
 
@@ -48,7 +48,7 @@ fn token_transformer_no_input_test() {
         Rc::new(nothing_transform),
     );
     let res = run(input, &mut bindings);
-    let expected = Ok(ScriptValue::Nothing);
+    let expected = Ok(WanderValue::Nothing);
     assert_eq!(res, expected);
 }
 
@@ -62,7 +62,7 @@ fn token_transformer_none() {
         Rc::new(nothing_transform),
     );
     let res = run(input, &mut bindings);
-    let expected = Ok(ScriptValue::Nothing);
+    let expected = Ok(WanderValue::Nothing);
     assert_eq!(res, expected);
 }
 
@@ -76,7 +76,7 @@ fn token_transformer_upper() {
         Rc::new(upper_case_transform),
     );
     let res = run(input, &mut bindings);
-    let expected = Ok(ScriptValue::String("TEST".to_owned()));
+    let expected = Ok(WanderValue::String("TEST".to_owned()));
     assert_eq!(res, expected);
 }
 

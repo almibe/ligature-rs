@@ -2,12 +2,15 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+use std::collections::HashMap;
+
 use gaze::Gaze;
 use ligature::Identifier;
+use serde::{Deserialize, Serialize};
 
 use crate::{lexer::Token, WanderError};
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 pub enum Element {
     Boolean(bool),
     Int(i64),
@@ -21,6 +24,7 @@ pub enum Element {
     Lambda(Vec<String>, Vec<Element>),
     Tuple(Vec<Element>),
     List(Vec<Element>),
+    Record(HashMap<String, Element>),
     Nothing,
     Forward,
 }
@@ -192,6 +196,30 @@ fn list(gaze: &mut Gaze<Token>) -> Option<Element> {
     }
 }
 
+fn record(gaze: &mut Gaze<Token>) -> Option<Element> {
+    match gaze.next() {
+        Some(Token::OpenParen) => (),
+        _ => return None,
+    }
+
+    let mut contents = HashMap::new();
+    while let Some(Element::Name(name)) = gaze.attemptf(&mut name) {
+        match gaze.next() {
+            Some(Token::Colon) => (),
+            _ => return None,
+        };
+        match gaze.attemptf(&mut element) {
+            Some(element) => contents.insert(name, element),
+            None => None,
+        };
+    }
+
+    match gaze.next() {
+        Some(Token::CloseParen) => Some(Element::Record(contents)),
+        _ => None,
+    }
+}
+
 fn tuple(gaze: &mut Gaze<Token>) -> Option<Element> {
     match gaze.next() {
         Some(Token::OpenParen) => (),
@@ -221,6 +249,7 @@ fn let_binding(gaze: &mut Gaze<Token>) -> Option<Element> {
 fn element(gaze: &mut Gaze<Token>) -> Option<Element> {
     let mut parsers = vec![
         tuple,
+        record,
         function_call,
         name,
         boolean,

@@ -7,7 +7,7 @@
 mod utils;
 
 use ligature_in_memory::LigatureInMemory;
-use wander::{ScriptValue, WanderError};
+use wander::{WanderError, WanderValue};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -17,6 +17,6 @@ pub fn run(script: String) -> JsValue {
     instance.add_bindings(&mut bindings);
     match wander::run(&script, &mut bindings) {
         Ok(value) => serde_wasm_bindgen::to_value(&value).unwrap(),
-        Err(err) => serde_wasm_bindgen::to_value(&Err::<ScriptValue, WanderError>(err)).unwrap(),
+        Err(err) => serde_wasm_bindgen::to_value(&Err::<WanderValue, WanderError>(err)).unwrap(),
     }
 }

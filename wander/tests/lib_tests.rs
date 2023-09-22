@@ -3,13 +3,13 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use ligature::{Identifier, LigatureError, Value};
-use wander::{preludes::common, run, write_identifier, write_value, ScriptValue};
+use wander::{preludes::common, run, write_identifier, write_value, WanderValue};
 
 #[test]
 fn run_wander_true() {
     let input = "true";
     let res = run(input, &mut common());
-    let expected = Ok(ScriptValue::Boolean(true));
+    let expected = Ok(WanderValue::Boolean(true));
     assert_eq!(res, expected);
 }
 
@@ -17,7 +17,7 @@ fn run_wander_true() {
 fn run_wander_integer() {
     let input = "-100";
     let res = run(input, &mut common());
-    let expected = Ok(ScriptValue::Int(-100));
+    let expected = Ok(WanderValue::Int(-100));
     assert_eq!(res, expected);
 }
 
@@ -25,7 +25,7 @@ fn run_wander_integer() {
 fn run_wander_string() {
     let input = "\"Hello world\"";
     let res = run(input, &mut common());
-    let expected = Ok(ScriptValue::String(String::from("Hello world")));
+    let expected = Ok(WanderValue::String(String::from("Hello world")));
     assert_eq!(res, expected);
 }
 
@@ -34,7 +34,7 @@ fn run_wander_identifier() {
     let expected_identifier = Identifier::new("hello").unwrap();
     let input = "<hello>";
     let res = run(input, &mut common());
-    let expected = Ok(ScriptValue::Identifier(expected_identifier));
+    let expected = Ok(WanderValue::Identifier(expected_identifier));
     assert_eq!(res, expected);
 }
 
@@ -42,7 +42,7 @@ fn run_wander_identifier() {
 fn run_wander_let_binding() {
     let input = "let x = true";
     let res = run(input, &mut common());
-    let expected = Ok(ScriptValue::Nothing);
+    let expected = Ok(WanderValue::Nothing);
     assert_eq!(res, expected);
 }
 
@@ -50,7 +50,7 @@ fn run_wander_let_binding() {
 fn run_wander_let_binding_and_reference() {
     let input = "let x = true x";
     let res = run(input, &mut common());
-    let expected = Ok(ScriptValue::Boolean(true));
+    let expected = Ok(WanderValue::Boolean(true));
     assert_eq!(res, expected);
 }
 
@@ -58,7 +58,7 @@ fn run_wander_let_binding_and_reference() {
 fn run_native_function() {
     let input = "Bool.not(true)";
     let res = run(input, &mut common());
-    let expected = Ok(ScriptValue::Boolean(false));
+    let expected = Ok(WanderValue::Boolean(false));
     assert_eq!(res, expected);
 }
 
@@ -66,7 +66,7 @@ fn run_native_function() {
 fn run_nested_function_calls() {
     let input = "Bool.not(Bool.not(false))";
     let res = run(input, &mut common());
-    let expected = Ok(ScriptValue::Boolean(false));
+    let expected = Ok(WanderValue::Boolean(false));
     assert_eq!(res, expected);
 }
 
@@ -74,7 +74,7 @@ fn run_nested_function_calls() {
 fn run_scope() {
     let input = "let x = {true 5 6} {x}";
     let res = run(input, &mut common());
-    let expected = Ok(ScriptValue::Int(6));
+    let expected = Ok(WanderValue::Int(6));
     assert_eq!(res, expected);
 }
 
@@ -82,7 +82,7 @@ fn run_scope() {
 fn run_conditional() {
     let input = "if true if Bool.not(true) 5 else 6 else 7";
     let res = run(input, &mut common());
-    let expected = Ok(ScriptValue::Int(6));
+    let expected = Ok(WanderValue::Int(6));
     assert_eq!(res, expected);
 }
 
@@ -90,10 +90,10 @@ fn run_conditional() {
 fn run_list() {
     let input = "[1 [2] []]";
     let res = run(input, &mut common());
-    let expected = Ok(ScriptValue::List(vec![
-        ScriptValue::Int(1),
-        ScriptValue::List(vec![ScriptValue::Int(2)]),
-        ScriptValue::List(vec![]),
+    let expected = Ok(WanderValue::List(vec![
+        WanderValue::Int(1),
+        WanderValue::List(vec![WanderValue::Int(2)]),
+        WanderValue::List(vec![]),
     ]));
     assert_eq!(res, expected);
 }
@@ -102,10 +102,10 @@ fn run_list() {
 fn run_tuple() {
     let input = "() (1 (2) ())";
     let res = run(input, &mut common());
-    let expected = Ok(ScriptValue::Tuple(vec![
-        ScriptValue::Int(1),
-        ScriptValue::Tuple(vec![ScriptValue::Int(2)]),
-        ScriptValue::Tuple(vec![]),
+    let expected = Ok(WanderValue::Tuple(vec![
+        WanderValue::Int(1),
+        WanderValue::Tuple(vec![WanderValue::Int(2)]),
+        WanderValue::Tuple(vec![]),
     ]));
     assert_eq!(res, expected);
 }
@@ -114,7 +114,7 @@ fn run_tuple() {
 fn run_lambda() {
     let input = "let id = { x -> x } id(5)";
     let res = run(input, &mut common());
-    let expected = Ok(ScriptValue::Int(5));
+    let expected = Ok(WanderValue::Int(5));
     assert_eq!(res, expected);
 }
 
@@ -122,9 +122,9 @@ fn run_lambda() {
 fn run_lambda_with_function() {
     let input = "let id = { x -> x } id([Bool.not(true) Bool.not(false)])";
     let res = run(input, &mut common());
-    let expected = Ok(ScriptValue::List(vec![
-        ScriptValue::Boolean(false),
-        ScriptValue::Boolean(true),
+    let expected = Ok(WanderValue::List(vec![
+        WanderValue::Boolean(false),
+        WanderValue::Boolean(true),
     ]));
     assert_eq!(res, expected);
 }
@@ -133,7 +133,7 @@ fn run_lambda_with_function() {
 fn forward_operator() {
     let input = "true >> Bool.not()";
     let res = run(input, &mut common());
-    let expected = Ok(ScriptValue::Boolean(false));
+    let expected = Ok(WanderValue::Boolean(false));
     assert_eq!(res, expected);
 }
 

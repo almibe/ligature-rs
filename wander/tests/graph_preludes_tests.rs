@@ -5,13 +5,13 @@
 use ligature::{Identifier, Statement, Value};
 use ligature_graph::Graph;
 use std::collections::BTreeSet;
-use wander::{preludes::common, run, ScriptValue};
+use wander::{preludes::common, run, WanderValue};
 
 #[test]
 fn empty_graph() {
     let input = "Graph.empty()";
     let res = run(input, &mut common());
-    let expected = Ok(ScriptValue::Graph(Graph::default()));
+    let expected = Ok(WanderValue::Graph(Graph::default()));
     assert_eq!(res, expected);
 }
 
@@ -19,7 +19,7 @@ fn empty_graph() {
 fn graph_with_empty_statements_list() {
     let input = "Graph.graph([])";
     let res = run(input, &mut common());
-    let expected = Ok(ScriptValue::Graph(Graph::default()));
+    let expected = Ok(WanderValue::Graph(Graph::default()));
     assert_eq!(res, expected);
 }
 
@@ -38,7 +38,7 @@ fn graph_with_statements_list() {
         attribute: Identifier::new("b").unwrap(),
         value: Value::Integer(123),
     });
-    let expected = Ok(ScriptValue::Graph(Graph::new(statements)));
+    let expected = Ok(WanderValue::Graph(Graph::new(statements)));
     assert_eq!(res, expected);
 }
 
@@ -57,7 +57,7 @@ fn graph_union() {
         attribute: Identifier::new("b").unwrap(),
         value: Value::Integer(123),
     });
-    let expected = Ok(ScriptValue::Graph(Graph::new(statements)));
+    let expected = Ok(WanderValue::Graph(Graph::new(statements)));
     assert_eq!(res, expected);
 }
 
@@ -72,7 +72,7 @@ fn graph_difference() {
         attribute: Identifier::new("b").unwrap(),
         value: Value::String("dog".to_owned()),
     });
-    let expected = Ok(ScriptValue::Graph(Graph::new(statements)));
+    let expected = Ok(WanderValue::Graph(Graph::new(statements)));
     assert_eq!(res, expected);
 }
 
@@ -86,10 +86,10 @@ fn graph_statements() {
         attribute: Identifier::new("b").unwrap(),
         value: Value::Identifier(Identifier::new("c").unwrap()),
     });
-    let expected = Ok(ScriptValue::List(vec![ScriptValue::Tuple(vec![
-        ScriptValue::Identifier(Identifier::new("a").unwrap()),
-        ScriptValue::Identifier(Identifier::new("b").unwrap()),
-        ScriptValue::Identifier(Identifier::new("c").unwrap()),
+    let expected = Ok(WanderValue::List(vec![WanderValue::Tuple(vec![
+        WanderValue::Identifier(Identifier::new("a").unwrap()),
+        WanderValue::Identifier(Identifier::new("b").unwrap()),
+        WanderValue::Identifier(Identifier::new("c").unwrap()),
     ])]));
     assert_eq!(res, expected);
 }
@@ -114,6 +114,6 @@ fn graph_transformer_test() {
         attribute: Identifier::new("b").unwrap(),
         value: Value::Integer(20),
     });
-    let expected = Ok(ScriptValue::Graph(Graph::new(statements)));
+    let expected = Ok(WanderValue::Graph(Graph::new(statements)));
     assert_eq!(res, expected);
 }

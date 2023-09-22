@@ -14,7 +14,7 @@ use lig::load_lig_from_str;
 use ligature::{Dataset, Ligature};
 use ligature_sqlite::LigatureSQLite;
 use std::{net::SocketAddr, sync::Arc};
-use wander::{bindings::BindingsProvider, preludes::common, run, ScriptValue};
+use wander::{bindings::BindingsProvider, preludes::common, run, WanderValue};
 
 #[tokio::main]
 async fn main() {
@@ -43,7 +43,7 @@ async fn lig_handler(
         Ok(dataset) => {
             let ligature: &dyn Ligature = instance.as_ref();
             match load_lig_from_str(dataset, &lig, ligature) {
-                Ok(_) => (StatusCode::OK, ScriptValue::Nothing.to_string()),
+                Ok(_) => (StatusCode::OK, WanderValue::Nothing.to_string()),
                 Err(err) => (StatusCode::BAD_REQUEST, err.0),
             }
         }

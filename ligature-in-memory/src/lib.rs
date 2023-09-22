@@ -502,6 +502,7 @@ impl HostFunction for QueryFunction {
                                     WanderValue::List(_) => false,
                                     WanderValue::Graph(_) => false,
                                     WanderValue::Tuple(_) => false,
+                                    WanderValue::Record(_) => todo!(),
                                 }
                             })
                             .map(|statement| {
