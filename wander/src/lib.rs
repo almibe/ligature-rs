@@ -69,13 +69,20 @@ pub enum WanderValue {
     String(String),
     Identifier(Identifier),
     Nothing,
-    /// A named reference to a NativeFunction.
-    NativeFunction(String),
+    /// A named reference to a HostedFunction.
+    HostedFunction(String),
     Lambda(Vec<String>, Vec<Element>),
+    Application(Box<Application>),
     List(Vec<WanderValue>),
     Tuple(Vec<WanderValue>),
     Record(HashMap<String, WanderValue>),
     Graph(Graph),
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
+pub struct Application {
+    arguments: Vec<WanderValue>,
+    callee: WanderValue
 }
 
 pub fn write_integer(integer: &i64) -> String {
@@ -182,12 +189,13 @@ impl Display for WanderValue {
             WanderValue::String(value) => f.write_str(&write_string(value)),
             WanderValue::Identifier(value) => write!(f, "{}", value),
             WanderValue::Nothing => write!(f, "nothing"),
-            WanderValue::NativeFunction(_) => write!(f, "[function]"),
+            WanderValue::HostedFunction(_) => write!(f, "[function]"),
             WanderValue::List(contents) => write_list_or_tuple_wander_value('[', ']', contents, f),
             WanderValue::Lambda(_, _) => write!(f, "[lambda]"),
             WanderValue::Graph(graph) => write_graph(graph, f),
             WanderValue::Tuple(contents) => write_list_or_tuple_wander_value('(', ')', contents, f),
             WanderValue::Record(values) => write_record(values, f),
+            WanderValue::Application(_) => write!(f, "[application]"),
         }
     }
 }

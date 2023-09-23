@@ -497,12 +497,13 @@ impl HostFunction for QueryFunction {
                                         }
                                     }
                                     WanderValue::Nothing => true,
-                                    WanderValue::NativeFunction(_) => false,
+                                    WanderValue::HostedFunction(_) => false,
                                     WanderValue::Lambda(_, _) => false,
                                     WanderValue::List(_) => false,
                                     WanderValue::Graph(_) => false,
                                     WanderValue::Tuple(_) => false,
-                                    WanderValue::Record(_) => todo!(),
+                                    WanderValue::Record(_) => false,
+                                    WanderValue::Application(_) => false,
                                 }
                             })
                             .map(|statement| {

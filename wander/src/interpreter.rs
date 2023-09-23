@@ -6,7 +6,7 @@ use std::collections::HashMap;
 
 use crate::bindings::Bindings;
 use crate::parser::Element;
-use crate::{WanderError, WanderValue};
+use crate::{WanderError, WanderValue, Application};
 
 pub fn eval(script: &Vec<Element>, bindings: &mut Bindings) -> Result<WanderValue, WanderError> {
     let mut result = Ok(WanderValue::Nothing);
@@ -160,7 +160,7 @@ fn handle_let(
             bindings.bind(name.to_string(), value);
             Ok(WanderValue::Nothing)
         }
-        _ => todo!(),
+        Err(err) => Err(err),
     }
 }
 
@@ -169,7 +169,7 @@ fn read_name(name: &String, bindings: &mut Bindings) -> Result<WanderValue, Wand
         Ok(value)
     } else {
         match bindings.read_host_function(name) {
-            Some(_) => Ok(WanderValue::NativeFunction(name.to_owned())),
+            Some(_) => Ok(WanderValue::HostedFunction(name.to_owned())),
             None => Err(WanderError(format!("Error looking up {name}"))),
         }
     }
@@ -189,10 +189,10 @@ fn call_function(
     }
     match bindings.read(name) {
         //corner case of this name shadowing with a native function
-        Some(WanderValue::NativeFunction(nf_name)) => match bindings.read_host_function(&nf_name) {
-            Some(nf) => nf.run(&argument_values, bindings),
+        Some(WanderValue::HostedFunction(function_name)) => match bindings.read_host_function(&function_name) {
+            Some(function) => function.run(&argument_values, bindings),
             None => Err(WanderError(
-                "Could not read function {name} that references NativeFunction {nf_name}"
+                "Could not read function {name} that references HostedFunction {nf_name}"
                     .to_owned(),
             )),
         },
@@ -217,11 +217,44 @@ fn call_function(
                 )))
             }
         }
+        Some(WanderValue::Application(application)) => {
+            match application.callee {
+                WanderValue::HostedFunction(function_name) => {
+                    let mut args = application.arguments.clone();
+                    args.append(&mut argument_values.clone());
+                    println!("!!!{function_name}");
+                    match bindings.read_host_function(&function_name) {
+                        None => Err(WanderError(format!("Function {} is not defined.", name))),
+                        Some(function) => {
+                            if args.len() == function.params().len() {
+                                function.run(&args, bindings)
+                            } else {
+                                Ok(WanderValue::Application(Box::new(Application { arguments: args, callee: WanderValue::HostedFunction(function_name.clone()) })))
+                            }
+                        }
+                    }
+                },
+                WanderValue::Application(application) => {
+                    todo!()
+                },
+                WanderValue::Lambda(parameters, body) => {
+                    todo!()
+                },
+                _ => panic!("Should never reach.")
+            }
+        }
         //found other value (err), will evntually handle lambdas here
         Some(_) => Err(WanderError(format!("Function {} is not defined.", &name))),
         None => match bindings.read_host_function(name) {
             None => Err(WanderError(format!("Function {} is not defined.", name))),
-            Some(nf) => nf.run(&argument_values, bindings),
+            Some(function) => {
+                if argument_values.len() == function.params().len() {
+                    println!("!!! {:?} {:?}", argument_values, function.params());
+                    function.run(&argument_values, bindings)
+                } else {
+                    Ok(WanderValue::Application(Box::new(Application { arguments: argument_values, callee: WanderValue::HostedFunction(name.clone()) })))
+                }
+            }
         },
     }
 }
