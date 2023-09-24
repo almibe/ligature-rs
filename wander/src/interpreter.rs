@@ -208,6 +208,8 @@ fn call_function(
                 let res = eval(&body, bindings);
                 bindings.remove_scope();
                 res
+            } else if parameters.len() > arguments.len() {
+                Ok(WanderValue::Application(Box::new(Application { arguments: argument_values, callee: WanderValue::Lambda(parameters, body) })))
             } else {
                 Err(WanderError(format!(
                     "Incorrect number of arguments, {}, passed to {}, expecting {}.",
@@ -222,7 +224,6 @@ fn call_function(
                 WanderValue::HostedFunction(function_name) => {
                     let mut args = application.arguments.clone();
                     args.append(&mut argument_values.clone());
-                    println!("!!!{function_name}");
                     match bindings.read_host_function(&function_name) {
                         None => Err(WanderError(format!("Function {} is not defined.", name))),
                         Some(function) => {
@@ -234,13 +235,25 @@ fn call_function(
                         }
                     }
                 },
-                WanderValue::Application(application) => {
-                    todo!()
-                },
                 WanderValue::Lambda(parameters, body) => {
-                    todo!()
+                    let mut args = application.arguments.clone();
+                    args.append(&mut argument_values.clone());
+                    if parameters.len() == args.len() {
+                        bindings.add_scope();
+                        for (i, parameter) in parameters.iter().enumerate() {
+                            bindings.bind(
+                                parameter.to_owned(),
+                                args.get(i).unwrap().clone(),
+                            );
+                        }
+                        let res = eval(&body, bindings);
+                        bindings.remove_scope();
+                        res        
+                    } else {
+                        Ok(WanderValue::Application(Box::new(Application { arguments: args, callee: WanderValue::Lambda(parameters, body) })))
+                    }
                 },
-                _ => panic!("Should never reach.")
+                _ => panic!("Should never reach. Callee in an Application was not a HostFunction or Lambda.")
             }
         }
         //found other value (err), will evntually handle lambdas here
@@ -249,7 +262,6 @@ fn call_function(
             None => Err(WanderError(format!("Function {} is not defined.", name))),
             Some(function) => {
                 if argument_values.len() == function.params().len() {
-                    println!("!!! {:?} {:?}", argument_values, function.params());
                     function.run(&argument_values, bindings)
                 } else {
                     Ok(WanderValue::Application(Box::new(Application { arguments: argument_values, callee: WanderValue::HostedFunction(name.clone()) })))
