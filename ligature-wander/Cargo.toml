@@ -1,0 +1,18 @@
+[package]
+name = "ligature-wander"
+version = "0.1.0"
+publish = false
+authors = ["Alex Michael Berry <alexmiberry@gmail.com>"]
+edition = "2021"
+license = "MPL-2.0"
+description = "Wander support for working with Ligature."
+repository = "https://github.com/almibe/ligature-rs/"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ligature = { path = "../ligature" }
+ligature-graph = { path = "../ligature-graph" }
+lig = { path = "../lig" }
+wander = { path = "../wander" }
+anyhow = "1.0"
