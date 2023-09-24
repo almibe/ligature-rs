@@ -264,3 +264,40 @@ fn write_graph(graph: &Graph, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Resu
     //     "graph".to_owned(),
     //     Rc::new(graph_transform),
     // );
+    fn identifier(gaze: &mut Gaze<Token>) -> Option<Element> {
+        match gaze.next() {
+            Some(Token::Identifier(value)) => Some(Element::Identifier(value)),
+            _ => None,
+        }
+    }
+    fn identifier(lex: &mut Lexer<Token>) -> Option<Identifier> {
+        let slice = lex.slice();
+        match Identifier::new(slice.slice(1..(slice.len() - 1)).unwrap()) {
+            Ok(ident) => Some(ident),
+            Err(_) => None,
+        }
+    }
+    // #[regex("<[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;%=\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}\\x{10000}-\\x{1FFFD}\\x{20000}-\\x{2FFFD}\\x{30000}-\\x{3FFFD}\\x{40000}-\\x{4FFFD}\\x{50000}-\\x{5FFFD}\\x{60000}-\\x{6FFFD}\\x{70000}-\\x{7FFFD}\\x{80000}-\\x{8FFFD}\\x{90000}-\\x{9FFFD}\\x{A0000}-\\x{AFFFD}\\x{B0000}-\\x{BFFFD}\\x{C0000}-\\x{CFFFD}\\x{D0000}-\\x{DFFFD}\\x{E1000}-\\x{EFFFD}]+>", identifier)]
+    // Identifier(Identifier),
+
+    pub fn write_value(value: &Value) -> String {
+        match value {
+            Value::Identifier(entity) => write_identifier(entity),
+            Value::Integer(integer) => write_integer(integer),
+            //Value::FloatLiteral(float) => write_float(float),
+            Value::String(string) => write_string(string),
+            Value::Bytes(bytes) => write_bytes(bytes),
+        }
+    }
+    pub fn write_statement(statement: &Statement) -> String {
+        format!(
+            "{} {} {}\n",
+            write_identifier(&statement.entity),
+            write_identifier(&statement.attribute),
+            write_value(&statement.value),
+        )
+    }
+    /// Writes out an Entity to a String.
+pub fn write_identifier(entity: &Identifier) -> String {
+    format!("<{}>", entity.id())
+}

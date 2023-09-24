@@ -13,7 +13,6 @@ use bindings::Bindings;
 use hex::encode;
 use interpreter::eval;
 use lexer::{tokenize, transform, Token};
-use ligature::{Bytes, Identifier, Statement, Value};
 use parser::{parse, Element};
 use serde::{Deserialize, Serialize};
 use translation::translate;
@@ -21,7 +20,6 @@ use translation::translate;
 pub mod bindings;
 pub mod interpreter;
 pub mod lexer;
-pub mod lig;
 pub mod parser;
 pub mod preludes;
 pub mod translation;
@@ -71,7 +69,6 @@ pub enum WanderValue {
     Boolean(bool),
     Int(i64),
     String(String),
-    Identifier(Identifier),
     Nothing,
     /// A named reference to a HostedFunction.
     HostedFunction(String),
@@ -102,24 +99,11 @@ pub fn write_float(float: &f64) -> String {
     }
 }
 
-pub fn write_bytes(bytes: &Bytes) -> String {
-    format!("0x{}", encode(bytes))
-}
+// pub fn write_bytes(bytes: &Bytes) -> String {
+//     format!("0x{}", encode(bytes))
+// }
 
-/// Writes out an Entity to a String.
-pub fn write_identifier(entity: &Identifier) -> String {
-    format!("<{}>", entity.id())
-}
 
-pub fn write_value(value: &Value) -> String {
-    match value {
-        Value::Identifier(entity) => write_identifier(entity),
-        Value::Integer(integer) => write_integer(integer),
-        //Value::FloatLiteral(float) => write_float(float),
-        Value::String(string) => write_string(string),
-        Value::Bytes(bytes) => write_bytes(bytes),
-    }
-}
 
 pub fn write_string(string: &str) -> String {
     //TODO this could be done better
@@ -134,14 +118,6 @@ pub fn write_string(string: &str) -> String {
     format!("\"{}\"", escaped_string)
 }
 
-pub fn write_statement(statement: &Statement) -> String {
-    format!(
-        "{} {} {}\n",
-        write_identifier(&statement.entity),
-        write_identifier(&statement.attribute),
-        write_value(&statement.value),
-    )
-}
 
 fn write_list_or_tuple_wander_value(
     open: char,
@@ -187,7 +163,6 @@ impl Display for WanderValue {
             WanderValue::Boolean(value) => write!(f, "{}", value),
             WanderValue::Int(value) => write!(f, "{}", value),
             WanderValue::String(value) => f.write_str(&write_string(value)),
-            WanderValue::Identifier(value) => write!(f, "{}", value),
             WanderValue::Nothing => write!(f, "nothing"),
             WanderValue::HostedFunction(_) => write!(f, "[function]"),
             WanderValue::List(contents) => write_list_or_tuple_wander_value('[', ']', contents, f),

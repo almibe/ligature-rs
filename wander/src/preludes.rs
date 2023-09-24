@@ -2,10 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use ligature::{Identifier, Statement, Value};
-use std::{collections::BTreeSet, rc::Rc};
-
-use crate::{bindings::Bindings, lexer::Token, HostFunction, WanderError, WanderType, WanderValue};
+use std::rc::Rc;
+use crate::{bindings::Bindings, HostFunction, WanderError, WanderType, WanderValue};
 
 struct EqFunction {}
 impl HostFunction for EqFunction {

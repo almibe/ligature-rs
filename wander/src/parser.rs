@@ -5,7 +5,6 @@
 use std::collections::HashMap;
 
 use gaze::Gaze;
-use ligature::Identifier;
 use serde::{Deserialize, Serialize};
 
 use crate::{lexer::Token, WanderError};
@@ -16,7 +15,6 @@ pub enum Element {
     Int(i64),
     String(String),
     Name(String),
-    Identifier(Identifier),
     Let(String, Box<Element>),
     FunctionCall(String, Vec<Element>),
     Scope(Vec<Element>),
@@ -90,13 +88,6 @@ fn forward(gaze: &mut Gaze<Token>) -> Option<Element> {
 fn name(gaze: &mut Gaze<Token>) -> Option<Element> {
     match gaze.next() {
         Some(Token::Name(value)) => Some(Element::Name(value)),
-        _ => None,
-    }
-}
-
-fn identifier(gaze: &mut Gaze<Token>) -> Option<Element> {
-    match gaze.next() {
-        Some(Token::Identifier(value)) => Some(Element::Identifier(value)),
         _ => None,
     }
 }
@@ -257,7 +248,6 @@ fn element(gaze: &mut Gaze<Token>) -> Option<Element> {
         forward,
         int,
         string,
-        identifier,
         let_binding,
         scope,
         conditional,

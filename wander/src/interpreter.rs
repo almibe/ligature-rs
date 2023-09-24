@@ -24,7 +24,6 @@ pub fn eval_element(
         Element::Boolean(value) => Ok(WanderValue::Boolean(*value)),
         Element::Int(value) => Ok(WanderValue::Int(*value)),
         Element::String(value) => Ok(WanderValue::String(unescape_string(value.to_string()))),
-        Element::Identifier(value) => Ok(WanderValue::Identifier(value.clone())),
         Element::Let(name, value) => handle_let(name, value, bindings),
         Element::Name(name) => read_name(name, bindings),
         Element::FunctionCall(name, arguments) => call_function(name, arguments, bindings),

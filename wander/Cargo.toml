@@ -11,7 +11,6 @@ repository = "https://github.com/almibe/ligature-rs/"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ligature = { path = "../ligature" }
 logos = "0.13"
 gaze = "0.5.0"
 serde = { version = "1.0", features = ["derive"] }

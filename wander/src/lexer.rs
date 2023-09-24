@@ -2,7 +2,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use ligature::Identifier;
 use logos::{Lexer, Logos, Source};
 
 use crate::{bindings::Bindings, WanderError};
@@ -37,8 +36,6 @@ pub enum Token {
     #[regex(r#""(([^\x00-\x1F"\\]|\\["\\/bfnrt]|\\u[0-9a-fA-F]{4})*)""#, string)]
     String(String),
 
-    #[regex("<[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;%=\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}\\x{10000}-\\x{1FFFD}\\x{20000}-\\x{2FFFD}\\x{30000}-\\x{3FFFD}\\x{40000}-\\x{4FFFD}\\x{50000}-\\x{5FFFD}\\x{60000}-\\x{6FFFD}\\x{70000}-\\x{7FFFD}\\x{80000}-\\x{8FFFD}\\x{90000}-\\x{9FFFD}\\x{A0000}-\\x{AFFFD}\\x{B0000}-\\x{BFFFD}\\x{C0000}-\\x{CFFFD}\\x{D0000}-\\x{DFFFD}\\x{E1000}-\\x{EFFFD}]+>", identifier)]
-    Identifier(Identifier),
 
     #[regex("[_a-zA-Z]+[_a-zA-Z0-9.?]*", name)]
     Name(String),
@@ -104,13 +101,6 @@ fn string(lex: &mut Lexer<Token>) -> Option<String> {
     Some(lex.slice().to_string())
 }
 
-fn identifier(lex: &mut Lexer<Token>) -> Option<Identifier> {
-    let slice = lex.slice();
-    match Identifier::new(slice.slice(1..(slice.len() - 1)).unwrap()) {
-        Ok(ident) => Some(ident),
-        Err(_) => None,
-    }
-}
 
 fn name(lex: &mut Lexer<Token>) -> Option<String> {
     Some(lex.slice().to_string())

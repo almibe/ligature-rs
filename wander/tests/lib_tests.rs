@@ -2,8 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use ligature::{Identifier, LigatureError, Value};
-use wander::{preludes::common, run, write_identifier, write_value, WanderValue};
+use wander::{preludes::common, run, WanderValue};
 
 #[test]
 fn run_wander_true() {
@@ -29,14 +28,6 @@ fn run_wander_string() {
     assert_eq!(res, expected);
 }
 
-#[test]
-fn run_wander_identifier() {
-    let expected_identifier = Identifier::new("hello").unwrap();
-    let input = "<hello>";
-    let res = run(input, &mut common());
-    let expected = Ok(WanderValue::Identifier(expected_identifier));
-    assert_eq!(res, expected);
-}
 
 #[test]
 fn run_wander_let_binding() {
@@ -137,30 +128,9 @@ fn forward_operator() {
     assert_eq!(res, expected);
 }
 
-#[test]
-fn write_entities() -> Result<(), LigatureError> {
-    let e = Identifier::new("test")?;
-    assert_eq!(write_identifier(&e), "<test>".to_string());
-    Ok(())
-}
-
-#[test]
-fn write_string_literals() {
-    assert_eq!(write_value(&Value::String("test".to_string())), "\"test\"");
-}
-
-#[test]
-fn write_integer_literals() {
-    assert_eq!(write_value(&Value::Integer(5)), "5");
-}
 
 // #[test]
 // fn write_float_literals() {
 //     assert_eq!(write_value(&Value::FloatLiteral(5.5)), "5.5");
 //     assert_eq!(write_value(&Value::FloatLiteral(5f64)), "5.0");
 // }
-
-#[test]
-fn write_bytes_literals() {
-    assert_eq!(write_value(&Value::Bytes(vec![0, 255])), "0x00ff");
-}

@@ -2,7 +2,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use ligature::Identifier;
 use wander::lexer::{tokenize, Token};
 
 #[test]
@@ -64,15 +63,6 @@ fn tokenize_strings_with_quotes() {
     let expected = Ok(vec![Token::String(String::from(
         "\"\\\"Hello, world\\\"\"",
     ))]);
-    assert_eq!(res, expected);
-}
-
-#[test]
-fn tokenize_identifier() {
-    let expected_identifier = Identifier::new("hello123").unwrap();
-    let input = "<hello123>";
-    let res = tokenize(input);
-    let expected = Ok(vec![Token::Identifier(expected_identifier)]);
     assert_eq!(res, expected);
 }
 
@@ -148,17 +138,3 @@ fn multiline_comment() {
     assert_eq!(res, expected);
 }
 
-#[test]
-fn graph_literal_with_string() {
-    let input = "graph`<a> <b> \"\\\"\"`";
-    let res = tokenize(input);
-    let expected = Ok(vec![
-        Token::Name("graph".to_owned()),
-        Token::Backtick,
-        Token::Identifier(Identifier::new("a").unwrap()),
-        Token::Identifier(Identifier::new("b").unwrap()),
-        Token::String("\"\\\"\"".to_owned()),
-        Token::Backtick,
-    ]);
-    assert_eq!(res, expected);
-}

@@ -57,3 +57,58 @@ fn read_write_test_strings_in_graph() {
     let expected = WanderValue::Graph(Graph::new(statements));
     assert_eq!(res, expected);
 }
+
+#[test]
+fn tokenize_identifier() {
+    let expected_identifier = Identifier::new("hello123").unwrap();
+    let input = "<hello123>";
+    let res = tokenize(input);
+    let expected = Ok(vec![Token::Identifier(expected_identifier)]);
+    assert_eq!(res, expected);
+}
+
+#[test]
+fn run_wander_identifier() {
+    let expected_identifier = Identifier::new("hello").unwrap();
+    let input = "<hello>";
+    let res = run(input, &mut common());
+    let expected = Ok(WanderValue::Identifier(expected_identifier));
+    assert_eq!(res, expected);
+}
+
+#[test]
+fn graph_literal_with_string() {
+    let input = "graph`<a> <b> \"\\\"\"`";
+    let res = tokenize(input);
+    let expected = Ok(vec![
+        Token::Name("graph".to_owned()),
+        Token::Backtick,
+        Token::Identifier(Identifier::new("a").unwrap()),
+        Token::Identifier(Identifier::new("b").unwrap()),
+        Token::String("\"\\\"\"".to_owned()),
+        Token::Backtick,
+    ]);
+    assert_eq!(res, expected);
+}
+
+#[test]
+fn write_entities() -> Result<(), LigatureError> {
+    let e = Identifier::new("test")?;
+    assert_eq!(write_identifier(&e), "<test>".to_string());
+    Ok(())
+}
+
+#[test]
+fn write_string_literals() {
+    assert_eq!(write_value(&Value::String("test".to_string())), "\"test\"");
+}
+
+#[test]
+fn write_integer_literals() {
+    assert_eq!(write_value(&Value::Integer(5)), "5");
+}
+
+#[test]
+fn write_bytes_literals() {
+    assert_eq!(write_value(&Value::Bytes(vec![0, 255])), "0x00ff");
+}
