@@ -79,19 +79,3 @@ fn token_transformer_upper() {
     let expected = Ok(WanderValue::String("TEST".to_owned()));
     assert_eq!(res, expected);
 }
-
-#[test]
-fn token_transformer_graph_empty() {
-    let input = "Graph.graph``";
-    let res = run(input, &mut common());
-    let expected = run("Graph.graph([])", &mut common());
-    assert_eq!(res, expected);
-}
-
-#[test]
-fn token_transformer_graph() {
-    let input = "Graph.graph`<a> <b> <c>`";
-    let res = run(input, &mut common());
-    let expected = run("Graph.graph([(<a> <b> <c>)])", &mut common());
-    assert_eq!(res, expected);
-}

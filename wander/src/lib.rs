@@ -14,7 +14,6 @@ use hex::encode;
 use interpreter::eval;
 use lexer::{tokenize, transform, Token};
 use ligature::{Bytes, Identifier, Statement, Value};
-use ligature_graph::Graph;
 use parser::{parse, Element};
 use serde::{Deserialize, Serialize};
 use translation::translate;
@@ -63,6 +62,11 @@ pub enum WanderType {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
+pub struct HostValue{
+    pub type_name: String
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub enum WanderValue {
     Boolean(bool),
     Int(i64),
@@ -76,7 +80,7 @@ pub enum WanderValue {
     List(Vec<WanderValue>),
     Tuple(Vec<WanderValue>),
     Record(HashMap<String, WanderValue>),
-    Graph(Graph),
+    HostValue(HostValue),
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
@@ -157,12 +161,8 @@ fn write_list_or_tuple_wander_value(
     write!(f, "{close}")
 }
 
-fn write_graph(graph: &Graph, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.write_str("Graph.graph`").unwrap();
-    graph.all_statements().into_iter().for_each(|statement| {
-        f.write_str(write_statement(&statement).as_str()).unwrap();
-    });
-    f.write_str("`")
+fn write_host_value(value: &HostValue, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "{}", value.type_name)
 }
 
 fn write_record(
@@ -192,7 +192,7 @@ impl Display for WanderValue {
             WanderValue::HostedFunction(_) => write!(f, "[function]"),
             WanderValue::List(contents) => write_list_or_tuple_wander_value('[', ']', contents, f),
             WanderValue::Lambda(_, _) => write!(f, "[lambda]"),
-            WanderValue::Graph(graph) => write_graph(graph, f),
+            WanderValue::HostValue(value) => write_host_value(value, f),
             WanderValue::Tuple(contents) => write_list_or_tuple_wander_value('(', ')', contents, f),
             WanderValue::Record(values) => write_record(values, f),
             WanderValue::Application(_) => write!(f, "[application]"),
