@@ -13,5 +13,4 @@ members = [
     "ligature-sqlite",
     "ligature-test-suite",
     "ligature-wasm",
-    "wander"
 ]

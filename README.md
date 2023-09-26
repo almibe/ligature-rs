@@ -30,8 +30,8 @@ Each project contains its own README with additional information when needed.
 | ligature-repl         | A REPL for using Ligature and Wander.                                   | app    |
 | ligature-sqlite       | An implementation of Ligature that uses sqlite3 for storage.            | lib    |
 | ligature-test-suite   | A test suite for Ligature implementations.                              | app    |
+| ligature-wander       | Wander support for working with Ligature.                               | lib    |
 | ligature-wasm         | Compile Ligature for Wasm, provides in memory store and Wander support. | wasm   |
-| wander                | The Wander scripting language.                                          | lib    |
 
 ## Running Integration Tests
 
