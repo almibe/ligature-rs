@@ -12,10 +12,10 @@ repository = "https://github.com/almibe/ligature-rs/"
 
 [dependencies]
 ligature = { path = "../ligature" }
-lig = { path = "../lig" }
+#lig = { path = "../lig" }
 ligature-in-memory = { path = "../ligature-in-memory" }
-ligature-sqlite = { path = "../ligature-sqlite" }
-wander = { path = "../wander" }
-rustyline = "10.0.0"
-tabled = "0.14.0"
+#ligature-sqlite = { path = "../ligature-sqlite" }
+wander = "0.5.0"
+wander-repl = "0.5.0"
 anyhow = "1.0"
+rustyline = "12.0.0" #TODO: remove this once I've published wander-repl 0.6.0

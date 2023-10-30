@@ -15,4 +15,4 @@ ligature = { path = "../ligature" }
 ligature-in-memory = { path = "../ligature-in-memory" }
 #ligature-redb = { path = "../ligature-redb" }
 ligature-sqlite = { path = "../ligature-sqlite" }
-wander = { path = "../wander" }
+wander = "0.5.0"

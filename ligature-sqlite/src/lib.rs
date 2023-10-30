@@ -19,7 +19,7 @@ use rusqlite::{params, Connection, Error, Transaction};
 use sql_builder::{quote, SqlBuilder};
 use wander::{
     bindings::{Bindings, BindingsProvider},
-    HostFunction, WanderError, WanderType, WanderValue,
+    HostFunction, WanderError, WanderValue,
 };
 
 #[derive(Clone)]
@@ -289,21 +289,21 @@ impl HostFunction for DatasetsFunction {
         }
     }
 
-    fn doc(&self) -> String {
-        "Get a list of all Datasets.".to_owned()
-    }
+    // fn doc(&self) -> String {
+    //     "Get a list of all Datasets.".to_owned()
+    // }
 
-    fn params(&self) -> Vec<WanderType> {
-        vec![]
-    }
+    // fn params(&self) -> Vec<WanderType> {
+    //     vec![]
+    // }
 
-    fn returns(&self) -> WanderType {
-        WanderType::List
-    }
+    // fn returns(&self) -> WanderType {
+    //     WanderType::List
+    // }
 
-    fn name(&self) -> String {
-        "Ligature.datasets".to_owned()
-    }
+    // fn name(&self) -> String {
+    //     "Ligature.datasets".to_owned()
+    // }
 }
 
 struct AddDatasetFunction {
@@ -328,21 +328,21 @@ impl HostFunction for AddDatasetFunction {
         }
     }
 
-    fn doc(&self) -> String {
-        "Add a new Dataset.".to_owned()
-    }
+    // fn doc(&self) -> String {
+    //     "Add a new Dataset.".to_owned()
+    // }
 
-    fn params(&self) -> Vec<WanderType> {
-        vec![WanderType::String]
-    }
+    // fn params(&self) -> Vec<WanderType> {
+    //     vec![WanderType::String]
+    // }
 
-    fn returns(&self) -> WanderType {
-        WanderType::Nothing
-    }
+    // fn returns(&self) -> WanderType {
+    //     WanderType::Nothing
+    // }
 
-    fn name(&self) -> String {
-        "Ligature.addDataset".to_owned()
-    }
+    // fn name(&self) -> String {
+    //     "Ligature.addDataset".to_owned()
+    // }
 }
 
 struct RemoveDatasetFunction {
@@ -367,21 +367,21 @@ impl HostFunction for RemoveDatasetFunction {
         }
     }
 
-    fn doc(&self) -> String {
-        "Remove a Dataset.".to_owned()
-    }
+    // fn doc(&self) -> String {
+    //     "Remove a Dataset.".to_owned()
+    // }
 
-    fn params(&self) -> Vec<WanderType> {
-        vec![WanderType::String]
-    }
+    // fn params(&self) -> Vec<WanderType> {
+    //     vec![WanderType::String]
+    // }
 
-    fn returns(&self) -> WanderType {
-        WanderType::Nothing
-    }
+    // fn returns(&self) -> WanderType {
+    //     WanderType::Nothing
+    // }
 
-    fn name(&self) -> String {
-        "Ligature.removeDataset".to_owned()
-    }
+    // fn name(&self) -> String {
+    //     "Ligature.removeDataset".to_owned()
+    // }
 }
 
 struct StatementsFunction {
@@ -421,21 +421,21 @@ impl HostFunction for StatementsFunction {
         }
     }
 
-    fn doc(&self) -> String {
-        "Get all of the Statements in a Dataset.".to_owned()
-    }
+    // fn doc(&self) -> String {
+    //     "Get all of the Statements in a Dataset.".to_owned()
+    // }
 
-    fn params(&self) -> Vec<WanderType> {
-        vec![WanderType::String]
-    }
+    // fn params(&self) -> Vec<WanderType> {
+    //     vec![WanderType::String]
+    // }
 
-    fn returns(&self) -> WanderType {
-        WanderType::List
-    }
+    // fn returns(&self) -> WanderType {
+    //     WanderType::List
+    // }
 
-    fn name(&self) -> String {
-        "Ligature.statements".to_owned()
-    }
+    // fn name(&self) -> String {
+    //     "Ligature.statements".to_owned()
+    // }
 }
 
 fn wander_value_to_statement(values: &Vec<WanderValue>) -> Result<Vec<Statement>, WanderError> {
@@ -489,21 +489,21 @@ impl HostFunction for AddStatementsFunction {
         }
     }
 
-    fn doc(&self) -> String {
-        "Add Statements to Dataset.".to_owned()
-    }
+    // fn doc(&self) -> String {
+    //     "Add Statements to Dataset.".to_owned()
+    // }
 
-    fn params(&self) -> Vec<WanderType> {
-        vec![WanderType::String, WanderType::List]
-    }
+    // fn params(&self) -> Vec<WanderType> {
+    //     vec![WanderType::String, WanderType::List]
+    // }
 
-    fn returns(&self) -> WanderType {
-        WanderType::Nothing
-    }
+    // fn returns(&self) -> WanderType {
+    //     WanderType::Nothing
+    // }
 
-    fn name(&self) -> String {
-        "Ligature.addStatements".to_owned()
-    }
+    // fn name(&self) -> String {
+    //     "Ligature.addStatements".to_owned()
+    // }
 }
 
 struct RemoveStatementsFunction {
@@ -530,21 +530,21 @@ impl HostFunction for RemoveStatementsFunction {
         }
     }
 
-    fn doc(&self) -> String {
-        "Remove Statements from the given Dataset.".to_owned()
-    }
+    // fn doc(&self) -> String {
+    //     "Remove Statements from the given Dataset.".to_owned()
+    // }
 
-    fn params(&self) -> Vec<WanderType> {
-        vec![WanderType::String, WanderType::List]
-    }
+    // fn params(&self) -> Vec<WanderType> {
+    //     vec![WanderType::String, WanderType::List]
+    // }
 
-    fn returns(&self) -> WanderType {
-        WanderType::Nothing
-    }
+    // fn returns(&self) -> WanderType {
+    //     WanderType::Nothing
+    // }
 
-    fn name(&self) -> String {
-        "Ligature.removeStatements".to_owned()
-    }
+    // fn name(&self) -> String {
+    //     "Ligature.removeStatements".to_owned()
+    // }
 }
 
 fn fetch_dataset_id(dataset_name: &str, tx: &Transaction) -> Result<Option<u64>, Error> {

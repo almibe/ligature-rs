@@ -14,7 +14,7 @@ repository = "https://github.com/almibe/ligature-rs/"
 ligature = { path = "../ligature" }
 lig = { path = "../lig" }
 ligature-sqlite = { path = "../ligature-sqlite" }
-wander = { path = "../wander" }
+wander = "0.5.0"
 anyhow = "1.0"
 nu-plugin = "0.84.0"
 nu-protocol = "0.84.0"

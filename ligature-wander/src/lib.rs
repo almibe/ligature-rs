@@ -301,3 +301,124 @@ fn write_graph(graph: &Graph, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Resu
 pub fn write_identifier(entity: &Identifier) -> String {
     format!("<{}>", entity.id())
 }
+
+struct EntityFunction {}
+impl<T: Clone + PartialEq> HostFunction<T> for EntityFunction {
+    fn run(
+        &self,
+        arguments: &[WanderValue<T>],
+        _bindings: &Bindings<T>,
+    ) -> Result<WanderValue<T>, WanderError> {
+        if let [WanderValue::Tuple(value)] = arguments {
+            if value.len() == 3 {
+                Ok(value.get(0).unwrap().clone())
+            } else {
+                Err(WanderError(
+                    "`entity` function requires one Statement parameter.".to_owned(),
+                ))
+            }
+        } else {
+            Err(WanderError(
+                "`entity` function requires one Statement parameter.".to_owned(),
+            ))
+        }
+    }
+
+    fn doc(&self) -> String {
+        "Retrieve the Entity from a Statement.".to_owned()
+    }
+
+    fn params(&self) -> Vec<crate::WanderType> {
+        vec![WanderType::Tuple]
+    }
+
+    fn returns(&self) -> crate::WanderType {
+        WanderType::Identifier
+    }
+
+    fn name(&self) -> String {
+        "Statement.entity".to_owned()
+    }
+}
+
+struct AttributeFunction {}
+impl<T: Clone + PartialEq> HostFunction<T> for AttributeFunction {
+    fn run(
+        &self,
+        arguments: &[WanderValue<T>],
+        _bindings: &Bindings<T>,
+    ) -> Result<WanderValue<T>, WanderError> {
+        if let [WanderValue::List(value)] = arguments {
+            if value.len() == 3 {
+                Ok(value.get(1).unwrap().clone())
+            } else {
+                Err(WanderError(
+                    "`attribute` function requires one Statement parameter.".to_owned(),
+                ))
+            }
+        } else {
+            Err(WanderError(
+                "`attribute` function requires one Statement parameter.".to_owned(),
+            ))
+        }
+    }
+
+    fn doc(&self) -> String {
+        "Retrieve the Attribute from a Statement.".to_owned()
+    }
+
+    fn params(&self) -> Vec<crate::WanderType> {
+        vec![WanderType::Tuple]
+    }
+
+    fn returns(&self) -> crate::WanderType {
+        WanderType::Identifier
+    }
+
+    fn name(&self) -> String {
+        "Statement.attribute".to_owned()
+    }
+}
+
+struct ValueFunction {}
+impl<T: Clone + PartialEq> HostFunction<T> for ValueFunction {
+    fn run(
+        &self,
+        arguments: &[WanderValue<T>],
+        _bindings: &Bindings<T>,
+    ) -> Result<WanderValue<T>, WanderError> {
+        if let [WanderValue::List(value)] = arguments {
+            if value.len() == 3 {
+                Ok(value.get(2).unwrap().clone())
+            } else {
+                Err(WanderError(
+                    "`value` function requires one Statement parameter.".to_owned(),
+                ))
+            }
+        } else {
+            Err(WanderError(
+                "`value` function requires one Statement parameter.".to_owned(),
+            ))
+        }
+    }
+
+    fn doc(&self) -> String {
+        "Retrieve the Value from a Statement.".to_owned()
+    }
+
+    fn params(&self) -> Vec<crate::WanderType> {
+        vec![WanderType::Tuple]
+    }
+
+    fn returns(&self) -> crate::WanderType {
+        WanderType::Value
+    }
+
+    fn name(&self) -> String {
+        "Statement.value".to_owned()
+    }
+}
+
+bindings.bind_host_function(Rc::new(EntityFunction {}));
+bindings.bind_host_function(Rc::new(AttributeFunction {}));
+bindings.bind_host_function(Rc::new(ValueFunction {}));

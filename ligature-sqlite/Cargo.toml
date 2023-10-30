@@ -12,7 +12,7 @@ repository = "https://github.com/almibe/ligature-rs/"
 
 [dependencies]
 ligature = { path = "../ligature" }
-wander = { path = "../wander" }
+wander = "0.5.0"
 rusqlite = { version = "0.29.0", features = ["bundled"] }
 sql-builder = "3.1"
 dirs = "5.0"
