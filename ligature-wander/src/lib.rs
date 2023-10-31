@@ -4,15 +4,143 @@
 
 //! Wander support for working with Ligature.
 
-use ligature_graph::Graph;
+use ligature::{Dataset, Ligature};
+use wander::environment::Environment;
+use wander::HostType;
+use std::sync::RwLock;
+use std::rc::Rc;
+use wander::HostFunction;
+use wander::NoHostType;
+use wander::WanderValue;
+use wander::WanderError;
+use wander::HostFunctionBinding;
 
-fn write_graph(graph: &Graph, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.write_str("Graph.graph`").unwrap();
-    graph.all_statements().into_iter().for_each(|statement| {
-        f.write_str(write_statement(&statement).as_str()).unwrap();
-    });
-    f.write_str("`")
+pub fn bind_instance<T: HostType>(instance: Rc<RwLock<dyn Ligature>>, environment: &mut Environment<T>) {
+    environment.bind_host_function(Rc::new(DatasetsFunction {
+        instance: instance.clone(),
+    }));
+    environment.bind_host_function(Rc::new(AddDatasetFunction {
+        instance: instance.clone(),
+    }));
+    //TODO add addDataset function
+    //TDOO add removeDataset function
 }
+
+struct DatasetsFunction {
+    instance: Rc<RwLock<dyn Ligature>>,
+}
+impl <T: HostType>HostFunction<T> for DatasetsFunction {
+    fn run(
+        &self,
+        arguments: &[WanderValue<T>],
+        _environment: &Environment<T>,
+    ) -> Result<WanderValue<T>, WanderError> {
+        if let [_] = arguments {
+            let instance = self.instance.read().unwrap();
+            let datasets = instance.datasets().map_err(|e| WanderError(e.0))?;
+            Ok(WanderValue::List(datasets.into_iter().map(|d| WanderValue::String(d.name().to_string())).collect()))
+        } else {
+            Err(WanderError(
+                "`datasets` function requires no arguments.".to_owned(),
+            ))
+        }
+    }
+
+    fn binding(&self) -> HostFunctionBinding {
+        HostFunctionBinding {
+            doc_string: "Show all Datasets.".to_owned(),
+            name: "datasets".to_owned(),
+            parameters: vec![("unit".to_owned(), None)],
+            result: None
+        }
+    }
+}
+
+struct AddDatasetFunction {
+    instance: Rc<RwLock<dyn Ligature>>,
+}
+impl <T: HostType>HostFunction<T> for AddDatasetFunction {
+    fn run(
+        &self,
+        arguments: &[WanderValue<T>],
+        _environment: &Environment<T>,
+    ) -> Result<wander::WanderValue<T>, WanderError> {
+        match arguments {
+            [WanderValue::String(name)] => {
+                let mut instance = self.instance.write().unwrap();
+                match Dataset::new(name) {
+                    Ok(ds) => instance.add_dataset(&ds).map(|_| WanderValue::Nothing).map_err(|e| WanderError(e.0)),
+                    Err(err) => Err(WanderError(err.0))
+                }
+            }
+            _ => Err(WanderError(
+                "`addDataset` function requires one string parameter.".to_owned(),
+            )),
+        }
+    }
+
+    fn binding(&self) -> HostFunctionBinding {
+        HostFunctionBinding {
+            doc_string: "Add a new Dataset.".to_owned(),
+            name: "addDataset".to_owned(),
+            parameters: vec![("name".to_owned(), None)],
+            result: None
+        }
+    }
+}
+
+struct RemoveDatasetFunction {
+    instance: Rc<RwLock<dyn Ligature>>,
+}
+impl <T: HostType>HostFunction<T> for RemoveDatasetFunction {
+    fn run(
+        &self,
+        arguments: &[WanderValue<T>],
+        _environment: &Environment<T>,
+    ) -> Result<wander::WanderValue<T>, WanderError> {
+        match arguments {
+            [WanderValue::String(name)] => {
+                let mut instance = self.instance.write().unwrap();                
+                match Dataset::new(name) {
+                    Ok(ds) => instance.remove_dataset(&ds).map(|_| WanderValue::Nothing).map_err(|e| WanderError(e.0)),
+                    Err(err) => Err(WanderError(err.0))
+                }
+            }
+            _ => Err(WanderError(
+                "`removeDataset` function requires one string parameter.".to_owned(),
+            )),
+        }
+    }
+
+    fn binding(&self) -> wander::HostFunctionBinding {
+        todo!()
+    }
+
+    // fn doc(&self) -> String {
+    //     todo!()
+    // }
+
+    // fn params(&self) -> Vec<WanderType> {
+    //     todo!()
+    // }
+
+    // fn returns(&self) -> WanderType {
+    //     todo!()
+    // }
+
+    // fn name(&self) -> String {
+    //     "Ligature.removeDataset".to_owned()
+    // }
+}
+
+
+// fn write_graph(graph: &Graph, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//     f.write_str("Graph.graph`").unwrap();
+//     graph.all_statements().into_iter().for_each(|statement| {
+//         f.write_str(write_statement(&statement).as_str()).unwrap();
+//     });
+//     f.write_str("`")
+// }
 
 // struct GraphFunction {}
 // impl HostFunction for GraphFunction {
@@ -264,161 +392,161 @@ fn write_graph(graph: &Graph, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Resu
     //     "graph".to_owned(),
     //     Rc::new(graph_transform),
     // );
-    fn identifier(gaze: &mut Gaze<Token>) -> Option<Element> {
-        match gaze.next() {
-            Some(Token::Identifier(value)) => Some(Element::Identifier(value)),
-            _ => None,
-        }
-    }
-    fn identifier(lex: &mut Lexer<Token>) -> Option<Identifier> {
-        let slice = lex.slice();
-        match Identifier::new(slice.slice(1..(slice.len() - 1)).unwrap()) {
-            Ok(ident) => Some(ident),
-            Err(_) => None,
-        }
-    }
-    // #[regex("<[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;%=\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}\\x{10000}-\\x{1FFFD}\\x{20000}-\\x{2FFFD}\\x{30000}-\\x{3FFFD}\\x{40000}-\\x{4FFFD}\\x{50000}-\\x{5FFFD}\\x{60000}-\\x{6FFFD}\\x{70000}-\\x{7FFFD}\\x{80000}-\\x{8FFFD}\\x{90000}-\\x{9FFFD}\\x{A0000}-\\x{AFFFD}\\x{B0000}-\\x{BFFFD}\\x{C0000}-\\x{CFFFD}\\x{D0000}-\\x{DFFFD}\\x{E1000}-\\x{EFFFD}]+>", identifier)]
-    // Identifier(Identifier),
+//     fn identifier(gaze: &mut Gaze<Token>) -> Option<Element> {
+//         match gaze.next() {
+//             Some(Token::Identifier(value)) => Some(Element::Identifier(value)),
+//             _ => None,
+//         }
+//     }
+//     fn identifier(lex: &mut Lexer<Token>) -> Option<Identifier> {
+//         let slice = lex.slice();
+//         match Identifier::new(slice.slice(1..(slice.len() - 1)).unwrap()) {
+//             Ok(ident) => Some(ident),
+//             Err(_) => None,
+//         }
+//     }
+//     // #[regex("<[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;%=\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}\\x{10000}-\\x{1FFFD}\\x{20000}-\\x{2FFFD}\\x{30000}-\\x{3FFFD}\\x{40000}-\\x{4FFFD}\\x{50000}-\\x{5FFFD}\\x{60000}-\\x{6FFFD}\\x{70000}-\\x{7FFFD}\\x{80000}-\\x{8FFFD}\\x{90000}-\\x{9FFFD}\\x{A0000}-\\x{AFFFD}\\x{B0000}-\\x{BFFFD}\\x{C0000}-\\x{CFFFD}\\x{D0000}-\\x{DFFFD}\\x{E1000}-\\x{EFFFD}]+>", identifier)]
+//     // Identifier(Identifier),
 
-    pub fn write_value(value: &Value) -> String {
-        match value {
-            Value::Identifier(entity) => write_identifier(entity),
-            Value::Integer(integer) => write_integer(integer),
-            //Value::FloatLiteral(float) => write_float(float),
-            Value::String(string) => write_string(string),
-            Value::Bytes(bytes) => write_bytes(bytes),
-        }
-    }
-    pub fn write_statement(statement: &Statement) -> String {
-        format!(
-            "{} {} {}\n",
-            write_identifier(&statement.entity),
-            write_identifier(&statement.attribute),
-            write_value(&statement.value),
-        )
-    }
-    /// Writes out an Entity to a String.
-pub fn write_identifier(entity: &Identifier) -> String {
-    format!("<{}>", entity.id())
-}
+//     pub fn write_value(value: &Value) -> String {
+//         match value {
+//             Value::Identifier(entity) => write_identifier(entity),
+//             Value::Integer(integer) => write_integer(integer),
+//             //Value::FloatLiteral(float) => write_float(float),
+//             Value::String(string) => write_string(string),
+//             Value::Bytes(bytes) => write_bytes(bytes),
+//         }
+//     }
+//     pub fn write_statement(statement: &Statement) -> String {
+//         format!(
+//             "{} {} {}\n",
+//             write_identifier(&statement.entity),
+//             write_identifier(&statement.attribute),
+//             write_value(&statement.value),
+//         )
+//     }
+//     /// Writes out an Entity to a String.
+// pub fn write_identifier(entity: &Identifier) -> String {
+//     format!("<{}>", entity.id())
+// }
 
-struct EntityFunction {}
-impl<T: Clone + PartialEq> HostFunction<T> for EntityFunction {
-    fn run(
-        &self,
-        arguments: &[WanderValue<T>],
-        _bindings: &Bindings<T>,
-    ) -> Result<WanderValue<T>, WanderError> {
-        if let [WanderValue::Tuple(value)] = arguments {
-            if value.len() == 3 {
-                Ok(value.get(0).unwrap().clone())
-            } else {
-                Err(WanderError(
-                    "`entity` function requires one Statement parameter.".to_owned(),
-                ))
-            }
-        } else {
-            Err(WanderError(
-                "`entity` function requires one Statement parameter.".to_owned(),
-            ))
-        }
-    }
+// struct EntityFunction {}
+// impl<T: Clone + PartialEq> HostFunction<T> for EntityFunction {
+//     fn run(
+//         &self,
+//         arguments: &[WanderValue<T>],
+//         _bindings: &Bindings<T>,
+//     ) -> Result<WanderValue<T>, WanderError> {
+//         if let [WanderValue::Tuple(value)] = arguments {
+//             if value.len() == 3 {
+//                 Ok(value.get(0).unwrap().clone())
+//             } else {
+//                 Err(WanderError(
+//                     "`entity` function requires one Statement parameter.".to_owned(),
+//                 ))
+//             }
+//         } else {
+//             Err(WanderError(
+//                 "`entity` function requires one Statement parameter.".to_owned(),
+//             ))
+//         }
+//     }
 
-    fn doc(&self) -> String {
-        "Retrieve the Entity from a Statement.".to_owned()
-    }
+//     fn doc(&self) -> String {
+//         "Retrieve the Entity from a Statement.".to_owned()
+//     }
 
-    fn params(&self) -> Vec<crate::WanderType> {
-        vec![WanderType::Tuple]
-    }
+//     fn params(&self) -> Vec<crate::WanderType> {
+//         vec![WanderType::Tuple]
+//     }
 
-    fn returns(&self) -> crate::WanderType {
-        WanderType::Identifier
-    }
+//     fn returns(&self) -> crate::WanderType {
+//         WanderType::Identifier
+//     }
 
-    fn name(&self) -> String {
-        "Statement.entity".to_owned()
-    }
-}
+//     fn name(&self) -> String {
+//         "Statement.entity".to_owned()
+//     }
+// }
 
-struct AttributeFunction {}
-impl<T: Clone + PartialEq> HostFunction<T> for AttributeFunction {
-    fn run(
-        &self,
-        arguments: &[WanderValue<T>],
-        _bindings: &Bindings<T>,
-    ) -> Result<WanderValue<T>, WanderError> {
-        if let [WanderValue::List(value)] = arguments {
-            if value.len() == 3 {
-                Ok(value.get(1).unwrap().clone())
-            } else {
-                Err(WanderError(
-                    "`attribute` function requires one Statement parameter.".to_owned(),
-                ))
-            }
-        } else {
-            Err(WanderError(
-                "`attribute` function requires one Statement parameter.".to_owned(),
-            ))
-        }
-    }
+// struct AttributeFunction {}
+// impl<T: Clone + PartialEq> HostFunction<T> for AttributeFunction {
+//     fn run(
+//         &self,
+//         arguments: &[WanderValue<T>],
+//         _bindings: &Bindings<T>,
+//     ) -> Result<WanderValue<T>, WanderError> {
+//         if let [WanderValue::List(value)] = arguments {
+//             if value.len() == 3 {
+//                 Ok(value.get(1).unwrap().clone())
+//             } else {
+//                 Err(WanderError(
+//                     "`attribute` function requires one Statement parameter.".to_owned(),
+//                 ))
+//             }
+//         } else {
+//             Err(WanderError(
+//                 "`attribute` function requires one Statement parameter.".to_owned(),
+//             ))
+//         }
+//     }
 
-    fn doc(&self) -> String {
-        "Retrieve the Attribute from a Statement.".to_owned()
-    }
+//     fn doc(&self) -> String {
+//         "Retrieve the Attribute from a Statement.".to_owned()
+//     }
 
-    fn params(&self) -> Vec<crate::WanderType> {
-        vec![WanderType::Tuple]
-    }
+//     fn params(&self) -> Vec<crate::WanderType> {
+//         vec![WanderType::Tuple]
+//     }
 
-    fn returns(&self) -> crate::WanderType {
-        WanderType::Identifier
-    }
+//     fn returns(&self) -> crate::WanderType {
+//         WanderType::Identifier
+//     }
 
-    fn name(&self) -> String {
-        "Statement.attribute".to_owned()
-    }
-}
+//     fn name(&self) -> String {
+//         "Statement.attribute".to_owned()
+//     }
+// }
 
-struct ValueFunction {}
-impl<T: Clone + PartialEq> HostFunction<T> for ValueFunction {
-    fn run(
-        &self,
-        arguments: &[WanderValue<T>],
-        _bindings: &Bindings<T>,
-    ) -> Result<WanderValue<T>, WanderError> {
-        if let [WanderValue::List(value)] = arguments {
-            if value.len() == 3 {
-                Ok(value.get(2).unwrap().clone())
-            } else {
-                Err(WanderError(
-                    "`value` function requires one Statement parameter.".to_owned(),
-                ))
-            }
-        } else {
-            Err(WanderError(
-                "`value` function requires one Statement parameter.".to_owned(),
-            ))
-        }
-    }
+// struct ValueFunction {}
+// impl<T: Clone + PartialEq> HostFunction<T> for ValueFunction {
+//     fn run(
+//         &self,
+//         arguments: &[WanderValue<T>],
+//         _bindings: &Bindings<T>,
+//     ) -> Result<WanderValue<T>, WanderError> {
+//         if let [WanderValue::List(value)] = arguments {
+//             if value.len() == 3 {
+//                 Ok(value.get(2).unwrap().clone())
+//             } else {
+//                 Err(WanderError(
+//                     "`value` function requires one Statement parameter.".to_owned(),
+//                 ))
+//             }
+//         } else {
+//             Err(WanderError(
+//                 "`value` function requires one Statement parameter.".to_owned(),
+//             ))
+//         }
+//     }
 
-    fn doc(&self) -> String {
-        "Retrieve the Value from a Statement.".to_owned()
-    }
+    // fn doc(&self) -> String {
+    //     "Retrieve the Value from a Statement.".to_owned()
+    // }
 
-    fn params(&self) -> Vec<crate::WanderType> {
-        vec![WanderType::Tuple]
-    }
+    // fn params(&self) -> Vec<crate::WanderType> {
+    //     vec![WanderType::Tuple]
+    // }
 
-    fn returns(&self) -> crate::WanderType {
-        WanderType::Value
-    }
+    // fn returns(&self) -> crate::WanderType {
+    //     WanderType::Value
+    // }
 
-    fn name(&self) -> String {
-        "Statement.value".to_owned()
-    }
-}
+    // fn name(&self) -> String {
+    //     "Statement.value".to_owned()
+    // }
+// }
 
-bindings.bind_host_function(Rc::new(EntityFunction {}));
-bindings.bind_host_function(Rc::new(AttributeFunction {}));
-bindings.bind_host_function(Rc::new(ValueFunction {}));
+// bindings.bind_host_function(Rc::new(EntityFunction {}));
+// bindings.bind_host_function(Rc::new(AttributeFunction {}));
+// bindings.bind_host_function(Rc::new(ValueFunction {}));

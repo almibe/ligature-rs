@@ -11,7 +11,6 @@
 extern crate lazy_static;
 
 use std::fmt::Display;
-
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;

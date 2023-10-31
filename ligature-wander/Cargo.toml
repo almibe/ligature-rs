@@ -13,6 +13,6 @@ repository = "https://github.com/almibe/ligature-rs/"
 [dependencies]
 ligature = { path = "../ligature" }
 ligature-graph = { path = "../ligature-graph" }
-lig = { path = "../lig" }
+#lig = { path = "../lig" }
 wander = "0.5.0"
 anyhow = "1.0"

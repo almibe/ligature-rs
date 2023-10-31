@@ -13,5 +13,6 @@ members = [
    "ligature-repl",
 #    "ligature-sqlite",
 #    "ligature-test-suite",
+    "ligature-wander",
 #    "ligature-wasm",
 ]

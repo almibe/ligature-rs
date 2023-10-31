@@ -6,15 +6,13 @@
 //! in-memory persistent data structures for storing data.
 
 use std::{
-    borrow::BorrowMut,
     cell::RefCell,
     collections::{BTreeMap, BTreeSet},
     rc::Rc,
     sync::RwLock,
 };
 
-use ligature::{Dataset, Ligature, LigatureError, Query, Statement, Value};
-use wander::{HostFunction, WanderError, WanderValue, NoHostType};
+use ligature::{Dataset, Ligature, LigatureError, Query, Statement};
 
 #[derive(Default)]
 pub struct LigatureInMemory {
@@ -23,15 +21,20 @@ pub struct LigatureInMemory {
 
 impl Ligature for LigatureInMemory {
     fn datasets(&self) -> Result<Vec<Dataset>, LigatureError> {
-        todo!()
+        let res = self.datasets.read().unwrap().keys().map(|e| {Dataset::new(e).unwrap()}).collect();
+        Ok(res)
     }
 
-    fn add_dataset(&mut self, _dataset: &Dataset) -> Result<(), LigatureError> {
-        todo!()
+    fn add_dataset(&mut self, dataset: &Dataset) -> Result<(), LigatureError> {
+        let mut instance = self.datasets.write().unwrap();
+        instance.insert(dataset.name().to_owned(), RefCell::new(BTreeSet::new()));
+        Ok(())
     }
 
-    fn remove_dataset(&mut self, _dataset: &Dataset) -> Result<(), LigatureError> {
-        todo!()
+    fn remove_dataset(&mut self, dataset: &Dataset) -> Result<(), LigatureError> {
+        let mut instance = self.datasets.write().unwrap();
+        instance.remove(dataset.name());
+        Ok(())
     }
 
     fn statements(&self, _dataset: &Dataset) -> Result<Vec<Statement>, LigatureError> {
@@ -67,9 +70,6 @@ impl LigatureInMemory {
     }
 
     // pub fn add_bindings(&self, bindings: &mut Bindings) {
-    //     bindings.bind_host_function(Rc::new(DatasetsFunction {
-    //         lim: self.datasets.clone(),
-    //     }));
     //     bindings.bind_host_function(Rc::new(AddDatasetFunction {
     //         lim: self.datasets.clone(),
     //     }));
@@ -90,143 +90,6 @@ impl LigatureInMemory {
     //     }));
     // }
 }
-
-// struct DatasetsFunction {
-//     lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
-// }
-// impl HostFunction<NoHostType> for DatasetsFunction {
-//     fn run(
-//         &self,
-//         arguments: &[WanderValue<NoHostType>],
-//         _bindings: &Bindings,
-//     ) -> Result<WanderValue<NoHostType>, WanderError> {
-//         if arguments.is_empty() {
-//             let datasets = self.lim.read().unwrap();
-//             let datasets = datasets
-//                 .keys()
-//                 .map(|name| WanderValue::String(name.to_owned()))
-//                 .collect();
-//             Ok(WanderValue::List(datasets))
-//         } else {
-//             Err(WanderError(
-//                 "`datasets` function requires no arguments.".to_owned(),
-//             ))
-//         }
-//     }
-
-//     fn binding(&self) -> wander::HostFunctionBinding {
-//         todo!()
-//     }
-
-//     // fn doc(&self) -> String {
-//     //     todo!()
-//     // }
-
-//     // fn params(&self) -> Vec<WanderType> {
-//     //     todo!()
-//     // }
-
-//     // fn returns(&self) -> WanderType {
-//     //     todo!()
-//     // }
-
-//     // fn name(&self) -> String {
-//     //     "Ligature.datasets".to_owned()
-//     // }
-// }
-
-// struct AddDatasetFunction {
-//     lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
-// }
-// impl HostFunction<NoHostType> for AddDatasetFunction {
-//     fn run(
-//         &self,
-//         arguments: &[WanderValue<NoHostType>],
-//         _bindings: &Bindings,
-//     ) -> Result<wander::WanderValue<NoHostType>, WanderError> {
-//         match arguments {
-//             [WanderValue::String(name)] => {
-//                 let mut instance = self.lim.write().unwrap();
-//                 if instance.contains_key(name) {
-//                     Ok(WanderValue::Nothing) //do nothing
-//                 } else {
-//                     let instance = instance.borrow_mut();
-//                     instance.insert(name.to_owned(), RefCell::new(BTreeSet::new()));
-//                     Ok(WanderValue::Nothing)
-//                 }
-//             }
-//             _ => Err(WanderError(
-//                 "`addDataset` function requires one string parameter.".to_owned(),
-//             )),
-//         }
-//     }
-
-//     fn binding(&self) -> wander::HostFunctionBinding {
-//         todo!()
-//     }
-
-//     // fn doc(&self) -> String {
-//     //     todo!()
-//     // }
-
-//     // fn params(&self) -> Vec<WanderType> {
-//     //     todo!()
-//     // }
-
-//     // fn returns(&self) -> WanderType {
-//     //     todo!()
-//     // }
-
-//     // fn name(&self) -> String {
-//     //     "Ligature.addDataset".to_owned()
-//     // }
-// }
-
-// struct RemoveDatasetFunction {
-//     lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
-// }
-// impl HostFunction<NoHostType> for RemoveDatasetFunction {
-//     fn run(
-//         &self,
-//         arguments: &[WanderValue<NoHostType>],
-//         _bindings: &Bindings,
-//     ) -> Result<wander::WanderValue<NoHostType>, WanderError> {
-//         match arguments {
-//             [WanderValue::String(name)] => {
-//                 let mut instance = self.lim.write().unwrap();
-//                 if instance.contains_key(name) {
-//                     instance.remove(name);
-//                     Ok(WanderValue::Nothing)
-//                 } else {
-//                     Ok(WanderValue::Nothing) // do nothing
-//                 }
-//             }
-//             _ => Err(WanderError(
-//                 "`removeDataset` function requires one string parameter.".to_owned(),
-//             )),
-//         }
-//     }
-
-//     fn binding(&self) -> wander::HostFunctionBinding {
-//         todo!()
-//     }
-
-//     // fn doc(&self) -> String {
-//     //     todo!()
-//     // }
-
-//     // fn params(&self) -> Vec<WanderType> {
-//     //     todo!()
-//     // }
-
-//     // fn returns(&self) -> WanderType {
-//     //     todo!()
-//     // }
-
-//     // fn name(&self) -> String {
-//     //     "Ligature.removeDataset".to_owned()
-//     // }
-// }
 
 // struct StatementsFunction {
 //     lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
