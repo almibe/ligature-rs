@@ -37,8 +37,19 @@ impl Ligature for LigatureInMemory {
         Ok(())
     }
 
-    fn statements(&self, _dataset: &Dataset) -> Result<Vec<Statement>, LigatureError> {
-        todo!()
+    fn statements(&self, dataset: &Dataset) -> Result<Vec<Statement>, LigatureError> {
+        let instance = self.datasets.read().unwrap();
+        match instance.get(dataset.name()) {
+            Some(statements) => {
+                let mut results = vec![];
+                let statements = statements.borrow();
+                for statement in statements.iter() {
+                    results.push(statement.clone());
+                }
+                Ok(results)
+            }
+            _ => Err(LigatureError("Could not find Dataset.".to_owned())), // do nothing
+        }
     }
 
     fn add_statements(

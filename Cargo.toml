@@ -2,17 +2,17 @@
 resolver = "2"
 
 members = [
-#    "lig",
+    "lig",
     "ligature",
-#    "ligature-benchmark",
-   "ligature-graph",
-#    "ligature-http",
+    "ligature-benchmark",
+    "ligature-graph",
+    "ligature-http",
     "ligature-in-memory",
-    # "ligature-nushell",
-#    "ligature-redb",
-   "ligature-repl",
-#    "ligature-sqlite",
-#    "ligature-test-suite",
+    "ligature-nushell",
+    "ligature-redb",
+    "ligature-repl",
+    "ligature-sqlite",
+    "ligature-test-suite",
     "ligature-wander",
-#    "ligature-wasm",
+    "ligature-wasm",
 ]

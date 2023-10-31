@@ -10,10 +10,10 @@ use wander::HostType;
 use std::sync::RwLock;
 use std::rc::Rc;
 use wander::HostFunction;
-use wander::NoHostType;
 use wander::WanderValue;
 use wander::WanderError;
 use wander::HostFunctionBinding;
+use std::collections::HashSet;
 
 pub fn bind_instance<T: HostType>(instance: Rc<RwLock<dyn Ligature>>, environment: &mut Environment<T>) {
     environment.bind_host_function(Rc::new(DatasetsFunction {
@@ -25,9 +25,9 @@ pub fn bind_instance<T: HostType>(instance: Rc<RwLock<dyn Ligature>>, environmen
     environment.bind_host_function(Rc::new(RemoveDatasetFunction {
         instance: instance.clone(),
     }));
-    //     bindings.bind_host_function(Rc::new(StatementsFunction {
-    //         lim: self.datasets.clone(),
-    //     }));
+    environment.bind_host_function(Rc::new(StatementsFunction {
+        instance: instance.clone(),
+    }));
     //     bindings.bind_host_function(Rc::new(AddStatementsFunction {
     //         lim: self.datasets.clone(),
     //     }));
@@ -135,66 +135,59 @@ impl <T: HostType>HostFunction<T> for RemoveDatasetFunction {
     }
 }
 
-// struct StatementsFunction {
-//     lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
-// }
-// impl HostFunction<NoHostType> for StatementsFunction {
-//     fn run(
-//         &self,
-//         arguments: &[WanderValue<NoHostType>],
-//         _bindings: &Bindings,
-//     ) -> Result<wander::WanderValue<NoHostType>, WanderError> {
-//         match arguments {
-//             [WanderValue::String(name)] => {
-//                 let instance = self.lim.read().unwrap();
-//                 match instance.get(name) {
-//                     Some(statements) => {
-//                         let mut results = vec![];
-//                         let statements = statements.borrow();
-//                         for statement in statements.iter() {
-//                             let entity = WanderValue::Identifier(statement.entity.clone());
-//                             let attribute = WanderValue::Identifier(statement.attribute.clone());
-//                             let value = match statement.value.clone() {
-//                                 ligature::Value::Identifier(value) => {
-//                                     WanderValue::Identifier(value)
-//                                 }
-//                                 ligature::Value::String(value) => WanderValue::String(value),
-//                                 ligature::Value::Integer(value) => WanderValue::Int(value),
-//                                 ligature::Value::Bytes(_) => todo!(),
-//                             };
-//                             results.push(WanderValue::List(vec![entity, attribute, value]));
-//                         }
-//                         Ok(WanderValue::List(results))
-//                     }
-//                     _ => Ok(WanderValue::Nothing), // do nothing
-//                 }
-//             }
-//             _ => Err(WanderError(
-//                 "`removeDataset` function requires one string parameter.".to_owned(),
-//             )),
-//         }
-//     }
+fn id(input: ligature::Identifier) -> wander::identifier::Identifier {
+    wander::identifier::Identifier::new(input.id()).unwrap()
+}
 
-//     fn binding(&self) -> wander::HostFunctionBinding {
-//         todo!()
-//     }
+struct StatementsFunction {
+    instance: Rc<RwLock<dyn Ligature>>,
+}
+impl <T: HostType>HostFunction<T> for StatementsFunction {
+    fn run(
+        &self,
+        arguments: &[WanderValue<T>],
+        _environment: &Environment<T>,
+    ) -> Result<wander::WanderValue<T>, WanderError> {
+        match arguments {
+            [WanderValue::String(name)] => {
+                let instance = self.instance.read().unwrap();
+                match Dataset::new(name) {
+                    Ok(ds) => {
+                        let statements = instance.statements(&ds).unwrap();
+                        let mut results = HashSet::new();
+                        for statement in statements.iter() {
+                            let entity = WanderValue::Identifier(id(statement.entity.clone()));
+                            let attribute = WanderValue::Identifier(id(statement.attribute.clone()));
+                            let value = match statement.value.clone() {
+                                ligature::Value::Identifier(value) => {
+                                    WanderValue::Identifier(wander::identifier::Identifier::new(value.id()).unwrap())
+                                }
+                                ligature::Value::String(value) => WanderValue::String(value),
+                                ligature::Value::Integer(value) => WanderValue::Int(value),
+                                ligature::Value::Bytes(_) => todo!(),
+                            };
+                            results.insert(WanderValue::List(vec![entity, attribute, value]));
+                        }
+                        Ok(WanderValue::Set(results))
+                    },
+                    Err(err) => Err(WanderError(err.0))
+                }
+            }
+            _ => Err(WanderError(
+                "`statements` function requires one string parameter.".to_owned(),
+            )),
+        }
+    }
 
-//     // fn doc(&self) -> String {
-//     //     todo!()
-//     // }
-
-//     // fn params(&self) -> Vec<WanderType> {
-//     //     todo!()
-//     // }
-
-//     // fn returns(&self) -> WanderType {
-//     //     todo!()
-//     // }
-
-//     // fn name(&self) -> String {
-//     //     "Ligature.statements".to_owned()
-//     // }
-// }
+    fn binding(&self) -> HostFunctionBinding {
+        HostFunctionBinding {
+            doc_string: "List all Statements for a Dataset.".to_owned(),
+            name: "statements".to_owned(),
+            parameters: vec![("dataset".to_owned(), None)],
+            result: None
+        }
+    }
+}
 
 // struct AddStatementsFunction {
 //     lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
