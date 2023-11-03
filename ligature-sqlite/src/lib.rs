@@ -16,11 +16,6 @@ use std::{
 use dirs::data_local_dir;
 use ligature::{Dataset, Identifier, Ligature, LigatureError, Statement, Value};
 use rusqlite::{params, Connection, Error, Transaction};
-use sql_builder::{quote, SqlBuilder};
-use wander::{
-    bindings::{Bindings, BindingsProvider},
-    HostFunction, WanderError, WanderValue,
-};
 
 #[derive(Clone)]
 /// The main struct used for working with the SQLite stored version of Ligature.
@@ -235,59 +230,59 @@ impl Ligature for LigatureSQLite {
     }
 }
 
-impl BindingsProvider for LigatureSQLite {
-    fn add_bindings(&self, bindings: &mut Bindings) {
-        bindings.bind_host_function(Rc::new(DatasetsFunction {
-            instance: Arc::new(Mutex::new(self.clone())),
-        }));
-        bindings.bind_host_function(Rc::new(AddDatasetFunction {
-            instance: Arc::new(Mutex::new(self.clone())),
-        }));
-        bindings.bind_host_function(Rc::new(RemoveDatasetFunction {
-            instance: Arc::new(Mutex::new(self.clone())),
-        }));
-        bindings.bind_host_function(Rc::new(StatementsFunction {
-            instance: Arc::new(Mutex::new(self.clone())),
-        }));
-        bindings.bind_host_function(Rc::new(AddStatementsFunction {
-            instance: Arc::new(Mutex::new(self.clone())),
-        }));
-        bindings.bind_host_function(Rc::new(RemoveStatementsFunction {
-            instance: Arc::new(Mutex::new(self.clone())),
-        }));
-        // bindings.bind_native_function(
-        //     "Ligature".to_owned(),
-        //     String::from("query"),
-        //     Rc::new(QueryFunction {
-        //         instance: Arc::new(Mutex::new(self.clone())),
-        //         connection: self.connection.clone(),
-        //     }),
-        // );
-    }
-}
+// impl BindingsProvider for LigatureSQLite {
+//     fn add_bindings(&self, bindings: &mut Bindings) {
+//         bindings.bind_host_function(Rc::new(DatasetsFunction {
+//             instance: Arc::new(Mutex::new(self.clone())),
+//         }));
+//         bindings.bind_host_function(Rc::new(AddDatasetFunction {
+//             instance: Arc::new(Mutex::new(self.clone())),
+//         }));
+//         bindings.bind_host_function(Rc::new(RemoveDatasetFunction {
+//             instance: Arc::new(Mutex::new(self.clone())),
+//         }));
+//         bindings.bind_host_function(Rc::new(StatementsFunction {
+//             instance: Arc::new(Mutex::new(self.clone())),
+//         }));
+//         bindings.bind_host_function(Rc::new(AddStatementsFunction {
+//             instance: Arc::new(Mutex::new(self.clone())),
+//         }));
+//         bindings.bind_host_function(Rc::new(RemoveStatementsFunction {
+//             instance: Arc::new(Mutex::new(self.clone())),
+//         }));
+//         // bindings.bind_native_function(
+//         //     "Ligature".to_owned(),
+//         //     String::from("query"),
+//         //     Rc::new(QueryFunction {
+//         //         instance: Arc::new(Mutex::new(self.clone())),
+//         //         connection: self.connection.clone(),
+//         //     }),
+//         // );
+//     }
+// }
 
-struct DatasetsFunction {
-    instance: Arc<Mutex<dyn Ligature>>,
-}
-impl HostFunction for DatasetsFunction {
-    fn run(
-        &self,
-        arguments: &[WanderValue],
-        _bindings: &Bindings,
-    ) -> Result<WanderValue, WanderError> {
-        if arguments.is_empty() {
-            let ds = self.instance.lock().unwrap().datasets().unwrap();
-            let mut results = vec![];
-            for name in ds {
-                results.push(WanderValue::String(name.name().to_owned()));
-            }
-            Ok(WanderValue::List(results))
-        } else {
-            Err(WanderError(
-                "`datasets` function take no arguments.".to_owned(),
-            ))
-        }
-    }
+// struct DatasetsFunction {
+//     instance: Arc<Mutex<dyn Ligature>>,
+// }
+// impl HostFunction for DatasetsFunction {
+//     fn run(
+//         &self,
+//         arguments: &[WanderValue],
+//         _bindings: &Bindings,
+//     ) -> Result<WanderValue, WanderError> {
+//         if arguments.is_empty() {
+//             let ds = self.instance.lock().unwrap().datasets().unwrap();
+//             let mut results = vec![];
+//             for name in ds {
+//                 results.push(WanderValue::String(name.name().to_owned()));
+//             }
+//             Ok(WanderValue::List(results))
+//         } else {
+//             Err(WanderError(
+//                 "`datasets` function take no arguments.".to_owned(),
+//             ))
+//         }
+//     }
 
     // fn doc(&self) -> String {
     //     "Get a list of all Datasets.".to_owned()
@@ -304,380 +299,380 @@ impl HostFunction for DatasetsFunction {
     // fn name(&self) -> String {
     //     "Ligature.datasets".to_owned()
     // }
-}
+// }
 
-struct AddDatasetFunction {
-    instance: Arc<Mutex<LigatureSQLite>>,
-}
-impl HostFunction for AddDatasetFunction {
-    fn run(
-        &self,
-        arguments: &[WanderValue],
-        _bindings: &Bindings,
-    ) -> Result<WanderValue, WanderError> {
-        match arguments {
-            [WanderValue::String(name)] => {
-                self.instance
-                    .lock()
-                    .unwrap()
-                    .add_dataset(&Dataset::new(name).unwrap())
-                    .map_err(|e| WanderError(e.0))?;
-                Ok(WanderValue::Nothing)
-            }
-            _ => todo!(),
-        }
-    }
+// struct AddDatasetFunction {
+//     instance: Arc<Mutex<LigatureSQLite>>,
+// }
+// impl HostFunction for AddDatasetFunction {
+//     fn run(
+//         &self,
+//         arguments: &[WanderValue],
+//         _bindings: &Bindings,
+//     ) -> Result<WanderValue, WanderError> {
+//         match arguments {
+//             [WanderValue::String(name)] => {
+//                 self.instance
+//                     .lock()
+//                     .unwrap()
+//                     .add_dataset(&Dataset::new(name).unwrap())
+//                     .map_err(|e| WanderError(e.0))?;
+//                 Ok(WanderValue::Nothing)
+//             }
+//             _ => todo!(),
+//         }
+//     }
 
-    // fn doc(&self) -> String {
-    //     "Add a new Dataset.".to_owned()
-    // }
+//     // fn doc(&self) -> String {
+//     //     "Add a new Dataset.".to_owned()
+//     // }
 
-    // fn params(&self) -> Vec<WanderType> {
-    //     vec![WanderType::String]
-    // }
+//     // fn params(&self) -> Vec<WanderType> {
+//     //     vec![WanderType::String]
+//     // }
 
-    // fn returns(&self) -> WanderType {
-    //     WanderType::Nothing
-    // }
+//     // fn returns(&self) -> WanderType {
+//     //     WanderType::Nothing
+//     // }
 
-    // fn name(&self) -> String {
-    //     "Ligature.addDataset".to_owned()
-    // }
-}
+//     // fn name(&self) -> String {
+//     //     "Ligature.addDataset".to_owned()
+//     // }
+// }
 
-struct RemoveDatasetFunction {
-    instance: Arc<Mutex<LigatureSQLite>>,
-}
-impl HostFunction for RemoveDatasetFunction {
-    fn run(
-        &self,
-        arguments: &[WanderValue],
-        _bindings: &Bindings,
-    ) -> Result<WanderValue, WanderError> {
-        match arguments {
-            [WanderValue::String(name)] => {
-                self.instance
-                    .lock()
-                    .unwrap()
-                    .remove_dataset(&Dataset::new(name).unwrap())
-                    .unwrap();
-                Ok(WanderValue::Nothing)
-            }
-            _ => todo!(),
-        }
-    }
+// struct RemoveDatasetFunction {
+//     instance: Arc<Mutex<LigatureSQLite>>,
+// }
+// impl HostFunction for RemoveDatasetFunction {
+//     fn run(
+//         &self,
+//         arguments: &[WanderValue],
+//         _bindings: &Bindings,
+//     ) -> Result<WanderValue, WanderError> {
+//         match arguments {
+//             [WanderValue::String(name)] => {
+//                 self.instance
+//                     .lock()
+//                     .unwrap()
+//                     .remove_dataset(&Dataset::new(name).unwrap())
+//                     .unwrap();
+//                 Ok(WanderValue::Nothing)
+//             }
+//             _ => todo!(),
+//         }
+//     }
 
-    // fn doc(&self) -> String {
-    //     "Remove a Dataset.".to_owned()
-    // }
+//     // fn doc(&self) -> String {
+//     //     "Remove a Dataset.".to_owned()
+//     // }
 
-    // fn params(&self) -> Vec<WanderType> {
-    //     vec![WanderType::String]
-    // }
+//     // fn params(&self) -> Vec<WanderType> {
+//     //     vec![WanderType::String]
+//     // }
 
-    // fn returns(&self) -> WanderType {
-    //     WanderType::Nothing
-    // }
+//     // fn returns(&self) -> WanderType {
+//     //     WanderType::Nothing
+//     // }
 
-    // fn name(&self) -> String {
-    //     "Ligature.removeDataset".to_owned()
-    // }
-}
+//     // fn name(&self) -> String {
+//     //     "Ligature.removeDataset".to_owned()
+//     // }
+// }
 
-struct StatementsFunction {
-    instance: Arc<Mutex<LigatureSQLite>>,
-}
-impl HostFunction for StatementsFunction {
-    fn run(
-        &self,
-        arguments: &[WanderValue],
-        _bindings: &Bindings,
-    ) -> Result<WanderValue, WanderError> {
-        match arguments {
-            [WanderValue::String(name)] => {
-                let statements = self
-                    .instance
-                    .lock()
-                    .unwrap()
-                    .statements(&Dataset::new(name).unwrap())
-                    .unwrap();
-                let mut results: Vec<WanderValue> = vec![];
-                for statement in statements {
-                    let mut result = vec![];
-                    result.push(WanderValue::Identifier(statement.entity));
-                    result.push(WanderValue::Identifier(statement.attribute));
-                    let value = match statement.value {
-                        Value::Identifier(value) => WanderValue::Identifier(value),
-                        Value::String(value) => WanderValue::String(value),
-                        Value::Integer(value) => WanderValue::Int(value),
-                        Value::Bytes(_value) => todo!(),
-                    };
-                    result.push(value);
-                    results.push(WanderValue::List(result));
-                }
-                Ok(WanderValue::List(results))
-            }
-            _ => panic!("Should not reach."),
-        }
-    }
+// struct StatementsFunction {
+//     instance: Arc<Mutex<LigatureSQLite>>,
+// }
+// impl HostFunction for StatementsFunction {
+//     fn run(
+//         &self,
+//         arguments: &[WanderValue],
+//         _bindings: &Bindings,
+//     ) -> Result<WanderValue, WanderError> {
+//         match arguments {
+//             [WanderValue::String(name)] => {
+//                 let statements = self
+//                     .instance
+//                     .lock()
+//                     .unwrap()
+//                     .statements(&Dataset::new(name).unwrap())
+//                     .unwrap();
+//                 let mut results: Vec<WanderValue> = vec![];
+//                 for statement in statements {
+//                     let mut result = vec![];
+//                     result.push(WanderValue::Identifier(statement.entity));
+//                     result.push(WanderValue::Identifier(statement.attribute));
+//                     let value = match statement.value {
+//                         Value::Identifier(value) => WanderValue::Identifier(value),
+//                         Value::String(value) => WanderValue::String(value),
+//                         Value::Integer(value) => WanderValue::Int(value),
+//                         Value::Bytes(_value) => todo!(),
+//                     };
+//                     result.push(value);
+//                     results.push(WanderValue::List(result));
+//                 }
+//                 Ok(WanderValue::List(results))
+//             }
+//             _ => panic!("Should not reach."),
+//         }
+//     }
 
-    // fn doc(&self) -> String {
-    //     "Get all of the Statements in a Dataset.".to_owned()
-    // }
+//     // fn doc(&self) -> String {
+//     //     "Get all of the Statements in a Dataset.".to_owned()
+//     // }
 
-    // fn params(&self) -> Vec<WanderType> {
-    //     vec![WanderType::String]
-    // }
+//     // fn params(&self) -> Vec<WanderType> {
+//     //     vec![WanderType::String]
+//     // }
 
-    // fn returns(&self) -> WanderType {
-    //     WanderType::List
-    // }
+//     // fn returns(&self) -> WanderType {
+//     //     WanderType::List
+//     // }
 
-    // fn name(&self) -> String {
-    //     "Ligature.statements".to_owned()
-    // }
-}
+//     // fn name(&self) -> String {
+//     //     "Ligature.statements".to_owned()
+//     // }
+// }
 
-fn wander_value_to_statement(values: &Vec<WanderValue>) -> Result<Vec<Statement>, WanderError> {
-    let mut results = vec![];
-    for value in values {
-        match value {
-            WanderValue::List(contents) => match &contents[..] {
-                [WanderValue::Identifier(entity), WanderValue::Identifier(attribute), value] => {
-                    let value = match value {
-                        WanderValue::Int(value) => Value::Integer(*value),
-                        WanderValue::String(value) => Value::String(value.to_string()),
-                        WanderValue::Identifier(value) => Value::Identifier(value.clone()),
-                        _ => todo!(),
-                    };
-                    let statement = Statement {
-                        entity: entity.clone(),
-                        attribute: attribute.clone(),
-                        value,
-                    };
-                    results.push(statement);
-                }
-                _ => todo!(),
-            },
-            _ => todo!(),
-        }
-    }
-    Ok(results)
-}
+// fn wander_value_to_statement(values: &Vec<WanderValue>) -> Result<Vec<Statement>, WanderError> {
+//     let mut results = vec![];
+//     for value in values {
+//         match value {
+//             WanderValue::List(contents) => match &contents[..] {
+//                 [WanderValue::Identifier(entity), WanderValue::Identifier(attribute), value] => {
+//                     let value = match value {
+//                         WanderValue::Int(value) => Value::Integer(*value),
+//                         WanderValue::String(value) => Value::String(value.to_string()),
+//                         WanderValue::Identifier(value) => Value::Identifier(value.clone()),
+//                         _ => todo!(),
+//                     };
+//                     let statement = Statement {
+//                         entity: entity.clone(),
+//                         attribute: attribute.clone(),
+//                         value,
+//                     };
+//                     results.push(statement);
+//                 }
+//                 _ => todo!(),
+//             },
+//             _ => todo!(),
+//         }
+//     }
+//     Ok(results)
+// }
 
-struct AddStatementsFunction {
-    instance: Arc<Mutex<LigatureSQLite>>,
-}
-impl HostFunction for AddStatementsFunction {
-    fn run(
-        &self,
-        arguments: &[WanderValue],
-        _bindings: &Bindings,
-    ) -> Result<WanderValue, WanderError> {
-        match arguments {
-            [WanderValue::String(name), WanderValue::List(statements)] => {
-                let dataset = Dataset::new(name).unwrap();
-                let statements = wander_value_to_statement(statements)?;
-                self.instance
-                    .lock()
-                    .unwrap()
-                    .add_statements(&dataset, statements)
-                    .map_err(|e| WanderError(e.0))?;
-                Ok(WanderValue::Nothing)
-            }
-            _ => todo!(),
-        }
-    }
+// struct AddStatementsFunction {
+//     instance: Arc<Mutex<LigatureSQLite>>,
+// }
+// impl HostFunction for AddStatementsFunction {
+//     fn run(
+//         &self,
+//         arguments: &[WanderValue],
+//         _bindings: &Bindings,
+//     ) -> Result<WanderValue, WanderError> {
+//         match arguments {
+//             [WanderValue::String(name), WanderValue::List(statements)] => {
+//                 let dataset = Dataset::new(name).unwrap();
+//                 let statements = wander_value_to_statement(statements)?;
+//                 self.instance
+//                     .lock()
+//                     .unwrap()
+//                     .add_statements(&dataset, statements)
+//                     .map_err(|e| WanderError(e.0))?;
+//                 Ok(WanderValue::Nothing)
+//             }
+//             _ => todo!(),
+//         }
+//     }
 
-    // fn doc(&self) -> String {
-    //     "Add Statements to Dataset.".to_owned()
-    // }
+//     // fn doc(&self) -> String {
+//     //     "Add Statements to Dataset.".to_owned()
+//     // }
 
-    // fn params(&self) -> Vec<WanderType> {
-    //     vec![WanderType::String, WanderType::List]
-    // }
+//     // fn params(&self) -> Vec<WanderType> {
+//     //     vec![WanderType::String, WanderType::List]
+//     // }
 
-    // fn returns(&self) -> WanderType {
-    //     WanderType::Nothing
-    // }
+//     // fn returns(&self) -> WanderType {
+//     //     WanderType::Nothing
+//     // }
 
-    // fn name(&self) -> String {
-    //     "Ligature.addStatements".to_owned()
-    // }
-}
+//     // fn name(&self) -> String {
+//     //     "Ligature.addStatements".to_owned()
+//     // }
+// }
 
-struct RemoveStatementsFunction {
-    instance: Arc<Mutex<dyn Ligature>>,
-}
-impl HostFunction for RemoveStatementsFunction {
-    fn run(
-        &self,
-        arguments: &[WanderValue],
-        _bindings: &Bindings,
-    ) -> Result<WanderValue, WanderError> {
-        match arguments {
-            [WanderValue::String(name), WanderValue::List(statements)] => {
-                let dataset = Dataset::new(name).map_err(|e| WanderError(e.0))?;
-                let statements = wander_value_to_statement(statements)?;
-                self.instance
-                    .lock()
-                    .unwrap()
-                    .remove_statements(&dataset, statements)
-                    .map_err(|e| WanderError(e.0))?;
-                Ok(WanderValue::Nothing)
-            }
-            _ => todo!(),
-        }
-    }
+// struct RemoveStatementsFunction {
+//     instance: Arc<Mutex<dyn Ligature>>,
+// }
+// impl HostFunction for RemoveStatementsFunction {
+//     fn run(
+//         &self,
+//         arguments: &[WanderValue],
+//         _bindings: &Bindings,
+//     ) -> Result<WanderValue, WanderError> {
+//         match arguments {
+//             [WanderValue::String(name), WanderValue::List(statements)] => {
+//                 let dataset = Dataset::new(name).map_err(|e| WanderError(e.0))?;
+//                 let statements = wander_value_to_statement(statements)?;
+//                 self.instance
+//                     .lock()
+//                     .unwrap()
+//                     .remove_statements(&dataset, statements)
+//                     .map_err(|e| WanderError(e.0))?;
+//                 Ok(WanderValue::Nothing)
+//             }
+//             _ => todo!(),
+//         }
+//     }
 
-    // fn doc(&self) -> String {
-    //     "Remove Statements from the given Dataset.".to_owned()
-    // }
+//     // fn doc(&self) -> String {
+//     //     "Remove Statements from the given Dataset.".to_owned()
+//     // }
 
-    // fn params(&self) -> Vec<WanderType> {
-    //     vec![WanderType::String, WanderType::List]
-    // }
+//     // fn params(&self) -> Vec<WanderType> {
+//     //     vec![WanderType::String, WanderType::List]
+//     // }
 
-    // fn returns(&self) -> WanderType {
-    //     WanderType::Nothing
-    // }
+//     // fn returns(&self) -> WanderType {
+//     //     WanderType::Nothing
+//     // }
 
-    // fn name(&self) -> String {
-    //     "Ligature.removeStatements".to_owned()
-    // }
-}
+//     // fn name(&self) -> String {
+//     //     "Ligature.removeStatements".to_owned()
+//     // }
+// }
 
-fn fetch_dataset_id(dataset_name: &str, tx: &Transaction) -> Result<Option<u64>, Error> {
-    let x = tx.query_row_and_then(
-        "select id from dataset where name = ?1",
-        [dataset_name],
-        |row| {
-            let id: u64 = row.get(0)?;
-            Ok::<u64, Error>(id)
-        },
-    );
-    match x {
-        Ok(dataset_id) => Ok(Some(dataset_id)),
-        Err(_) => Ok(None), //TODO just returning None for now, eventually I should match on the error (some errors should return Err others None)
-    }
-}
+// fn fetch_dataset_id(dataset_name: &str, tx: &Transaction) -> Result<Option<u64>, Error> {
+//     let x = tx.query_row_and_then(
+//         "select id from dataset where name = ?1",
+//         [dataset_name],
+//         |row| {
+//             let id: u64 = row.get(0)?;
+//             Ok::<u64, Error>(id)
+//         },
+//     );
+//     match x {
+//         Ok(dataset_id) => Ok(Some(dataset_id)),
+//         Err(_) => Ok(None), //TODO just returning None for now, eventually I should match on the error (some errors should return Err others None)
+//     }
+// }
 
-struct QueryFunction {
-    _instance: Arc<Mutex<LigatureSQLite>>,
-    connection: Arc<Mutex<Connection>>,
-}
-impl HostFunction for QueryFunction {
-    fn run(
-        &self,
-        arguments: &[WanderValue],
-        _bindings: &Bindings,
-    ) -> Result<WanderValue, WanderError> {
-        match arguments {
-            [WanderValue::String(dataset), entity, attribute, value] => {
-                let mut connection = self.connection.lock().unwrap();
-                let tx = connection.transaction().unwrap();
-                let dataset_id = fetch_dataset_id(dataset, &tx).unwrap().unwrap();
+// struct QueryFunction {
+//     _instance: Arc<Mutex<LigatureSQLite>>,
+//     connection: Arc<Mutex<Connection>>,
+// }
+// impl HostFunction for QueryFunction {
+//     fn run(
+//         &self,
+//         arguments: &[WanderValue],
+//         _bindings: &Bindings,
+//     ) -> Result<WanderValue, WanderError> {
+//         match arguments {
+//             [WanderValue::String(dataset), entity, attribute, value] => {
+//                 let mut connection = self.connection.lock().unwrap();
+//                 let tx = connection.transaction().unwrap();
+//                 let dataset_id = fetch_dataset_id(dataset, &tx).unwrap().unwrap();
 
-                let mut builder = SqlBuilder::select_from("statement");
-                builder
-                    .field("entity")
-                    .field("attribute")
-                    .field("value_identifier")
-                    .field("value_int")
-                    .field("value_string")
-                    .and_where_eq("dataset_id", dataset_id);
+//                 let mut builder = SqlBuilder::select_from("statement");
+//                 builder
+//                     .field("entity")
+//                     .field("attribute")
+//                     .field("value_identifier")
+//                     .field("value_int")
+//                     .field("value_string")
+//                     .and_where_eq("dataset_id", dataset_id);
 
-                if let WanderValue::Identifier(entity) = entity {
-                    builder.and_where_eq("entity", &quote(entity.id()));
-                } else if let WanderValue::Nothing = entity {
-                    //do nothing
-                } else {
-                    return Err(WanderError(
-                        "Invalid argument in Entity position in call to `query`.".to_owned(),
-                    ));
-                }
+//                 if let WanderValue::Identifier(entity) = entity {
+//                     builder.and_where_eq("entity", &quote(entity.id()));
+//                 } else if let WanderValue::Nothing = entity {
+//                     //do nothing
+//                 } else {
+//                     return Err(WanderError(
+//                         "Invalid argument in Entity position in call to `query`.".to_owned(),
+//                     ));
+//                 }
 
-                if let WanderValue::Identifier(attribute) = attribute {
-                    builder.and_where_eq("attribute", &quote(attribute.id()));
-                } else if let WanderValue::Nothing = attribute {
-                    //do nothing
-                } else {
-                    return Err(WanderError(
-                        "Invalid argument in Attribute position in call to `query`.".to_owned(),
-                    ));
-                }
+//                 if let WanderValue::Identifier(attribute) = attribute {
+//                     builder.and_where_eq("attribute", &quote(attribute.id()));
+//                 } else if let WanderValue::Nothing = attribute {
+//                     //do nothing
+//                 } else {
+//                     return Err(WanderError(
+//                         "Invalid argument in Attribute position in call to `query`.".to_owned(),
+//                     ));
+//                 }
 
-                match value {
-                    WanderValue::Int(value) => {
-                        builder.and_where_eq("value_int", value);
-                    }
-                    WanderValue::String(value) => {
-                        builder.and_where_eq("value_string", &quote(value));
-                    }
-                    WanderValue::Identifier(value) => {
-                        builder.and_where_eq("value_identifier", &quote(value.id()));
-                    }
-                    WanderValue::Nothing => (), //do nothing
-                    _ => {
-                        return Err(WanderError(
-                            "Invalid argument in Value position in call to `query`.".to_owned(),
-                        ))
-                    }
-                }
-                let stmt = builder.sql().unwrap();
-                let mut stmt = tx.prepare(&stmt).unwrap();
-                let x = stmt
-                    .query_map([], |e| {
-                        let entity: String = e.get(0).unwrap();
-                        let attribute: String = e.get(1).unwrap();
-                        let value_identifier: Option<String> = e.get(2).unwrap();
-                        let value_int: Option<i64> = e.get(3).unwrap();
-                        let value_string: Option<String> = e.get(4).unwrap();
+//                 match value {
+//                     WanderValue::Int(value) => {
+//                         builder.and_where_eq("value_int", value);
+//                     }
+//                     WanderValue::String(value) => {
+//                         builder.and_where_eq("value_string", &quote(value));
+//                     }
+//                     WanderValue::Identifier(value) => {
+//                         builder.and_where_eq("value_identifier", &quote(value.id()));
+//                     }
+//                     WanderValue::Nothing => (), //do nothing
+//                     _ => {
+//                         return Err(WanderError(
+//                             "Invalid argument in Value position in call to `query`.".to_owned(),
+//                         ))
+//                     }
+//                 }
+//                 let stmt = builder.sql().unwrap();
+//                 let mut stmt = tx.prepare(&stmt).unwrap();
+//                 let x = stmt
+//                     .query_map([], |e| {
+//                         let entity: String = e.get(0).unwrap();
+//                         let attribute: String = e.get(1).unwrap();
+//                         let value_identifier: Option<String> = e.get(2).unwrap();
+//                         let value_int: Option<i64> = e.get(3).unwrap();
+//                         let value_string: Option<String> = e.get(4).unwrap();
 
-                        let entity = WanderValue::Identifier(Identifier::new(&entity).unwrap());
-                        let attribute =
-                            WanderValue::Identifier(Identifier::new(&attribute).unwrap());
-                        let value = if let Some(value) = value_identifier {
-                            WanderValue::Identifier(Identifier::new(&value).unwrap())
-                        } else if let Some(value) = value_int {
-                            WanderValue::Int(value)
-                        } else if let Some(value) = value_string {
-                            WanderValue::String(value)
-                        } else {
-                            todo!("err")
-                            //return Err(WanderError("Invalid argument in Value position in call to `query`.".to_owned()))
-                        };
-                        Ok(WanderValue::List(vec![entity, attribute, value]))
-                    })
-                    .unwrap();
-                let mut results = vec![];
-                for y in x {
-                    results.push(y.unwrap());
-                }
-                Ok(WanderValue::List(results))
-            }
-            _ => Err(WanderError("Incorrect arguments.".to_owned())),
-        }
-    }
+//                         let entity = WanderValue::Identifier(Identifier::new(&entity).unwrap());
+//                         let attribute =
+//                             WanderValue::Identifier(Identifier::new(&attribute).unwrap());
+//                         let value = if let Some(value) = value_identifier {
+//                             WanderValue::Identifier(Identifier::new(&value).unwrap())
+//                         } else if let Some(value) = value_int {
+//                             WanderValue::Int(value)
+//                         } else if let Some(value) = value_string {
+//                             WanderValue::String(value)
+//                         } else {
+//                             todo!("err")
+//                             //return Err(WanderError("Invalid argument in Value position in call to `query`.".to_owned()))
+//                         };
+//                         Ok(WanderValue::List(vec![entity, attribute, value]))
+//                     })
+//                     .unwrap();
+//                 let mut results = vec![];
+//                 for y in x {
+//                     results.push(y.unwrap());
+//                 }
+//                 Ok(WanderValue::List(results))
+//             }
+//             _ => Err(WanderError("Incorrect arguments.".to_owned())),
+//         }
+//     }
 
-    fn doc(&self) -> String {
-        "Run a query against a Dataset.".to_owned()
-    }
+//     // fn doc(&self) -> String {
+//     //     "Run a query against a Dataset.".to_owned()
+//     // }
 
-    fn params(&self) -> Vec<wander::WanderType> {
-        vec![
-            WanderType::String,
-            WanderType::Optional(Box::new(WanderType::Identifier)),
-            WanderType::Optional(Box::new(WanderType::Identifier)),
-            WanderType::Optional(Box::new(WanderType::Value)),
-        ]
-    }
+//     // fn params(&self) -> Vec<wander::WanderType> {
+//     //     vec![
+//     //         WanderType::String,
+//     //         WanderType::Optional(Box::new(WanderType::Identifier)),
+//     //         WanderType::Optional(Box::new(WanderType::Identifier)),
+//     //         WanderType::Optional(Box::new(WanderType::Value)),
+//     //     ]
+//     // }
 
-    fn returns(&self) -> wander::WanderType {
-        WanderType::List
-    }
+//     // fn returns(&self) -> wander::WanderType {
+//     //     WanderType::List
+//     // }
 
-    fn name(&self) -> String {
-        todo!()
-    }
-}
+//     // fn name(&self) -> String {
+//     //     todo!()
+//     // }
+// }

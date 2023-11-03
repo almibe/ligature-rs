@@ -6,7 +6,7 @@
 
 use ligature::{Dataset, Ligature, LigatureError};
 
-use crate::read::read;
+//use crate::read::read;
 
 pub mod read;
 pub mod write;
@@ -21,11 +21,11 @@ impl From<LigatureError> for LigError {
     }
 }
 
-pub fn load_lig_from_str(
-    dataset: Dataset,
-    input: &str,
-    ligature: &dyn Ligature,
-) -> Result<(), LigatureError> {
-    let statements = read(input)?;
-    ligature.add_statements(&dataset, statements)
-}
+// pub fn load_lig_from_str(
+//     dataset: Dataset,
+//     input: &str,
+//     ligature: &dyn Ligature,
+// ) -> Result<(), LigatureError> {
+// //    let statements = read(input)?;
+// //   ligature.add_statements(&dataset, statements)
+// }

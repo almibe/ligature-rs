@@ -6,6 +6,8 @@
 
 #![deny(missing_docs)]
 
+mod mem;
+
 /// The data structure stored in this triple store.
 pub struct Trip<F, S, T> {
     /// The first element

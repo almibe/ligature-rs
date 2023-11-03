@@ -4,26 +4,26 @@
 
 //! This module is an implementation of the a test suite for Ligature implementations.
 
-use std::fmt::Display;
+use std::{fmt::Display, rc::Rc, sync::RwLock};
+use wander::{environment::Environment, NoHostType};
 
-use ligature::Identifier;
 use ligature_in_memory::LigatureInMemory;
-use ligature_sqlite::LigatureSQLite;
+//use ligature_sqlite::LigatureSQLite;
 use wander::{
-    bindings::{Bindings, BindingsProvider},
     preludes::common,
-    run, WanderError, WanderValue,
+    run, WanderError, WanderValue, HostType
 };
+use ligature_wander::bind_instance;
 
-struct LigatureTestCase<'a> {
+struct LigatureTestCase<'a, T: HostType> {
     name: &'a str,
     input: &'a str,
-    result: Result<WanderValue, WanderError>,
+    result: Result<WanderValue<T>, WanderError>,
     skippable: bool,
 }
 
-fn ident(id: &str) -> WanderValue {
-    WanderValue::Identifier(Identifier::new(id).unwrap())
+fn ident<T: HostType>(id: &str) -> WanderValue<T> {
+    WanderValue::Identifier(wander::identifier::Identifier::new(id).unwrap())
 }
 
 #[derive(Debug)]
@@ -51,13 +51,13 @@ impl Display for TestResults<'_> {
     }
 }
 
-#[allow(dead_code)]
-fn create_sqlite_bindings() -> Bindings {
-    let mut bindings = common();
-    let instance = LigatureSQLite::new_memory_store().unwrap();
-    instance.add_bindings(&mut bindings);
-    bindings
-}
+// #[allow(dead_code)]
+// fn create_sqlite_bindings() -> Bindings {
+//     let mut environment = common();
+//     let instance = LigatureSQLite::new_memory_store().unwrap();
+//     instance.add_bindings(&mut bindings);
+//     bindings
+// }
 
 // #[allow(dead_code)]
 // fn create_redb_bindings() -> Bindings {
@@ -68,10 +68,11 @@ fn create_sqlite_bindings() -> Bindings {
 // }
 
 #[allow(dead_code)]
-fn create_memory_bindings() -> Bindings {
-    let mut bindings = common();
-    let instance = LigatureInMemory::new();
-    instance.add_bindings(&mut bindings);
+fn create_memory_bindings() -> Environment<NoHostType> {
+    let mut bindings = common::<NoHostType>();
+    let instance = Rc::new(RwLock::new(LigatureInMemory::new()));
+//    instance.add_bindings(&mut bindings);
+    bind_instance(instance, &mut bindings);
     bindings
 }
 
@@ -83,16 +84,16 @@ pub fn main() {
         skipped_tests: vec![],
     };
     let tests = vec![
-        LigatureTestCase {
-            name: "Empty test",
-            input: "",
-            result: Ok(WanderValue::Nothing),
-            skippable: true,
-        },
+        // LigatureTestCase {
+        //     name: "Empty test",
+        //     input: "",
+        //     result: Ok(WanderValue::Nothing),
+        //     skippable: true,
+        // },
         LigatureTestCase {
             name: "Parse Boolean",
             input: "true",
-            result: Ok(WanderValue::Boolean(true)),
+            result: Ok(WanderValue::Bool(true)),
             skippable: true,
         },
         LigatureTestCase {

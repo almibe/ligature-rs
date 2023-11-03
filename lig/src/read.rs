@@ -18,7 +18,7 @@ pub fn tokenize(script: &str) -> Result<Vec<Token>, LigatureError> {
     Ok(results)
 }
 
-pub fn read(script: &str) -> Result<Vec<Statement>, LigatureError> {
-    let tokens = tokenize(script)?;
-    wander::lig::read_tokens(tokens)
-}
+// pub fn read(script: &str) -> Result<Vec<Statement>, LigatureError> {
+//     let tokens = tokenize(script)?;
+//     wander::lig::read_tokens(tokens)
+// }

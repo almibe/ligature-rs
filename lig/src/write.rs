@@ -3,12 +3,13 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use ligature::Statement;
-use wander::write_statement;
+//use wander::write_statement;
 
 pub fn write(statements: std::slice::Iter<Statement>) -> String {
     let mut result = String::new();
     for statement in statements {
-        result += &*write_statement(statement);
+//        result += &*write_statement(statement);
+        todo!()
     }
     result
 }

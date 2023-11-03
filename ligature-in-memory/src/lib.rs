@@ -54,10 +54,19 @@ impl Ligature for LigatureInMemory {
 
     fn add_statements(
         &self,
-        _dataset: &Dataset,
-        _statements: Vec<Statement>,
+        dataset: &Dataset,
+        statements: Vec<Statement>,
     ) -> Result<(), LigatureError> {
-        todo!()
+        let instance = self.datasets.write().unwrap();
+        if instance.contains_key(dataset.name()) {
+            let mut ds = instance.get(dataset.name()).unwrap().borrow_mut();
+            for statement in statements {
+                ds.insert(statement);
+            }
+            Ok(())
+        } else {
+            todo!()
+        }
     }
 
     fn remove_statements(

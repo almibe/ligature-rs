@@ -6,17 +6,20 @@
 
 mod utils;
 
+use std::{sync::RwLock, rc::Rc};
+
+use ligature_wander::bind_instance;
 use ligature_in_memory::LigatureInMemory;
-use wander::{WanderError, WanderValue};
+use wander::{WanderError, WanderValue, NoHostType};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 pub fn run(script: String) -> JsValue {
-    let mut bindings = wander::preludes::common();
+    let mut environment = wander::preludes::common::<NoHostType>();
     let instance = LigatureInMemory::new();
-    instance.add_bindings(&mut bindings);
-    match wander::run(&script, &mut bindings) {
+    bind_instance(Rc::new(RwLock::new(instance)), &mut environment);
+    match wander::run(&script, &mut environment) {
         Ok(value) => serde_wasm_bindgen::to_value(&value).unwrap(),
-        Err(err) => serde_wasm_bindgen::to_value(&Err::<WanderValue, WanderError>(err)).unwrap(),
+        Err(err) => serde_wasm_bindgen::to_value(&Err::<WanderValue<NoHostType>, WanderError>(err)).unwrap(),
     }
 }

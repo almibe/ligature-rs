@@ -15,4 +15,5 @@ members = [
     "ligature-test-suite",
     "ligature-wander",
     "ligature-wasm",
+    "trips",
 ]

@@ -4,6 +4,7 @@
 
 //! Wander support for working with Ligature.
 
+use ligature::{Value, Statement, LigatureError};
 use ligature::{Dataset, Ligature};
 use wander::environment::Environment;
 use wander::HostType;
@@ -28,13 +29,13 @@ pub fn bind_instance<T: HostType>(instance: Rc<RwLock<dyn Ligature>>, environmen
     environment.bind_host_function(Rc::new(StatementsFunction {
         instance: instance.clone(),
     }));
-    //     bindings.bind_host_function(Rc::new(AddStatementsFunction {
+    environment.bind_host_function(Rc::new(AddStatementsFunction {
+        instance: instance.clone(),
+    }));
+    //     environment.bind_host_function(Rc::new(RemoveStatementsFunction {
     //         lim: self.datasets.clone(),
     //     }));
-    //     bindings.bind_host_function(Rc::new(RemoveStatementsFunction {
-    //         lim: self.datasets.clone(),
-    //     }));
-    //     bindings.bind_host_function(Rc::new(QueryFunction {
+    //     environment.bind_host_function(Rc::new(QueryFunction {
     //         lim: self.datasets.clone(),
     //     }));
 }
@@ -135,8 +136,12 @@ impl <T: HostType>HostFunction<T> for RemoveDatasetFunction {
     }
 }
 
-fn id(input: ligature::Identifier) -> wander::identifier::Identifier {
+fn id_to_wander(input: ligature::Identifier) -> wander::identifier::Identifier {
     wander::identifier::Identifier::new(input.id()).unwrap()
+}
+
+fn wander_to_id(input: wander::identifier::Identifier) -> ligature::Identifier {
+    ligature::Identifier::new(input.id()).unwrap()
 }
 
 struct StatementsFunction {
@@ -148,19 +153,20 @@ impl <T: HostType>HostFunction<T> for StatementsFunction {
         arguments: &[WanderValue<T>],
         _environment: &Environment<T>,
     ) -> Result<wander::WanderValue<T>, WanderError> {
+        println!("in run");
         match arguments {
             [WanderValue::String(name)] => {
                 let instance = self.instance.read().unwrap();
                 match Dataset::new(name) {
                     Ok(ds) => {
-                        let statements = instance.statements(&ds).unwrap();
+                        let statements = instance.statements(&ds).map_err(|e| WanderError(e.0))?;
                         let mut results = HashSet::new();
                         for statement in statements.iter() {
-                            let entity = WanderValue::Identifier(id(statement.entity.clone()));
-                            let attribute = WanderValue::Identifier(id(statement.attribute.clone()));
+                            let entity = WanderValue::Identifier(id_to_wander(statement.entity.clone()));
+                            let attribute = WanderValue::Identifier(id_to_wander(statement.attribute.clone()));
                             let value = match statement.value.clone() {
                                 ligature::Value::Identifier(value) => {
-                                    WanderValue::Identifier(wander::identifier::Identifier::new(value.id()).unwrap())
+                                    WanderValue::Identifier(wander::identifier::Identifier::new(value.id()).map_err(|e| WanderError(e.0))?)
                                 }
                                 ligature::Value::String(value) => WanderValue::String(value),
                                 ligature::Value::Integer(value) => WanderValue::Int(value),
@@ -168,6 +174,7 @@ impl <T: HostType>HostFunction<T> for StatementsFunction {
                             };
                             results.insert(WanderValue::List(vec![entity, attribute, value]));
                         }
+                        println!("hello {:?}", results);
                         Ok(WanderValue::Set(results))
                     },
                     Err(err) => Err(WanderError(err.0))
@@ -189,115 +196,104 @@ impl <T: HostType>HostFunction<T> for StatementsFunction {
     }
 }
 
-// struct AddStatementsFunction {
-//     lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
-// }
-// impl HostFunction<NoHostType> for AddStatementsFunction {
-//     fn run(
-//         &self,
-//         arguments: &[WanderValue<NoHostType>],
-//         _bindings: &Bindings,
-//     ) -> Result<wander::WanderValue<NoHostType>, WanderError> {
-//         match arguments {
-//             [WanderValue::String(name), WanderValue::List(statements)] => {
-//                 let instance = self.lim.write().unwrap();
-//                 match instance.get(name) {
-//                     Some(ds_statements) => {
-//                         //ds_statements.insert( Statement { entity: Identifier::new("test").unwrap(), attribute: todo!(), value: todo!() } );
-//                         for statement in statements {
-//                             match statement {
-//                                 WanderValue::List(statement) => match &statement[..] {
-//                                     [WanderValue::Identifier(entity), WanderValue::Identifier(attribute), value] =>
-//                                     {
-//                                         let value: Value = match value {
-//                                             WanderValue::Int(value) => {
-//                                                 Value::Integer(value.to_owned())
-//                                             }
-//                                             WanderValue::String(value) => {
-//                                                 Value::String(value.to_owned())
-//                                             }
-//                                             WanderValue::Identifier(value) => {
-//                                                 Value::Identifier(value.to_owned())
-//                                             }
-//                                             _ => {
-//                                                 return Err(WanderError(
-//                                                     "Invalid Statement".to_owned(),
-//                                                 ))
-//                                             }
-//                                         };
-//                                         let statement = Statement {
-//                                             entity: entity.to_owned(),
-//                                             attribute: attribute.to_owned(),
-//                                             value,
-//                                         };
-//                                         let mut ds_statements = ds_statements.borrow_mut();
-//                                         ds_statements.insert(statement);
-//                                     }
-//                                     _ => todo!(),
-//                                 },
-//                                 _ => todo!(),
-//                             }
-//                         }
-//                         Ok(WanderValue::Nothing)
-//                     }
-//                     _ => Ok(WanderValue::Nothing), // do nothing
-//                 }
-//             }
-//             _ => Err(WanderError(
-//                 "`addStatements` function requires one string parameter and a list of Statements."
-//                     .to_owned(),
-//             )),
-//         }
-//     }
+struct AddStatementsFunction {
+    instance: Rc<RwLock<dyn Ligature>>,
+}
+impl <T: HostType>HostFunction<T> for AddStatementsFunction {
+    fn run(
+        &self,
+        arguments: &[WanderValue<T>],
+        _environment: &Environment<T>,
+    ) -> Result<wander::WanderValue<T>, WanderError> {
+        match arguments {
+            [WanderValue::String(name), WanderValue::List(statements)] => {
+                let instance = self.instance.write().unwrap();
+                match Dataset::new(name) {
+                    Ok(ds) => {
+                        let mut res = vec![];
+                        for statement in statements {
+                            match statement {
+                                WanderValue::List(statement) => match &statement[..] {
+                                    [WanderValue::Identifier(entity), WanderValue::Identifier(attribute), value] =>
+                                    {
+                                        let value: Value = match value {
+                                            WanderValue::Int(value) => {
+                                                Value::Integer(value.to_owned())
+                                            }
+                                            WanderValue::String(value) => {
+                                                Value::String(value.to_owned())
+                                            }
+                                            WanderValue::Identifier(value) => {
+                                                Value::Identifier(wander_to_id(value.to_owned()))
+                                            }
+                                            _ => {
+                                                return Err(WanderError(
+                                                    "Invalid Statement".to_owned(),
+                                                ))
+                                            }
+                                        };
+                                        let statement = Statement {
+                                            entity: wander_to_id(entity.to_owned()),
+                                            attribute: wander_to_id(attribute.to_owned()),
+                                            value,
+                                        };
+                                        res.push(statement);
+                                    }
+                                    _ => return Err(WanderError("Invalid Statement.".to_owned())),
+                                },
+                                _ => return Err(WanderError("Invalid Statement.".to_owned())),
+                            }
+                        }
+                        instance.add_statements(&ds, res).map_err(|e| WanderError(e.0))?;
+                        Ok(WanderValue::Nothing)
+                    },
+                    Err(err) => Err(WanderError(err.0)),
+                }
+            }
+            _ => Err(WanderError(
+                "`addStatements` function requires one string parameter and a list of Statements."
+                    .to_owned(),
+            )),
+        }
+    }
 
-//     fn binding(&self) -> wander::HostFunctionBinding {
-//         todo!()
-//     }
+    fn binding(&self) -> wander::HostFunctionBinding {
+        HostFunctionBinding {
+            name: "addStatements".to_owned(),
+            parameters: vec![("dataset".to_owned(), None), ("statements".to_owned(), None)],
+            result: None,
+            doc_string: "".to_owned() 
+        }
+    }
+}
 
-//     // fn doc(&self) -> String {
-//     //     todo!()
-//     // }
+fn wander_value_to_value<T: HostType>(value: &WanderValue<T>) -> Result<Value, WanderError> {
+    match value {
+        WanderValue::Int(value) => Ok(Value::Integer(value.to_owned())),
+        WanderValue::String(value) => Ok(Value::String(value.to_owned())),
+        WanderValue::Identifier(value) => Ok(Value::Identifier(ligature::Identifier::new(value.to_owned().id()).unwrap())),
+        _ => Err(WanderError("Invalid Statement".to_owned())),
+    }
+}
 
-//     // fn params(&self) -> Vec<WanderType> {
-//     //     todo!()
-//     // }
-
-//     // fn returns(&self) -> WanderType {
-//     //     todo!()
-//     // }
-
-//     // fn name(&self) -> String {
-//     //     "Ligature.addStatements".to_owned()
-//     // }
-// }
-
-// fn wander_value_to_value(value: &WanderValue<NoHostType>) -> Result<Value, WanderError> {
-//     match value {
-//         WanderValue::Int(value) => Ok(Value::Integer(value.to_owned())),
-//         WanderValue::String(value) => Ok(Value::String(value.to_owned())),
-//         WanderValue::Identifier(value) => Ok(Value::Identifier(value.to_owned())),
-//         _ => Err(WanderError("Invalid Statement".to_owned())),
-//     }
-// }
-
-// fn value_to_wander_value(value: &Value) -> WanderValue<NoHostType> {
-//     match value {
-//         Value::Identifier(value) => WanderValue::Identifier(value.to_owned()),
-//         Value::String(value) => WanderValue::String(value.to_owned()),
-//         Value::Integer(value) => WanderValue::Int(value.to_owned()),
-//         Value::Bytes(_) => todo!(),
-//     }
-// }
+fn value_to_wander_value<T: HostType>(value: &Value) -> WanderValue<T> {
+    match value {
+        Value::Identifier(value) => WanderValue::Identifier(wander::identifier::Identifier::new(value.to_owned().id()).unwrap()),
+        Value::String(value) => WanderValue::String(value.to_owned()),
+        Value::Integer(value) => WanderValue::Int(value.to_owned()),
+        Value::Bytes(_) => todo!(),
+    }
+}
 
 // struct RemoveStatementsFunction {
 //     lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
 // }
-// impl HostFunction<NoHostType> for RemoveStatementsFunction {
+// impl HostFunction<T> for RemoveStatementsFunction {
 //     fn run(
 //         &self,
-//         arguments: &[WanderValue<NoHostType>],
-//         _bindings: &Bindings,
-//     ) -> Result<wander::WanderValue<NoHostType>, WanderError> {
+//         arguments: &[WanderValue<T>],
+//         _environment: &Environment<T>,
+//     ) -> Result<wander::WanderValue<T>, WanderError> {
 //         match arguments {
 //             [WanderValue::String(name), WanderValue::List(statements)] => {
 //                 let instance = self.lim.write().unwrap();
@@ -358,12 +354,12 @@ impl <T: HostType>HostFunction<T> for StatementsFunction {
 // struct QueryFunction {
 //     lim: Rc<RwLock<BTreeMap<String, RefCell<BTreeSet<Statement>>>>>,
 // }
-// impl HostFunction<NoHostType> for QueryFunction {
+// impl HostFunction<T> for QueryFunction {
 //     fn run(
 //         &self,
-//         arguments: &[WanderValue<NoHostType>],
-//         _bindings: &Bindings,
-//     ) -> Result<wander::WanderValue<NoHostType>, WanderError> {
+//         arguments: &[WanderValue<T>],
+//         _environment: &Environment<T>,
+//     ) -> Result<wander::WanderValue<T>, WanderError> {
 //         match arguments {
 //             [WanderValue::String(name), entity, attribute, value] => {
 //                 let instance = self.lim.read().unwrap();
@@ -479,7 +475,7 @@ impl <T: HostType>HostFunction<T> for StatementsFunction {
 
 // struct GraphFunction {}
 // impl HostFunction for GraphFunction {
-//     fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, WanderError> {
+//     fn run(&self, arguments: &[WanderValue], _: &Environment<T>) -> Result<WanderValue, WanderError> {
 //         match arguments {
 //             [WanderValue::List(statements)] => {
 //                 let mut contents = BTreeSet::new();
@@ -542,7 +538,7 @@ impl <T: HostType>HostFunction<T> for StatementsFunction {
 
 // struct EmptyGraphFunction {}
 // impl HostFunction for EmptyGraphFunction {
-//     fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, WanderError> {
+//     fn run(&self, arguments: &[WanderValue], _: &Environment<T>) -> Result<WanderValue, WanderError> {
 //         match arguments {
 //             [] => Ok(WanderValue::Graph(Graph::default())),
 //             _ => Err(WanderError(
@@ -570,7 +566,7 @@ impl <T: HostType>HostFunction<T> for StatementsFunction {
 
 // struct UnionFunction {}
 // impl HostFunction for UnionFunction {
-//     fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, WanderError> {
+//     fn run(&self, arguments: &[WanderValue], _: &Environment<T>) -> Result<WanderValue, WanderError> {
 //         match arguments {
 //             [WanderValue::Graph(g1), WanderValue::Graph(g2)] => {
 //                 Ok(WanderValue::Graph(g1.add_all(g2.clone())))
@@ -600,7 +596,7 @@ impl <T: HostType>HostFunction<T> for StatementsFunction {
 
 // struct DifferenceFunction {}
 // impl HostFunction for DifferenceFunction {
-//     fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, WanderError> {
+//     fn run(&self, arguments: &[WanderValue], _: &Environment<T>) -> Result<WanderValue, WanderError> {
 //         match arguments {
 //             [WanderValue::Graph(g1), WanderValue::Graph(g2)] => {
 //                 Ok(WanderValue::Graph(g1.remove_all(g2.clone())))
@@ -630,7 +626,7 @@ impl <T: HostType>HostFunction<T> for StatementsFunction {
 
 // struct StatementsFunction {}
 // impl HostFunction for StatementsFunction {
-//     fn run(&self, arguments: &[WanderValue], _: &Bindings) -> Result<WanderValue, WanderError> {
+//     fn run(&self, arguments: &[WanderValue], _: &Environment<T>) -> Result<WanderValue, WanderError> {
 //         match arguments {
 //             [WanderValue::Graph(graph)] => {
 //                 let g: Vec<WanderValue> = graph
@@ -712,17 +708,17 @@ impl <T: HostType>HostFunction<T> for StatementsFunction {
 //     Ok(results)
 // }
 
-    // bindings.bind_host_function(Rc::new(EmptyGraphFunction {}));
-    // bindings.bind_host_function(Rc::new(GraphFunction {}));
-    // bindings.bind_host_function(Rc::new(UnionFunction {}));
-    // bindings.bind_host_function(Rc::new(DifferenceFunction {}));
-    // bindings.bind_host_function(Rc::new(StatementsFunction {}));
-    // bindings.bind_native_function(
+    // environment.bind_host_function(Rc::new(EmptyGraphFunction {}));
+    // environment.bind_host_function(Rc::new(GraphFunction {}));
+    // environment.bind_host_function(Rc::new(UnionFunction {}));
+    // environment.bind_host_function(Rc::new(DifferenceFunction {}));
+    // environment.bind_host_function(Rc::new(StatementsFunction {}));
+    // environment.bind_native_function(
     //     "Graph".to_owned(),
     //     "find".to_owned(),
     //     Rc::new(FindFunction {}),
     // );
-    // bindings.bind_token_transformer(
+    // environment.bind_token_transformer(
     //     "Graph".to_owned(),
     //     "graph".to_owned(),
     //     Rc::new(graph_transform),
@@ -770,7 +766,7 @@ impl <T: HostType>HostFunction<T> for StatementsFunction {
 //     fn run(
 //         &self,
 //         arguments: &[WanderValue<T>],
-//         _bindings: &Bindings<T>,
+//         _environment: &Environment<T>,
 //     ) -> Result<WanderValue<T>, WanderError> {
 //         if let [WanderValue::Tuple(value)] = arguments {
 //             if value.len() == 3 {
@@ -809,7 +805,7 @@ impl <T: HostType>HostFunction<T> for StatementsFunction {
 //     fn run(
 //         &self,
 //         arguments: &[WanderValue<T>],
-//         _bindings: &Bindings<T>,
+//         _environment: &Environment<T>,
 //     ) -> Result<WanderValue<T>, WanderError> {
 //         if let [WanderValue::List(value)] = arguments {
 //             if value.len() == 3 {
@@ -848,7 +844,7 @@ impl <T: HostType>HostFunction<T> for StatementsFunction {
 //     fn run(
 //         &self,
 //         arguments: &[WanderValue<T>],
-//         _bindings: &Bindings<T>,
+//         _environment: &Environment<T>,
 //     ) -> Result<WanderValue<T>, WanderError> {
 //         if let [WanderValue::List(value)] = arguments {
 //             if value.len() == 3 {
@@ -882,6 +878,6 @@ impl <T: HostType>HostFunction<T> for StatementsFunction {
     // }
 // }
 
-// bindings.bind_host_function(Rc::new(EntityFunction {}));
-// bindings.bind_host_function(Rc::new(AttributeFunction {}));
-// bindings.bind_host_function(Rc::new(ValueFunction {}));
+// environment.bind_host_function(Rc::new(EntityFunction {}));
+// environment.bind_host_function(Rc::new(AttributeFunction {}));
+// environment.bind_host_function(Rc::new(ValueFunction {}));

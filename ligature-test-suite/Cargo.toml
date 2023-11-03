@@ -16,3 +16,4 @@ ligature-in-memory = { path = "../ligature-in-memory" }
 #ligature-redb = { path = "../ligature-redb" }
 # ligature-sqlite = { path = "../ligature-sqlite" }
 wander = "0.5.0"
+ligature-wander = { path = "../ligature-wander" }
