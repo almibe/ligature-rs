@@ -1,0 +1,15 @@
+[package]
+name = "wander-pad"
+version = "0.2.0"
+publish = false
+authors = ["Alex Michael Berry <alexmiberry@gmail.com>"]
+edition = "2021"
+license = "MPL-2.0"
+description = "A simple desktop application for working with Wander."
+repository = "https://github.com/almibe/wander/"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+wander = { path = "../wander" }
+eframe = "0.23.0"
