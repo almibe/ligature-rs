@@ -1,0 +1,62 @@
+Test.assertEq "Basic function call"
+  false (Bool.and true (Bool.not true))
+ 
+Test.assertEq "Datasets should start empty."
+  [] (Ligature.datasets [])
+
+Test.assertEq "Add single Dataset."
+  ["hello"]
+  let
+    val _ = Ligature.addDataset "hello"
+  in
+    Ligature.datasets []
+  end
+
+Test.assertEq "Add and remove Datasets."
+  ["hello"]
+  let
+    val _ = Ligature.addDataset "hello"
+    val _ = Ligature.addDataset "goodbye"
+    val _ = Ligature.removeDataset "goodbye"
+  in
+    Ligature.datasets []
+  end
+
+Test.assertEq "Datases should start empty."
+  []
+  let
+    val _ = Ligature.addDataset "hello"
+  in
+    Ligature.statements "hello"
+  end
+
+Test.assertEq "Add Statements to Dataset."
+  [[<a> <b> <c>]]
+  let
+    val _ = Ligature.addDataset "hello"
+    val _ = Ligature.addStatements "hello" [[<a> <b> <c>]]
+  in
+    Ligature.statement "hello"
+  end
+
+Test.assertEq "Remove Statements from Dataset."
+  [[<a> <b> <c>]]
+  let
+    val _ = Ligature.addDataset "hello"
+    val _ = Ligature.addStatements "hello"
+      [[<a> <b> <c>] [<d> <e> <f>]]
+    val _ = Ligature.removeStatements "hello"
+      [[<d> <e> <f>]]
+  in
+    Ligature.statements "hello"
+  end
+
+Test.assertEq "Basic Statements query."
+  [[<a> <b> <c>][<a> <b> <d>]]
+  let
+    val _ = Ligature.addDataset "hello"
+    val _ = Ligature.addStatements "hello"
+      [[<a> <b> <c>][<a> <b> <d>][<a> <c> <d>]]
+  in
+    Ligature.query "hello" <a> <b> ?
+  end

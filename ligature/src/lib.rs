@@ -204,18 +204,18 @@ pub trait Ligature {
         dataset: &Dataset,
         statements: Vec<Statement>,
     ) -> Result<(), LigatureError>;
-    /// Run a query against the given Dataset.
-    fn query(&self) -> Result<Box<dyn Query>, LigatureError>; //TODO this is wrong
+    //// Run a query against the given Dataset.
+    //fn query(&self) -> Result<Box<dyn Query>, LigatureError>; //TODO this is wrong
 }
 
-/// Query Ligature instances.
-pub trait Query {
-    /// Find Statements that match the given pattern.
-    /// (None, None, None) returns all Statements.
-    fn find(
-        &self,
-        entity: Option<Identifier>,
-        attribute: Option<Identifier>,
-        value: Option<Value>,
-    ) -> Result<Vec<Statement>, LigatureError>;
-}
+// /// Query Ligature instances.
+// pub trait Query {
+//     /// Find Statements that match the given pattern.
+//     /// (None, None, None) returns all Statements.
+//     fn find(
+//         &self,
+//         entity: Option<Identifier>,
+//         attribute: Option<Identifier>,
+//         value: Option<Value>,
+//     ) -> Result<Vec<Statement>, LigatureError>;
+// }
