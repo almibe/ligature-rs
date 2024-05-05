@@ -37,35 +37,6 @@ pub mod translation;
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize, Clone)]
 pub struct WanderError(pub String);
 
-/// A combination of all the traits needed to implement a HostType.
-pub trait HostType: Debug + PartialEq + Eq + Serialize + Clone + Display + Serialize {}
-impl<T> HostType for T where T: Debug + PartialEq + Eq + Serialize + Clone + Display + Serialize {}
-
-/// A trait for the pluggable type checker used by Wander.
-pub trait TypeChecker<T: HostType> {
-    /// Called when a value is assigned to a TaggedNamed.
-    fn check(&self, value: WanderValue<T>, tag: WanderValue<T>) -> Result<bool, WanderError>;
-}
-
-/// A TypeChecker that does nothing, everything passes.
-pub struct EpsilonChecker {}
-
-impl<T: HostType> TypeChecker<T> for EpsilonChecker {
-    fn check(&self, _value: WanderValue<T>, _tag: WanderValue<T>) -> Result<bool, WanderError> {
-        Ok(true)
-    }
-}
-
-/// This is a dummy type you can use when you don't need a HostType.
-#[derive(Debug, PartialEq, Eq, Deserialize, Serialize, Clone)]
-pub struct NoHostType {}
-
-impl Display for NoHostType {
-    fn fmt(&self, _: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        panic!("NoHostType should never be displayed.")
-    }
-}
-
 /// struct describing a HostFunction.
 pub struct HostFunctionBinding {
     /// Name used to bind this HostFunction including Namespaces.
@@ -95,19 +66,10 @@ pub trait HostFunction<T: HostType> {
 /// Type alias used for TokenTransformers.
 pub type TokenTransformer = fn(&[Location<Token>]) -> Result<Vec<Location<Token>>, WanderError>;
 
-/// A value of a type provided by the host application that can be accessed via Wander.
-/// Note it cannot be accessed by Wander directly, only through HostFunctions.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
-pub struct HostValue<T> {
-    /// The value passed to Wander.
-    /// Note it cannot be accessed by Wander directly, only through HostFunctions.
-    pub value: T,
-}
-
 /// Values in Wander programs used for Wander's implementation and interfacing between
 /// Wander and the host application.
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
-pub enum WanderValue<T: Clone + PartialEq + Eq> {
+pub enum WanderValue {
     /// A Bool value.
     Bool(bool),
     /// A 64-bit signed integer value.
@@ -116,23 +78,15 @@ pub enum WanderValue<T: Clone + PartialEq + Eq> {
     String(String),
     /// An Identifier.
     Identifier(Identifier),
-    /// The nothing value.
-    Nothing,
     /// A Lambda
     Lambda(String, Option<String>, Option<String>, Box<Location<Element>>),
     /// A List.
-    List(Vec<WanderValue<T>>),
-    /// A Tuple.
-    Tuple(Vec<WanderValue<T>>),
-    /// A Set.
-    Set(HashSet<WanderValue<T>>),
+    List(Vec<WanderValue>),
     /// A Record.
-    Record(HashMap<String, WanderValue<T>>),
-    /// A HostValue.
-    HostValue(HostValue<T>),
+    Record(HashMap<String, WanderValue>),
 }
 
-impl<T: Clone + PartialEq + Eq> core::hash::Hash for WanderValue<T> {
+impl core::hash::Hash for WanderValue {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         core::mem::discriminant(self).hash(state);
     }
@@ -142,8 +96,8 @@ impl<T: Clone + PartialEq + Eq> core::hash::Hash for WanderValue<T> {
 /// The function can be a Lambda or a HostFunction.
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct PartialApplication<T: Clone + PartialEq + Eq> {
-    arguments: Vec<WanderValue<T>>,
-    callee: WanderValue<T>,
+    arguments: Vec<WanderValue>,
+    callee: WanderValue,
 }
 
 /// Write integer.
@@ -183,7 +137,7 @@ pub fn write_string(string: &str) -> String {
 fn write_list_or_tuple_wander_value<T: Clone + Display + PartialEq + Eq + Debug>(
     open: &str,
     close: char,
-    contents: &Vec<WanderValue<T>>,
+    contents: &Vec<WanderValue>,
     f: &mut std::fmt::Formatter<'_>,
 ) -> std::fmt::Result {
     f.write_str(open).unwrap();
@@ -198,31 +152,8 @@ fn write_list_or_tuple_wander_value<T: Clone + Display + PartialEq + Eq + Debug>
     write!(f, "{close}")
 }
 
-fn write_set<T: Clone + Display + PartialEq + Eq + Debug>(
-    contents: &HashSet<WanderValue<T>>,
-    f: &mut std::fmt::Formatter<'_>,
-) -> std::fmt::Result {
-    f.write_str("#(").unwrap();
-    let mut i = 0;
-    for value in contents {
-        write!(f, "{value}").unwrap();
-        i += 1;
-        if i < contents.len() {
-            write!(f, " ").unwrap();
-        }
-    }
-    f.write_char(')')
-}
-
-fn write_host_value<T: Display + PartialEq + Eq>(
-    value: &HostValue<T>,
-    f: &mut std::fmt::Formatter<'_>,
-) -> std::fmt::Result {
-    write!(f, "{}", value.value)
-}
-
-fn write_record<T: Clone + Display + PartialEq + Eq + Debug>(
-    contents: &HashMap<String, WanderValue<T>>,
+fn write_record(
+    contents: &HashMap<String, WanderValue>,
     f: &mut std::fmt::Formatter<'_>,
 ) -> std::fmt::Result {
     write!(f, "{{").unwrap();
@@ -237,7 +168,7 @@ fn write_record<T: Clone + Display + PartialEq + Eq + Debug>(
     write!(f, "}}")
 }
 
-impl<T: Clone + Display + PartialEq + Eq + std::fmt::Debug> Display for WanderValue<T> {
+impl Display for WanderValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             WanderValue::Bool(value) => write!(f, "{}", value),
@@ -246,26 +177,21 @@ impl<T: Clone + Display + PartialEq + Eq + std::fmt::Debug> Display for WanderVa
             WanderValue::Identifier(value) => write!(f, "<{}>", value.id()),
             WanderValue::Nothing => write!(f, "nothing"),
             WanderValue::List(contents) => write_list_or_tuple_wander_value("[", ']', contents, f),
-            WanderValue::HostValue(value) => write_host_value(value, f),
-            WanderValue::Tuple(contents) => {
-                write_list_or_tuple_wander_value("'(", ')', contents, f)
-            }
             WanderValue::Record(values) => write_record(values, f),
-            WanderValue::Lambda(p, i, o, b) => write!(
-                f,
-                "[lambda {:?}]",
-                WanderValue::Lambda::<T>(p.clone(), i.clone(), o.clone(), b.clone())
-            ),
-            WanderValue::Set(contents) => write_set(contents, f),
+            // WanderValue::Lambda(p, i, o, b) => write!(
+            //     f,
+            //     "[lambda {:?}]",
+            //     WanderValue::Lambda::(p.clone(), i.clone(), o.clone(), b.clone())
+            // ),
         }
     }
 }
 
 /// Run a Wander script with the given Bindings.
-pub fn run<T: HostType + Display>(
+pub fn run(
     script: &str,
-    bindings: &mut Environment<T>,
-) -> Result<WanderValue<T>, WanderError> {
+    bindings: &mut Environment,
+) -> Result<WanderValue, WanderError> {
     let tokens = match tokenize_and_filter(script) {
         Ok(v) => v,
         Err(err) => return Err(err),
@@ -307,7 +233,7 @@ pub struct Introspection {
 /// Run a Wander script with the given Bindings.
 pub fn introspect<T: HostType>(
     script: &str,
-    bindings: &Environment<T>,
+    bindings: &Environment,
 ) -> Result<Introspection, WanderError> {
     let tokens_ws = tokenize(script).or(Ok(vec![]))?;
     let tokens = tokenize_and_filter(script).or(Ok(vec![]))?;

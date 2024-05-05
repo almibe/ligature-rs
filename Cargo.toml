@@ -1,4 +1,5 @@
 [workspace]
+
 resolver = "2"
 
 members = [
@@ -16,4 +17,8 @@ members = [
     "ligature-wander",
     "ligature-wasm",
     "trips",
+    "wander",
+    "wander-pad",
+    "wander-repl",
+    "wander-wasm"
 ]

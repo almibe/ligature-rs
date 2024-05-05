@@ -12,4 +12,4 @@ repository = "https://github.com/almibe/wander/"
 
 [dependencies]
 wander = { path = "../wander" }
-eframe = "0.23.0"
+eframe = "0.27.2"

@@ -12,7 +12,7 @@ use std::{
     sync::RwLock,
 };
 
-use ligature::{Dataset, Ligature, LigatureError, Query, Statement};
+use ligature::{Dataset, Ligature, LigatureError, Statement};
 
 #[derive(Default)]
 pub struct LigatureInMemory {
@@ -77,9 +77,9 @@ impl Ligature for LigatureInMemory {
         todo!()
     }
 
-    fn query(&self) -> Result<Box<dyn Query>, LigatureError> {
-        todo!()
-    }
+    // fn query(&self) -> Result<Box<dyn Query>, LigatureError> {
+    //     todo!()
+    // }
 }
 
 impl LigatureInMemory {

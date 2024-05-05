@@ -8,14 +8,12 @@ use wander::{run, NoHostType};
 
 pub fn start_app() -> Result<(), eframe::Error> {
     let options = eframe::NativeOptions {
-        initial_window_size: Some(egui::vec2(320.0, 240.0)),
         ..Default::default()
     };
     eframe::run_native(
         "WanderPad",
         options,
-        Box::new(|cc| {
-            // This gives us image support:
+        Box::new(|_| {
             Box::<WanderPad>::default()
         }),
     )

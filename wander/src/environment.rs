@@ -3,8 +3,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use crate::{
-    parser::Element, EpsilonChecker, HostFunction, HostFunctionBinding, HostType, TokenTransformer,
-    TypeChecker, WanderValue, Location,
+    parser::Element, HostFunctionBinding, TokenTransformer,
+    WanderValue, Location,
 };
 use std::{
     cell::RefCell,
@@ -13,9 +13,9 @@ use std::{
 };
 
 /// A structure used to setup the environment a Wander program is executed in.
-pub struct Environment<T: HostType> {
+pub struct Environment {
     token_transformers: RefCell<HashMap<String, Rc<TokenTransformer>>>,
-    host_functions: RefCell<HashMap<String, Rc<dyn HostFunction<T>>>>,
+    host_functions: RefCell<HashMap<String, Rc<dyn HostFunction>>>,
     scopes: Vec<HashMap<String, WanderValue<T>>>,
     type_checker: Box<dyn TypeChecker<T>>,
 }
