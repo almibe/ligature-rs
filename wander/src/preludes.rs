@@ -3,17 +3,17 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use crate::{
-    environment::Environment, HostFunction, HostFunctionBinding, HostType, WanderError, WanderValue,
+    environment::Environment, HostFunction, HostFunctionBinding, WanderError, WanderValue,
 };
 use std::rc::Rc;
 
 struct EqFunction {}
-impl<T: HostType> HostFunction<T> for EqFunction {
+impl HostFunction for EqFunction {
     fn run(
         &self,
-        arguments: &[WanderValue<T>],
-        _bindings: &Environment<T>,
-    ) -> Result<WanderValue<T>, WanderError> {
+        arguments: &[WanderValue],
+        _bindings: &Environment,
+    ) -> Result<WanderValue, WanderError> {
         if let [left, right] = arguments {
             Ok(crate::WanderValue::Bool(left == right))
         } else {
@@ -34,15 +34,16 @@ impl<T: HostType> HostFunction<T> for EqFunction {
 }
 
 struct LogFunction {}
-impl<T: HostType> HostFunction<T> for LogFunction {
+impl HostFunction for LogFunction {
     fn run(
         &self,
-        arguments: &[WanderValue<T>],
-        _bindings: &Environment<T>,
-    ) -> Result<WanderValue<T>, WanderError> {
+        arguments: &[WanderValue],
+        _bindings: &Environment,
+    ) -> Result<WanderValue, WanderError> {
         if let [message] = arguments {
             println!("{message}");
-            Ok(WanderValue::Nothing)
+            todo!();
+            // Ok(WanderValue::Nothing)
         } else {
             Err(WanderError(
                 "`log` function requires a message to print.".to_owned(),
@@ -61,15 +62,16 @@ impl<T: HostType> HostFunction<T> for LogFunction {
 }
 
 struct AssertEqFunction {}
-impl<T: HostType> HostFunction<T> for AssertEqFunction {
+impl HostFunction for AssertEqFunction {
     fn run(
         &self,
-        arguments: &[WanderValue<T>],
-        _bindings: &Environment<T>,
-    ) -> Result<WanderValue<T>, WanderError> {
+        arguments: &[WanderValue],
+        _bindings: &Environment,
+    ) -> Result<WanderValue, WanderError> {
         if let [left, right] = arguments {
             if left == right {
-                Ok(crate::WanderValue::Nothing)
+                todo!();
+                // Ok(crate::WanderValue::Nothing)
             } else {
                 Err(WanderError("Assertion failed!".to_owned()))
             }
@@ -91,12 +93,12 @@ impl<T: HostType> HostFunction<T> for AssertEqFunction {
 }
 
 struct AndFunction {}
-impl<T: HostType> HostFunction<T> for AndFunction {
+impl HostFunction for AndFunction {
     fn run(
         &self,
-        arguments: &[WanderValue<T>],
-        _bindings: &Environment<T>,
-    ) -> Result<crate::WanderValue<T>, WanderError> {
+        arguments: &[WanderValue],
+        _bindings: &Environment,
+    ) -> Result<crate::WanderValue, WanderError> {
         if let [WanderValue::Bool(left), WanderValue::Bool(right)] = arguments {
             Ok(crate::WanderValue::Bool(*left && *right))
         } else {
@@ -120,12 +122,12 @@ impl<T: HostType> HostFunction<T> for AndFunction {
 }
 
 struct NotFunction {}
-impl<T: HostType> HostFunction<T> for NotFunction {
+impl HostFunction for NotFunction {
     fn run(
         &self,
-        arguments: &[WanderValue<T>],
-        _bindings: &Environment<T>,
-    ) -> Result<crate::WanderValue<T>, WanderError> {
+        arguments: &[WanderValue],
+        _bindings: &Environment,
+    ) -> Result<crate::WanderValue, WanderError> {
         if let [WanderValue::Bool(value)] = arguments {
             Ok(crate::WanderValue::Bool(!value))
         } else {
@@ -146,16 +148,16 @@ impl<T: HostType> HostFunction<T> for NotFunction {
 }
 
 struct AtFunction {}
-impl<T: HostType> HostFunction<T> for AtFunction {
+impl HostFunction for AtFunction {
     fn run(
         &self,
-        arguments: &[WanderValue<T>],
-        _: &Environment<T>,
-    ) -> Result<WanderValue<T>, WanderError> {
+        arguments: &[WanderValue],
+        _: &Environment,
+    ) -> Result<WanderValue, WanderError> {
         if let [WanderValue::Int(index), WanderValue::List(value)] = arguments {
             let index: usize = index.to_owned().try_into().unwrap();
             if index < value.len() {
-                let t: Option<&WanderValue<T>> = value.get(index);
+                let t: Option<&WanderValue> = value.get(index);
                 match t {
                     Some(t) => Ok(t.to_owned()),
                     None => Err(WanderError("`at` function err.".to_owned())),
@@ -239,7 +241,7 @@ impl<T: HostType> HostFunction<T> for AtFunction {
 
 /// Creates a set of Bindings for Wander that consists of all of the common
 /// functionality, but doesn't interact with an instance of Ligature.
-pub fn common<T: HostType>() -> Environment<T> {
+pub fn common() -> Environment {
     let mut bindings = Environment::new();
     bindings.bind_host_function(Rc::new(EqFunction {}));
     bindings.bind_host_function(Rc::new(AssertEqFunction {}));
@@ -250,6 +252,6 @@ pub fn common<T: HostType>() -> Environment<T> {
     bindings
 }
 
-pub fn add_print<T: HostType>(environment: &mut Environment<T>) {
+pub fn add_print(environment: &mut Environment) {
     environment.bind_host_function(Rc::new(LogFunction {}));
 }

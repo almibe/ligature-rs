@@ -5,7 +5,7 @@
 use logos::{Lexer, Logos};
 use serde::Serialize;
 
-use crate::{environment::Environment, identifier::Identifier, HostType, WanderError, Location};
+use crate::{environment::Environment, identifier::Identifier, WanderError, Location};
 
 #[derive(Logos, Debug, PartialEq, Eq, Clone, Serialize)]
 #[logos()]
@@ -181,9 +181,9 @@ pub fn tokenize_and_filter(script: &str) -> Result<Vec<Location<Token>>, WanderE
     })
 }
 
-pub fn transform<T: HostType>(
+pub fn transform(
     input: &[Location<Token>],
-    bindings: &Environment<T>,
+    bindings: &Environment,
 ) -> Result<Vec<Location<Token>>, WanderError> {
     let mut index = 0;
     let mut results: Vec<Location<Token>> = vec![];

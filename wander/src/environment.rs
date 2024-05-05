@@ -4,7 +4,7 @@
 
 use crate::{
     parser::Element, HostFunctionBinding, TokenTransformer,
-    WanderValue, Location,
+    WanderValue, Location, HostFunction
 };
 use std::{
     cell::RefCell,
@@ -16,23 +16,21 @@ use std::{
 pub struct Environment {
     token_transformers: RefCell<HashMap<String, Rc<TokenTransformer>>>,
     host_functions: RefCell<HashMap<String, Rc<dyn HostFunction>>>,
-    scopes: Vec<HashMap<String, WanderValue<T>>>,
-    type_checker: Box<dyn TypeChecker<T>>,
+    scopes: Vec<HashMap<String, WanderValue>>,
 }
 
 ///
 // pub trait BindingsProvider<T: Clone> {
-//     fn add_bindings(&self, bindings: &mut Bindings<T>);
+//     fn add_bindings(&self, bindings: &mut Bindings);
 // }
 
-impl<T: HostType> Environment<T> {
+impl Environment {
     /// Create a new empty Bindings.
-    pub fn new() -> Environment<T> {
+    pub fn new() -> Environment {
         Environment {
             token_transformers: RefCell::new(HashMap::new()),
             host_functions: RefCell::new(HashMap::new()),
             scopes: vec![HashMap::new()],
-            type_checker: Box::new(EpsilonChecker {}),
         }
     }
 
@@ -47,7 +45,7 @@ impl<T: HostType> Environment<T> {
     }
 
     /// Read a bound Value.
-    pub fn read(&self, name: &String) -> Option<WanderValue<T>> {
+    pub fn read(&self, name: &String) -> Option<WanderValue> {
         let mut index = self.scopes.len();
         while index > 0 {
             match self.scopes.get(index - 1) {
@@ -64,14 +62,14 @@ impl<T: HostType> Environment<T> {
     }
 
     /// Bind a new Value in this Scope.
-    pub fn bind(&mut self, name: String, value: WanderValue<T>) {
+    pub fn bind(&mut self, name: String, value: WanderValue) {
         let mut current_scope = self.scopes.pop().unwrap();
         current_scope.insert(name, value);
         self.scopes.push(current_scope);
     }
 
     /// Add a new HostFunction.
-    pub fn bind_host_function(&mut self, function: Rc<dyn HostFunction<T>>) {
+    pub fn bind_host_function(&mut self, function: Rc<dyn HostFunction>) {
         let full_name = function.binding().name.to_string();
         self.host_functions
             .borrow_mut()
@@ -111,7 +109,7 @@ impl<T: HostType> Environment<T> {
     }
 
     /// Read a HostFunction.
-    pub fn read_host_function(&self, name: &String) -> Option<Rc<dyn HostFunction<T>>> {
+    pub fn read_host_function(&self, name: &String) -> Option<Rc<dyn HostFunction>> {
         match self.host_functions.borrow().get(name) {
             None => None,
             Some(value) => Some(value.clone()),

@@ -2,8 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use std::collections::{HashMap, HashSet};
-use std::fmt::Display;
+use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
@@ -12,7 +11,7 @@ use crate::environment::Environment;
 use crate::identifier::Identifier;
 use crate::parser::Element;
 use crate::translation::express;
-use crate::{HostType, WanderError, WanderValue, Location};
+use crate::{WanderError, WanderValue, Location};
 
 #[doc(hidden)]
 #[derive(Debug, PartialEq, Eq, Clone, Deserialize, Serialize)]
@@ -22,20 +21,15 @@ pub enum Expression {
     String(String),
     Identifier(Identifier),
     Name(String),
-    TaggedName(String, Box<Location<Expression>>),
     HostFunction(String),
     Let(
         Vec<(String, Option<Location<Expression>>, Location<Expression>)>,
         Box<Location<Expression>>,
     ),
     Application(Vec<Location<Expression>>),
-    Conditional(Box<Location<Expression>>, Box<Location<Expression>>, Box<Location<Expression>>),
     Lambda(String, Option<String>, Option<String>, Box<Location<Element>>),
-    Tuple(Vec<Location<Expression>>),
     List(Vec<Location<Expression>>),
-    Set(HashSet<Location<Expression>>),
     Record(HashMap<String, Location<Expression>>),
-    Nothing,
 }
 
 impl core::hash::Hash for Expression {
@@ -44,10 +38,10 @@ impl core::hash::Hash for Expression {
     }
 }
 
-pub fn eval<T: Clone + Display + PartialEq + Eq + std::fmt::Debug + Serialize>(
+pub fn eval(
     expression: &Location<Expression>,
-    environment: &mut Environment<T>,
-) -> Result<WanderValue<T>, WanderError> {
+    environment: &mut Environment,
+) -> Result<WanderValue, WanderError> {
     match expression {
         Location(Expression::Boolean(value), _) => Ok(WanderValue::Bool(*value)),
         Location(Expression::Int(value), _) => Ok(WanderValue::Int(*value)),
@@ -55,17 +49,13 @@ pub fn eval<T: Clone + Display + PartialEq + Eq + std::fmt::Debug + Serialize>(
         Location(Expression::Identifier(value), _) => Ok(WanderValue::Identifier(value.clone())),
         Location(Expression::Let(decls, body), _) => handle_let(decls.clone(), *body.clone(), environment),
         Location(Expression::Name(name), _) => read_name(name, environment),
-        Location(Expression::TaggedName(name, tag), _) => read_tagged_name(name, tag, environment),
         Location(Expression::Application(expressions), _) => handle_function_call(expressions, environment),
-        Location(Expression::Conditional(c, i, e), _) => handle_conditional(c, i, e, environment),
         Location(Expression::List(values), _) => handle_list(values, environment),
-        Location(Expression::Nothing, _) => Ok(WanderValue::Nothing),
-        Location(Expression::Tuple(values), _) => handle_tuple(values, environment),
         Location(Expression::Record(values), _) => handle_record(values, environment),
         Location(Expression::Lambda(name, input, output, body), _) => {
-            handle_lambda(name.clone(), input.clone(), output.clone(), body)
+            todo!();
+            // handle_lambda(name.clone(), input.clone(), output.clone(), body)
         }
-        Location(Expression::Set(values), _) => handle_set(values, environment),
         Location(Expression::HostFunction(name), _) => handle_host_function(name, environment),
         // Expression::Grouping(expressions) => handle_grouping(expressions.clone(), environment),
     }
@@ -110,10 +100,10 @@ fn unescape_string(value: String) -> String {
     result
 }
 
-fn handle_host_function<T: HostType>(
+fn handle_host_function(
     name: &str,
-    environment: &mut Environment<T>,
-) -> Result<WanderValue<T>, WanderError> {
+    environment: &mut Environment,
+) -> Result<WanderValue, WanderError> {
     let host_function = environment.read_host_function(&name.to_owned()).unwrap();
     let params = host_function.binding().parameters;
     let mut arguments = vec![];
@@ -126,38 +116,10 @@ fn handle_host_function<T: HostType>(
     host_function.run(&arguments, environment)
 }
 
-fn handle_set<T: HostType + Display>(
-    expressions: &HashSet<Location<Expression>>,
-    environment: &mut Environment<T>,
-) -> Result<WanderValue<T>, WanderError> {
-    let mut results = HashSet::new();
-    for expression in expressions {
-        match eval(expression, environment) {
-            Ok(value) => results.insert(value),
-            Err(err) => return Err(err),
-        };
-    }
-    Ok(WanderValue::Set(results))
-}
-
-fn handle_tuple<T: HostType>(
-    expressions: &Vec<Location<Expression>>,
-    environment: &mut Environment<T>,
-) -> Result<WanderValue<T>, WanderError> {
-    let mut results = vec![];
-    for expression in expressions {
-        match eval(expression, environment) {
-            Ok(value) => results.push(value),
-            Err(err) => return Err(err),
-        }
-    }
-    Ok(WanderValue::Tuple(results))
-}
-
-fn handle_record<T: HostType>(
+fn handle_record(
     expressions: &HashMap<String, Location<Expression>>,
-    environment: &mut Environment<T>,
-) -> Result<WanderValue<T>, WanderError> {
+    environment: &mut Environment,
+) -> Result<WanderValue, WanderError> {
     let mut results = HashMap::new();
     for (name, expression) in expressions {
         match eval(expression, environment) {
@@ -168,10 +130,10 @@ fn handle_record<T: HostType>(
     Ok(WanderValue::Record(results))
 }
 
-fn handle_list<T: HostType>(
+fn handle_list(
     expressions: &Vec<Location<Expression>>,
-    environment: &mut Environment<T>,
-) -> Result<WanderValue<T>, WanderError> {
+    environment: &mut Environment,
+) -> Result<WanderValue, WanderError> {
     let mut results = vec![];
     for expression in expressions {
         match eval(expression, environment) {
@@ -182,12 +144,12 @@ fn handle_list<T: HostType>(
     Ok(WanderValue::List(results))
 }
 
-fn handle_lambda<T: Clone + PartialEq + Eq>(
+fn handle_lambda(
     name: String,
     input: Option<String>,
     output: Option<String>,
     body: &Location<Element>,
-) -> Result<WanderValue<T>, WanderError> {
+) -> Result<WanderValue, WanderError> {
     Ok(WanderValue::Lambda(
         name,
         input.clone(),
@@ -196,12 +158,12 @@ fn handle_lambda<T: Clone + PartialEq + Eq>(
     ))
 }
 
-fn handle_conditional<T: HostType + Display>(
+fn handle_conditional(
     cond: &Location<Expression>,
     ife: &Location<Expression>,
     elsee: &Location<Expression>,
-    environment: &mut Environment<T>,
-) -> Result<WanderValue<T>, WanderError> {
+    environment: &mut Environment,
+) -> Result<WanderValue, WanderError> {
     match eval(cond, environment)? {
         WanderValue::Bool(true) => eval(ife, environment),
         WanderValue::Bool(false) => eval(elsee, environment),
@@ -211,14 +173,14 @@ fn handle_conditional<T: HostType + Display>(
     }
 }
 
-fn run_lambda<T: HostType + Display>(
+fn run_lambda(
     name: String,
     input: Option<String>,
     output: Option<String>,
     lambda_body: Location<Element>,
     expressions: &mut Vec<Location<Expression>>,
-    environment: &mut Environment<T>,
-) -> Option<Result<WanderValue<T>, WanderError>> {
+    environment: &mut Environment,
+) -> Option<Result<WanderValue, WanderError>> {
     if expressions.is_empty() {
         Some(Ok(WanderValue::Lambda(
             name,
@@ -267,10 +229,10 @@ fn run_lambda<T: HostType + Display>(
     }
 }
 
-fn handle_function_call<T: HostType>(
+fn handle_function_call(
     expressions: &Vec<Location<Expression>>,
-    environment: &mut Environment<T>,
-) -> Result<WanderValue<T>, WanderError> {
+    environment: &mut Environment,
+) -> Result<WanderValue, WanderError> {
     if expressions.len() == 1 {
         let expression = expressions.first().unwrap();
         return eval(expression, environment);
@@ -334,13 +296,12 @@ fn handle_function_call<T: HostType>(
     panic!()
 }
 
-fn value_to_expression<T: Clone + Display + PartialEq + Eq>(value: WanderValue<T>) -> Location<Expression> {
+fn value_to_expression(value: WanderValue) -> Location<Expression> {
     match value {
         WanderValue::Bool(value) => Location(Expression::Boolean(value), 0),
         WanderValue::Int(value) => Location(Expression::Int(value), 0),
         WanderValue::String(value) => Location(Expression::String(value), 0),
         WanderValue::Identifier(value) => Location(Expression::Identifier(value), 0),
-        WanderValue::Nothing => Location(Expression::Nothing, 0),
         WanderValue::Lambda(p, i, o, b) => Location(Expression::Lambda(p, i, o, b), 0),
         WanderValue::List(values) => {
             let mut expressions = vec![];
@@ -349,20 +310,6 @@ fn value_to_expression<T: Clone + Display + PartialEq + Eq>(value: WanderValue<T
             }
             Location(Expression::List(expressions), 0)
         }
-        WanderValue::Tuple(values) => {
-            let mut expressions = vec![];
-            for value in values {
-                expressions.push(value_to_expression(value).clone());
-            }
-            Location(Expression::Tuple(expressions), 0)
-        }
-        WanderValue::Set(values) => {
-            let mut expressions = HashSet::new();
-            for value in values {
-                expressions.insert(value_to_expression(value).clone());
-            }
-            Location(Expression::Set(expressions), 0)
-        }
         WanderValue::Record(value_record) => {
             let mut record = HashMap::new();
             for (name, value) in value_record {
@@ -370,26 +317,25 @@ fn value_to_expression<T: Clone + Display + PartialEq + Eq>(value: WanderValue<T
             }
             Location(Expression::Record(record), 0)
         }
-        WanderValue::HostValue(value) => todo!(),
     }
 }
 
-fn handle_let<T: HostType + Display>(
+fn handle_let(
     decls: Vec<(String, Option<Location<Expression>>, Location<Expression>)>,
     body: Location<Expression>,
-    environment: &mut Environment<T>,
-) -> Result<WanderValue<T>, WanderError> {
+    environment: &mut Environment,
+) -> Result<WanderValue, WanderError> {
     for (name, tag, body) in decls {
         handle_decl(name, tag, body, environment)?;
     }
     eval(&body, environment)
 }
 
-fn handle_decl<T: HostType + Display>(
+fn handle_decl(
     name: String,
     tag: Option<Location<Expression>>,
     body: Location<Expression>,
-    environment: &mut Environment<T>,
+    environment: &mut Environment,
 ) -> Result<(), WanderError> {
     //TODO handle tag checking here
     match eval(&body, environment) {
@@ -401,10 +347,10 @@ fn handle_decl<T: HostType + Display>(
     }
 }
 
-fn read_name<T: HostType>(
+fn read_name(
     name: &String,
-    environment: &mut Environment<T>,
-) -> Result<WanderValue<T>, WanderError> {
+    environment: &mut Environment,
+) -> Result<WanderValue, WanderError> {
     if let Some(value) = environment.read(name) {
         Ok(value)
     } else {
@@ -415,11 +361,11 @@ fn read_name<T: HostType>(
     }
 }
 
-fn read_tagged_name<T: HostType>(
+fn read_tagged_name(
     name: &String,
     tag: &Location<Expression>,
-    environment: &mut Environment<T>,
-) -> Result<WanderValue<T>, WanderError> {
+    environment: &mut Environment,
+) -> Result<WanderValue, WanderError> {
     if let Some(value) = environment.read(name) {
         Ok(value)
     } else {
@@ -430,10 +376,10 @@ fn read_tagged_name<T: HostType>(
     }
 }
 
-fn read_field<T: HostType>(
+fn read_field(
     name: &str,
-    environment: &mut Environment<T>,
-) -> Result<WanderValue<T>, WanderError> {
+    environment: &mut Environment,
+) -> Result<WanderValue, WanderError> {
     let t = name
         .split('.')
         .map(|e| e.to_string())
@@ -461,11 +407,11 @@ fn read_field<T: HostType>(
     }
 }
 
-fn call_function<T: HostType + Display>(
+fn call_function(
     name: &String,
     arguments: &Vec<Location<Expression>>,
-    environment: &mut Environment<T>,
-) -> Result<WanderValue<T>, WanderError> {
+    environment: &mut Environment,
+) -> Result<WanderValue, WanderError> {
     let mut argument_values = vec![];
     for argument in arguments {
         match eval(argument, environment) {

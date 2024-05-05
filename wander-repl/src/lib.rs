@@ -11,13 +11,13 @@ use tabled::{
     Table, Tabled,
 };
 use wander::environment::Environment;
-use wander::{introspect, run, HostFunctionBinding, HostType};
+use wander::{introspect, run, HostFunctionBinding};
 
-pub struct REPLState<T: HostType> {
-    pub environment: Environment<T>,
+pub struct REPLState {
+    pub environment: Environment,
 }
 
-pub fn start_repl<T: HostType>(state: &mut REPLState<T>) -> Result<()> {
+pub fn start_repl(state: &mut REPLState) -> Result<()> {
     //TODO this should accept REPLState not create it
     println!("Welcome to Wander's REPL!");
     println!("Press Ctrl+C or Ctrl+D or enter `:q` to quit.");
@@ -60,7 +60,7 @@ pub fn start_repl<T: HostType>(state: &mut REPLState<T>) -> Result<()> {
     rl.save_history("history.txt")
 }
 
-fn handle_command<T: HostType>(input: &str, instance: &mut REPLState<T>) -> bool {
+fn handle_command(input: &str, instance: &mut REPLState) -> bool {
     let mut parts = input.split_whitespace();
     match parts.next().unwrap() {
         //":remote" => todo!(),
@@ -79,7 +79,7 @@ fn handle_command<T: HostType>(input: &str, instance: &mut REPLState<T>) -> bool
     }
 }
 
-fn parse<T: HostType>(input: &str, instance: &Environment<T>) -> bool {
+fn parse(input: &str, instance: &Environment) -> bool {
     let input = if input.starts_with(":parse") {
         input.replacen(":parse", "", 1)
     } else {
@@ -99,7 +99,7 @@ fn broadcast(_input: &str) -> bool {
     true
 }
 
-fn bindings<T: HostType>(bindings: &Environment<T>) -> bool {
+fn bindings(bindings: &Environment) -> bool {
     bindings
         .bound_names()
         .iter()
@@ -107,7 +107,7 @@ fn bindings<T: HostType>(bindings: &Environment<T>) -> bool {
     true
 }
 
-fn environment<T: HostType>(bindings: &mut Environment<T>) -> bool {
+fn environment(bindings: &mut Environment) -> bool {
     let mut display: Vec<EnvironmentDisplay> = bindings
         .environment()
         .into_iter()

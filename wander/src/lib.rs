@@ -52,13 +52,13 @@ pub struct HostFunctionBinding {
 
 /// A trait representing a function exported from the hosting application that
 /// can be called from Wander.
-pub trait HostFunction<T: HostType> {
+pub trait HostFunction {
     /// The function called when the HostFunction is called from Wander.
     fn run(
         &self,
-        arguments: &[WanderValue<T>],
-        bindings: &Environment<T>,
-    ) -> Result<WanderValue<T>, WanderError>;
+        arguments: &[WanderValue],
+        bindings: &Environment,
+    ) -> Result<WanderValue, WanderError>;
     /// Get the binding information for this HostFunction.
     fn binding(&self) -> HostFunctionBinding;
 }
@@ -95,7 +95,7 @@ impl core::hash::Hash for WanderValue {
 /// A struct represting a partially applied function.
 /// The function can be a Lambda or a HostFunction.
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
-pub struct PartialApplication<T: Clone + PartialEq + Eq> {
+pub struct PartialApplication {
     arguments: Vec<WanderValue>,
     callee: WanderValue,
 }
@@ -134,7 +134,7 @@ pub fn write_string(string: &str) -> String {
     format!("\"{}\"", escaped_string)
 }
 
-fn write_list_or_tuple_wander_value<T: Clone + Display + PartialEq + Eq + Debug>(
+fn write_list_value(
     open: &str,
     close: char,
     contents: &Vec<WanderValue>,
@@ -175,14 +175,14 @@ impl Display for WanderValue {
             WanderValue::Int(value) => write!(f, "{}", value),
             WanderValue::String(value) => f.write_str(&write_string(value)),
             WanderValue::Identifier(value) => write!(f, "<{}>", value.id()),
-            WanderValue::Nothing => write!(f, "nothing"),
-            WanderValue::List(contents) => write_list_or_tuple_wander_value("[", ']', contents, f),
+            WanderValue::List(contents) => write_list_value("[", ']', contents, f),
             WanderValue::Record(values) => write_record(values, f),
             // WanderValue::Lambda(p, i, o, b) => write!(
             //     f,
             //     "[lambda {:?}]",
             //     WanderValue::Lambda::(p.clone(), i.clone(), o.clone(), b.clone())
             // ),
+            WanderValue::Lambda(_p, _i , _o, _b) => todo!(),
         }
     }
 }
@@ -231,20 +231,21 @@ pub struct Introspection {
 }
 
 /// Run a Wander script with the given Bindings.
-pub fn introspect<T: HostType>(
+pub fn introspect(
     script: &str,
     bindings: &Environment,
 ) -> Result<Introspection, WanderError> {
     let tokens_ws = tokenize(script).or(Ok(vec![]))?;
     let tokens = tokenize_and_filter(script).or(Ok(vec![]))?;
     let tokens_transformed = transform(&tokens.clone(), bindings).or(Ok(vec![]))?;
-    let element = parse(tokens_transformed.clone()).or(Ok(Location(Element::Nothing, 0)))?; //TODO handle errors better
-    let expression = translate(element.clone()).or(Ok(Location(Expression::Nothing, 0)))?; //TODO handle errors better
-    Ok(Introspection {
-        tokens_ws,
-        tokens,
-        tokens_transformed,
-        element,
-        expression,
-    })
+    // let element = parse(tokens_transformed.clone()).or(Ok(Location(Element::Nothing, 0)))?; //TODO handle errors better
+    //let expression = translate(element.clone()).or(Ok(Location(Expression::Nothing, 0)))?; //TODO handle errors better
+    // Ok(Introspection {
+    //     tokens_ws,
+    //     tokens,
+    //     tokens_transformed,
+    //     element,
+    //     expression,
+    // })
+    todo!()
 }

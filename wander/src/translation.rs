@@ -23,7 +23,7 @@ fn process_pipes(element: &Location<Element>) -> Result<Location<Element>, Wande
         if element.0 == Element::Pipe {
             index += 1;
             match elements.get(index) {
-                Some(Location(Element::Grouping(next_elements), position)) => {
+                Some(Location(Element::Grouping(next_elements), _position)) => {
                     let mut next_elements = next_elements.clone();
                     let mut new_results = vec![];
                     next_elements.append(&mut results);
@@ -69,22 +69,11 @@ pub fn express(element: &Location<Element>) -> Result<Location<Expression>, Wand
             Box::new(express(body).unwrap()),
         ), *position),
         Location(Element::Grouping(elements), position) => return handle_grouping(elements),
-        Location(Element::Conditional(i, ie, ee), position) => Location(Expression::Conditional(
-            Box::new(express(i).unwrap()),
-            Box::new(express(ie).unwrap()),
-            Box::new(express(ee).unwrap()),
-        ), *position),
         Location(Element::Lambda(p, i, o, b), position) => {
             Location(Expression::Lambda(p.clone(), i.clone(), o.clone(), b.clone()), *position)
         }
-        Location(Element::Tuple(values), position) => {
-            Location(Expression::Tuple(values.clone().iter().map(|e| express(e).unwrap()).collect()), *position)
-        }
         Location(Element::List(values), position) => {
             Location(Expression::List(values.clone().iter().map(|e| express(e).unwrap()).collect()), *position)
-        }
-        Location(Element::Set(values), position) => {
-            Location(Expression::Set(values.clone().iter().map(|e| express(e).unwrap()).collect()), *position)
         }
         Location(Element::Record(values), position) => {
             let mut result: HashMap<String, Location<Expression>> = HashMap::new();
@@ -96,16 +85,12 @@ pub fn express(element: &Location<Element>) -> Result<Location<Expression>, Wand
                 });
             Location(Expression::Record(result), *position)
         }
-        Location(Element::Nothing, position) => Location(Expression::Nothing, *position),
         Location(Element::Pipe, position) => {
             return Err(WanderError(
                 "Cannot process pipe, Should never reach.".to_owned(),
             ))
         }
         Location(Element::HostFunction(name), position) => Location(Expression::HostFunction(name.clone()), *position),
-        Location(Element::TaggedName(name, tag), position) => {
-            Location(Expression::TaggedName(name.clone(), Box::new(express(tag).unwrap())), *position)
-        }
     };
     Ok(expression)
 }
@@ -115,7 +100,7 @@ fn handle_grouping(elements: &[Location<Element>]) -> Result<Location<Expression
     let expressions: Vec<Location<Expression>> = expressions
         .iter()
         .map(|e| match e {
-            Location(Expression::Application(application), position) => {
+            Location(Expression::Application(application), _position) => {
                 if application.len() == 1 {
                     application.first().unwrap().clone()
                 } else {
