@@ -2,7 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use ligature::{new_identifier, Dataset, Identifier, LigatureError};
+use ligature::{new_identifier, NetworkName, Identifier, LigatureError};
 use regex::Regex;
 
 #[test]
@@ -37,12 +37,12 @@ fn valid_dataset_names() {
     ];
 
     for ok in oks {
-        assert!(Dataset::new(ok).is_ok(), "{} should be a valid Dataset", ok);
+        assert!(NetworkName::new(ok).is_ok(), "{} should be a valid Dataset", ok);
     }
 
     for err in errs {
         assert!(
-            Dataset::new(err).is_err(),
+            NetworkName::new(err).is_err(),
             "{} should be an invalid Dataset",
             err
         );
