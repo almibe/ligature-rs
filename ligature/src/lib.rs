@@ -17,21 +17,17 @@ use serde::{Deserialize, Serialize};
 /// A simple type alias for Bytes.
 pub type Bytes = Vec<u8>;
 
-/// A string that represents a Network by name.
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Serialize, Deserialize, Hash)]
-pub struct NetworkName(String);
-
-impl Display for NetworkName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "@{}", self.0)
-    }
-}
-
 
 /// A Slot is a place holder in a Network used for pattern matching.
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Serialize, Deserialize, Hash)]
 pub struct Slot(String);
 
+
+impl Display for Slot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "${}", self.0)
+    }
+}
 
 /// Check if a given name is valid.
 pub fn validate_name(id: &str) -> bool {
@@ -50,7 +46,7 @@ pub fn validate_name_characters(id: &str) -> bool {
 
 /// An Entity that is identified by a unique String id.
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq, Deserialize, Serialize, Hash)]
-pub struct Name(String);
+pub struct Name(pub String);
 
 impl Display for Name {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -61,16 +57,14 @@ impl Display for Name {
 /// An enum that represents all the currently supported Value types.
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq, Deserialize, Serialize, Hash)]
 pub enum Value {
-    /// A NetworkName.
-    NetworkName(NetworkName),
-    /// An Entity.
+    /// A Name.
     Name(Name),
+    /// A Slot.
+    Slot(Slot),
     /// A String used for a Ligature literal
     String(String),
     /// An i64 used for a Ligature literal
     Integer(i64),
-    // /// An f64 used for a Ligature literal
-    // FloatLiteral(f64),
     /// An array of bytes
     Bytes(Bytes),
 }
@@ -78,13 +72,22 @@ pub enum Value {
 impl Display for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Value::NetworkName(value) => write!(f, "{value}"),
             Value::Name(value) => write!(f, "{value}"),
             Value::String(value) => write!(f, "{value}"),
             Value::Integer(value) => write!(f, "{value}"),
             Value::Bytes(value) => write!(f, "{value:?}"),
+            Value::Slot(value) => write!(f, "{value}"),
         }
     }
+}
+
+/// An enum that represents a Name or Slot.
+#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq, Deserialize, Serialize, Hash)]
+pub enum Pattern {
+    /// A Name.
+    Name(Name),
+    /// A Slot.
+    Slot(Slot),
 }
 
 /// A Statement is a grouping of an Entity, an Attribute, and a Value.

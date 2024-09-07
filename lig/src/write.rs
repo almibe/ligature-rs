@@ -2,14 +2,17 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use ligature::Statement;
-//use wander::write_statement;
+use ligature::{LigatureError, Value};
 
-pub fn write(statements: std::slice::Iter<Statement>) -> String {
-    let mut result = String::new();
-    for statement in statements {
-//        result += &*write_statement(statement);
-        todo!()
-    }
-    result
+pub fn write(value: &Value) -> Result<String, LigatureError> {
+    todo!()
+    // let lexer = Token::lexer(script);
+    // let mut results = vec![];
+    // for token in lexer {
+    //     match token {
+    //         Ok(token) => results.push(token),
+    //         Err(_) => return Err(LigatureError(String::from("Error tokenizing input."))),
+    //     }
+    // }
+    // Ok(results)
 }

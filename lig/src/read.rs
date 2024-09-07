@@ -4,7 +4,7 @@
 
 use ligature::{LigatureError, Statement};
 use logos::Logos;
-use wander::lexer::Token;
+use crate::lexer::Token;
 
 pub fn tokenize(script: &str) -> Result<Vec<Token>, LigatureError> {
     let lexer = Token::lexer(script);
@@ -18,7 +18,8 @@ pub fn tokenize(script: &str) -> Result<Vec<Token>, LigatureError> {
     Ok(results)
 }
 
-// pub fn read(script: &str) -> Result<Vec<Statement>, LigatureError> {
-//     let tokens = tokenize(script)?;
-//     wander::lig::read_tokens(tokens)
-// }
+pub fn read(script: &str) -> Result<Vec<Statement>, LigatureError> {
+    todo!()
+    //let tokens = tokenize(script)?;
+    //read_tokens(tokens)
+}

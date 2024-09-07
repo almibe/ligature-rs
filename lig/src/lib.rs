@@ -2,30 +2,87 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-//! This module is the main module for the lig serialization format for Ligature.
+//! This module is the main module for the Ligature project.
+//! It represents to common types and traits used by Ligature.
 
-use ligature::{Dataset, Ligature, LigatureError};
+//#![deny(missing_docs)]
 
-//use crate::read::read;
+use std::fmt::Debug;
 
+use lexer::Token;
+
+pub mod lexer;
 pub mod read;
 pub mod write;
 
-/// A error related to parsing Lig.
-#[derive(Debug, PartialEq, Eq)]
-pub struct LigError(pub String);
+/// Write integer.
+pub fn write_integer(integer: &i64) -> String {
+    format!("{}", integer)
+}
 
-impl From<LigatureError> for LigError {
-    fn from(err: LigatureError) -> Self {
-        LigError(err.0)
+/// Write float.
+pub fn write_float(float: &f64) -> String {
+    let res = format!("{}", float);
+    if res.contains('.') {
+        res
+    } else {
+        res + ".0"
     }
 }
 
-// pub fn load_lig_from_str(
-//     dataset: Dataset,
-//     input: &str,
-//     ligature: &dyn Ligature,
-// ) -> Result<(), LigatureError> {
-// //    let statements = read(input)?;
-// //   ligature.add_statements(&dataset, statements)
+// Write out Bytes as a String.
+// pub fn write_bytes(bytes: &Bytes) -> String {
+//     format!("0x{}", encode(bytes))
+// }
+
+/// Escape a String value.
+pub fn write_string(string: &str) -> String {
+    //TODO this could be done better
+    let escaped_string = string
+        .replace('\\', "\\\\")
+        .replace('"', "\\\"")
+        //.replace("\f", "\\b") <-- TODO not sure how to handle this or if I really need to
+        //.replace("\b", "\\b") <-- TODO not sure how to handle this or if I really need to
+        .replace('\n', "\\n")
+        .replace('\r', "\\r")
+        .replace('\t', "\\t");
+    format!("\"{}\"", escaped_string)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+/// Store location information alongside a value.
+pub struct Location<T: PartialEq + Eq>(pub T, pub usize);
+
+// #[derive(Debug, Serialize)]
+// /// Structure used for debugging or inspecting code.
+// pub struct Introspection {
+//     /// A list of all Tokens including whitespace.
+//     pub tokens_ws: Vec<Location<Token>>,
+//     /// A list of all Tokens without whitespace.
+//     pub tokens: Vec<Location<Token>>,
+//     /// A list of all Tokens after macro transformations.
+//     pub tokens_transformed: Vec<Location<Token>>,
+//     /// Element representation.
+//     pub element: Location<Element>,
+//     /// Expression representation.
+//     pub expression: Location<Expression>,
+// }
+
+// /// Run a Wander script with the given Bindings.
+// pub fn introspect(
+//     script: &str,
+// ) -> Result<Introspection, LigatureError> {
+//     let tokens_ws = tokenize(script).or(Ok(vec![]))?;
+//     let tokens = tokenize_and_filter(script).or(Ok(vec![]))?;
+//     let tokens_transformed = transform(&tokens.clone(), bindings).or(Ok(vec![]))?;
+//     // let element = parse(tokens_transformed.clone()).or(Ok(Location(Element::Nothing, 0)))?; //TODO handle errors better
+//     //let expression = translate(element.clone()).or(Ok(Location(Expression::Nothing, 0)))?; //TODO handle errors better
+//     // Ok(Introspection {
+//     //     tokens_ws,
+//     //     tokens,
+//     //     tokens_transformed,
+//     //     element,
+//     //     expression,
+//     // })
+//     todo!()
 // }
