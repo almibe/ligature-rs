@@ -5,6 +5,6 @@
 use std::rc::Rc;
 
 use wander::{
-    interpreter::eval, interpreter::Expression, preludes::common, HostFunction,
+    interpreter::eval, interpreter::Expression, preludes::common, Command,
     HostFunctionBinding, WanderError, WanderValue, Location,
 };

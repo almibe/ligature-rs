@@ -37,30 +37,15 @@ pub mod translation;
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize, Clone)]
 pub struct WanderError(pub String);
 
-/// struct describing a HostFunction.
-pub struct HostFunctionBinding {
-    /// Name used to bind this HostFunction including Namespaces.
-    pub name: String,
-    /// The type of the parameters this HostFunction takes.
-    pub parameters: Vec<(String, Option<String>)>,
-    /// The type of the result of this HostFunction.
-    pub result: Option<String>,
-    /// The documentation for this HostFunction.
-    /// Can be text or Markdown.
-    pub doc_string: String,
-}
-
 /// A trait representing a function exported from the hosting application that
 /// can be called from Wander.
-pub trait HostFunction {
+pub trait Command {
     /// The function called when the HostFunction is called from Wander.
     fn run(
         &self,
         arguments: &[WanderValue],
         bindings: &Environment,
     ) -> Result<WanderValue, WanderError>;
-    /// Get the binding information for this HostFunction.
-    fn binding(&self) -> HostFunctionBinding;
 }
 
 /// Type alias used for TokenTransformers.

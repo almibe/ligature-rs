@@ -3,8 +3,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use crate::{
-    parser::Element, HostFunctionBinding, TokenTransformer,
-    WanderValue, Location, HostFunction
+    parser::Element, TokenTransformer,
+    WanderValue, Location, Command
 };
 use std::{
     cell::RefCell,
@@ -15,7 +15,7 @@ use std::{
 /// A structure used to setup the environment a Wander program is executed in.
 pub struct Environment {
     token_transformers: RefCell<HashMap<String, Rc<TokenTransformer>>>,
-    host_functions: RefCell<HashMap<String, Rc<dyn HostFunction>>>,
+    host_functions: RefCell<HashMap<String, Rc<dyn Command>>>,
     scopes: Vec<HashMap<String, WanderValue>>,
 }
 
@@ -69,47 +69,48 @@ impl Environment {
     }
 
     /// Add a new HostFunction.
-    pub fn bind_host_function(&mut self, function: Rc<dyn HostFunction>) {
-        let full_name = function.binding().name.to_string();
-        self.host_functions
-            .borrow_mut()
-            .insert(full_name.clone(), function.clone());
-        let mut parameters = function.binding().parameters.clone();
-        let mut result = None;
-        parameters.reverse();
-        parameters.iter().for_each(|(name, tag)| match &result {
-            Some(value) => match value {
-                WanderValue::InnerCall(innerp, i, o, b) => {
-                    let p = parameters.clone();
-                    result = Some(WanderValue::InnerCall(
-                        name.clone(),
-                        tag.clone(),
-                        None,
-                        Box::new(Location(Element::Lambda(
-                            innerp.clone(),
-                            i.clone(),
-                            o.clone(),
-                            b.clone(),
-                        ), 0),)
-                    ));
-                }
-                _ => panic!("Should never reach."),
-            },
-            None => {
-                let p = parameters.clone();
-                result = Some(WanderValue::InnerCall(
-                    name.clone(),
-                    tag.clone(),
-                    None,
-                    Box::new(Location(Element::HostFunction(full_name.clone()),0),)
-                ));
-            }
-        });
-        self.bind(full_name, result.unwrap());
+    pub fn bind_host_function(&mut self, function: Rc<dyn Command>) {
+        todo!()
+        // let full_name = function.binding().name.to_string();
+        // self.host_functions
+        //     .borrow_mut()
+        //     .insert(full_name.clone(), function.clone());
+        // let mut parameters = function.binding().parameters.clone();
+        // let mut result = None;
+        // parameters.reverse();
+        // parameters.iter().for_each(|(name, tag)| match &result {
+        //     Some(value) => match value {
+        //         WanderValue::InnerCall(innerp, i, o, b) => {
+        //             let p = parameters.clone();
+        //             result = Some(WanderValue::InnerCall(
+        //                 name.clone(),
+        //                 tag.clone(),
+        //                 None,
+        //                 Box::new(Location(Element::Lambda(
+        //                     innerp.clone(),
+        //                     i.clone(),
+        //                     o.clone(),
+        //                     b.clone(),
+        //                 ), 0),)
+        //             ));
+        //         }
+        //         _ => panic!("Should never reach."),
+        //     },
+        //     None => {
+        //         let p = parameters.clone();
+        //         result = Some(WanderValue::InnerCall(
+        //             name.clone(),
+        //             tag.clone(),
+        //             None,
+        //             Box::new(Location(Element::HostFunction(full_name.clone()),0),)
+        //         ));
+        //     }
+        // });
+        // self.bind(full_name, result.unwrap());
     }
 
     /// Read a HostFunction.
-    pub fn read_host_function(&self, name: &String) -> Option<Rc<dyn HostFunction>> {
+    pub fn read_host_function(&self, name: &String) -> Option<Rc<dyn Command>> {
         match self.host_functions.borrow().get(name) {
             None => None,
             Some(value) => Some(value.clone()),
@@ -146,9 +147,5 @@ impl Environment {
             }
         }
         names
-    }
-
-    pub fn environment(&self) -> Vec<HostFunctionBinding> {
-        todo!()
     }
 }

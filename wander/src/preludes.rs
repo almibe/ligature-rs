@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use crate::{
-    environment::Environment, HostFunction, HostFunctionBinding, WanderError, WanderValue,
+    environment::Environment, Command, WanderError, WanderValue,
 };
 use std::rc::Rc;
 
@@ -34,7 +34,7 @@ use std::rc::Rc;
 // }
 
 struct LogFunction {}
-impl HostFunction for LogFunction {
+impl Command for LogFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
@@ -51,18 +51,18 @@ impl HostFunction for LogFunction {
         }
     }
 
-    fn binding(&self) -> HostFunctionBinding {
-        HostFunctionBinding {
-            name: "log".to_owned(),
-            parameters: vec![("message".to_owned(), None)],
-            result: None,
-            doc_string: "Log a message.".to_owned(),
-        }
-    }
+    // fn binding(&self) -> HostFunctionBinding {
+    //     HostFunctionBinding {
+    //         name: "log".to_owned(),
+    //         parameters: vec![("message".to_owned(), None)],
+    //         result: None,
+    //         doc_string: "Log a message.".to_owned(),
+    //     }
+    // }
 }
 
 struct AssertEqFunction {}
-impl HostFunction for AssertEqFunction {
+impl Command for AssertEqFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
@@ -82,14 +82,14 @@ impl HostFunction for AssertEqFunction {
         }
     }
 
-    fn binding(&self) -> HostFunctionBinding {
-        HostFunctionBinding {
-            name: "Assert.assertEq".to_owned(),
-            parameters: vec![("value".to_owned(), None), ("expected".to_owned(), None)],
-            result: None,
-            doc_string: "Assert that two values are equal.".to_owned(),
-        }
-    }
+    // fn binding(&self) -> HostFunctionBinding {
+    //     HostFunctionBinding {
+    //         name: "Assert.assertEq".to_owned(),
+    //         parameters: vec![("value".to_owned(), None), ("expected".to_owned(), None)],
+    //         result: None,
+    //         doc_string: "Assert that two values are equal.".to_owned(),
+    //     }
+    // }
 }
 
 // struct AndFunction {}

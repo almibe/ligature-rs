@@ -91,16 +91,17 @@ fn handle_host_function(
     name: &str,
     environment: &mut Environment,
 ) -> Result<WanderValue, WanderError> {
-    let host_function = environment.read_host_function(&name.to_owned()).unwrap();
-    let params = host_function.binding().parameters;
-    let mut arguments = vec![];
-    for (name, wander_type) in params {
-        match environment.read(&name) {
-            Some(value) => arguments.push(value),
-            None => return Err(WanderError(format!("Could not read {}", name))),
-        }
-    }
-    host_function.run(&arguments, environment)
+    todo!()
+    // let host_function = environment.read_host_function(&name.to_owned()).unwrap();
+    // let params = host_function.binding().parameters;
+    // let mut arguments = vec![];
+    // for (name, wander_type) in params {
+    //     match environment.read(&name) {
+    //         Some(value) => arguments.push(value),
+    //         None => return Err(WanderError(format!("Could not read {}", name))),
+    //     }
+    // }
+    // host_function.run(&arguments, environment)
 }
 
 fn handle_lambda(
@@ -301,17 +302,17 @@ fn call_function(
         None => match environment.read_host_function(name) {
             None => Err(WanderError(format!("Function {} is not defined.", name))),
             Some(function) => {
-                if argument_values.len() == function.binding().parameters.len() {
-                    function.run(&argument_values, environment)
-                } else {
-                    // Ok(WanderValue::PartialApplication(Box::new(
-                    //     PartialApplication {
-                    //         arguments: argument_values,
-                    //         callee: WanderValue::HostedFunction(name.clone()),
-                    //     },
-                    // )))
-                    todo!()
-                }
+                // if argument_values.len() == function.binding().parameters.len() {
+                //     function.run(&argument_values, environment)
+                // } else {
+                //     // Ok(WanderValue::PartialApplication(Box::new(
+                //     //     PartialApplication {
+                //     //         arguments: argument_values,
+                //     //         callee: WanderValue::HostedFunction(name.clone()),
+                //     //     },
+                //     // )))
+                todo!()
+                // }
             }
         },
     }
