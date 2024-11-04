@@ -70,20 +70,14 @@ pub type TokenTransformer = fn(&[Location<Token>]) -> Result<Vec<Location<Token>
 /// Wander and the host application.
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub enum WanderValue {
-    /// A Bool value.
-    Bool(bool),
-    /// A 64-bit signed integer value.
-    Int(i64),
     /// A String value.
     String(String),
     /// An Identifier.
     Identifier(Identifier),
     /// A Lambda
-    Lambda(String, Option<String>, Option<String>, Box<Location<Element>>),
-    /// A List.
-    List(Vec<WanderValue>),
+    InnerCall(String, Option<String>, Option<String>, Box<Location<Element>>),
     /// A Record.
-    Record(HashMap<String, WanderValue>),
+    Network(HashSet<ligature::Entry>),
 }
 
 impl core::hash::Hash for WanderValue {
@@ -152,37 +146,35 @@ fn write_list_value(
     write!(f, "{close}")
 }
 
-fn write_record(
-    contents: &HashMap<String, WanderValue>,
+fn write_network(
+    contents: &HashSet<ligature::Entry>,
     f: &mut std::fmt::Formatter<'_>,
 ) -> std::fmt::Result {
-    write!(f, "{{").unwrap();
-    let mut i = 0;
-    for (name, value) in contents {
-        write!(f, "{name} = {value}").unwrap();
-        i += 1;
-        if i < contents.len() {
-            write!(f, " ").unwrap();
-        }
-    }
-    write!(f, "}}")
+    todo!()
+    // write!(f, "{{").unwrap();
+    // let mut i = 0;
+    // for (name, value) in contents {
+    //     write!(f, "{name} = {value}").unwrap();
+    //     i += 1;
+    //     if i < contents.len() {
+    //         write!(f, " ").unwrap();
+    //     }
+    // }
+    // write!(f, "}}")
 }
 
 impl Display for WanderValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            WanderValue::Bool(value) => write!(f, "{}", value),
-            WanderValue::Int(value) => write!(f, "{}", value),
             WanderValue::String(value) => f.write_str(&write_string(value)),
             WanderValue::Identifier(value) => write!(f, "<{}>", value.id()),
-            WanderValue::List(contents) => write_list_value("[", ']', contents, f),
-            WanderValue::Record(values) => write_record(values, f),
+            WanderValue::Network(values) => write_network(values, f),
             // WanderValue::Lambda(p, i, o, b) => write!(
             //     f,
             //     "[lambda {:?}]",
             //     WanderValue::Lambda::(p.clone(), i.clone(), o.clone(), b.clone())
             // ),
-            WanderValue::Lambda(_p, _i , _o, _b) => todo!(),
+            WanderValue::InnerCall(_p, _i , _o, _b) => todo!(),
         }
     }
 }

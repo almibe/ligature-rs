@@ -79,9 +79,9 @@ impl Environment {
         parameters.reverse();
         parameters.iter().for_each(|(name, tag)| match &result {
             Some(value) => match value {
-                WanderValue::Lambda(innerp, i, o, b) => {
+                WanderValue::InnerCall(innerp, i, o, b) => {
                     let p = parameters.clone();
-                    result = Some(WanderValue::Lambda(
+                    result = Some(WanderValue::InnerCall(
                         name.clone(),
                         tag.clone(),
                         None,
@@ -97,7 +97,7 @@ impl Environment {
             },
             None => {
                 let p = parameters.clone();
-                result = Some(WanderValue::Lambda(
+                result = Some(WanderValue::InnerCall(
                     name.clone(),
                     tag.clone(),
                     None,

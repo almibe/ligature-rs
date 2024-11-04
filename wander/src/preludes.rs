@@ -7,31 +7,31 @@ use crate::{
 };
 use std::rc::Rc;
 
-struct EqFunction {}
-impl HostFunction for EqFunction {
-    fn run(
-        &self,
-        arguments: &[WanderValue],
-        _bindings: &Environment,
-    ) -> Result<WanderValue, WanderError> {
-        if let [left, right] = arguments {
-            Ok(crate::WanderValue::Bool(left == right))
-        } else {
-            Err(WanderError(
-                "`eq` function requires two parameters.".to_owned(),
-            ))
-        }
-    }
+// struct EqFunction {}
+// impl HostFunction for EqFunction {
+//     fn run(
+//         &self,
+//         arguments: &[WanderValue],
+//         _bindings: &Environment,
+//     ) -> Result<WanderValue, WanderError> {
+//         if let [left, right] = arguments {
+//             Ok(crate::WanderValue::Bool(left == right))
+//         } else {
+//             Err(WanderError(
+//                 "`eq` function requires two parameters.".to_owned(),
+//             ))
+//         }
+//     }
 
-    fn binding(&self) -> HostFunctionBinding {
-        HostFunctionBinding {
-            name: "Core.eq".to_owned(),
-            parameters: vec![("left".to_owned(), None), ("right".to_owned(), None)],
-            result: None,
-            doc_string: "Check if two values are equal.".to_owned(),
-        }
-    }
-}
+//     fn binding(&self) -> HostFunctionBinding {
+//         HostFunctionBinding {
+//             name: "Core.eq".to_owned(),
+//             parameters: vec![("left".to_owned(), None), ("right".to_owned(), None)],
+//             result: None,
+//             doc_string: "Check if two values are equal.".to_owned(),
+//         }
+//     }
+// }
 
 struct LogFunction {}
 impl HostFunction for LogFunction {
@@ -92,96 +92,60 @@ impl HostFunction for AssertEqFunction {
     }
 }
 
-struct AndFunction {}
-impl HostFunction for AndFunction {
-    fn run(
-        &self,
-        arguments: &[WanderValue],
-        _bindings: &Environment,
-    ) -> Result<crate::WanderValue, WanderError> {
-        if let [WanderValue::Bool(left), WanderValue::Bool(right)] = arguments {
-            Ok(crate::WanderValue::Bool(*left && *right))
-        } else {
-            Err(WanderError(
-                "`and` function requires two boolean parameters.".to_owned(),
-            ))
-        }
-    }
+// struct AndFunction {}
+// impl HostFunction for AndFunction {
+//     fn run(
+//         &self,
+//         arguments: &[WanderValue],
+//         _bindings: &Environment,
+//     ) -> Result<crate::WanderValue, WanderError> {
+//         if let [WanderValue::Bool(left), WanderValue::Bool(right)] = arguments {
+//             Ok(crate::WanderValue::Bool(*left && *right))
+//         } else {
+//             Err(WanderError(
+//                 "`and` function requires two boolean parameters.".to_owned(),
+//             ))
+//         }
+//     }
 
-    fn binding(&self) -> HostFunctionBinding {
-        HostFunctionBinding {
-            name: "Bool.and".to_owned(),
-            parameters: vec![
-                ("left".to_owned(), None),  // bool
-                ("right".to_owned(), None), // bool
-            ],
-            result: None, // bool
-            doc_string: "Check if two boolean values are both true.".to_owned(),
-        }
-    }
-}
+//     fn binding(&self) -> HostFunctionBinding {
+//         HostFunctionBinding {
+//             name: "Bool.and".to_owned(),
+//             parameters: vec![
+//                 ("left".to_owned(), None),  // bool
+//                 ("right".to_owned(), None), // bool
+//             ],
+//             result: None, // bool
+//             doc_string: "Check if two boolean values are both true.".to_owned(),
+//         }
+//     }
+// }
 
-struct NotFunction {}
-impl HostFunction for NotFunction {
-    fn run(
-        &self,
-        arguments: &[WanderValue],
-        _bindings: &Environment,
-    ) -> Result<crate::WanderValue, WanderError> {
-        if let [WanderValue::Bool(value)] = arguments {
-            Ok(crate::WanderValue::Bool(!value))
-        } else {
-            Err(WanderError(
-                "`not` function requires one boolean parameter.".to_owned(),
-            ))
-        }
-    }
+// struct NotFunction {}
+// impl HostFunction for NotFunction {
+//     fn run(
+//         &self,
+//         arguments: &[WanderValue],
+//         _bindings: &Environment,
+//     ) -> Result<crate::WanderValue, WanderError> {
+//         if let [WanderValue::Bool(value)] = arguments {
+//             Ok(crate::WanderValue::Bool(!value))
+//         } else {
+//             Err(WanderError(
+//                 "`not` function requires one boolean parameter.".to_owned(),
+//             ))
+//         }
+//     }
 
-    fn binding(&self) -> HostFunctionBinding {
-        HostFunctionBinding {
-            name: "Bool.not".to_owned(),
-            parameters: vec![("value".to_owned(), None)], // bool
-            result: None,                                 // bool
-            doc_string: "Return the opposite of the boolean value passed.".to_owned(),
-        }
-    }
-}
-
-struct AtFunction {}
-impl HostFunction for AtFunction {
-    fn run(
-        &self,
-        arguments: &[WanderValue],
-        _: &Environment,
-    ) -> Result<WanderValue, WanderError> {
-        if let [WanderValue::Int(index), WanderValue::List(value)] = arguments {
-            let index: usize = index.to_owned().try_into().unwrap();
-            if index < value.len() {
-                let t: Option<&WanderValue> = value.get(index);
-                match t {
-                    Some(t) => Ok(t.to_owned()),
-                    None => Err(WanderError("`at` function err.".to_owned())),
-                }
-            } else {
-                Err(WanderError("`at` function err.".to_owned()))
-            }
-        } else {
-            Err(WanderError("`at` function err.".to_owned()))
-        }
-    }
-
-    fn binding(&self) -> HostFunctionBinding {
-        HostFunctionBinding {
-            name: "List.at".to_owned(),
-            parameters: vec![
-                ("offset".to_owned(), None), //Int
-                ("list".to_owned(), None),   //List
-            ],
-            result: None,
-            doc_string: "Get the value at a given location.".to_owned(),
-        }
-    }
-}
+//     fn binding(&self) -> HostFunctionBinding {
+//         HostFunctionBinding {
+//             name: "Bool.not".to_owned(),
+//             parameters: vec![("value".to_owned(), None)], // bool
+//             result: None,                                 // bool
+//             doc_string: "Return the opposite of the boolean value passed.".to_owned(),
+//         }
+//     }
+// }
 
 //TODO https://github.com/almibe/ligature-rs/issues/305
 // struct EnvironmentFunction {}
@@ -243,11 +207,10 @@ impl HostFunction for AtFunction {
 /// functionality, but doesn't interact with an instance of Ligature.
 pub fn common() -> Environment {
     let mut bindings = Environment::new();
-    bindings.bind_host_function(Rc::new(EqFunction {}));
+//    bindings.bind_host_function(Rc::new(EqFunction {}));
     bindings.bind_host_function(Rc::new(AssertEqFunction {}));
-    bindings.bind_host_function(Rc::new(AndFunction {}));
-    bindings.bind_host_function(Rc::new(NotFunction {}));
-    bindings.bind_host_function(Rc::new(AtFunction {}));
+    // bindings.bind_host_function(Rc::new(AndFunction {}));
+    // bindings.bind_host_function(Rc::new(NotFunction {}));
     // bindings.bind_host_function(Rc::new(EnvironmentFunction {}));
     bindings
 }

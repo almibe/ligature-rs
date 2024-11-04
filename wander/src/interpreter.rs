@@ -2,10 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use std::collections::HashMap;
-
 use serde::{Deserialize, Serialize};
-
+use std::collections::HashSet;
 use crate::environment::Environment;
 
 use crate::identifier::Identifier;
@@ -16,20 +14,13 @@ use crate::{WanderError, WanderValue, Location};
 #[doc(hidden)]
 #[derive(Debug, PartialEq, Eq, Clone, Deserialize, Serialize)]
 pub enum Expression {
-    Boolean(bool),
-    Int(i64),
     String(String),
     Identifier(Identifier),
     Name(String),
     HostFunction(String),
-    Let(
-        Vec<(String, Option<Location<Expression>>, Location<Expression>)>,
-        Box<Location<Expression>>,
-    ),
     Application(Vec<Location<Expression>>),
     Lambda(String, Option<String>, Option<String>, Box<Location<Element>>),
-    List(Vec<Location<Expression>>),
-    Record(HashMap<String, Location<Expression>>),
+    Network(HashSet<ligature::Entry>),
 }
 
 impl core::hash::Hash for Expression {
@@ -43,15 +34,11 @@ pub fn eval(
     environment: &mut Environment,
 ) -> Result<WanderValue, WanderError> {
     match expression {
-        Location(Expression::Boolean(value), _) => Ok(WanderValue::Bool(*value)),
-        Location(Expression::Int(value), _) => Ok(WanderValue::Int(*value)),
         Location(Expression::String(value), _) => Ok(WanderValue::String(unescape_string(value.to_string()))),
         Location(Expression::Identifier(value), _) => Ok(WanderValue::Identifier(value.clone())),
-        Location(Expression::Let(decls, body), _) => handle_let(decls.clone(), *body.clone(), environment),
-        Location(Expression::Name(name), _) => read_name(name, environment),
+        Location(Expression::Name(name), _) => todo!(),//read_name(name, environment),
         Location(Expression::Application(expressions), _) => handle_function_call(expressions, environment),
-        Location(Expression::List(values), _) => handle_list(values, environment),
-        Location(Expression::Record(values), _) => handle_record(values, environment),
+        Location(Expression::Network(values), _) => todo!(),//handle_record(values, environment),
         Location(Expression::Lambda(name, input, output, body), _) => {
             todo!();
             // handle_lambda(name.clone(), input.clone(), output.clone(), body)
@@ -116,61 +103,18 @@ fn handle_host_function(
     host_function.run(&arguments, environment)
 }
 
-fn handle_record(
-    expressions: &HashMap<String, Location<Expression>>,
-    environment: &mut Environment,
-) -> Result<WanderValue, WanderError> {
-    let mut results = HashMap::new();
-    for (name, expression) in expressions {
-        match eval(expression, environment) {
-            Ok(value) => results.insert(name.to_owned(), value),
-            Err(err) => return Err(err),
-        };
-    }
-    Ok(WanderValue::Record(results))
-}
-
-fn handle_list(
-    expressions: &Vec<Location<Expression>>,
-    environment: &mut Environment,
-) -> Result<WanderValue, WanderError> {
-    let mut results = vec![];
-    for expression in expressions {
-        match eval(expression, environment) {
-            Ok(value) => results.push(value),
-            Err(err) => return Err(err),
-        }
-    }
-    Ok(WanderValue::List(results))
-}
-
 fn handle_lambda(
     name: String,
     input: Option<String>,
     output: Option<String>,
     body: &Location<Element>,
 ) -> Result<WanderValue, WanderError> {
-    Ok(WanderValue::Lambda(
+    Ok(WanderValue::InnerCall(
         name,
         input.clone(),
         output.clone(),
         Box::new(body.clone()),
     ))
-}
-
-fn handle_conditional(
-    cond: &Location<Expression>,
-    ife: &Location<Expression>,
-    elsee: &Location<Expression>,
-    environment: &mut Environment,
-) -> Result<WanderValue, WanderError> {
-    match eval(cond, environment)? {
-        WanderValue::Bool(true) => eval(ife, environment),
-        WanderValue::Bool(false) => eval(elsee, environment),
-        value => Err(WanderError(format!(
-            "Conditionals require a bool value found, {value}"
-        ))),
-    }
 }
 
 fn run_lambda(
@@ -182,7 +126,7 @@ fn run_lambda(
     environment: &mut Environment,
 ) -> Option<Result<WanderValue, WanderError>> {
     if expressions.is_empty() {
-        Some(Ok(WanderValue::Lambda(
+        Some(Ok(WanderValue::InnerCall(
             name,
             input,
             output,
@@ -204,7 +148,7 @@ fn run_lambda(
             Err(err) => return Some(Err(err)),
         };
         match function {
-            WanderValue::Lambda(_, _, _, b) => {
+            WanderValue::InnerCall(_, _, _, b) => {
                 let Ok(expression) = express(&b) else {
                     return None;
                 };
@@ -243,7 +187,7 @@ fn handle_function_call(
         match expression {
             Location(Expression::Application(contents), position) => {
                 match handle_function_call(&contents, environment)? {
-                    WanderValue::Lambda(name, input, output, element) => {
+                    WanderValue::InnerCall(name, input, output, element) => {
                         if let Some(res) =
                             run_lambda(name, input, output, *element, &mut expressions, environment)
                         {
@@ -267,7 +211,7 @@ fn handle_function_call(
             }
             Location(Expression::Name(name), position) => match eval(&Location(Expression::Name(name), position), environment) {
                 Ok(value) => match value {
-                    WanderValue::Lambda(p, i, o, b) => {
+                    WanderValue::InnerCall(p, i, o, b) => {
                         let argument_expression = expressions.pop().unwrap();
                         let argument_value = eval(&argument_expression, environment)?;
                         environment.bind(p, argument_value);
@@ -298,24 +242,16 @@ fn handle_function_call(
 
 fn value_to_expression(value: WanderValue) -> Location<Expression> {
     match value {
-        WanderValue::Bool(value) => Location(Expression::Boolean(value), 0),
-        WanderValue::Int(value) => Location(Expression::Int(value), 0),
         WanderValue::String(value) => Location(Expression::String(value), 0),
         WanderValue::Identifier(value) => Location(Expression::Identifier(value), 0),
-        WanderValue::Lambda(p, i, o, b) => Location(Expression::Lambda(p, i, o, b), 0),
-        WanderValue::List(values) => {
-            let mut expressions = vec![];
-            for value in values {
-                expressions.push(value_to_expression(value).clone());
-            }
-            Location(Expression::List(expressions), 0)
-        }
-        WanderValue::Record(value_record) => {
-            let mut record = HashMap::new();
-            for (name, value) in value_record {
-                record.insert(name, value_to_expression(value));
-            }
-            Location(Expression::Record(record), 0)
+        WanderValue::InnerCall(p, i, o, b) => Location(Expression::Lambda(p, i, o, b), 0),
+        WanderValue::Network(value_record) => {
+            todo!()
+            // let mut record = HashMap::new();
+            // for (name, value) in value_record {
+            //     record.insert(name, value_to_expression(value));
+            // }
+            // Location(Expression::Network(record), 0)
         }
     }
 }
@@ -344,66 +280,6 @@ fn handle_decl(
             Ok(())
         }
         Err(err) => Err(err),
-    }
-}
-
-fn read_name(
-    name: &String,
-    environment: &mut Environment,
-) -> Result<WanderValue, WanderError> {
-    if let Some(value) = environment.read(name) {
-        Ok(value)
-    } else {
-        match environment.read_host_function(name) {
-            Some(_) => todo!(), //Ok(WanderValue::HostedFunction(name.to_owned())),
-            None => read_field(name, environment),
-        }
-    }
-}
-
-fn read_tagged_name(
-    name: &String,
-    _tag: &Location<Expression>,
-    environment: &mut Environment,
-) -> Result<WanderValue, WanderError> {
-    if let Some(value) = environment.read(name) {
-        Ok(value)
-    } else {
-        match environment.read_host_function(name) {
-            Some(_) => todo!(), //Ok(WanderValue::HostedFunction(name.to_owned())),
-            None => read_field(name, environment),
-        }
-    }
-}
-
-fn read_field(
-    name: &str,
-    environment: &mut Environment,
-) -> Result<WanderValue, WanderError> {
-    let t = name
-        .split('.')
-        .map(|e| e.to_string())
-        .collect::<Vec<String>>();
-    let mut result = None;
-    let (name, fields) = t.split_first().unwrap();
-    if let Some(WanderValue::Record(value)) = environment.read(&name.to_string()) {
-        for field in fields {
-            match result {
-                Some(WanderValue::Record(r)) => result = Some(r.get(field).unwrap().clone()),
-                Some(x) => {
-                    return Err(WanderError(format!(
-                        "Could not access field {field} in {x}."
-                    )))
-                }
-                None => match value.get(field) {
-                    Some(r) => result = Some(r.clone()),
-                    None => return Err(WanderError(format!("Could not read field {name}"))),
-                },
-            }
-        }
-        Ok(result.unwrap().clone())
-    } else {
-        Err(WanderError(format!("Error looking up {name}")))
     }
 }
 
