@@ -4,15 +4,11 @@
 
 use std::rc::Rc;
 use wander::preludes::common;
-use wander::{NoHostType, Location};
+use wander::{Location};
 use wander::{lexer::Token, run, WanderError, WanderValue};
 
 fn empty_transform(_input: &[Token]) -> Result<Vec<Token>, WanderError> {
     Ok(vec![])
-}
-
-fn nothing_transform(_input: &[Token]) -> Result<Vec<Token>, WanderError> {
-    Ok([Token::Nothing].to_vec())
 }
 
 fn upper_case_transform(input: &[Location<Token>]) -> Result<Vec<Location<Token>>, WanderError> {

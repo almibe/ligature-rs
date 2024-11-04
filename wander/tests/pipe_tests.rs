@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use wander::parser::Element;
-use wander::{run, NoHostType, WanderValue};
+use wander::{run, WanderValue};
 
 //use crate::utilities::{introspect_str, parse_str};
 use wander::interpreter::Expression;

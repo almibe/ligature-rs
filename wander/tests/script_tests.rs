@@ -5,7 +5,7 @@
 use std::collections::HashMap;
 use std::{path::PathBuf, fs::File};
 
-use wander::{NoHostType, WanderValue, WanderError};
+use wander::{WanderValue, WanderError};
 use wander::preludes::add_print;
 use std::io::Read;
 use wander::preludes::common;
@@ -24,7 +24,7 @@ fn run_script_tests() {
             let mut file = File::open(path).unwrap();
             let mut script = String::new();
             let _ = file.read_to_string(&mut script);
-            let mut environment = common::<NoHostType>();
+            let mut environment = common();
             add_print(&mut environment);
             match run(&script, &mut environment) {
                 Ok(WanderValue::List(tests)) => {

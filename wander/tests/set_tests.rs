@@ -4,7 +4,7 @@
 
 use std::collections::HashSet;
 
-use wander::{preludes::common, run, NoHostType, WanderValue};
+use wander::{preludes::common, run, WanderValue};
 
 // #[test]
 // fn empty_set() {

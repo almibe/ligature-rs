@@ -13,50 +13,11 @@ pub enum Token {
     #[regex("[ \t\n\r]+", ws)]
     WS(String),
 
-    #[token("let")]
-    Let,
-
-    #[token("in")]
-    In,
-
-    #[token("end")]
-    End,
-
-    #[token("=")]
-    EqualSign,
-
-    #[token("if")]
-    If,
-
-    #[token("then")]
-    Then,
-
-    #[token("else")]
-    Else,
-
-    #[token(".")]
-    Period,
-
-    #[token(":")]
-    Colon,
-
-    #[token("::")]
-    DoubleColon,
-
-    #[token("'")]
-    SingleQuote,
-
-    #[regex("-?[0-9]+", int, priority = 2)]
-    Int(i64),
-
     #[regex(r#""(([^\x00-\x1F"\\]|\\["\\/bfnrt]|\\u[0-9a-fA-F]{4})*)""#, string)]
     String(String),
 
     #[regex("[_a-zA-Z]+[_a-zA-Z0-9.?]*", name, priority = 2)]
     Name(String),
-
-    #[regex("(true)|(false)", bool)]
-    Boolean(bool),
 
     #[token("(")]
     OpenParen,
@@ -76,58 +37,14 @@ pub enum Token {
     #[token("]")]
     CloseSquare,
 
-    #[token("<")]
-    OpenAngle,
-
-    #[token(">")]
-    CloseAngle,
-
     #[regex("`[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;%=\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}\\x{10000}-\\x{1FFFD}\\x{20000}-\\x{2FFFD}\\x{30000}-\\x{3FFFD}\\x{40000}-\\x{4FFFD}\\x{50000}-\\x{5FFFD}\\x{60000}-\\x{6FFFD}\\x{70000}-\\x{7FFFD}\\x{80000}-\\x{8FFFD}\\x{90000}-\\x{9FFFD}\\x{A0000}-\\x{AFFFD}\\x{B0000}-\\x{BFFFD}\\x{C0000}-\\x{CFFFD}\\x{D0000}-\\x{DFFFD}\\x{E1000}-\\x{EFFFD}]+`", identifier)]
     Identifier(Identifier),
 
     #[token("|")]
     Pipe,
 
-    #[token("->")]
-    Arrow,
-
-    #[token("nothing")]
-    Nothing,
-
-    #[token("?")]
-    QuestionMark,
-
-    #[token("`")]
-    Backtick,
-
-    #[token("#")]
-    Hash,
-
     #[regex("--.*\n?", comment)]
     Comment(String),
-
-    #[token("\\")]
-    Lambda,
-
-    #[token("fun")]
-    Fun,
-}
-
-fn bool(lex: &mut Lexer<Token>) -> Option<bool> {
-    let slice = lex.slice();
-    match slice {
-        "true" => Some(true),
-        "false" => Some(false),
-        _ => None,
-    }
-}
-
-fn int(lex: &mut Lexer<Token>) -> Option<i64> {
-    let slice = lex.slice();
-    match slice.parse::<i64>() {
-        Ok(value) => Some(value),
-        _ => None,
-    }
 }
 
 fn trim_string(value: &str) -> &str {
@@ -179,44 +96,4 @@ pub fn tokenize_and_filter(script: &str) -> Result<Vec<Location<Token>>, WanderE
             .retain(|Location(token, _)| !matches!(token, Token::Comment(_)) && !matches!(token, Token::WS(_)));
         tokens
     })
-}
-
-pub fn transform(
-    input: &[Location<Token>],
-    bindings: &Environment,
-) -> Result<Vec<Location<Token>>, WanderError> {
-    let mut index = 0;
-    let mut results: Vec<Location<Token>> = vec![];
-    while let Some(Location(token, position)) = input.get(index) {
-        if token == &Token::Backtick {
-            let mut internal_results: Vec<Location<Token>> = vec![];
-            let transformer = match input.get(index - 1) {
-                Some(Location(Token::Name(name), _)) => match bindings.read_token_transformer(name) {
-                    Some(transformer) => transformer,
-                    None => {
-                        return Err(WanderError(format!(
-                            "{name} Token Transformer doesn't exist."
-                        )))
-                    }
-                },
-                _ => return Err(WanderError("Token Transforms require a name.".to_owned())),
-            };
-            results.pop(); //remove transformer's name token
-            index += 1; //skip first `
-            while let Some(Location(token, position)) = input.get(index) {
-                if token == &Token::Backtick {
-                    let transformed_content = transformer(&internal_results).unwrap();
-                    results.append(&mut transformed_content.to_vec());
-                    break;
-                } else {
-                    internal_results.push(Location(token.to_owned(), position.clone()));
-                }
-                index += 1;
-            }
-        } else {
-            results.push(Location(token.to_owned(), position.clone()));
-        }
-        index += 1;
-    }
-    Ok(results)
 }

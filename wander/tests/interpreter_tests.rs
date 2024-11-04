@@ -4,12 +4,12 @@
 
 use wander::interpreter::{eval, Expression};
 use wander::preludes::common;
-use wander::{NoHostType, WanderValue, Location};
+use wander::{WanderValue, Location};
 
 #[test]
 fn eval_boolean_true() {
     let input = Location(Expression::Boolean(true), 0);
-    let res = eval(&input, &mut common::<NoHostType>());
+    let res = eval(&input, &mut common());
     let expected = Ok(WanderValue::Bool(true));
     assert_eq!(res, expected);
 }
@@ -17,7 +17,7 @@ fn eval_boolean_true() {
 #[test]
 fn eval_string_with_quotes() {
     let input = Location(Expression::String(r#"\""#.to_owned()), 0);
-    let res = eval(&input, &mut common::<NoHostType>());
+    let res = eval(&input, &mut common());
     let expected = Ok(WanderValue::String(r#"""#.to_owned()));
     assert_eq!(res, expected);
 }

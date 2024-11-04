@@ -4,7 +4,7 @@
 
 use eframe::egui;
 use wander::preludes::common;
-use wander::{run, NoHostType};
+use wander::run;
 
 pub fn start_app() -> Result<(), eframe::Error> {
     let options = eframe::NativeOptions {
@@ -38,7 +38,7 @@ impl eframe::App for WanderPad {
         egui::CentralPanel::default().show(ctx, |ui| {
             if ui.button("Run").clicked() {
                 let script = self.script.clone();
-                self.result = match run(&script, &mut common::<NoHostType>()) {
+                self.result = match run(&script, &mut common()) {
                     Ok(value) => value.to_string(),
                     Err(err) => err.0,
                 }

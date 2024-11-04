@@ -4,7 +4,7 @@
 
 use wander::parser::Element;
 use wander::preludes::common;
-use wander::{introspect, Introspection, NoHostType};
+use wander::{introspect, Introspection};
 
 // pub fn parse_str(input: &str) -> Element {
 //     introspect(input, &common::<NoHostType>())

@@ -10,37 +10,18 @@ use std::collections::{HashMap, HashSet};
 #[doc(hidden)]
 #[derive(Debug, PartialEq, Eq, Clone, Deserialize, Serialize)]
 pub enum Element {
-    Boolean(bool),
-    Int(i64),
     String(String),
     Identifier(Identifier),
     Name(String),
     HostFunction(String),
-    Let(Vec<(String, Option<String>, Location<Element>)>, Box<Location<Element>>),
     Grouping(Vec<Location<Element>>),
     Lambda(String, Option<String>, Option<String>, Box<Location<Element>>),
-    List(Vec<Location<Element>>),
-    Record(HashMap<String, Location<Element>>),
     Pipe,
 }
 
 impl core::hash::Hash for Element {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         core::mem::discriminant(self).hash(state);
-    }
-}
-
-fn boolean(gaze: &mut Gaze<Location<Token>>) -> Option<Location<Element>> {
-    match gaze.next() {
-        Some(Location(Token::Boolean(value), position)) => Some(Location(Element::Boolean(value), position)),
-        _ => None,
-    }
-}
-
-fn int(gaze: &mut Gaze<Location<Token>>) -> Option<Location<Element>> {
-    match gaze.next() {
-        Some(Location(Token::Int(value), position)) => Some(Location(Element::Int(value), position)),
-        _ => None,
     }
 }
 
@@ -69,35 +50,6 @@ fn name(gaze: &mut Gaze<Location<Token>>) -> Option<Location<Element>> {
     match gaze.next() {
         Some(Location(Token::Name(value), position)) => Some(Location(Element::Name(value), position)),
         _ => None,
-    }
-}
-
-fn let_scope(gaze: &mut Gaze<Location<Token>>) -> Option<Location<Element>> {
-    let position = match gaze.next() {
-        Some(Location(Token::Let, position)) => position,
-        _ => return None,
-    };
-
-    let mut decls = vec![];
-    while let Some(element) = gaze.attemptf(&mut val_binding) {
-        decls.push(element);
-    }
-
-    match gaze.next() {
-        Some(Location(Token::In, position)) => {
-            let body = if let Some(element) = gaze.attemptf(&mut element) {
-                element
-            } else {
-                todo!();
-                // Location(Element::Nothing, position)
-            };
-
-            match gaze.next() {
-                Some(Location(Token::End, position)) => Some(Location(Element::Let(decls, Box::new(body)), position)),
-                _ => None,
-            }
-        }
-        _ => todo!() //Some(Location(Element::Let(decls, Box::new(Location(Element::Nothing, 0))), position)),
     }
 }
 
@@ -136,138 +88,13 @@ fn grouped_application(gaze: &mut Gaze<Location<Token>>) -> Option<Location<Elem
     }
 }
 
-fn lambda(gaze: &mut Gaze<Location<Token>>) -> Option<Location<Element>> {
-    let _position = match gaze.next() {
-        Some(Location(Token::Lambda, position)) => position,
-        _ => return None,
-    };
-
-    let mut params: Vec<(String, Option<String>)> = vec![];
-
-    while let Some(Location(Element::Name(name), _)) = gaze.attemptf(&mut name) {
-        let tag = if let Some(Location(Token::Colon, _)) = gaze.peek() {
-            gaze.next();
-            match gaze.next() {
-                Some(Location(Token::Name(name), _)) => Some(name),
-                _ => return None, //no match
-            }
-        } else {
-            None
-        };
-        params.push((name, tag));
-    }
-
-    match gaze.next() {
-        Some(Location(Token::Arrow, _)) => (),
-        _ => return None,
-    }
-
-    gaze.attemptf(&mut element).map(|body| {
-        let mut final_lambda = None;
-        params.reverse();
-        for (name, tag) in params {
-            match final_lambda {
-                Some(prev_lambda) => {
-                    final_lambda = Some(Location(Element::Lambda(
-                        name.clone(),
-                        tag,
-                        None,
-                        Box::new(prev_lambda),
-                    ), 0))
-                }
-                None => {
-                    final_lambda = Some(Location(Element::Lambda(
-                        name.clone(),
-                        tag,
-                        None,
-                        Box::new(body.clone()),), 0
-                    ))
-                }
-            }
-        }
-        final_lambda.unwrap()
-    })
-}
-
-fn list(gaze: &mut Gaze<Location<Token>>) -> Option<Location<Element>> {
-    let position = match gaze.next() {
-        Some(Location(Token::OpenSquare, position)) => position,
-        _ => return None,
-    };
-
-    let mut contents = vec![];
-    while let Some(e) = gaze.attemptf(&mut element_inner) {
-        contents.push(e)
-    }
-
-    match gaze.next() {
-        Some(Location(Token::CloseSquare, _)) => Some(Location(Element::List(contents), position)),
-        _ => None,
-    }
-}
-
-fn record(gaze: &mut Gaze<Location<Token>>) -> Option<Location<Element>> {
-    let position = match gaze.next() {
-        Some(Location(Token::OpenBrace, position)) => position,
-        _ => return None,
-    };
-
-    let mut contents = HashMap::new();
-    while let Some(Location(Element::Name(name), _)) = gaze.attemptf(&mut name) {
-        match gaze.next() {
-            Some(Location(Token::EqualSign, _)) => (),
-            _ => return None,
-        };
-        match gaze.attemptf(&mut element_inner) {
-            Some(element) => contents.insert(name, element),
-            None => None,
-        };
-    }
-
-    match gaze.next() {
-        Some(Location(Token::CloseBrace, _)) => Some(Location(Element::Record(contents), position)),
-        _ => None,
-    }
-}
-
-fn val_binding(gaze: &mut Gaze<Location<Token>>) -> Option<(String, Option<String>, Location<Element>)> {
-    let name = match gaze.next() {
-        Some(Location(Token::Name(name), _)) => name,
-        _ => return None,
-    };
-    let tag = match gaze.peek() {
-        Some(Location(Token::Colon, _)) => {
-            gaze.next();
-            if let Some(Location(Token::Name(name), _)) = gaze.next() {
-                Some(name)
-            } else {
-                return None;
-            }
-        }
-        _ => None,
-    };
-
-    match gaze.next() {
-        Some(Location(Token::EqualSign, _)) => (),
-        _ => return None,
-    };
-
-    gaze.attemptf(&mut element).map(|body| (name, tag, body))
-}
-
 //this function is basically the same as element inner but it matches name instead of application
 fn element_inner(gaze: &mut Gaze<Location<Token>>) -> Option<Location<Element>> {
     let mut parsers = vec![
-        record,
         name,
-        boolean,
-        int,
         identifier,
         string,
-        let_scope,
         grouped_application,
-        lambda,
-        list,
     ];
     for &mut mut parser in parsers.iter_mut() {
         if let Some(element) = gaze.attemptf(&mut parser) {
@@ -278,7 +105,7 @@ fn element_inner(gaze: &mut Gaze<Location<Token>>) -> Option<Location<Element>> 
 }
 
 fn element(gaze: &mut Gaze<Location<Token>>) -> Option<Location<Element>> {
-    let mut parsers = vec![pipe, let_scope, grouping, grouped_application];
+    let mut parsers = vec![pipe, grouping, grouped_application];
     for &mut mut parser in parsers.iter_mut() {
         if let Some(element) = gaze.attemptf(&mut parser) {
             return Some(element);

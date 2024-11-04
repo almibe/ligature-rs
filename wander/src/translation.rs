@@ -49,43 +49,14 @@ fn express_optional_name(name: &Option<String>) -> Result<Option<Location<Expres
 
 pub fn express(element: &Location<Element>) -> Result<Location<Expression>, WanderError> {
     let expression = match element {
-        Location(Element::Boolean(val), position) => Location(Expression::Boolean(*val), *position),
-        Location(Element::Int(val), position) => Location(Expression::Int(*val), *position),
         Location(Element::String(val), position) => Location(Expression::String(val.clone()), *position),
         Location(Element::Identifier(value), position) => Location(Expression::Identifier(value.clone()), *position),
         Location(Element::Name(name), position) => Location(Expression::Name(name.clone()), *position),
-        Location(Element::Let(decls, body), position) => Location(Expression::Let(
-            decls
-                .clone()
-                .iter()
-                .map(|e| {
-                    (
-                        e.0.clone(),
-                        express_optional_name(&e.1).unwrap(),
-                        express(&e.2).unwrap(),
-                    )
-                })
-                .collect(),
-            Box::new(express(body).unwrap()),
-        ), *position),
-        Location(Element::Grouping(elements), position) => return handle_grouping(elements),
+        Location(Element::Grouping(elements), _position) => return handle_grouping(elements),
         Location(Element::Lambda(p, i, o, b), position) => {
             Location(Expression::Lambda(p.clone(), i.clone(), o.clone(), b.clone()), *position)
         }
-        Location(Element::List(values), position) => {
-            Location(Expression::List(values.clone().iter().map(|e| express(e).unwrap()).collect()), *position)
-        }
-        Location(Element::Record(values), position) => {
-            let mut result: HashMap<String, Location<Expression>> = HashMap::new();
-            values
-                .iter()
-                .map(|e| (e.0, express(e.1).unwrap()))
-                .for_each(|e| {
-                    result.insert(e.0.clone(), e.1);
-                });
-            Location(Expression::Record(result), *position)
-        }
-        Location(Element::Pipe, position) => {
+        Location(Element::Pipe, _position) => {
             return Err(WanderError(
                 "Cannot process pipe, Should never reach.".to_owned(),
             ))

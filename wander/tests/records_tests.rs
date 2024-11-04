@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use std::collections::HashMap;
-use wander::{preludes::common, run, NoHostType, WanderValue};
+use wander::{preludes::common, run, WanderValue};
 
 // #[test]
 // fn basic_record() {

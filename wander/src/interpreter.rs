@@ -333,7 +333,7 @@ fn handle_let(
 
 fn handle_decl(
     name: String,
-    tag: Option<Location<Expression>>,
+    _tag: Option<Location<Expression>>,
     body: Location<Expression>,
     environment: &mut Environment,
 ) -> Result<(), WanderError> {
@@ -363,7 +363,7 @@ fn read_name(
 
 fn read_tagged_name(
     name: &String,
-    tag: &Location<Expression>,
+    _tag: &Location<Expression>,
     environment: &mut Environment,
 ) -> Result<WanderValue, WanderError> {
     if let Some(value) = environment.read(name) {

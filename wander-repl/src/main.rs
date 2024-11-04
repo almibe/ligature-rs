@@ -6,12 +6,11 @@
 
 pub use rustyline::Result;
 use wander::preludes::common;
-use wander::NoHostType;
 use wander_repl::{start_repl, REPLState};
 use wander::preludes::add_print;
 
 fn main() -> Result<()> {
-    let mut environment = common::<NoHostType>();
+    let mut environment = common();
     add_print(&mut environment);
     let mut state = REPLState { environment };
     start_repl(&mut state)

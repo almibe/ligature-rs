@@ -14,7 +14,7 @@ use std::{
 use environment::Environment;
 use identifier::Identifier;
 use interpreter::{eval, Expression};
-use lexer::{tokenize, tokenize_and_filter, transform, Token};
+use lexer::{tokenize, tokenize_and_filter, Token};
 use parser::{parse, Element};
 use serde::{Deserialize, Serialize};
 use translation::translate;
@@ -196,10 +196,6 @@ pub fn run(
         Ok(v) => v,
         Err(err) => return Err(err),
     };
-    let tokens = match transform(&tokens, bindings) {
-        Ok(v) => v,
-        Err(err) => return Err(err),
-    };
     let elements = match parse(tokens) {
         Ok(v) => v,
         Err(err) => return Err(err),
@@ -232,12 +228,12 @@ pub struct Introspection {
 
 /// Run a Wander script with the given Bindings.
 pub fn introspect(
-    script: &str,
-    bindings: &Environment,
+    _script: &str,
+    _bindings: &Environment,
 ) -> Result<Introspection, WanderError> {
-    let tokens_ws = tokenize(script).or(Ok(vec![]))?;
-    let tokens = tokenize_and_filter(script).or(Ok(vec![]))?;
-    let tokens_transformed = transform(&tokens.clone(), bindings).or(Ok(vec![]))?;
+    // let tokens_ws = tokenize(script).or(Ok(vec![]))?;
+    // let tokens = tokenize_and_filter(script).or(Ok(vec![]))?;
+    // let tokens_transformed = transform(&tokens.clone(), bindings).or(Ok(vec![]))?;
     // let element = parse(tokens_transformed.clone()).or(Ok(Location(Element::Nothing, 0)))?; //TODO handle errors better
     //let expression = translate(element.clone()).or(Ok(Location(Expression::Nothing, 0)))?; //TODO handle errors better
     // Ok(Introspection {
