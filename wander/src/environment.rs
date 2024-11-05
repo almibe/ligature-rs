@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use crate::{
-    parser::Element, TokenTransformer,
+    parser::ParserElement,
     WanderValue, Location, Command
 };
 use std::{
@@ -14,9 +14,7 @@ use std::{
 
 /// A structure used to setup the environment a Wander program is executed in.
 pub struct Environment {
-    token_transformers: RefCell<HashMap<String, Rc<TokenTransformer>>>,
     host_functions: RefCell<HashMap<String, Rc<dyn Command>>>,
-    scopes: Vec<HashMap<String, WanderValue>>,
 }
 
 ///
@@ -28,44 +26,8 @@ impl Environment {
     /// Create a new empty Bindings.
     pub fn new() -> Environment {
         Environment {
-            token_transformers: RefCell::new(HashMap::new()),
             host_functions: RefCell::new(HashMap::new()),
-            scopes: vec![HashMap::new()],
         }
-    }
-
-    /// Add a new Scope to these Bindings.
-    pub fn add_scope(&mut self) {
-        self.scopes.push(HashMap::new());
-    }
-
-    /// Remove the current Scope from these Bindings.
-    pub fn remove_scope(&mut self) {
-        self.scopes.pop();
-    }
-
-    /// Read a bound Value.
-    pub fn read(&self, name: &String) -> Option<WanderValue> {
-        let mut index = self.scopes.len();
-        while index > 0 {
-            match self.scopes.get(index - 1) {
-                Some(scope) => {
-                    if let Some(value) = scope.get(name) {
-                        return Some(value.clone());
-                    }
-                }
-                _ => return None,
-            }
-            index -= 1;
-        }
-        None
-    }
-
-    /// Bind a new Value in this Scope.
-    pub fn bind(&mut self, name: String, value: WanderValue) {
-        let mut current_scope = self.scopes.pop().unwrap();
-        current_scope.insert(name, value);
-        self.scopes.push(current_scope);
     }
 
     /// Add a new HostFunction.
@@ -115,37 +77,5 @@ impl Environment {
             None => None,
             Some(value) => Some(value.clone()),
         }
-    }
-
-    /// Add a Token Transformer.
-    pub fn bind_token_transformer(
-        &mut self,
-        module: String,
-        name: String,
-        transformer: Rc<TokenTransformer>,
-    ) {
-        let full_name = format!("{module}.{name}");
-        self.token_transformers
-            .borrow_mut()
-            .insert(full_name, transformer);
-    }
-
-    /// Read a Token Transformer.
-    pub fn read_token_transformer(&self, name: &String) -> Option<Rc<TokenTransformer>> {
-        self.token_transformers.borrow().get(name).cloned()
-    }
-
-    /// Get a collection of all names.
-    pub fn bound_names(&self) -> HashSet<String> {
-        let mut names = HashSet::new();
-        for native_function in self.host_functions.borrow().keys() {
-            names.insert(native_function.clone());
-        }
-        for scope in self.scopes.iter() {
-            for name in scope.keys() {
-                names.insert(name.clone());
-            }
-        }
-        names
     }
 }

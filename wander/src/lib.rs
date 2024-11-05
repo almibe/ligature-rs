@@ -12,16 +12,14 @@ use std::{
 };
 
 use environment::Environment;
-use identifier::Identifier;
 use interpreter::{eval, Expression};
 use lexer::{tokenize, tokenize_and_filter, Token};
-use parser::{parse, Element};
+use parser::{parse, ParserElement};
 use serde::{Deserialize, Serialize};
 use translation::translate;
 
 #[doc(hidden)]
 pub mod environment;
-pub mod identifier;
 #[doc(hidden)]
 pub mod interpreter;
 #[doc(hidden)]
@@ -48,9 +46,6 @@ pub trait Command {
     ) -> Result<WanderValue, WanderError>;
 }
 
-/// Type alias used for TokenTransformers.
-pub type TokenTransformer = fn(&[Location<Token>]) -> Result<Vec<Location<Token>>, WanderError>;
-
 /// Values in Wander programs used for Wander's implementation and interfacing between
 /// Wander and the host application.
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
@@ -58,9 +53,9 @@ pub enum WanderValue {
     /// A String value.
     String(String),
     /// An Identifier.
-    Identifier(Identifier),
+    Element(ligature::Element),
     /// A Lambda
-    InnerCall(String, Option<String>, Option<String>, Box<Location<Element>>),
+    InnerCall(String, Option<String>, Option<String>, Box<Location<ParserElement>>),
     /// A Record.
     Network(HashSet<ligature::Entry>),
 }
@@ -69,14 +64,6 @@ impl core::hash::Hash for WanderValue {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         core::mem::discriminant(self).hash(state);
     }
-}
-
-/// A struct represting a partially applied function.
-/// The function can be a Lambda or a HostFunction.
-#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
-pub struct PartialApplication {
-    arguments: Vec<WanderValue>,
-    callee: WanderValue,
 }
 
 /// Write integer.
@@ -132,8 +119,8 @@ fn write_list_value(
 }
 
 fn write_network(
-    contents: &HashSet<ligature::Entry>,
-    f: &mut std::fmt::Formatter<'_>,
+    _contents: &HashSet<ligature::Entry>,
+    _f: &mut std::fmt::Formatter<'_>,
 ) -> std::fmt::Result {
     todo!()
     // write!(f, "{{").unwrap();
@@ -152,7 +139,7 @@ impl Display for WanderValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             WanderValue::String(value) => f.write_str(&write_string(value)),
-            WanderValue::Identifier(value) => write!(f, "<{}>", value.id()),
+            WanderValue::Element(value) => write!(f, "{}", value.0),
             WanderValue::Network(values) => write_network(values, f),
             // WanderValue::Lambda(p, i, o, b) => write!(
             //     f,
@@ -198,7 +185,7 @@ pub struct Introspection {
     /// A list of all Tokens after macro transformations.
     pub tokens_transformed: Vec<Location<Token>>,
     /// Element representation.
-    pub element: Location<Element>,
+    pub element: Location<ParserElement>,
     /// Expression representation.
     pub expression: Location<Expression>,
 }

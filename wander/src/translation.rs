@@ -4,30 +4,30 @@
 
 use std::collections::HashMap;
 
-use crate::{interpreter::Expression, parser::Element, WanderError, Location};
+use crate::{interpreter::Expression, parser::ParserElement, WanderError, Location};
 
 // Handle any tranlations needed before creating an expression.
-pub fn translate(element: Location<Element>) -> Result<Location<Expression>, WanderError> {
+pub fn translate(element: Location<ParserElement>) -> Result<Location<Expression>, WanderError> {
     let element = process_pipes(&element)?;
     express(&element)
 }
 
-fn process_pipes(element: &Location<Element>) -> Result<Location<Element>, WanderError> {
+fn process_pipes(element: &Location<ParserElement>) -> Result<Location<ParserElement>, WanderError> {
     let (elements, position) = match element {
-        Location(Element::Grouping(elements), position) => (elements, position),
+        Location(ParserElement::Grouping(elements), position) => (elements, position),
         e => return Ok(e.clone()),
     };
     let mut index = 0;
     let mut results = vec![];
     while let Some(element) = elements.get(index) {
-        if element.0 == Element::Pipe {
+        if element.0 == ParserElement::Pipe {
             index += 1;
             match elements.get(index) {
-                Some(Location(Element::Grouping(next_elements), _position)) => {
+                Some(Location(ParserElement::Grouping(next_elements), _position)) => {
                     let mut next_elements = next_elements.clone();
                     let mut new_results = vec![];
                     next_elements.append(&mut results);
-                    new_results.push(Location(Element::Grouping(next_elements.clone()), element.1));
+                    new_results.push(Location(ParserElement::Grouping(next_elements.clone()), element.1));
                     results = new_results;
                 }
                 _ => return Err(WanderError("Invalid pipe.".to_owned())),
@@ -37,36 +37,36 @@ fn process_pipes(element: &Location<Element>) -> Result<Location<Element>, Wande
         }
         index += 1;
     }
-    Ok(Location(Element::Grouping(results), *position))
+    Ok(Location(ParserElement::Grouping(results), *position))
 }
 
 fn express_optional_name(name: &Option<String>) -> Result<Option<Location<Expression>>, WanderError> {
     match name {
-        Some(element) => Ok(Some(express(&Location(Element::Name(element.to_string()), 0))?)),
+        Some(element) => Ok(Some(express(&Location(ParserElement::Name(element.to_string()), 0))?)),
         None => Ok(None),
     }
 }
 
-pub fn express(element: &Location<Element>) -> Result<Location<Expression>, WanderError> {
+pub fn express(element: &Location<ParserElement>) -> Result<Location<Expression>, WanderError> {
     let expression = match element {
-        Location(Element::String(val), position) => Location(Expression::String(val.clone()), *position),
-        Location(Element::Identifier(value), position) => Location(Expression::Identifier(value.clone()), *position),
-        Location(Element::Name(name), position) => Location(Expression::Name(name.clone()), *position),
-        Location(Element::Grouping(elements), _position) => return handle_grouping(elements),
-        Location(Element::Lambda(p, i, o, b), position) => {
+        Location(ParserElement::String(val), position) => Location(Expression::String(val.clone()), *position),
+        Location(ParserElement::Element(value), position) => Location(Expression::Element(value.clone()), *position),
+        Location(ParserElement::Name(name), position) => Location(Expression::Name(name.clone()), *position),
+        Location(ParserElement::Grouping(elements), _position) => return handle_grouping(elements),
+        Location(ParserElement::Lambda(p, i, o, b), position) => {
             Location(Expression::Lambda(p.clone(), i.clone(), o.clone(), b.clone()), *position)
         }
-        Location(Element::Pipe, _position) => {
+        Location(ParserElement::Pipe, _position) => {
             return Err(WanderError(
                 "Cannot process pipe, Should never reach.".to_owned(),
             ))
         }
-        Location(Element::HostFunction(name), position) => Location(Expression::HostFunction(name.clone()), *position),
+        Location(ParserElement::HostFunction(name), position) => Location(Expression::HostFunction(name.clone()), *position),
     };
     Ok(expression)
 }
 
-fn handle_grouping(elements: &[Location<Element>]) -> Result<Location<Expression>, WanderError> {
+fn handle_grouping(elements: &[Location<ParserElement>]) -> Result<Location<Expression>, WanderError> {
     let expressions: Vec<Location<Expression>> = elements.iter().map(|e| express(e).unwrap()).collect();
     let expressions: Vec<Location<Expression>> = expressions
         .iter()

@@ -2,59 +2,59 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use crate::{identifier::Identifier, lexer::Token, WanderError, Location};
+use crate::{lexer::Token, WanderError, Location};
 use gaze::Gaze;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
 #[doc(hidden)]
 #[derive(Debug, PartialEq, Eq, Clone, Deserialize, Serialize)]
-pub enum Element {
+pub enum ParserElement {
     String(String),
-    Identifier(Identifier),
+    Element(ligature::Element),
     Name(String),
     HostFunction(String),
-    Grouping(Vec<Location<Element>>),
-    Lambda(String, Option<String>, Option<String>, Box<Location<Element>>),
+    Grouping(Vec<Location<ParserElement>>),
+    Lambda(String, Option<String>, Option<String>, Box<Location<ParserElement>>),
     Pipe,
 }
 
-impl core::hash::Hash for Element {
+impl core::hash::Hash for ParserElement {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         core::mem::discriminant(self).hash(state);
     }
 }
 
-fn identifier(gaze: &mut Gaze<Location<Token>>) -> Option<Location<Element>> {
+fn identifier(gaze: &mut Gaze<Location<Token>>) -> Option<Location<ParserElement>> {
     match gaze.next() {
-        Some(Location(Token::Identifier(value), position)) => Some(Location(Element::Identifier(value), position)),
+        Some(Location(Token::Element(value), position)) => Some(Location(ParserElement::Element(value), position)),
         _ => None,
     }
 }
 
-fn string(gaze: &mut Gaze<Location<Token>>) -> Option<Location<Element>> {
+fn string(gaze: &mut Gaze<Location<Token>>) -> Option<Location<ParserElement>> {
     match gaze.next() {
-        Some(Location(Token::String(value), position)) => Some(Location(Element::String(value), position)),
+        Some(Location(Token::String(value), position)) => Some(Location(ParserElement::String(value), position)),
         _ => None,
     }
 }
 
-fn pipe(gaze: &mut Gaze<Location<Token>>) -> Option<Location<Element>> {
+fn pipe(gaze: &mut Gaze<Location<Token>>) -> Option<Location<ParserElement>> {
     match gaze.next() {
-        Some(Location(Token::Pipe, position)) => Some(Location(Element::Pipe, position)),
+        Some(Location(Token::Pipe, position)) => Some(Location(ParserElement::Pipe, position)),
         _ => None,
     }
 }
 
-fn name(gaze: &mut Gaze<Location<Token>>) -> Option<Location<Element>> {
+fn name(gaze: &mut Gaze<Location<Token>>) -> Option<Location<ParserElement>> {
     match gaze.next() {
-        Some(Location(Token::Name(value), position)) => Some(Location(Element::Name(value), position)),
+        Some(Location(Token::Name(value), position)) => Some(Location(ParserElement::Name(value), position)),
         _ => None,
     }
 }
 
-fn grouping(gaze: &mut Gaze<Location<Token>>) -> Option<Location<Element>> {
-    let mut expressions: Vec<Location<Element>> = vec![];
+fn grouping(gaze: &mut Gaze<Location<Token>>) -> Option<Location<ParserElement>> {
+    let mut expressions: Vec<Location<ParserElement>> = vec![];
     let position = match gaze.peek() {
         Some(Location(_, p)) => p,
         None => return None,
@@ -66,11 +66,11 @@ fn grouping(gaze: &mut Gaze<Location<Token>>) -> Option<Location<Element>> {
 
     match &expressions[..] {
         [] => None,
-        _ => Some(Location(Element::Grouping(expressions), position)),
+        _ => Some(Location(ParserElement::Grouping(expressions), position)),
     }
 }
 
-fn grouped_application(gaze: &mut Gaze<Location<Token>>) -> Option<Location<Element>> {
+fn grouped_application(gaze: &mut Gaze<Location<Token>>) -> Option<Location<ParserElement>> {
     let mut elements = vec![];
 
     let _position = match gaze.next() {
@@ -83,13 +83,13 @@ fn grouped_application(gaze: &mut Gaze<Location<Token>>) -> Option<Location<Elem
     }
 
     match gaze.next() {
-        Some(Location(Token::CloseParen, position)) => Some(Location(Element::Grouping(elements), position)),
+        Some(Location(Token::CloseParen, position)) => Some(Location(ParserElement::Grouping(elements), position)),
         _ => None,
     }
 }
 
 //this function is basically the same as element inner but it matches name instead of application
-fn element_inner(gaze: &mut Gaze<Location<Token>>) -> Option<Location<Element>> {
+fn element_inner(gaze: &mut Gaze<Location<Token>>) -> Option<Location<ParserElement>> {
     let mut parsers = vec![
         name,
         identifier,
@@ -104,7 +104,7 @@ fn element_inner(gaze: &mut Gaze<Location<Token>>) -> Option<Location<Element>> 
     None
 }
 
-fn element(gaze: &mut Gaze<Location<Token>>) -> Option<Location<Element>> {
+fn element(gaze: &mut Gaze<Location<Token>>) -> Option<Location<ParserElement>> {
     let mut parsers = vec![pipe, grouping, grouped_application];
     for &mut mut parser in parsers.iter_mut() {
         if let Some(element) = gaze.attemptf(&mut parser) {
@@ -114,7 +114,7 @@ fn element(gaze: &mut Gaze<Location<Token>>) -> Option<Location<Element>> {
     None
 }
 
-fn elements(gaze: &mut Gaze<Location<Token>>) -> Option<Vec<Location<Element>>> {
+fn elements(gaze: &mut Gaze<Location<Token>>) -> Option<Vec<Location<ParserElement>>> {
     let mut results = vec![];
     while !gaze.is_complete() {
         if let Some(element) = gaze.attemptf(&mut element) {
@@ -127,14 +127,14 @@ fn elements(gaze: &mut Gaze<Location<Token>>) -> Option<Vec<Location<Element>>> 
 }
 
 /// Parse a sequence of Tokens into a sequence of ASTs.
-pub fn parse(tokens: Vec<Location<Token>>) -> Result<Location<Element>, WanderError> {
+pub fn parse(tokens: Vec<Location<Token>>) -> Result<Location<ParserElement>, WanderError> {
     let mut gaze = Gaze::from_vec(tokens);
     match gaze.attemptf(&mut elements) {
         Some(values) => {
             if values.len() == 1 {
                 Ok(values.first().unwrap().clone())
             } else {
-                Ok(Location(Element::Grouping(values), 0))
+                Ok(Location(ParserElement::Grouping(values), 0))
             }
         }
         None => Err(WanderError(format!("Error parsing {:?}", gaze.peek()))),

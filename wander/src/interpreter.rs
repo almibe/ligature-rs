@@ -6,8 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use crate::environment::Environment;
 
-use crate::identifier::Identifier;
-use crate::parser::Element;
+use crate::parser::ParserElement;
 use crate::translation::express;
 use crate::{WanderError, WanderValue, Location};
 
@@ -15,11 +14,11 @@ use crate::{WanderError, WanderValue, Location};
 #[derive(Debug, PartialEq, Eq, Clone, Deserialize, Serialize)]
 pub enum Expression {
     String(String),
-    Identifier(Identifier),
+    Element(ligature::Element),
     Name(String),
     HostFunction(String),
     Application(Vec<Location<Expression>>),
-    Lambda(String, Option<String>, Option<String>, Box<Location<Element>>),
+    Lambda(String, Option<String>, Option<String>, Box<Location<ParserElement>>),
     Network(HashSet<ligature::Entry>),
 }
 
@@ -35,11 +34,11 @@ pub fn eval(
 ) -> Result<WanderValue, WanderError> {
     match expression {
         Location(Expression::String(value), _) => Ok(WanderValue::String(unescape_string(value.to_string()))),
-        Location(Expression::Identifier(value), _) => Ok(WanderValue::Identifier(value.clone())),
-        Location(Expression::Name(name), _) => todo!(),//read_name(name, environment),
+        Location(Expression::Element(value), _) => Ok(WanderValue::Element(value.clone())),
+        Location(Expression::Name(_name), _) => todo!(),//read_name(name, environment),
         Location(Expression::Application(expressions), _) => handle_function_call(expressions, environment),
-        Location(Expression::Network(values), _) => todo!(),//handle_record(values, environment),
-        Location(Expression::Lambda(name, input, output, body), _) => {
+        Location(Expression::Network(_values), _) => todo!(),//handle_record(values, environment),
+        Location(Expression::Lambda(_name, _input, _output, _body), _) => {
             todo!();
             // handle_lambda(name.clone(), input.clone(), output.clone(), body)
         }
@@ -108,7 +107,7 @@ fn handle_lambda(
     name: String,
     input: Option<String>,
     output: Option<String>,
-    body: &Location<Element>,
+    body: &Location<ParserElement>,
 ) -> Result<WanderValue, WanderError> {
     Ok(WanderValue::InnerCall(
         name,
@@ -122,7 +121,7 @@ fn run_lambda(
     name: String,
     input: Option<String>,
     output: Option<String>,
-    lambda_body: Location<Element>,
+    lambda_body: Location<ParserElement>,
     expressions: &mut Vec<Location<Expression>>,
     environment: &mut Environment,
 ) -> Option<Result<WanderValue, WanderError>> {
@@ -139,7 +138,7 @@ fn run_lambda(
             Err(e) => return Some(Err(e)),
             Ok(e) => e,
         };
-        environment.bind(name, argument_value);
+//        environment.bind(name, argument_value);
         let expression = match express(&lambda_body) {
             Ok(e) => e,
             Err(e) => return Some(Err(e)),
@@ -212,10 +211,10 @@ fn handle_function_call(
             }
             Location(Expression::Name(name), position) => match eval(&Location(Expression::Name(name), position), environment) {
                 Ok(value) => match value {
-                    WanderValue::InnerCall(p, i, o, b) => {
+                    WanderValue::InnerCall(p, _i, _o, b) => {
                         let argument_expression = expressions.pop().unwrap();
                         let argument_value = eval(&argument_expression, environment)?;
-                        environment.bind(p, argument_value);
+                        //environment.bind(p, argument_value);
                         match eval(&express(&b)?, environment) {
                             Ok(value) => expressions.push(value_to_expression(value)),
                             Err(err) => return Err(err),
@@ -244,7 +243,7 @@ fn handle_function_call(
 fn value_to_expression(value: WanderValue) -> Location<Expression> {
     match value {
         WanderValue::String(value) => Location(Expression::String(value), 0),
-        WanderValue::Identifier(value) => Location(Expression::Identifier(value), 0),
+        WanderValue::Element(value) => Location(Expression::Element(value), 0),
         WanderValue::InnerCall(p, i, o, b) => Location(Expression::Lambda(p, i, o, b), 0),
         WanderValue::Network(value_record) => {
             todo!()
@@ -254,33 +253,6 @@ fn value_to_expression(value: WanderValue) -> Location<Expression> {
             // }
             // Location(Expression::Network(record), 0)
         }
-    }
-}
-
-fn handle_let(
-    decls: Vec<(String, Option<Location<Expression>>, Location<Expression>)>,
-    body: Location<Expression>,
-    environment: &mut Environment,
-) -> Result<WanderValue, WanderError> {
-    for (name, tag, body) in decls {
-        handle_decl(name, tag, body, environment)?;
-    }
-    eval(&body, environment)
-}
-
-fn handle_decl(
-    name: String,
-    _tag: Option<Location<Expression>>,
-    body: Location<Expression>,
-    environment: &mut Environment,
-) -> Result<(), WanderError> {
-    //TODO handle tag checking here
-    match eval(&body, environment) {
-        Ok(value) => {
-            environment.bind(name.to_string(), value);
-            Ok(())
-        }
-        Err(err) => Err(err),
     }
 }
 
@@ -296,24 +268,25 @@ fn call_function(
             Err(err) => return Err(err),
         }
     }
-    match environment.read(name) {
-        //found other value (err), will evntually handle lambdas here
-        Some(_) => Err(WanderError(format!("Function {} is not defined.", &name))),
-        None => match environment.read_host_function(name) {
-            None => Err(WanderError(format!("Function {} is not defined.", name))),
-            Some(function) => {
-                // if argument_values.len() == function.binding().parameters.len() {
-                //     function.run(&argument_values, environment)
-                // } else {
-                //     // Ok(WanderValue::PartialApplication(Box::new(
-                //     //     PartialApplication {
-                //     //         arguments: argument_values,
-                //     //         callee: WanderValue::HostedFunction(name.clone()),
-                //     //     },
-                //     // )))
-                todo!()
-                // }
-            }
-        },
-    }
+    todo!()
+    // match environment.read(name) {
+    //     //found other value (err), will evntually handle lambdas here
+    //     Some(_) => Err(WanderError(format!("Function {} is not defined.", &name))),
+    //     None => match environment.read_host_function(name) {
+    //         None => Err(WanderError(format!("Function {} is not defined.", name))),
+    //         Some(function) => {
+    //             // if argument_values.len() == function.binding().parameters.len() {
+    //             //     function.run(&argument_values, environment)
+    //             // } else {
+    //             //     // Ok(WanderValue::PartialApplication(Box::new(
+    //             //     //     PartialApplication {
+    //             //     //         arguments: argument_values,
+    //             //     //         callee: WanderValue::HostedFunction(name.clone()),
+    //             //     //     },
+    //             //     // )))
+    //             todo!()
+    //             // }
+    //         }
+    //     },
+    // }
 }

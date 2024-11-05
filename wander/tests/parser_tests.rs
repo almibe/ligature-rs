@@ -4,12 +4,9 @@
 
 use wander::Location;
 use wander::lexer::Token;
-use wander::parser::{parse, Element};
+use wander::parser::{parse, ParserElement};
 
 //use crate::utilities::parse_str;
-
-#[path = "utilities.rs"]
-mod utilities;
 
 // #[test]
 // fn parse_booleans() {
