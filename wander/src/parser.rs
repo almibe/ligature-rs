@@ -25,7 +25,7 @@ impl core::hash::Hash for ParserElement {
     }
 }
 
-fn identifier(gaze: &mut Gaze<Location<Token>>) -> Option<Location<ParserElement>> {
+fn element(gaze: &mut Gaze<Location<Token>>) -> Option<Location<ParserElement>> {
     match gaze.next() {
         Some(Location(Token::Element(value), position)) => Some(Location(ParserElement::Element(value), position)),
         _ => None,
@@ -42,13 +42,6 @@ fn string(gaze: &mut Gaze<Location<Token>>) -> Option<Location<ParserElement>> {
 fn pipe(gaze: &mut Gaze<Location<Token>>) -> Option<Location<ParserElement>> {
     match gaze.next() {
         Some(Location(Token::Pipe, position)) => Some(Location(ParserElement::Pipe, position)),
-        _ => None,
-    }
-}
-
-fn name(gaze: &mut Gaze<Location<Token>>) -> Option<Location<ParserElement>> {
-    match gaze.next() {
-        Some(Location(Token::Name(value), position)) => Some(Location(ParserElement::Name(value), position)),
         _ => None,
     }
 }
@@ -91,8 +84,7 @@ fn grouped_application(gaze: &mut Gaze<Location<Token>>) -> Option<Location<Pars
 //this function is basically the same as element inner but it matches name instead of application
 fn element_inner(gaze: &mut Gaze<Location<Token>>) -> Option<Location<ParserElement>> {
     let mut parsers = vec![
-        name,
-        identifier,
+        element,
         string,
         grouped_application,
     ];
@@ -104,7 +96,7 @@ fn element_inner(gaze: &mut Gaze<Location<Token>>) -> Option<Location<ParserElem
     None
 }
 
-fn element(gaze: &mut Gaze<Location<Token>>) -> Option<Location<ParserElement>> {
+fn parser_element(gaze: &mut Gaze<Location<Token>>) -> Option<Location<ParserElement>> {
     let mut parsers = vec![pipe, grouping, grouped_application];
     for &mut mut parser in parsers.iter_mut() {
         if let Some(element) = gaze.attemptf(&mut parser) {
@@ -117,7 +109,7 @@ fn element(gaze: &mut Gaze<Location<Token>>) -> Option<Location<ParserElement>> 
 fn elements(gaze: &mut Gaze<Location<Token>>) -> Option<Vec<Location<ParserElement>>> {
     let mut results = vec![];
     while !gaze.is_complete() {
-        if let Some(element) = gaze.attemptf(&mut element) {
+        if let Some(element) = gaze.attemptf(&mut parser_element) {
             results.push(element);
         } else {
             return None;

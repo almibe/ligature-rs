@@ -134,7 +134,7 @@ fn run_lambda(
         )))
     } else {
         let argument_expression = expressions.pop().unwrap();
-        let argument_value = match eval(&argument_expression, environment) {
+        let _argument_value = match eval(&argument_expression, environment) {
             Err(e) => return Some(Err(e)),
             Ok(e) => e,
         };
@@ -185,7 +185,7 @@ fn handle_function_call(
     expressions.reverse();
     while let Some(expression) = expressions.pop() {
         match expression {
-            Location(Expression::Application(contents), position) => {
+            Location(Expression::Application(contents), _position) => {
                 match handle_function_call(&contents, environment)? {
                     WanderValue::InnerCall(name, input, output, element) => {
                         if let Some(res) =
@@ -197,7 +197,7 @@ fn handle_function_call(
                     e => return Ok(e),
                 }
             },
-            Location(Expression::Lambda(name, input, output, lambda_body), position) => {
+            Location(Expression::Lambda(name, input, output, lambda_body), _position) => {
                 if let Some(res) = run_lambda(
                     name,
                     input,
@@ -213,7 +213,7 @@ fn handle_function_call(
                 Ok(value) => match value {
                     WanderValue::InnerCall(p, _i, _o, b) => {
                         let argument_expression = expressions.pop().unwrap();
-                        let argument_value = eval(&argument_expression, environment)?;
+                        let _argument_value = eval(&argument_expression, environment)?;
                         //environment.bind(p, argument_value);
                         match eval(&express(&b)?, environment) {
                             Ok(value) => expressions.push(value_to_expression(value)),
@@ -245,7 +245,7 @@ fn value_to_expression(value: WanderValue) -> Location<Expression> {
         WanderValue::String(value) => Location(Expression::String(value), 0),
         WanderValue::Element(value) => Location(Expression::Element(value), 0),
         WanderValue::InnerCall(p, i, o, b) => Location(Expression::Lambda(p, i, o, b), 0),
-        WanderValue::Network(value_record) => {
+        WanderValue::Network(_value_record) => {
             todo!()
             // let mut record = HashMap::new();
             // for (name, value) in value_record {
@@ -257,7 +257,7 @@ fn value_to_expression(value: WanderValue) -> Location<Expression> {
 }
 
 fn call_function(
-    name: &String,
+    _name: &String,
     arguments: &Vec<Location<Expression>>,
     environment: &mut Environment,
 ) -> Result<WanderValue, WanderError> {

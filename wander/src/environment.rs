@@ -32,7 +32,7 @@ impl Environment {
 
     /// Add a new HostFunction.
     pub fn bind_host_function(&mut self, function: Rc<dyn Command>) {
-        todo!()
+        //todo!()
         // let full_name = function.binding().name.to_string();
         // self.host_functions
         //     .borrow_mut()

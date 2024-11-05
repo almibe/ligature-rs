@@ -11,7 +11,7 @@ use tabled::{
     Table, Tabled,
 };
 use wander::environment::Environment;
-use wander::{introspect, run, HostFunctionBinding};
+use wander::{introspect, run};
 
 pub struct REPLState {
     pub environment: Environment,
@@ -68,8 +68,8 @@ fn handle_command(input: &str, instance: &mut REPLState) -> bool {
         ":parse" | ":p" => parse(input, &instance.environment),
         ":status" | ":s" => status(),
         ":quit" | ":q" => quit(),
-        ":bindings" | ":b" => bindings(&instance.environment),
-        ":environment" | ":e" => environment(&mut instance.environment),
+        //":bindings" | ":b" => bindings(&instance.environment),
+        //":environment" | ":e" => environment(&mut instance.environment),
         ":help" | ":h" => help(),
         ":broadcast" => broadcast(input),
         s => {
@@ -99,32 +99,32 @@ fn broadcast(_input: &str) -> bool {
     true
 }
 
-fn bindings(bindings: &Environment) -> bool {
-    bindings
-        .bound_names()
-        .iter()
-        .for_each(|binding| println!("{binding}"));
-    true
-}
+// fn bindings(bindings: &Environment) -> bool {
+//     bindings
+//         .bound_names()
+//         .iter()
+//         .for_each(|binding| println!("{binding}"));
+//     true
+// }
 
-fn environment(bindings: &mut Environment) -> bool {
-    let mut display: Vec<EnvironmentDisplay> = bindings
-        .environment()
-        .into_iter()
-        .map(EnvironmentDisplay::from)
-        .collect();
-    display.sort();
-    let mut table = Table::new(display);
-    table
-        .with(
-            Modify::new(Rows::new(1..))
-                .with(Width::wrap(30).keep_words())
-                .with(Width::increase(20)),
-        )
-        .with(Width::increase(150));
-    println!("{table}");
-    true
-}
+// fn environment(bindings: &mut Environment) -> bool {
+//     let mut display: Vec<EnvironmentDisplay> = bindings
+//         .environment()
+//         .into_iter()
+//         .map(EnvironmentDisplay::from)
+//         .collect();
+//     display.sort();
+//     let mut table = Table::new(display);
+//     table
+//         .with(
+//             Modify::new(Rows::new(1..))
+//                 .with(Width::wrap(30).keep_words())
+//                 .with(Width::increase(20)),
+//         )
+//         .with(Width::increase(150));
+//     println!("{table}");
+//     true
+// }
 
 fn help() -> bool {
     true
@@ -145,15 +145,4 @@ pub struct EnvironmentDisplay {
     pub parameters: String,
     pub result: String,
     pub doc_string: String,
-}
-
-impl From<HostFunctionBinding> for EnvironmentDisplay {
-    fn from(value: HostFunctionBinding) -> Self {
-        EnvironmentDisplay {
-            name: value.name,
-            parameters: format!("{:?}", value.parameters),
-            result: format!("{:?}", value.result),
-            doc_string: value.doc_string,
-        }
-    }
 }

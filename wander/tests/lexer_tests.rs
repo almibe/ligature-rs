@@ -2,35 +2,28 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+use ligature::Element;
 use wander::{lexer::{tokenize_and_filter, Token}, Location};
 
-// #[test]
-// fn tokenize_boolean_true() {
-//     let input = "true";
-//     let res = tokenize_and_filter(input).unwrap().iter().map(|t| t.0).collect();
-//     let expected = Ok(vec![Token::Boolean(true)]);
-//     assert_eq!(res, expected);
-// }
+#[test]
+fn tokenize_true() {
+    let input = "true";
+    let res: Vec<Token> = tokenize_and_filter(input).unwrap().iter().map(|t| t.0.clone()).collect();
+    let expected = vec![Token::Element(Element("true".to_owned()))];
+    assert_eq!(res, expected);
+}
 
-// #[test]
-// fn tokenize_boolean_false() {
-//     let input = "false";
-//     let res = tokenize_and_filter(input).iter().map(|t| t.first().unwrap().0).collect();
-//     let expected = Ok(vec![Token::Boolean(false)]);
-//     assert_eq!(res, expected);
-// }
-
-// #[test]
-// fn tokenize_booleans() {
-//     let input = "true false false";
-//     let res = tokenize_and_filter(input).iter().map(|t| t.0).collect();
-//     let expected = Ok(vec![
-//         Token::Boolean(true),
-//         Token::Boolean(false),
-//         Token::Boolean(false),
-//     ]);
-//     assert_eq!(res, expected);
-// }
+#[test]
+fn tokenize_booleans() {
+    let input = "true false false";
+    let res: Vec<Token> = tokenize_and_filter(input).unwrap().iter().map(|t| t.0.clone()).collect();
+    let expected = vec![
+        Token::Element(Element("true".to_owned())),
+        Token::Element(Element("false".to_owned())),
+        Token::Element(Element("false".to_string())),
+    ];
+    assert_eq!(res, expected);
+}
 
 // #[test]
 // fn tokenize_integer() {
