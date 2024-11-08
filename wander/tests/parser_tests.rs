@@ -33,14 +33,36 @@ fn parse_strings() {
     assert_eq!(res, expected);
 }
 
+// #[test]
+// fn parse_empty_network() {
+//     let res = parse_str("{}");
+//     let expected = Ok(vec![vec![WanderValue::Network(HashSet::new())]]);
+//     assert_eq!(res, expected);
+// }
+
 #[test]
-fn parse_applications() {
+fn parse_application() {
     let res = parse_str("Bool.not x true");
     let expected = Ok(vec![vec![
         WanderValue::Element(Element("Bool.not".to_owned())),
         WanderValue::Element(Element("x".to_owned())),
         WanderValue::Element(Element("true".to_owned())),
     ]]);
+    assert_eq!(res, expected);
+}
+
+#[test]
+fn parse_applications() {
+    let res = parse_str("Bool.not x, true");
+    let expected = Ok(vec![
+        vec![
+            WanderValue::Element(Element("Bool.not".to_owned())),
+            WanderValue::Element(Element("x".to_owned())),
+        ],
+        vec![
+            WanderValue::Element(Element("true".to_owned())),
+        ]
+    ]);
     assert_eq!(res, expected);
 }
 
