@@ -2,13 +2,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use crate::{
-    parser::ParserElement,
-    WanderValue, Location, Command
-};
+use crate::Command;
 use std::{
     cell::RefCell,
-    collections::{HashMap, HashSet},
+    collections::HashMap,
     rc::Rc,
 };
 
@@ -31,7 +28,7 @@ impl Environment {
     }
 
     /// Add a new HostFunction.
-    pub fn bind_host_function(&mut self, function: Rc<dyn Command>) {
+    pub fn bind_host_function(&mut self, _function: Rc<dyn Command>) {
         //todo!()
         // let full_name = function.binding().name.to_string();
         // self.host_functions

@@ -7,14 +7,14 @@
 #![deny(missing_docs)]
 
 use std::{
-    collections::{HashMap, HashSet},
-    fmt::{Debug, Display, Write}, ops::Range,
+    collections::HashSet,
+    fmt::Display,
 };
 
 use environment::Environment;
-use interpreter::{eval, Expression};
-use lexer::{tokenize, tokenize_and_filter, Token};
-use parser::{parse, ParserElement};
+use interpreter::eval;
+use lexer::tokenize_and_filter;
+use parser::parse;
 use serde::{Deserialize, Serialize};
 use translation::translate;
 
@@ -46,38 +46,28 @@ pub trait Command {
     ) -> Result<WanderValue, WanderError>;
 }
 
+/// A function call.
+#[derive(Debug, PartialEq, Eq, Clone, Deserialize, Serialize)]
+pub struct Call {
+    name: ligature::Element,
+    arguments: Vec<WanderValue>,
+}
+
 /// Values in Wander programs used for Wander's implementation and interfacing between
 /// Wander and the host application.
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub enum WanderValue {
-    /// A String value.
-    String(String),
-    /// An Identifier.
+    /// An Element.
     Element(ligature::Element),
-    /// A Lambda
-    InnerCall(String, Option<String>, Option<String>, Box<Location<ParserElement>>),
-    /// A Record.
+    /// A Call
+    Call(Call),
+    /// A Network.
     Network(HashSet<ligature::Entry>),
 }
 
 impl core::hash::Hash for WanderValue {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         core::mem::discriminant(self).hash(state);
-    }
-}
-
-/// Write integer.
-pub fn write_integer(integer: &i64) -> String {
-    format!("{}", integer)
-}
-
-/// Write float.
-pub fn write_float(float: &f64) -> String {
-    let res = format!("{}", float);
-    if res.contains('.') {
-        res
-    } else {
-        res + ".0"
     }
 }
 
@@ -138,15 +128,9 @@ fn write_network(
 impl Display for WanderValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            WanderValue::String(value) => f.write_str(&write_string(value)),
             WanderValue::Element(value) => write!(f, "{}", value.0),
             WanderValue::Network(values) => write_network(values, f),
-            // WanderValue::Lambda(p, i, o, b) => write!(
-            //     f,
-            //     "[lambda {:?}]",
-            //     WanderValue::Lambda::(p.clone(), i.clone(), o.clone(), b.clone())
-            // ),
-            WanderValue::InnerCall(_p, _i , _o, _b) => todo!(),
+            WanderValue::Call(_call) => todo!(),
         }
     }
 }
@@ -160,52 +144,13 @@ pub fn run(
         Ok(v) => v,
         Err(err) => return Err(err),
     };
-    let elements = match parse(tokens) {
+    let calls = match parse(tokens) {
         Ok(v) => v,
         Err(err) => return Err(err),
     };
-    let expression = match translate(elements) {
+    let expression = match translate(calls) {
         Ok(v) => v,
         Err(err) => return Err(err),
     };
     eval(&expression, bindings)
-}
-
-#[derive(Debug, Serialize, Clone, PartialEq, Eq, Deserialize, Hash)]
-/// Store location information alongside a value.
-pub struct Location<T: PartialEq + Eq>(pub T, pub usize);
-
-#[derive(Debug, Serialize)]
-/// Structure used for debugging or inspecting code.
-pub struct Introspection {
-    /// A list of all Tokens including whitespace.
-    pub tokens_ws: Vec<Location<Token>>,
-    /// A list of all Tokens without whitespace.
-    pub tokens: Vec<Location<Token>>,
-    /// A list of all Tokens after macro transformations.
-    pub tokens_transformed: Vec<Location<Token>>,
-    /// Element representation.
-    pub element: Location<ParserElement>,
-    /// Expression representation.
-    pub expression: Location<Expression>,
-}
-
-/// Run a Wander script with the given Bindings.
-pub fn introspect(
-    _script: &str,
-    _bindings: &Environment,
-) -> Result<Introspection, WanderError> {
-    // let tokens_ws = tokenize(script).or(Ok(vec![]))?;
-    // let tokens = tokenize_and_filter(script).or(Ok(vec![]))?;
-    // let tokens_transformed = transform(&tokens.clone(), bindings).or(Ok(vec![]))?;
-    // let element = parse(tokens_transformed.clone()).or(Ok(Location(Element::Nothing, 0)))?; //TODO handle errors better
-    //let expression = translate(element.clone()).or(Ok(Location(Expression::Nothing, 0)))?; //TODO handle errors better
-    // Ok(Introspection {
-    //     tokens_ws,
-    //     tokens,
-    //     tokens_transformed,
-    //     element,
-    //     expression,
-    // })
-    todo!()
 }

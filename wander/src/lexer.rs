@@ -5,7 +5,7 @@
 use logos::{Lexer, Logos};
 use serde::Serialize;
 
-use crate::{environment::Environment, WanderError, Location};
+use crate::WanderError;
 
 #[derive(Logos, Debug, PartialEq, Eq, Clone, Serialize)]
 #[logos()]
@@ -40,6 +40,9 @@ pub enum Token {
     #[token("|")]
     Pipe,
 
+    #[token(",")]
+    Comma,
+
     #[regex("--.*\n?", comment)]
     Comment(String),
 }
@@ -55,10 +58,6 @@ fn string(lex: &mut Lexer<Token>) -> Option<String> {
     Some(trim_string(lex.slice()).to_string())
 }
 
-fn name(lex: &mut Lexer<Token>) -> Option<String> {
-    Some(lex.slice().to_string())
-}
-
 fn identifier(lex: &mut Lexer<Token>) -> Option<ligature::Element> {
     Some(ligature::Element(lex.slice().to_string()))
 }
@@ -71,23 +70,23 @@ fn ws(lex: &mut Lexer<Token>) -> Option<String> {
     Some(lex.slice().to_string())
 }
 
-pub fn tokenize(script: &str) -> Result<Vec<Location<Token>>, WanderError> {
+pub fn tokenize(script: &str) -> Result<Vec<Token>, WanderError> {
     let lexer = Token::lexer(script).spanned();
     let mut results = vec![];
-    for (token, range) in lexer {
+    for (token, _range) in lexer {
         match token {
-            Ok(token) => results.push(Location(token, range.start)),
+            Ok(token) => results.push(token),
             Err(_) => return Err(WanderError(String::from("Error tokenizing input."))),
         }
     }
     Ok(results)
 }
 
-pub fn tokenize_and_filter(script: &str) -> Result<Vec<Location<Token>>, WanderError> {
+pub fn tokenize_and_filter(script: &str) -> Result<Vec<Token>, WanderError> {
     let tokens = tokenize(script);
     tokens.map(|mut tokens| {
         tokens
-            .retain(|Location(token, _)| !matches!(token, Token::Comment(_)) && !matches!(token, Token::WS(_)));
+            .retain(|token| !matches!(token, Token::Comment(_)) && !matches!(token, Token::WS(_)));
         tokens
     })
 }

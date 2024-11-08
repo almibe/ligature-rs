@@ -2,32 +2,36 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use wander::Location;
-use wander::lexer::Token;
-use wander::parser::{parse, ParserElement};
+use ligature::Element;
+use wander::{WanderError, WanderValue};
 
-//use crate::utilities::parse_str;
+fn parse_str(script: &str) -> Result<Vec<WanderValue>, WanderError> {
+    match wander::lexer::tokenize_and_filter(script) {
+        Ok(results) => todo!(),//wander::parser::parse(results),
+        Err(_) => todo!(),
+    }
+}
 
-// #[test]
-// fn parse_booleans() {
-//     let res = parse_str("true");
-//     let expected = Element::Grouping(vec![Element::Boolean(true)]);
-//     assert_eq!(res, expected);
-// }
+#[test]
+fn parse_booleans() {
+    let res = parse_str("true");
+    let expected = Ok(vec![WanderValue::Element(Element("true".to_owned()))]);
+    assert_eq!(res, expected);
+}
 
-// #[test]
-// fn parse_integers() {
-//     let res = parse_str("-100");
-//     let expected = Element::Grouping(vec![Element::Int(-100)]);
-//     assert_eq!(res, expected);
-// }
+#[test]
+fn parse_integers() {
+    let res = parse_str("-100");
+    let expected = Ok(vec![WanderValue::Element(Element("-100".to_owned()))]);
+    assert_eq!(res, expected);
+}
 
-// #[test]
-// fn parse_strings() {
-//     let res = parse_str("\"Hello\"");
-//     let expected = Element::Grouping(vec![Element::String("Hello".to_owned())]);
-//     assert_eq!(res, expected);
-// }
+#[test]
+fn parse_strings() {
+    let res = parse_str("\"Hello\"");
+    let expected = Ok(vec![WanderValue::Element(Element("Hello".to_owned()))]);
+    assert_eq!(res, expected);
+}
 
 // #[test]
 // fn parse_name() {
