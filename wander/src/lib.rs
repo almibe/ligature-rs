@@ -144,13 +144,13 @@ pub fn run(
         Ok(v) => v,
         Err(err) => return Err(err),
     };
-    let calls = match parse(tokens) {
+    let values = match parse(tokens) {
         Ok(v) => v,
         Err(err) => return Err(err),
     };
-    let expression = match translate(calls) {
+    let calls = match translate(values) {
         Ok(v) => v,
         Err(err) => return Err(err),
     };
-    eval(&expression, bindings)
+    eval(&calls, bindings)
 }

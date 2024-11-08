@@ -7,14 +7,27 @@ use crate::environment::Environment;
 use crate::{Call, WanderError, WanderValue};
 
 pub fn eval(
-    expression: &WanderValue,
+    calls: &Vec<Call>,
     _environment: &mut Environment,
 ) -> Result<WanderValue, WanderError> {
-    match expression {
-        WanderValue::Element(value) => Ok(WanderValue::Element(value.clone())),
-        WanderValue::Call(_expressions) => todo!(),//handle_function_call(expressions, environment),
-        WanderValue::Network(_values) => todo!(),//handle_record(values, environment),
-    }
+    todo!()
+    // match expression {
+    //     WanderValue::Element(value) => Ok(WanderValue::Element(value.clone())),
+    //     WanderValue::Call(_expressions) => todo!(),//handle_function_call(expressions, environment),
+    //     WanderValue::Network(_values) => todo!(),//handle_record(values, environment),
+    // }
+}
+
+pub fn eval_call(
+    call: &Call,
+    _environment: &mut Environment,
+) -> Result<WanderValue, WanderError> {
+    todo!()
+    // match expression {
+    //     WanderValue::Element(value) => Ok(WanderValue::Element(value.clone())),
+    //     WanderValue::Call(_expressions) => todo!(),//handle_function_call(expressions, environment),
+    //     WanderValue::Network(_values) => todo!(),//handle_record(values, environment),
+    // }
 }
 
 fn unescape_string(value: String) -> String {

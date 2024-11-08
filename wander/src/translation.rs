@@ -5,9 +5,10 @@
 use crate::{Call, WanderError, WanderValue};
 
 // Handle any tranlations needed before creating an expression.
-pub fn translate(calls: Vec<Call>) -> Result<WanderValue, WanderError> {
+pub fn translate(values: Vec<Vec<WanderValue>>) -> Result<Vec<Call>, WanderError> {
+    todo!()
     //let element = process_pipes(&element)?;
-    express(&calls)
+    //express(&calls)
 }
 
 // fn process_pipes(element: &ParserElement) -> Result<ParserElement, WanderError> {
