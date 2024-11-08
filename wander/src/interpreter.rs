@@ -7,7 +7,7 @@ use crate::environment::Environment;
 use crate::{Call, WanderError, WanderValue};
 
 pub fn eval(
-    calls: &Vec<Call>,
+    _calls: &[Call],
     _environment: &mut Environment,
 ) -> Result<WanderValue, WanderError> {
     todo!()
@@ -19,7 +19,7 @@ pub fn eval(
 }
 
 pub fn eval_call(
-    call: &Call,
+    _call: &Call,
     _environment: &mut Environment,
 ) -> Result<WanderValue, WanderError> {
     todo!()
@@ -30,98 +30,98 @@ pub fn eval_call(
     // }
 }
 
-fn unescape_string(value: String) -> String {
-    let mut result = String::new();
-    let mut last_char = ' ';
-    let mut idx = 0;
-    value.chars().for_each(|c| {
-        idx += 1;
-        if last_char == '\\' {
-            match c {
-                'n' => {
-                    result.push('\n');
-                    last_char = c
-                }
-                '\\' => {
-                    result.push('\\');
-                    last_char = ' '
-                }
-                't' => {
-                    result.push('\t');
-                    last_char = c
-                }
-                '"' => {
-                    result.push(c);
-                    last_char = c
-                }
-                _ => todo!(),
-            }
-        } else if c == '\\' {
-            last_char = c
-        } else {
-            result.push(c);
-            last_char = c
-        }
-    });
-    if last_char == '\\' {
-        panic!()
-    }
-    result
-}
+// fn unescape_string(value: String) -> String {
+//     let mut result = String::new();
+//     let mut last_char = ' ';
+//     let mut idx = 0;
+//     value.chars().for_each(|c| {
+//         idx += 1;
+//         if last_char == '\\' {
+//             match c {
+//                 'n' => {
+//                     result.push('\n');
+//                     last_char = c
+//                 }
+//                 '\\' => {
+//                     result.push('\\');
+//                     last_char = ' '
+//                 }
+//                 't' => {
+//                     result.push('\t');
+//                     last_char = c
+//                 }
+//                 '"' => {
+//                     result.push(c);
+//                     last_char = c
+//                 }
+//                 _ => todo!(),
+//             }
+//         } else if c == '\\' {
+//             last_char = c
+//         } else {
+//             result.push(c);
+//             last_char = c
+//         }
+//     });
+//     if last_char == '\\' {
+//         panic!()
+//     }
+//     result
+// }
 
-fn handle_host_function(
-    _name: &str,
-    _environment: &mut Environment,
-) -> Result<WanderValue, WanderError> {
-    todo!()
-    // let host_function = environment.read_host_function(&name.to_owned()).unwrap();
-    // let params = host_function.binding().parameters;
-    // let mut arguments = vec![];
-    // for (name, wander_type) in params {
-    //     match environment.read(&name) {
-    //         Some(value) => arguments.push(value),
-    //         None => return Err(WanderError(format!("Could not read {}", name))),
-    //     }
-    // }
-    // host_function.run(&arguments, environment)
-}
+// fn handle_host_function(
+//     _name: &str,
+//     _environment: &mut Environment,
+// ) -> Result<WanderValue, WanderError> {
+//     todo!()
+//     // let host_function = environment.read_host_function(&name.to_owned()).unwrap();
+//     // let params = host_function.binding().parameters;
+//     // let mut arguments = vec![];
+//     // for (name, wander_type) in params {
+//     //     match environment.read(&name) {
+//     //         Some(value) => arguments.push(value),
+//     //         None => return Err(WanderError(format!("Could not read {}", name))),
+//     //     }
+//     // }
+//     // host_function.run(&arguments, environment)
+// }
 
-fn handle_function_call(
-    _call: Call,
-    _environment: &mut Environment,
-) -> Result<WanderValue, WanderError> {
-    // if expressions.len() == 1 {
-    //     let expression = expressions.first().unwrap();
-    //     return eval(expression, environment);
-    // }
-    // let mut expressions = expressions.clone();
-    // expressions.reverse();
-    // while let Some(expression) = expressions.pop() {
-    //     match expression {
-    //         WanderValue::Call(contents) => {
-    //             match handle_function_call(&contents, environment)? {
-    //                 WanderValue::Call(parts) => {
-    //                     todo!()
-    //                     // if let Some(res) =
-    //                     //     run_lambda(name, input, output, *element, &mut expressions, environment)
-    //                     // {
-    //                     //     return res;
-    //                     // }
-    //                 }
-    //                 e => return Ok(e),
-    //             }
-    //         },
-    //         value => {
-    //             if expressions.is_empty() {
-    //                 return eval(&value, environment);
-    //             } else {
-    //                 return Err(WanderError(format!("Invalid function call {value:?}.")));
-    //             }
-    //         }
-    //     };
-    // }
-    todo!()
-}
+// fn handle_function_call(
+//     _call: Call,
+//     _environment: &mut Environment,
+// ) -> Result<WanderValue, WanderError> {
+//     // if expressions.len() == 1 {
+//     //     let expression = expressions.first().unwrap();
+//     //     return eval(expression, environment);
+//     // }
+//     // let mut expressions = expressions.clone();
+//     // expressions.reverse();
+//     // while let Some(expression) = expressions.pop() {
+//     //     match expression {
+//     //         WanderValue::Call(contents) => {
+//     //             match handle_function_call(&contents, environment)? {
+//     //                 WanderValue::Call(parts) => {
+//     //                     todo!()
+//     //                     // if let Some(res) =
+//     //                     //     run_lambda(name, input, output, *element, &mut expressions, environment)
+//     //                     // {
+//     //                     //     return res;
+//     //                     // }
+//     //                 }
+//     //                 e => return Ok(e),
+//     //             }
+//     //         },
+//     //         value => {
+//     //             if expressions.is_empty() {
+//     //                 return eval(&value, environment);
+//     //             } else {
+//     //                 return Err(WanderError(format!("Invalid function call {value:?}.")));
+//     //             }
+//     //         }
+//     //     };
+//     // }
+//     todo!()
+// }
 
 // fn call_function(
 //     _name: &String,

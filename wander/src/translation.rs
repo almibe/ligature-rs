@@ -5,7 +5,7 @@
 use crate::{Call, WanderError, WanderValue};
 
 // Handle any tranlations needed before creating an expression.
-pub fn translate(values: Vec<Vec<WanderValue>>) -> Result<Vec<Call>, WanderError> {
+pub fn translate(_values: Vec<Vec<WanderValue>>) -> Result<Vec<Call>, WanderError> {
     todo!()
     //let element = process_pipes(&element)?;
     //express(&calls)
@@ -39,7 +39,7 @@ pub fn translate(values: Vec<Vec<WanderValue>>) -> Result<Vec<Call>, WanderError
 //     Ok(ParserElement::Grouping(results))
 // }
 
-pub fn express(_element: &Vec<Call>) -> Result<WanderValue, WanderError> {
+pub fn express(_element: &[Call]) -> Result<WanderValue, WanderError> {
     todo!()
     // let expression = match element {
     //     ParserElement::Element(value) => Expression::Element(value.clone()),
@@ -54,26 +54,26 @@ pub fn express(_element: &Vec<Call>) -> Result<WanderValue, WanderError> {
     // Ok(expression)
 }
 
-fn handle_grouping(_elements: &[WanderValue]) -> Result<WanderValue, WanderError> {
-    todo!()
-    // let expressions: Vec<Expression> = elements.iter().map(|e| express(e).unwrap()).collect();
-    // let expressions: Vec<Expression> = expressions
-    //     .iter()
-    //     .map(|e| match e {
-    //         Expression::Application(application) => {
-    //             if application.len() == 1 {
-    //                 application.first().unwrap().clone()
-    //             } else {
-    //                 e.clone()
-    //             }
-    //         }
-    //         e => e.clone(),
-    //     })
-    //     .collect();
-    // if expressions.len() == 1 {
-    //     Ok(expressions.first().unwrap().clone())
-    // } else {
-    //     let res = Expression::Application(expressions);
-    //     Ok(res)
-    // }
-}
+// fn handle_grouping(_elements: &[WanderValue]) -> Result<WanderValue, WanderError> {
+//     todo!()
+//     // let expressions: Vec<Expression> = elements.iter().map(|e| express(e).unwrap()).collect();
+//     // let expressions: Vec<Expression> = expressions
+//     //     .iter()
+//     //     .map(|e| match e {
+//     //         Expression::Application(application) => {
+//     //             if application.len() == 1 {
+//     //                 application.first().unwrap().clone()
+//     //             } else {
+//     //                 e.clone()
+//     //             }
+//     //         }
+//     //         e => e.clone(),
+//     //     })
+//     //     .collect();
+//     // if expressions.len() == 1 {
+//     //     Ok(expressions.first().unwrap().clone())
+//     // } else {
+//     //     let res = Expression::Application(expressions);
+//     //     Ok(res)
+//     // }
+// }

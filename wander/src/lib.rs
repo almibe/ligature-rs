@@ -90,24 +90,6 @@ pub fn write_string(string: &str) -> String {
     format!("\"{}\"", escaped_string)
 }
 
-fn write_list_value(
-    open: &str,
-    close: char,
-    contents: &Vec<WanderValue>,
-    f: &mut std::fmt::Formatter<'_>,
-) -> std::fmt::Result {
-    f.write_str(open).unwrap();
-    let mut i = 0;
-    for value in contents {
-        write!(f, "{value}").unwrap();
-        i += 1;
-        if i < contents.len() {
-            write!(f, " ").unwrap();
-        }
-    }
-    write!(f, "{close}")
-}
-
 fn write_network(
     _contents: &HashSet<ligature::Entry>,
     _f: &mut std::fmt::Formatter<'_>,

@@ -10,14 +10,10 @@ use std::{
 };
 
 /// A structure used to setup the environment a Wander program is executed in.
+#[derive(Default)]
 pub struct Environment {
     host_functions: RefCell<HashMap<String, Rc<dyn Command>>>,
 }
-
-///
-// pub trait BindingsProvider<T: Clone> {
-//     fn add_bindings(&self, bindings: &mut Bindings);
-// }
 
 impl Environment {
     /// Create a new empty Bindings.
