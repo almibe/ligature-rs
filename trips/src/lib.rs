@@ -6,6 +6,8 @@
 
 #![deny(missing_docs)]
 
+use core::hash::Hash;
+
 pub mod mem;
 
 /// The data structure stored in this triple store.
@@ -20,27 +22,27 @@ pub struct Trip<T> {
 
 /// A trait that defines all the actions a Ligature instance can perform.
 /// The API used for storing triples.
-pub trait Trips<C, T, E> {
+pub trait Trips<C: Eq + Hash, T, E> {
     /// Get all Collections.
     fn collections(&self) -> Result<Vec<C>, E>;
 
     /// Add a new Dataset.
     /// Does nothing if Dataset already exists.
-    fn add_collection(&mut self, collection: &C) -> Result<(), E>;
+    fn add_collection(&mut self, collection: C) -> Result<(), E>;
 
     /// Remove a Dataset.
     /// Does nothing if Dataset doesn't exist.
-    fn remove_collection(&mut self, collection: &C) -> Result<(), E>;
+    fn remove_collection(&mut self, collection: C) -> Result<(), E>;
 
     /// Get all Statements in a given Dataset.
-    fn statements(&self, collection: &C) -> Result<Vec<Trip<T>>, E>;
+    fn statements(&self, collection: C) -> Result<Vec<Trip<T>>, E>;
 
     /// Add Statements to a given Dataset.
     /// Returns Error if Dataset doesn't exist.
     /// Does nothing if Statement already exists in Dataset.
     fn add_triples(
         &mut self,
-        collection: &C,
+        collection: C,
         trips: Vec<Trip<T>>,
     ) -> Result<(), E>;
     /// Remove Statements from a given Dataset.
@@ -48,7 +50,7 @@ pub trait Trips<C, T, E> {
     /// Does nothing if Statement doesn't exist in Dataset.
     fn remove_triples(
         &mut self,
-        collection: &C,
+        collection: C,
         trips: Vec<Trip<T>>
     ) -> Result<(), E>;
     /// Run a query against the given Dataset.

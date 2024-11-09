@@ -6,8 +6,8 @@
 
 #![deny(missing_docs)]
 
-use std::collections::{BTreeSet, HashMap};
-
+use std::collections::{BTreeSet, HashMap, HashSet};
+use core::hash::Hash;
 use crate::Trips;
 
 /// A simple error type.
@@ -30,27 +30,29 @@ impl <C: Clone, T>TripsMem<C, T> {
     }
 }
 
-impl <C: Clone,T>Trips<C,T,TripsError> for TripsMem<C, T> {
+impl <C: Clone + Eq + Hash,T>Trips<C,T,TripsError> for TripsMem<C, T> {
     fn collections(&self) -> Result<Vec<C>, TripsError> {
         let res: Vec<C> = self.collections.keys().cloned().collect();
         Ok(res)
     }
 
-    fn add_collection(&mut self, collection: &C) -> Result<(), TripsError> {
-        todo!()
+    fn add_collection(&mut self, collection: C) -> Result<(), TripsError> {
+        self.collections.insert(collection, BTreeSet::new());
+        Ok(())
     }
 
-    fn remove_collection(&mut self, collection: &C) -> Result<(), TripsError> {
-        todo!()
+    fn remove_collection(&mut self, collection: C) -> Result<(), TripsError> {
+        self.collections.remove(&collection);
+        Ok(())
     }
 
-    fn statements(&self, collection: &C) -> Result<Vec<crate::Trip<T>>, TripsError> {
+    fn statements(&self, collection: C) -> Result<Vec<crate::Trip<T>>, TripsError> {
         todo!()
     }
 
     fn add_triples(
         &mut self,
-        collection: &C,
+        collection: C,
         trips: Vec<crate::Trip<T>>,
     ) -> Result<(), TripsError> {
         todo!()
@@ -58,7 +60,7 @@ impl <C: Clone,T>Trips<C,T,TripsError> for TripsMem<C, T> {
 
     fn remove_triples(
         &mut self,
-        collection: &C,
+        collection: C,
         trips: Vec<crate::Trip<T>>
     ) -> Result<(), TripsError> {
         todo!()
