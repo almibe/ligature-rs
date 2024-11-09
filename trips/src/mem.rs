@@ -30,7 +30,7 @@ impl <C: Clone, T>TripsMem<C, T> {
     }
 }
 
-impl <C: Clone + Eq + Hash,T>Trips<C,T,TripsError> for TripsMem<C, T> {
+impl <C: Clone + Eq + Hash,T: std::fmt::Debug + Eq>Trips<C,T,TripsError> for TripsMem<C, T> {
     fn collections(&self) -> Result<Vec<C>, TripsError> {
         let res: Vec<C> = self.collections.keys().cloned().collect();
         Ok(res)
@@ -47,7 +47,10 @@ impl <C: Clone + Eq + Hash,T>Trips<C,T,TripsError> for TripsMem<C, T> {
     }
 
     fn statements(&self, collection: C) -> Result<Vec<crate::Trip<T>>, TripsError> {
-        todo!()
+        match self.collections.get(&collection) {
+            Some(res) => Ok(vec![]),
+            None => todo!()
+        }
     }
 
     fn add_triples(

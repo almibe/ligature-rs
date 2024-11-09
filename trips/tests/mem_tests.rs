@@ -2,7 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use trips::Trips;
+use trips::{Trip, Trips};
 use trips::mem::TripsMem;
 
 #[test]
@@ -30,5 +30,14 @@ fn remove_collection_from_store() {
     let _ = store.remove_collection("T".to_owned());
     let collections: Vec<String> = store.collections().unwrap();
     let result: Vec<String> = vec!["S".to_owned()];
+    assert_eq!(collections, result);
+}
+
+#[test]
+fn statements_should_start_empty() {
+    let mut store: TripsMem<String, String> = trips::mem::TripsMem::new();
+    let _ = store.add_collection("T".to_owned());
+    let collections: Vec<Trip<String>> = store.statements("T".to_owned()).unwrap();
+    let result: Vec<Trip<String>> = vec![];
     assert_eq!(collections, result);
 }

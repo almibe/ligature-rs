@@ -11,7 +11,8 @@ use core::hash::Hash;
 pub mod mem;
 
 /// The data structure stored in this triple store.
-pub struct Trip<T> {
+#[derive(Debug, PartialEq, Eq)]
+pub struct Trip<T: std::fmt::Debug + Eq> {
     /// The first element
     pub first: T,
     /// The second element
@@ -22,7 +23,7 @@ pub struct Trip<T> {
 
 /// A trait that defines all the actions a Ligature instance can perform.
 /// The API used for storing triples.
-pub trait Trips<C: Eq + Hash, T, E> {
+pub trait Trips<C: Eq + Hash, T: std::fmt::Debug + Eq, E> {
     /// Get all Collections.
     fn collections(&self) -> Result<Vec<C>, E>;
 
@@ -58,7 +59,7 @@ pub trait Trips<C: Eq + Hash, T, E> {
 }
 
 /// Query Ligature instances.
-pub trait Query<T, E> {
+pub trait Query<T: std::fmt::Debug + Eq, E> {
     /// Find Statements that match the given pattern.
     /// (None, None, None) returns all Statements.
     fn find(
