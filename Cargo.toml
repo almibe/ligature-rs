@@ -19,5 +19,4 @@ members = [
     "wander",
     "wander-pad",
     "wander-repl",
-    "wander-wasm"
 ]

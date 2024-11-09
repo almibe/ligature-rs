@@ -6,21 +6,21 @@
 
 #![deny(missing_docs)]
 
-mod mem;
+pub mod mem;
 
 /// The data structure stored in this triple store.
-pub struct Trip<F, S, T> {
+pub struct Trip<T> {
     /// The first element
-    pub first: F,
+    pub first: T,
     /// The second element
-    pub second: S,
+    pub second: T,
     /// The third element    
     pub third: T
 }
 
 /// A trait that defines all the actions a Ligature instance can perform.
 /// The API used for storing triples.
-pub trait Trips<C, F, S, T, E> {
+pub trait Trips<C, T, E> {
     /// Get all Collections.
     fn collections(&self) -> Result<Vec<C>, E>;
 
@@ -33,36 +33,36 @@ pub trait Trips<C, F, S, T, E> {
     fn remove_collection(&mut self, collection: &C) -> Result<(), E>;
 
     /// Get all Statements in a given Dataset.
-    fn statements(&self, collection: &C) -> Result<Vec<Trip<F, S, T>>, E>;
+    fn statements(&self, collection: &C) -> Result<Vec<Trip<T>>, E>;
 
     /// Add Statements to a given Dataset.
     /// Returns Error if Dataset doesn't exist.
     /// Does nothing if Statement already exists in Dataset.
-    fn add_statements(
-        &self,
+    fn add_triples(
+        &mut self,
         collection: &C,
-        trips: Vec<Trip<F, S, T>>,
+        trips: Vec<Trip<T>>,
     ) -> Result<(), E>;
     /// Remove Statements from a given Dataset.
     /// Returns Error if Dataset doesn't exist.
     /// Does nothing if Statement doesn't exist in Dataset.
-    fn remove_statements(
-        &self,
+    fn remove_triples(
+        &mut self,
         collection: &C,
-        trips: Vec<Trip<F, S, T>>
+        trips: Vec<Trip<T>>
     ) -> Result<(), E>;
     /// Run a query against the given Dataset.
-    fn query(&self) -> Result<Box<dyn Query<F, S, T, E>>, E>; //TODO this is wrong
+    fn query(&self) -> Result<Box<dyn Query<T, E>>, E>; //TODO this is wrong
 }
 
 /// Query Ligature instances.
-pub trait Query<F, S, T, E> {
+pub trait Query<T, E> {
     /// Find Statements that match the given pattern.
     /// (None, None, None) returns all Statements.
     fn find(
         &self,
-        first: Option<F>,
-        second: Option<S>,
+        first: Option<T>,
+        second: Option<T>,
         third: Option<T>,
-    ) -> Result<Vec<Trip<F,S,T>>, E>;
+    ) -> Result<Vec<Trip<T>>, E>;
 }
