@@ -59,12 +59,7 @@ impl <C: Clone + Eq + Hash,T: std::fmt::Debug + Eq + Ord + Clone>Trips<C,T,Trips
 
     fn triples(&self, collection: C) -> Result<BTreeSet<crate::Trip<T>>, TripsError> {
         match self.collections.get(&collection) {
-            Some(res) => {
-                match self.collections.get(&collection) {
-                    Some(res) => Ok(res.clone()),
-                    None => todo!()
-                }
-            },
+            Some(res) => Ok(res.clone()),
             None => todo!()
         }
     }
@@ -88,10 +83,18 @@ impl <C: Clone + Eq + Hash,T: std::fmt::Debug + Eq + Ord + Clone>Trips<C,T,Trips
         collection: C,
         trips: &mut BTreeSet<crate::Trip<T>>
     ) -> Result<(), TripsError> {
-        todo!()
+        match self.collections.get_mut(&collection) {
+            Some(res) => {
+                trips.iter().for_each(|trip| {
+                    res.remove(trip);
+                });
+                return Ok(())
+            },
+            None => todo!()
+        }
     }
 
-    fn query(&self) -> Result<Box<dyn crate::Query<T, TripsError>>, TripsError> {
+    fn query(&self, pattern: BTreeSet<crate::Query<T>>) -> Result<BTreeSet<Trip<T>>, TripsError> {
         todo!()
     }
 }

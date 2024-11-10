@@ -15,6 +15,19 @@ pub mod mem;
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct Trip<T: std::fmt::Debug + Eq + Ord>(pub T, pub T, pub T);
 
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
+/// Contains either a Variable or Value.
+pub enum Slot<T: std::fmt::Debug + Eq + Ord> {
+    /// A Variable.
+    Variable(String),
+    /// A Value.
+    Value(T)
+}
+
+/// The data structure used to represent queries.
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
+pub struct Query<T: std::fmt::Debug + Eq + Ord>(pub Slot<T>, pub Slot<T>, pub Slot<T>);
+
 /// A trait that defines all the actions a Ligature instance can perform.
 /// The API used for storing triples.
 pub trait Trips<C: Eq + Hash, T: std::fmt::Debug + Eq + Ord, E> {
@@ -49,15 +62,5 @@ pub trait Trips<C: Eq + Hash, T: std::fmt::Debug + Eq + Ord, E> {
         trips: &mut BTreeSet<Trip<T>>
     ) -> Result<(), E>;
     /// Run a query against the given Dataset.
-    fn query(&self) -> Result<Box<dyn Query<T, E>>, E>; //TODO this is wrong
-}
-
-/// Query Ligature instances.
-pub trait Query<T: std::fmt::Debug + Eq + Ord, E> {
-    /// Find Statements that match the given pattern.
-    /// (None, None, None) returns all Statements.
-    fn find(
-        &self,
-        pattern: (Option<T>, Option<T>, Option<T>)
-    ) -> Result<Vec<Trip<T>>, E>;
+    fn query(&self, pattern: BTreeSet<Query<T>>) -> Result<BTreeSet<Trip<T>>, E>;
 }
