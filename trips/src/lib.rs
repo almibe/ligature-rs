@@ -21,7 +21,9 @@ pub enum Slot<T: std::fmt::Debug + Eq + Ord> {
     /// A Variable.
     Variable(String),
     /// A Value.
-    Value(T)
+    Value(T),
+    /// Match any value.
+    Any,
 }
 
 /// The data structure used to represent queries.
@@ -62,5 +64,5 @@ pub trait Trips<C: Eq + Hash, T: std::fmt::Debug + Eq + Ord, E> {
         trips: &mut BTreeSet<Trip<T>>
     ) -> Result<(), E>;
     /// Run a query against the given Dataset.
-    fn query(&self, pattern: BTreeSet<Query<T>>) -> Result<BTreeSet<Trip<T>>, E>;
+    fn query(&self, collection: C, pattern: BTreeSet<Query<T>>) -> Result<BTreeSet<Trip<T>>, E>;
 }

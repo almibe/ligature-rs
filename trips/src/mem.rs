@@ -94,7 +94,10 @@ impl <C: Clone + Eq + Hash,T: std::fmt::Debug + Eq + Ord + Clone>Trips<C,T,Trips
         }
     }
 
-    fn query(&self, pattern: BTreeSet<crate::Query<T>>) -> Result<BTreeSet<Trip<T>>, TripsError> {
-        todo!()
+    fn query(&self, collection: C, pattern: BTreeSet<crate::Query<T>>) -> Result<BTreeSet<Trip<T>>, TripsError> {
+        match self.collections.get(&collection) {
+            Some(res) => Ok(res.clone()),
+            None => todo!()
+        }
     }
 }

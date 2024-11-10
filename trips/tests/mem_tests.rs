@@ -2,7 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use trips::{Trip, Trips};
+use trips::{Trip, Trips, Query, Slot};
 use trips::mem::TripsMem;
 use std::collections::BTreeSet;
 
@@ -61,5 +61,15 @@ fn remove_triples_from_collection() {
     let _ = store.remove_triples("T".to_owned(), &mut BTreeSet::from([Trip(1, 2, 3)]));
     let collections: BTreeSet<Trip<u64>> = store.triples("T".to_owned()).unwrap();
     let result: BTreeSet<Trip<u64>> = BTreeSet::from([Trip(1, 2, 5), Trip(1, 2, 6)]);
+    assert_eq!(collections, result);
+}
+
+#[test]
+fn match_all_query_collection() {
+    let mut store: TripsMem<String, u64> = trips::mem::TripsMem::new();
+    let _ = store.add_collection("T".to_owned());
+    let _ = store.add_triples("T".to_owned(), &mut BTreeSet::from([Trip(1, 2, 3), Trip(1, 2, 6), Trip(1, 2, 5)]));
+    let collections: BTreeSet<Trip<u64>> = store.query("T".to_owned(), BTreeSet::from([Query(Slot::Any, Slot::Any, Slot::Any)])).unwrap();
+    let result: BTreeSet<Trip<u64>> = BTreeSet::from([Trip(1, 2, 3), Trip(1, 2, 6), Trip(1, 2, 5)]);
     assert_eq!(collections, result);
 }
