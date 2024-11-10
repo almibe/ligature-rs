@@ -7,23 +7,17 @@
 #![deny(missing_docs)]
 
 use core::hash::Hash;
+use std::collections::BTreeSet;
 
 pub mod mem;
 
 /// The data structure stored in this triple store.
-#[derive(Debug, PartialEq, Eq)]
-pub struct Trip<T: std::fmt::Debug + Eq> {
-    /// The first element
-    pub first: T,
-    /// The second element
-    pub second: T,
-    /// The third element    
-    pub third: T
-}
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
+pub struct Trip<T: std::fmt::Debug + Eq + Ord>(pub T, pub T, pub T);
 
 /// A trait that defines all the actions a Ligature instance can perform.
 /// The API used for storing triples.
-pub trait Trips<C: Eq + Hash, T: std::fmt::Debug + Eq, E> {
+pub trait Trips<C: Eq + Hash, T: std::fmt::Debug + Eq + Ord, E> {
     /// Get all Collections.
     fn collections(&self) -> Result<Vec<C>, E>;
 
@@ -36,7 +30,7 @@ pub trait Trips<C: Eq + Hash, T: std::fmt::Debug + Eq, E> {
     fn remove_collection(&mut self, collection: C) -> Result<(), E>;
 
     /// Get all Statements in a given Dataset.
-    fn statements(&self, collection: C) -> Result<Vec<Trip<T>>, E>;
+    fn triples(&self, collection: C) -> Result<BTreeSet<Trip<T>>, E>;
 
     /// Add Statements to a given Dataset.
     /// Returns Error if Dataset doesn't exist.
@@ -44,7 +38,7 @@ pub trait Trips<C: Eq + Hash, T: std::fmt::Debug + Eq, E> {
     fn add_triples(
         &mut self,
         collection: C,
-        trips: Vec<Trip<T>>,
+        trips: &mut BTreeSet<Trip<T>>,
     ) -> Result<(), E>;
     /// Remove Statements from a given Dataset.
     /// Returns Error if Dataset doesn't exist.
@@ -52,20 +46,18 @@ pub trait Trips<C: Eq + Hash, T: std::fmt::Debug + Eq, E> {
     fn remove_triples(
         &mut self,
         collection: C,
-        trips: Vec<Trip<T>>
+        trips: &mut BTreeSet<Trip<T>>
     ) -> Result<(), E>;
     /// Run a query against the given Dataset.
     fn query(&self) -> Result<Box<dyn Query<T, E>>, E>; //TODO this is wrong
 }
 
 /// Query Ligature instances.
-pub trait Query<T: std::fmt::Debug + Eq, E> {
+pub trait Query<T: std::fmt::Debug + Eq + Ord, E> {
     /// Find Statements that match the given pattern.
     /// (None, None, None) returns all Statements.
     fn find(
         &self,
-        first: Option<T>,
-        second: Option<T>,
-        third: Option<T>,
+        pattern: (Option<T>, Option<T>, Option<T>)
     ) -> Result<Vec<Trip<T>>, E>;
 }

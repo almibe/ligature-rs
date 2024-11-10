@@ -8,29 +8,40 @@
 
 use std::collections::{BTreeSet, HashMap, HashSet};
 use core::hash::Hash;
-use crate::Trips;
+use crate::{Trip, Trips};
 
 /// A simple error type.
 #[derive(Debug)]
 pub struct TripsError(String);
 
 /// An in-memory implementation of Trips.
-pub struct TripsMem<C: Clone, T> {
-    values: HashMap<usize, T>,
-    collections: HashMap<C, BTreeSet<(usize, usize, usize)>>
+pub struct TripsMem<C: Clone, T: std::fmt::Debug + Ord> {
+    // index: usize,
+    // id_to_value: HashMap<usize, T>,
+    // value_to_id: HashMap<T, usize>,
+    // collections: HashMap<C, BTreeSet<(usize, usize, usize)>>
+    collections: HashMap<C, BTreeSet<Trip<T>>>
 }
 
-impl <C: Clone, T>TripsMem<C, T> {
+impl <C: Clone, T: std::fmt::Debug + Ord>TripsMem<C, T> {
     /// Create an empty triple store.
     pub fn new() -> Self {
         Self {
-            values: HashMap::new(),
+            // index: 0,
+            // values: HashMap::new(),
             collections: HashMap::new()
         }
     }
+
+    // /// Check if the value is already stored and if not add it.
+    // /// Either way return its id.
+    // pub fn check_and_add_value(&mut self, value: T) -> usize {
+
+    //     todo!()
+    // }
 }
 
-impl <C: Clone + Eq + Hash,T: std::fmt::Debug + Eq>Trips<C,T,TripsError> for TripsMem<C, T> {
+impl <C: Clone + Eq + Hash,T: std::fmt::Debug + Eq + Ord + Clone>Trips<C,T,TripsError> for TripsMem<C, T> {
     fn collections(&self) -> Result<Vec<C>, TripsError> {
         let res: Vec<C> = self.collections.keys().cloned().collect();
         Ok(res)
@@ -46,9 +57,14 @@ impl <C: Clone + Eq + Hash,T: std::fmt::Debug + Eq>Trips<C,T,TripsError> for Tri
         Ok(())
     }
 
-    fn statements(&self, collection: C) -> Result<Vec<crate::Trip<T>>, TripsError> {
+    fn triples(&self, collection: C) -> Result<BTreeSet<crate::Trip<T>>, TripsError> {
         match self.collections.get(&collection) {
-            Some(res) => Ok(vec![]),
+            Some(res) => {
+                match self.collections.get(&collection) {
+                    Some(res) => Ok(res.clone()),
+                    None => todo!()
+                }
+            },
             None => todo!()
         }
     }
@@ -56,15 +72,21 @@ impl <C: Clone + Eq + Hash,T: std::fmt::Debug + Eq>Trips<C,T,TripsError> for Tri
     fn add_triples(
         &mut self,
         collection: C,
-        trips: Vec<crate::Trip<T>>,
+        trips: &mut BTreeSet<crate::Trip<T>>,
     ) -> Result<(), TripsError> {
-        todo!()
+        match self.collections.get_mut(&collection) {
+            Some(res) => {
+                res.append(trips);
+                return Ok(())
+            },
+            None => todo!()
+        }
     }
 
     fn remove_triples(
         &mut self,
         collection: C,
-        trips: Vec<crate::Trip<T>>
+        trips: &mut BTreeSet<crate::Trip<T>>
     ) -> Result<(), TripsError> {
         todo!()
     }

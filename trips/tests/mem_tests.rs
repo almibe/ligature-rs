@@ -4,6 +4,7 @@
 
 use trips::{Trip, Trips};
 use trips::mem::TripsMem;
+use std::collections::BTreeSet;
 
 #[test]
 fn store_should_start_empty() {
@@ -34,10 +35,20 @@ fn remove_collection_from_store() {
 }
 
 #[test]
-fn statements_should_start_empty() {
+fn triples_should_start_empty() {
     let mut store: TripsMem<String, String> = trips::mem::TripsMem::new();
     let _ = store.add_collection("T".to_owned());
-    let collections: Vec<Trip<String>> = store.statements("T".to_owned()).unwrap();
-    let result: Vec<Trip<String>> = vec![];
+    let collections: BTreeSet<Trip<String>> = store.triples("T".to_owned()).unwrap();
+    let result: BTreeSet<Trip<String>> = BTreeSet::new();
+    assert_eq!(collections, result);
+}
+
+#[test]
+fn add_triples_to_collection() {
+    let mut store: TripsMem<String, u64> = trips::mem::TripsMem::new();
+    let _ = store.add_collection("T".to_owned());
+    let _ = store.add_triples("T".to_owned(), &mut BTreeSet::from([Trip(1, 2, 3)]));
+    let collections: BTreeSet<Trip<u64>> = store.triples("T".to_owned()).unwrap();
+    let result: BTreeSet<Trip<u64>> = BTreeSet::from([Trip(1, 2, 3)]);
     assert_eq!(collections, result);
 }
