@@ -8,7 +8,11 @@ use wander::lexer::{tokenize_and_filter, Token};
 #[test]
 fn tokenize_true() {
     let input = "true";
-    let res: Vec<Token> = tokenize_and_filter(input).unwrap().iter().map(|t| t.clone()).collect();
+    let res: Vec<Token> = tokenize_and_filter(input)
+        .unwrap()
+        .iter()
+        .map(|t| t.clone())
+        .collect();
     let expected = vec![Token::Element(Element("true".to_owned()))];
     assert_eq!(res, expected);
 }
@@ -16,7 +20,11 @@ fn tokenize_true() {
 #[test]
 fn tokenize_booleans() {
     let input = "true false false";
-    let res: Vec<Token> = tokenize_and_filter(input).unwrap().iter().map(|t| t.clone()).collect();
+    let res: Vec<Token> = tokenize_and_filter(input)
+        .unwrap()
+        .iter()
+        .map(|t| t.clone())
+        .collect();
     let expected = vec![
         Token::Element(Element("true".to_owned())),
         Token::Element(Element("false".to_owned())),
@@ -28,7 +36,10 @@ fn tokenize_booleans() {
 #[test]
 fn tokenize_integer() {
     let input = "123450";
-    let res: Vec<Token> = tokenize_and_filter(input).iter().map(|t| t.first().unwrap().clone()).collect();
+    let res: Vec<Token> = tokenize_and_filter(input)
+        .iter()
+        .map(|t| t.first().unwrap().clone())
+        .collect();
     let expected = vec![Token::Element(Element("123450".to_owned()))];
     assert_eq!(res, expected);
 }
@@ -36,8 +47,16 @@ fn tokenize_integer() {
 #[test]
 fn tokenize_integers() {
     let input = "0 -100 4200";
-    let res: Vec<_> = tokenize_and_filter(input).unwrap().iter().map(|t| t.clone()).collect();
-    let expected = vec![Token::Element(Element("0".to_owned())), Token::Element(Element("-100".to_owned())), Token::Element(Element("4200".to_owned()))];
+    let res: Vec<_> = tokenize_and_filter(input)
+        .unwrap()
+        .iter()
+        .map(|t| t.clone())
+        .collect();
+    let expected = vec![
+        Token::Element(Element("0".to_owned())),
+        Token::Element(Element("-100".to_owned())),
+        Token::Element(Element("4200".to_owned())),
+    ];
     assert_eq!(res, expected);
 }
 
@@ -68,7 +87,11 @@ fn tokenize_name() {
 #[test]
 fn tokenize_function_call() {
     let input = "not false";
-    let res: Vec<Token> = tokenize_and_filter(input).unwrap().iter().map(|t| t.clone()).collect();
+    let res: Vec<Token> = tokenize_and_filter(input)
+        .unwrap()
+        .iter()
+        .map(|t| t.clone())
+        .collect();
     let expected = vec![
         Token::Element(Element("not".to_owned())),
         Token::Element(Element("false".to_owned())),
@@ -109,7 +132,11 @@ fn tokenize_complex_comment() {
 #[test]
 fn multiline_comment() {
     let input = "-- <<<>>> () {} }{ )( ><\n5 -- five\n-- comment";
-    let res: Vec<Token> = tokenize_and_filter(input).unwrap().iter().map(|t| t.clone()).collect();;
+    let res: Vec<Token> = tokenize_and_filter(input)
+        .unwrap()
+        .iter()
+        .map(|t| t.clone())
+        .collect();
     let expected = vec![Token::Element(Element("5".to_owned()))];
     assert_eq!(res, expected);
 }

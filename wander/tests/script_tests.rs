@@ -3,13 +3,13 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use std::collections::HashMap;
-use std::{path::PathBuf, fs::File};
+use std::{fs::File, path::PathBuf};
 
-use wander::{WanderValue, WanderError};
-use wander::preludes::add_print;
 use std::io::Read;
+use wander::preludes::add_print;
 use wander::preludes::common;
 use wander::run;
+use wander::{WanderError, WanderValue};
 
 #[test]
 fn run_script_tests() {

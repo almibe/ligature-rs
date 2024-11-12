@@ -6,10 +6,7 @@
 
 #![deny(missing_docs)]
 
-use std::{
-    collections::HashSet,
-    fmt::Display,
-};
+use std::{collections::HashSet, fmt::Display};
 
 use environment::Environment;
 use interpreter::eval;
@@ -122,16 +119,13 @@ impl Display for WanderValue {
             WanderValue::Element(value) => write!(f, "{}", value.0),
             WanderValue::Network(values) => write_network(values, f),
             WanderValue::Call(_call) => todo!(),
-            WanderValue::Quote(_quote) => todo!()
+            WanderValue::Quote(_quote) => todo!(),
         }
     }
 }
 
 /// Run a Wander script with the given Bindings.
-pub fn run(
-    script: &str,
-    bindings: &mut Environment,
-) -> Result<WanderValue, WanderError> {
+pub fn run(script: &str, bindings: &mut Environment) -> Result<WanderValue, WanderError> {
     let tokens = match tokenize_and_filter(script) {
         Ok(v) => v,
         Err(err) => return Err(err),

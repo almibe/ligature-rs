@@ -4,7 +4,7 @@
 
 use std::collections::HashSet;
 
-use ligature::Element;
+use ligature::{Element, Entry};
 use wander::{WanderError, WanderValue};
 
 fn parse_str(script: &str) -> Result<Vec<Vec<WanderValue>>, WanderError> {
@@ -31,7 +31,9 @@ fn parse_integers() {
 #[test]
 fn parse_strings() {
     let res = parse_str("\"Hello\"");
-    let expected = Ok(vec![vec![WanderValue::Element(Element("Hello".to_owned()))]]);
+    let expected = Ok(vec![vec![WanderValue::Element(Element(
+        "Hello".to_owned(),
+    ))]]);
     assert_eq!(res, expected);
 }
 
@@ -39,6 +41,49 @@ fn parse_strings() {
 fn parse_empty_network() {
     let res = parse_str("{}");
     let expected = Ok(vec![vec![WanderValue::Network(HashSet::new())]]);
+    assert_eq!(res, expected);
+}
+
+#[test]
+fn parse_network_with_single_entry() {
+    let res = parse_str("{a b c}");
+    let expected = Ok(vec![vec![WanderValue::Network(HashSet::from([
+        Entry::Role {
+            first: Element("a".to_owned()),
+            second: Element("c".to_owned()),
+            role: Element("b".to_owned()),
+        },
+    ]))]]);
+    assert_eq!(res, expected);
+}
+
+#[test]
+fn parse_network_with_single_entry_and_trailing_comma() {
+    let res = parse_str("{a b c,}");
+    let expected = Ok(vec![vec![WanderValue::Network(HashSet::from([
+        Entry::Role {
+            first: Element("a".to_owned()),
+            second: Element("c".to_owned()),
+            role: Element("b".to_owned()),
+        },
+    ]))]]);
+    assert_eq!(res, expected);
+}
+
+#[test]
+fn parse_network_with_two_entries_and_trailing_comma() {
+    let res = parse_str("{a b c, a : A,}");
+    let expected = Ok(vec![vec![WanderValue::Network(HashSet::from([
+        Entry::Role {
+            first: Element("a".to_owned()),
+            second: Element("c".to_owned()),
+            role: Element("b".to_owned()),
+        },
+        Entry::Extends {
+            element: Element("a".to_owned()),
+            concept: Element("A".to_owned()),
+        },
+    ]))]]);
     assert_eq!(res, expected);
 }
 
@@ -61,9 +106,7 @@ fn parse_applications() {
             WanderValue::Element(Element("Bool.not".to_owned())),
             WanderValue::Element(Element("x".to_owned())),
         ],
-        vec![
-            WanderValue::Element(Element("true".to_owned())),
-        ]
+        vec![WanderValue::Element(Element("true".to_owned()))],
     ]);
     assert_eq!(res, expected);
 }

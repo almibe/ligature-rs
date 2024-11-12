@@ -66,17 +66,15 @@ pub fn parse(tokens: Vec<Token>) -> Result<Vec<Vec<WanderValue>>, WanderError> {
                     current_result.push(WanderValue::Element(value));
                 }
                 Some(Token::Comma) => cont = false,
-                Some(Token::OpenBrace) => {
-                    match read_network(&mut gaze) {
-                        Ok(res) => {
-                            current_result.push(res);
-                        },
-                        _ => todo!()
+                Some(Token::OpenBrace) => match read_network(&mut gaze) {
+                    Ok(res) => {
+                        current_result.push(res);
                     }
-                }
+                    _ => todo!(),
+                },
                 Some(_) => todo!(),
                 None => return Err(WanderError(format!("Error parsing {:?}", gaze.peek()))),
-            }    
+            }
         }
         results.push(current_result);
     }
@@ -89,32 +87,42 @@ fn read_network(gaze: &mut Gaze<Token>) -> Result<WanderValue, WanderError> {
     while cont {
         let first = match gaze.next() {
             Some(Token::Element(first)) => first,
-            Some(Token::CloseBrace) => return Ok(WanderValue::Network(HashSet::default())),
-            _ => todo!()
+            Some(Token::CloseBrace) => return Ok(WanderValue::Network(result)),
+            _ => todo!(),
         };
         let second = match gaze.next() {
             Some(Token::Element(second)) => second,
-            _ => todo!()
+            _ => todo!(),
         };
         let third = match gaze.next() {
             Some(Token::Element(third)) => third,
-            _ => todo!()
+            _ => todo!(),
         };
 
         if second == Element(":".to_owned()) {
-            result.insert(Entry::Extends{ element : first, concept: third });
+            result.insert(Entry::Extends {
+                element: first,
+                concept: third,
+            });
         } else if second == Element("¬:".to_owned()) {
-            result.insert(Entry::NotExtends { element : first, concept: third });
+            result.insert(Entry::NotExtends {
+                element: first,
+                concept: third,
+            });
         } else {
-            result.insert(Entry::Role { first, second: third, role: second });
+            result.insert(Entry::Role {
+                first,
+                second: third,
+                role: second,
+            });
         }
-        
+
         match gaze.next() {
             Some(Token::Comma) => (),
             Some(Token::CloseBrace) => cont = false,
             Some(_) => return Err(WanderError("Error parsing Network.".to_owned())),
-            None => return Err(WanderError("Error parsing Network.".to_owned()))
+            None => return Err(WanderError("Error parsing Network.".to_owned())),
         }
     }
-    return Ok(WanderValue::Network(result))
+    return Ok(WanderValue::Network(result));
 }

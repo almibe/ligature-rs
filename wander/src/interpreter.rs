@@ -6,10 +6,7 @@ use crate::environment::Environment;
 
 use crate::{Call, WanderError, WanderValue};
 
-pub fn eval(
-    _calls: &[Call],
-    _environment: &mut Environment,
-) -> Result<WanderValue, WanderError> {
+pub fn eval(_calls: &[Call], _environment: &mut Environment) -> Result<WanderValue, WanderError> {
     todo!()
     // match expression {
     //     WanderValue::Element(value) => Ok(WanderValue::Element(value.clone())),
@@ -18,10 +15,7 @@ pub fn eval(
     // }
 }
 
-pub fn eval_call(
-    _call: &Call,
-    _environment: &mut Environment,
-) -> Result<WanderValue, WanderError> {
+pub fn eval_call(_call: &Call, _environment: &mut Environment) -> Result<WanderValue, WanderError> {
     todo!()
     // match expression {
     //     WanderValue::Element(value) => Ok(WanderValue::Element(value.clone())),

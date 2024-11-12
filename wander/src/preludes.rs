@@ -2,9 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use crate::{
-    environment::Environment, Command, WanderError, WanderValue,
-};
+use crate::{environment::Environment, Command, WanderError, WanderValue};
 use std::rc::Rc;
 
 // struct EqFunction {}
@@ -207,7 +205,7 @@ impl Command for AssertEqFunction {
 /// functionality, but doesn't interact with an instance of Ligature.
 pub fn common() -> Environment {
     let mut bindings = Environment::new();
-//    bindings.bind_host_function(Rc::new(EqFunction {}));
+    //    bindings.bind_host_function(Rc::new(EqFunction {}));
     bindings.bind_host_function(Rc::new(AssertEqFunction {}));
     // bindings.bind_host_function(Rc::new(AndFunction {}));
     // bindings.bind_host_function(Rc::new(NotFunction {}));

@@ -15,7 +15,7 @@ use std::{
 #[derive(Default)]
 pub struct Environment {
     host_functions: RefCell<HashMap<String, Rc<dyn Command>>>,
-    state: RefCell<HashMap<String, HashSet<Entry>>>
+    state: RefCell<HashMap<String, HashSet<Entry>>>,
 }
 
 impl Environment {
@@ -23,7 +23,7 @@ impl Environment {
     pub fn new() -> Environment {
         Environment {
             host_functions: RefCell::new(HashMap::new()),
-            state: RefCell::new(HashMap::new())
+            state: RefCell::new(HashMap::new()),
         }
     }
 
