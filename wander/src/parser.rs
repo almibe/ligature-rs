@@ -2,9 +2,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+use std::collections::HashSet;
+
 use crate::{lexer::Token, WanderError, WanderValue};
 use gaze::Gaze;
-use ligature::Element;
+use ligature::{Element, Entry};
 
 // fn wander_values(gaze: &mut Gaze<Token>) -> Option<WanderValue> {
 //     match gaze.next() {
@@ -64,11 +66,55 @@ pub fn parse(tokens: Vec<Token>) -> Result<Vec<Vec<WanderValue>>, WanderError> {
                     current_result.push(WanderValue::Element(value));
                 }
                 Some(Token::Comma) => cont = false,
+                Some(Token::OpenBrace) => {
+                    match read_network(&mut gaze) {
+                        Ok(res) => {
+                            current_result.push(res);
+                        },
+                        _ => todo!()
+                    }
+                }
+                Some(_) => todo!(),
                 None => return Err(WanderError(format!("Error parsing {:?}", gaze.peek()))),
-                _ => todo!()
             }    
         }
         results.push(current_result);
     }
     Ok(results)
+}
+
+fn read_network(gaze: &mut Gaze<Token>) -> Result<WanderValue, WanderError> {
+    let mut cont = true;
+    let mut result: HashSet<ligature::Entry> = HashSet::new();
+    while cont {
+        let first = match gaze.next() {
+            Some(Token::Element(first)) => first,
+            Some(Token::CloseBrace) => return Ok(WanderValue::Network(HashSet::default())),
+            _ => todo!()
+        };
+        let second = match gaze.next() {
+            Some(Token::Element(second)) => second,
+            _ => todo!()
+        };
+        let third = match gaze.next() {
+            Some(Token::Element(third)) => third,
+            _ => todo!()
+        };
+
+        if second == Element(":".to_owned()) {
+            result.insert(Entry::Extends{ element : first, concept: third });
+        } else if second == Element("¬:".to_owned()) {
+            result.insert(Entry::NotExtends { element : first, concept: third });
+        } else {
+            result.insert(Entry::Role { first, second: third, role: second });
+        }
+        
+        match gaze.next() {
+            Some(Token::Comma) => (),
+            Some(Token::CloseBrace) => cont = false,
+            Some(_) => return Err(WanderError("Error parsing Network.".to_owned())),
+            None => return Err(WanderError("Error parsing Network.".to_owned()))
+        }
+    }
+    return Ok(WanderValue::Network(result))
 }

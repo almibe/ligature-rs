@@ -53,6 +53,13 @@ pub struct Call {
     arguments: Vec<WanderValue>,
 }
 
+/// A function call.
+#[derive(Debug, PartialEq, Eq, Clone, Deserialize, Serialize)]
+pub struct Quote {
+    name: ligature::Element,
+    arguments: Vec<WanderValue>,
+}
+
 /// Values in Wander programs used for Wander's implementation and interfacing between
 /// Wander and the host application.
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
@@ -61,6 +68,8 @@ pub enum WanderValue {
     Element(ligature::Element),
     /// A Call
     Call(Call),
+    /// A Quote
+    Quote(Quote),
     /// A Network.
     Network(HashSet<ligature::Entry>),
 }
@@ -113,6 +122,7 @@ impl Display for WanderValue {
             WanderValue::Element(value) => write!(f, "{}", value.0),
             WanderValue::Network(values) => write_network(values, f),
             WanderValue::Call(_call) => todo!(),
+            WanderValue::Quote(_quote) => todo!()
         }
     }
 }

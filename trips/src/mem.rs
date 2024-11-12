@@ -9,7 +9,7 @@
 use crate::{Query, Slot, Trip, Trips};
 use core::hash::Hash;
 use hashbag::HashBag;
-use std::{collections::{BTreeMap, BTreeSet, HashMap}, env::var};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 /// A simple error type.
 #[derive(Debug)]
@@ -116,7 +116,6 @@ impl<C: Clone + Eq + Hash, T: std::fmt::Debug + Eq + Ord + Clone + Hash> Trips<C
                             } else {
                                 if index == 0 {
                                     matches.iter().for_each(|m| {
-                                        println!("***");
                                         results.insert(m.clone());
                                         ()
                                     });
@@ -125,13 +124,13 @@ impl<C: Clone + Eq + Hash, T: std::fmt::Debug + Eq + Ord + Clone + Hash> Trips<C
                                 }
                             }
                         }
-                        None => todo!(),
+                        None => panic!("Should never reach."),
                     }
                     index = index + 1;
                 }
                 Ok(results)
             } //Ok(res.clone()),
-            None => todo!(),
+            None => Err(TripsError("Collection not found.".to_owned())),
         }
     }
 }
@@ -159,61 +158,60 @@ fn match_query_single<T: std::fmt::Debug + Ord>(
         Slot::Variable(variable_name) => {
             result.insert(variable_name.to_owned(), triple.0);
             ()
-        },
-        Slot::Value(value) =>
+        }
+        Slot::Value(value) => {
             if *value == triple.0 {
                 ()
             } else {
-                return None
-            },
+                return None;
+            }
+        }
         Slot::Any => (),
     }
     match &query.1 {
-        Slot::Variable(variable_name) => {
-            match result.get(variable_name) {
-                Some(value) => {
-                    if *value == triple.1 {
-                        ()
-                    } else {
-                        return None
-                    }
-                },
-                None => {
-                    result.insert(variable_name.to_owned(), triple.1);
-                    ()    
+        Slot::Variable(variable_name) => match result.get(variable_name) {
+            Some(value) => {
+                if *value == triple.1 {
+                    ()
+                } else {
+                    return None;
                 }
             }
+            None => {
+                result.insert(variable_name.to_owned(), triple.1);
+                ()
+            }
         },
-        Slot::Value(value) =>
+        Slot::Value(value) => {
             if *value == triple.1 {
                 ()
             } else {
-                return None
-            },
+                return None;
+            }
+        }
         Slot::Any => (),
     }
     match &query.2 {
-        Slot::Variable(variable_name) => {
-            match result.get(variable_name) {
-                Some(value) => {
-                    if *value == triple.2 {
-                        ()
-                    } else {
-                        return None
-                    }
-                },
-                None => {
-                    result.insert(variable_name.to_owned(), triple.2);
+        Slot::Variable(variable_name) => match result.get(variable_name) {
+            Some(value) => {
+                if *value == triple.2 {
                     ()
+                } else {
+                    return None;
                 }
             }
+            None => {
+                result.insert(variable_name.to_owned(), triple.2);
+                ()
+            }
         },
-        Slot::Value(value) =>
+        Slot::Value(value) => {
             if *value == triple.2 {
                 ()
             } else {
-                return None
-            },
+                return None;
+            }
+        }
         Slot::Any => (),
     }
     Some(result)

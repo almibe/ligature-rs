@@ -2,6 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+use std::collections::HashSet;
+
 use ligature::Element;
 use wander::{WanderError, WanderValue};
 
@@ -33,12 +35,12 @@ fn parse_strings() {
     assert_eq!(res, expected);
 }
 
-// #[test]
-// fn parse_empty_network() {
-//     let res = parse_str("{}");
-//     let expected = Ok(vec![vec![WanderValue::Network(HashSet::new())]]);
-//     assert_eq!(res, expected);
-// }
+#[test]
+fn parse_empty_network() {
+    let res = parse_str("{}");
+    let expected = Ok(vec![vec![WanderValue::Network(HashSet::new())]]);
+    assert_eq!(res, expected);
+}
 
 #[test]
 fn parse_application() {

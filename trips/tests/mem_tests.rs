@@ -116,7 +116,7 @@ fn basic_query_collection() {
 }
 
 #[test]
-fn complex_query_collection() {
+fn complex_single_query_collection() {
     let mut store: TripsMem<String, u64> = trips::mem::TripsMem::new();
     let _ = store.add_collection("T".to_owned());
     let _ = store.add_triples(
@@ -126,11 +126,14 @@ fn complex_query_collection() {
     let results: HashBag<BTreeMap<String, u64>> = store
         .query(
             "T".to_owned(),
-            BTreeSet::from([Query(
-                Slot::Variable("A".to_owned()),
-                Slot::Value(2),
-                Slot::Variable("C".to_owned()),
-            )]),
+            BTreeSet::from([
+                Query(
+                    Slot::Variable("A".to_owned()),
+                    Slot::Value(2),
+                    Slot::Variable("C".to_owned()),
+                ),
+                Query(Slot::Any, Slot::Variable("C".to_owned()), Slot::Any),
+            ]),
         )
         .unwrap();
     let expected: HashBag<BTreeMap<String, u64>> = HashBag::from_iter([

@@ -2,10 +2,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+use ligature::Entry;
+
 use crate::Command;
 use std::{
     cell::RefCell,
-    collections::HashMap,
+    collections::{HashMap, HashSet},
     rc::Rc,
 };
 
@@ -13,6 +15,7 @@ use std::{
 #[derive(Default)]
 pub struct Environment {
     host_functions: RefCell<HashMap<String, Rc<dyn Command>>>,
+    state: RefCell<HashMap<String, HashSet<Entry>>>
 }
 
 impl Environment {
@@ -20,6 +23,7 @@ impl Environment {
     pub fn new() -> Environment {
         Environment {
             host_functions: RefCell::new(HashMap::new()),
+            state: RefCell::new(HashMap::new())
         }
     }
 
