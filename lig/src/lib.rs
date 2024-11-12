@@ -15,21 +15,6 @@ pub mod lexer;
 pub mod read;
 pub mod write;
 
-/// Write integer.
-pub fn write_integer(integer: &i64) -> String {
-    format!("{}", integer)
-}
-
-/// Write float.
-pub fn write_float(float: &f64) -> String {
-    let res = format!("{}", float);
-    if res.contains('.') {
-        res
-    } else {
-        res + ".0"
-    }
-}
-
 // Write out Bytes as a String.
 // pub fn write_bytes(bytes: &Bytes) -> String {
 //     format!("0x{}", encode(bytes))

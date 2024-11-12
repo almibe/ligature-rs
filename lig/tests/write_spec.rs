@@ -3,20 +3,20 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use lig::write::write;
-use ligature::{Name, LigatureError, Statement, Value};
+use ligature::{Element, LigatureError, Role, Value};
 
 #[test]
 fn write_set_of_statements() -> Result<(), LigatureError> {
     let statements = vec![
-        Statement {
-            entity: Name("e".to_string()),
-            attribute: Name("a".to_string()),
-            value: Value::Integer(234),
+        Role {
+            first: Element("e".to_string()),
+            second: Element("a".to_string()),
+            role: Value::Integer(234),
         },
-        Statement {
-            entity: Name("e".to_string()),
-            attribute: Name("a2".to_string()),
-            value: Value::String("test".to_string()),
+        Role {
+            first: Element("e".to_string()),
+            second: Element("a2".to_string()),
+            role: Value::String("test".to_string()),
         },
     ];
     let expected = "<e> <a> 234\n<e> <a2> \"test\"\n";

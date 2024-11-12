@@ -2,7 +2,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use ligature::{LigatureError, Statement};
 use logos::Logos;
 use crate::lexer::Token;
 
@@ -18,7 +17,7 @@ pub fn tokenize(script: &str) -> Result<Vec<Token>, LigatureError> {
     Ok(results)
 }
 
-pub fn read(script: &str) -> Result<Vec<Statement>, LigatureError> {
+pub fn read(script: &str) -> Result<Vec<Role>, LigatureError> {
     todo!()
     //let tokens = tokenize(script)?;
     //read_tokens(tokens)
