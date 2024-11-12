@@ -108,11 +108,9 @@ fn basic_query_collection() {
             )]),
         )
         .unwrap();
-    // let expected: BTreeSet<BTreeMap<String, u64>> =
-    //     BTreeSet::from([BTreeMap::from()]);
-    let expected: HashBag<BTreeMap<String, u64>> = HashBag::from_iter([BTreeMap::from_iter([
-        ("A".to_owned(), 1),
-        ("A".to_owned(), 1),
-    ])]);
+    let expected: HashBag<BTreeMap<String, u64>> = HashBag::from_iter([
+        BTreeMap::from_iter([("A".to_owned(), 1)]),
+        BTreeMap::from_iter([("A".to_owned(), 1)]),
+    ]);
     assert_eq!(results, expected);
 }

@@ -9,7 +9,7 @@
 use crate::{Query, Slot, Trip, Trips};
 use core::hash::Hash;
 use hashbag::HashBag;
-use std::collections::{BTreeMap, BTreeSet, HashMap};
+use std::{collections::{BTreeMap, BTreeSet, HashMap}, env::var};
 
 /// A simple error type.
 #[derive(Debug)]
@@ -116,6 +116,7 @@ impl<C: Clone + Eq + Hash, T: std::fmt::Debug + Eq + Ord + Clone + Hash> Trips<C
                             } else {
                                 if index == 0 {
                                     matches.iter().for_each(|m| {
+                                        println!("***");
                                         results.insert(m.clone());
                                         ()
                                     });
@@ -153,8 +154,67 @@ fn match_query_single<T: std::fmt::Debug + Ord>(
     query: &Query<T>,
     triple: Trip<T>,
 ) -> Option<BTreeMap<String, T>> {
-    match query {
-        Query(Slot::Any, Slot::Any, Slot::Any) => Some(BTreeMap::new()),
-        _ => todo!(),
+    let mut result = BTreeMap::new();
+    match &query.0 {
+        Slot::Variable(variable_name) => {
+            result.insert(variable_name.to_owned(), triple.0);
+            ()
+        },
+        Slot::Value(value) =>
+            if *value == triple.0 {
+                ()
+            } else {
+                return None
+            },
+        Slot::Any => (),
     }
+    match &query.1 {
+        Slot::Variable(variable_name) => {
+            match result.get(variable_name) {
+                Some(value) => {
+                    if *value == triple.1 {
+                        ()
+                    } else {
+                        return None
+                    }
+                },
+                None => {
+                    result.insert(variable_name.to_owned(), triple.1);
+                    ()    
+                }
+            }
+        },
+        Slot::Value(value) =>
+            if *value == triple.1 {
+                ()
+            } else {
+                return None
+            },
+        Slot::Any => (),
+    }
+    match &query.2 {
+        Slot::Variable(variable_name) => {
+            match result.get(variable_name) {
+                Some(value) => {
+                    if *value == triple.2 {
+                        ()
+                    } else {
+                        return None
+                    }
+                },
+                None => {
+                    result.insert(variable_name.to_owned(), triple.2);
+                    ()
+                }
+            }
+        },
+        Slot::Value(value) =>
+            if *value == triple.2 {
+                ()
+            } else {
+                return None
+            },
+        Slot::Any => (),
+    }
+    Some(result)
 }
