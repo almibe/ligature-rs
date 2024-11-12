@@ -7,7 +7,8 @@
 #![deny(missing_docs)]
 
 use core::hash::Hash;
-use std::collections::BTreeSet;
+use hashbag::HashBag;
+use std::collections::{BTreeMap, BTreeSet};
 
 pub mod mem;
 
@@ -50,19 +51,15 @@ pub trait Trips<C: Eq + Hash, T: std::fmt::Debug + Eq + Ord, E> {
     /// Add Statements to a given Dataset.
     /// Returns Error if Dataset doesn't exist.
     /// Does nothing if Statement already exists in Dataset.
-    fn add_triples(
-        &mut self,
-        collection: C,
-        trips: &mut BTreeSet<Trip<T>>,
-    ) -> Result<(), E>;
+    fn add_triples(&mut self, collection: C, trips: &mut BTreeSet<Trip<T>>) -> Result<(), E>;
     /// Remove Statements from a given Dataset.
     /// Returns Error if Dataset doesn't exist.
     /// Does nothing if Statement doesn't exist in Dataset.
-    fn remove_triples(
-        &mut self,
-        collection: C,
-        trips: &mut BTreeSet<Trip<T>>
-    ) -> Result<(), E>;
+    fn remove_triples(&mut self, collection: C, trips: &mut BTreeSet<Trip<T>>) -> Result<(), E>;
     /// Run a query against the given Dataset.
-    fn query(&self, collection: C, pattern: BTreeSet<Query<T>>) -> Result<BTreeSet<Trip<T>>, E>;
+    fn query(
+        &self,
+        collection: C,
+        pattern: BTreeSet<Query<T>>,
+    ) -> Result<HashBag<BTreeMap<String, T>>, E>;
 }

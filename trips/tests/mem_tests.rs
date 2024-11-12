@@ -2,9 +2,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use trips::{Trip, Trips, Query, Slot};
+use hashbag::HashBag;
+use std::collections::{BTreeMap, BTreeSet};
 use trips::mem::TripsMem;
-use std::collections::BTreeSet;
+use trips::{Query, Slot, Trip, Trips};
 
 #[test]
 fn store_should_start_empty() {
@@ -57,7 +58,10 @@ fn add_triples_to_collection() {
 fn remove_triples_from_collection() {
     let mut store: TripsMem<String, u64> = trips::mem::TripsMem::new();
     let _ = store.add_collection("T".to_owned());
-    let _ = store.add_triples("T".to_owned(), &mut BTreeSet::from([Trip(1, 2, 3), Trip(1, 2, 6), Trip(1, 2, 5)]));
+    let _ = store.add_triples(
+        "T".to_owned(),
+        &mut BTreeSet::from([Trip(1, 2, 3), Trip(1, 2, 6), Trip(1, 2, 5)]),
+    );
     let _ = store.remove_triples("T".to_owned(), &mut BTreeSet::from([Trip(1, 2, 3)]));
     let collections: BTreeSet<Trip<u64>> = store.triples("T".to_owned()).unwrap();
     let result: BTreeSet<Trip<u64>> = BTreeSet::from([Trip(1, 2, 5), Trip(1, 2, 6)]);
@@ -68,8 +72,47 @@ fn remove_triples_from_collection() {
 fn match_all_query_collection() {
     let mut store: TripsMem<String, u64> = trips::mem::TripsMem::new();
     let _ = store.add_collection("T".to_owned());
-    let _ = store.add_triples("T".to_owned(), &mut BTreeSet::from([Trip(1, 2, 3), Trip(1, 2, 6), Trip(1, 2, 5)]));
-    let collections: BTreeSet<Trip<u64>> = store.query("T".to_owned(), BTreeSet::from([Query(Slot::Any, Slot::Any, Slot::Any)])).unwrap();
-    let result: BTreeSet<Trip<u64>> = BTreeSet::from([Trip(1, 2, 3), Trip(1, 2, 6), Trip(1, 2, 5)]);
-    assert_eq!(collections, result);
+    let _ = store.add_triples(
+        "T".to_owned(),
+        &mut BTreeSet::from([Trip(1, 2, 3), Trip(1, 2, 6), Trip(1, 2, 5)]),
+    );
+    let results = store
+        .query(
+            "T".to_owned(),
+            BTreeSet::from([Query(Slot::Any, Slot::Any, Slot::Any)]),
+        )
+        .unwrap();
+    let expected: HashBag<BTreeMap<String, u64>> = HashBag::from_iter([
+        BTreeMap::from_iter([]),
+        BTreeMap::from_iter([]),
+        BTreeMap::from_iter([]),
+    ]);
+    assert_eq!(results, expected);
+}
+
+#[test]
+fn basic_query_collection() {
+    let mut store: TripsMem<String, u64> = trips::mem::TripsMem::new();
+    let _ = store.add_collection("T".to_owned());
+    let _ = store.add_triples(
+        "T".to_owned(),
+        &mut BTreeSet::from([Trip(1, 2, 3), Trip(1, 2, 6), Trip(1, 3, 5)]),
+    );
+    let results: HashBag<BTreeMap<String, u64>> = store
+        .query(
+            "T".to_owned(),
+            BTreeSet::from([Query(
+                Slot::Variable("A".to_owned()),
+                Slot::Value(2),
+                Slot::Any,
+            )]),
+        )
+        .unwrap();
+    // let expected: BTreeSet<BTreeMap<String, u64>> =
+    //     BTreeSet::from([BTreeMap::from()]);
+    let expected: HashBag<BTreeMap<String, u64>> = HashBag::from_iter([BTreeMap::from_iter([
+        ("A".to_owned(), 1),
+        ("A".to_owned(), 1),
+    ])]);
+    assert_eq!(results, expected);
 }

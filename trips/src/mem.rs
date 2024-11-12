@@ -6,9 +6,10 @@
 
 #![deny(missing_docs)]
 
-use std::collections::{BTreeSet, HashMap, HashSet};
+use crate::{Query, Slot, Trip, Trips};
 use core::hash::Hash;
-use crate::{Trip, Trips};
+use hashbag::HashBag;
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 /// A simple error type.
 #[derive(Debug)]
@@ -20,16 +21,16 @@ pub struct TripsMem<C: Clone, T: std::fmt::Debug + Ord> {
     // id_to_value: HashMap<usize, T>,
     // value_to_id: HashMap<T, usize>,
     // collections: HashMap<C, BTreeSet<(usize, usize, usize)>>
-    collections: HashMap<C, BTreeSet<Trip<T>>>
+    collections: HashMap<C, BTreeSet<Trip<T>>>,
 }
 
-impl <C: Clone, T: std::fmt::Debug + Ord>TripsMem<C, T> {
+impl<C: Clone, T: std::fmt::Debug + Ord> TripsMem<C, T> {
     /// Create an empty triple store.
     pub fn new() -> Self {
         Self {
             // index: 0,
             // values: HashMap::new(),
-            collections: HashMap::new()
+            collections: HashMap::new(),
         }
     }
 
@@ -41,7 +42,9 @@ impl <C: Clone, T: std::fmt::Debug + Ord>TripsMem<C, T> {
     // }
 }
 
-impl <C: Clone + Eq + Hash,T: std::fmt::Debug + Eq + Ord + Clone>Trips<C,T,TripsError> for TripsMem<C, T> {
+impl<C: Clone + Eq + Hash, T: std::fmt::Debug + Eq + Ord + Clone + Hash> Trips<C, T, TripsError>
+    for TripsMem<C, T>
+{
     fn collections(&self) -> Result<Vec<C>, TripsError> {
         let res: Vec<C> = self.collections.keys().cloned().collect();
         Ok(res)
@@ -60,7 +63,7 @@ impl <C: Clone + Eq + Hash,T: std::fmt::Debug + Eq + Ord + Clone>Trips<C,T,Trips
     fn triples(&self, collection: C) -> Result<BTreeSet<crate::Trip<T>>, TripsError> {
         match self.collections.get(&collection) {
             Some(res) => Ok(res.clone()),
-            None => todo!()
+            None => todo!(),
         }
     }
 
@@ -72,32 +75,86 @@ impl <C: Clone + Eq + Hash,T: std::fmt::Debug + Eq + Ord + Clone>Trips<C,T,Trips
         match self.collections.get_mut(&collection) {
             Some(res) => {
                 res.append(trips);
-                return Ok(())
-            },
-            None => todo!()
+                return Ok(());
+            }
+            None => todo!(),
         }
     }
 
     fn remove_triples(
         &mut self,
         collection: C,
-        trips: &mut BTreeSet<crate::Trip<T>>
+        trips: &mut BTreeSet<crate::Trip<T>>,
     ) -> Result<(), TripsError> {
         match self.collections.get_mut(&collection) {
             Some(res) => {
                 trips.iter().for_each(|trip| {
                     res.remove(trip);
                 });
-                return Ok(())
-            },
-            None => todo!()
+                return Ok(());
+            }
+            None => todo!(),
         }
     }
 
-    fn query(&self, collection: C, pattern: BTreeSet<crate::Query<T>>) -> Result<BTreeSet<Trip<T>>, TripsError> {
+    fn query(
+        &self,
+        collection: C,
+        pattern: BTreeSet<crate::Query<T>>,
+    ) -> Result<HashBag<BTreeMap<String, T>>, TripsError> {
         match self.collections.get(&collection) {
-            Some(res) => Ok(res.clone()),
-            None => todo!()
+            Some(collection) => {
+                let mut results: HashBag<BTreeMap<String, T>> = HashBag::new();
+                let terms: Vec<&Query<T>> = pattern.iter().collect();
+                let mut index = 0;
+                while index < terms.len() {
+                    match terms.get(index) {
+                        Some(query) => {
+                            let matches = match_query(query, collection.clone());
+                            if matches.is_empty() {
+                                return Ok(HashBag::new());
+                            } else {
+                                if index == 0 {
+                                    matches.iter().for_each(|m| {
+                                        results.insert(m.clone());
+                                        ()
+                                    });
+                                } else {
+                                    todo!()
+                                }
+                            }
+                        }
+                        None => todo!(),
+                    }
+                    index = index + 1;
+                }
+                Ok(results)
+            } //Ok(res.clone()),
+            None => todo!(),
         }
+    }
+}
+
+fn match_query<T: std::fmt::Debug + Ord>(
+    query: &Query<T>,
+    triples: BTreeSet<Trip<T>>,
+) -> Vec<BTreeMap<String, T>> {
+    let mut results = vec![];
+    for trip in triples {
+        match match_query_single(query, trip) {
+            Some(res) => results.push(res),
+            None => (),
+        }
+    }
+    results
+}
+
+fn match_query_single<T: std::fmt::Debug + Ord>(
+    query: &Query<T>,
+    triple: Trip<T>,
+) -> Option<BTreeMap<String, T>> {
+    match query {
+        Query(Slot::Any, Slot::Any, Slot::Any) => Some(BTreeMap::new()),
+        _ => todo!(),
     }
 }
