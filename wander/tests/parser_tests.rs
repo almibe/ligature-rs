@@ -137,12 +137,10 @@ fn parse_nested_function_calls() {
     let res = parse_str("Bool.not (Bool.not false)");
     let expected = Ok(vec![Call {
         name: Element("Bool.not".to_owned()),
-        arguments: vec![
-            WanderValue::Quote(Quote(vec![
-                WanderValue::Element(Element("Bool.not".to_owned())),
-                WanderValue::Element(Element("false".to_owned())),
-            ]))
-        ],
+        arguments: vec![WanderValue::Quote(Quote(vec![
+            WanderValue::Element(Element("Bool.not".to_owned())),
+            WanderValue::Element(Element("false".to_owned())),
+        ]))],
     }]);
     assert_eq!(res, expected);
 }

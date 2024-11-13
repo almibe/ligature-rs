@@ -6,18 +6,18 @@
 
 #![deny(missing_docs)]
 
-use std::{collections::HashSet, fmt::Display};
+use std::{
+    cell::RefCell,
+    collections::{HashMap, HashSet},
+    fmt::Display,
+    rc::Rc,
+};
 
-use environment::Environment;
-use interpreter::eval;
 use lexer::tokenize_and_filter;
+use ligature::{Element, Entry};
 use parser::parse;
 use serde::{Deserialize, Serialize};
 
-#[doc(hidden)]
-pub mod environment;
-#[doc(hidden)]
-pub mod interpreter;
 #[doc(hidden)]
 pub mod lexer;
 #[doc(hidden)]
@@ -36,7 +36,7 @@ pub trait Command {
     fn run(
         &self,
         arguments: &[WanderValue],
-        bindings: &Environment,
+        state: &HashMap<String, HashSet<Entry>>,
     ) -> Result<WanderValue, WanderError>;
 }
 
@@ -51,9 +51,10 @@ pub struct Call {
 
 /// A quote of WanderValues.
 #[derive(Debug, PartialEq, Eq, Clone, Deserialize, Serialize)]
-pub struct Quote (
+pub struct Quote(
     /// The arguments to the quoted call.
-    pub Vec<WanderValue>);
+    pub Vec<WanderValue>,
+);
 
 /// Values in Wander programs used for Wander's implementation and interfacing between
 /// Wander and the host application.
@@ -120,7 +121,11 @@ impl Display for WanderValue {
 }
 
 /// Run a Wander script with the given Bindings.
-pub fn run(script: &str, bindings: &mut Environment) -> Result<WanderValue, WanderError> {
+pub fn run(
+    script: &str,
+    commands: HashMap<String, Box<dyn Command>>,
+    state: HashMap<String, HashSet<Entry>>
+) -> Result<WanderValue, WanderError> {
     let tokens = match tokenize_and_filter(script) {
         Ok(v) => v,
         Err(err) => return Err(err),
@@ -129,5 +134,18 @@ pub fn run(script: &str, bindings: &mut Environment) -> Result<WanderValue, Wand
         Ok(v) => v,
         Err(err) => return Err(err),
     };
-    eval(&calls, bindings)
+    let mut result = Ok(WanderValue::Network(HashSet::new()));
+    calls.iter().for_each(|call| {
+        match commands.get(&call.name.0) {
+            Some(res) => {
+                match res.run(&call.arguments, &state) {
+                    Ok(res) => result = Ok(res),
+                    _ => todo!()
+                }
+            },
+            _ => todo!()
+        }
+    });
+    result
+    //    eval(&calls, bindings)
 }

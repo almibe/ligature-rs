@@ -2,8 +2,13 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use crate::{environment::Environment, Command, WanderError, WanderValue};
-use std::rc::Rc;
+use ligature::Entry;
+
+use crate::{Command, WanderError, WanderValue};
+use std::{
+    collections::{HashMap, HashSet},
+    rc::Rc,
+};
 
 // struct EqFunction {}
 // impl HostFunction for EqFunction {
@@ -36,7 +41,7 @@ impl Command for LogFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
-        _bindings: &Environment,
+        state: &HashMap<String, HashSet<Entry>>,
     ) -> Result<WanderValue, WanderError> {
         if let [message] = arguments {
             println!("{message}");
@@ -64,7 +69,7 @@ impl Command for AssertEqFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
-        _bindings: &Environment,
+        state: &HashMap<String, HashSet<Entry>>,
     ) -> Result<WanderValue, WanderError> {
         if let [left, right] = arguments {
             if left == right {
@@ -88,6 +93,17 @@ impl Command for AssertEqFunction {
     //         doc_string: "Assert that two values are equal.".to_owned(),
     //     }
     // }
+}
+
+struct IgnoreFunction {}
+impl Command for IgnoreFunction {
+    fn run(
+        &self,
+        _arguments: &[WanderValue],
+        state: &HashMap<String, HashSet<Entry>>,
+    ) -> Result<WanderValue, WanderError> {
+        Ok(WanderValue::Network(HashSet::new()))
+    }
 }
 
 // struct AndFunction {}
@@ -203,16 +219,17 @@ impl Command for AssertEqFunction {
 
 /// Creates a set of Bindings for Wander that consists of all of the common
 /// functionality, but doesn't interact with an instance of Ligature.
-pub fn common() -> Environment {
-    let mut bindings = Environment::new();
-    //    bindings.bind_host_function(Rc::new(EqFunction {}));
-    bindings.bind_host_function(Rc::new(AssertEqFunction {}));
-    // bindings.bind_host_function(Rc::new(AndFunction {}));
-    // bindings.bind_host_function(Rc::new(NotFunction {}));
-    // bindings.bind_host_function(Rc::new(EnvironmentFunction {}));
-    bindings
+pub fn common() -> HashMap<String, Box<dyn Command>> {
+    let mut commands: HashMap<String, Box<dyn Command>> = HashMap::new();
+    //    commands.bind_host_function(Rc::new(EqFunction {}));
+    commands.insert("assert-eq".to_owned(), Box::new(AssertEqFunction {}));
+    commands.insert("ignore".to_owned(), Box::new(IgnoreFunction {}));
+    // commands.bind_host_function(Rc::new(AndFunction {}));
+    // commands.bind_host_function(Rc::new(NotFunction {}));
+    // commands.bind_host_function(Rc::new(EnvironmentFunction {}));
+    commands
 }
 
-pub fn add_print(environment: &mut Environment) {
-    environment.bind_host_function(Rc::new(LogFunction {}));
-}
+// pub fn add_print(environment: &mut WanderEngine) {
+//     environment.bind_host_function(Rc::new(LogFunction {}));
+// }

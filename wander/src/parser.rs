@@ -151,9 +151,12 @@ fn read_quote(gaze: &mut Gaze<Token>) -> Result<WanderValue, WanderError> {
     while cont {
         match gaze.next() {
             Some(Token::Element(element)) => {
-                values.push(WanderValue::Element(element));    
-            },
+                values.push(WanderValue::Element(element));
+            }
             Some(Token::CloseParen) => cont = false,
+            Some(Token::OpenBrace) => {
+                todo!()
+            }
             _ => todo!(),
         };
     }

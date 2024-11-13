@@ -6,9 +6,7 @@ use std::collections::HashMap;
 use std::{fs::File, path::PathBuf};
 
 use std::io::Read;
-use wander::preludes::add_print;
 use wander::preludes::common;
-use wander::run;
 use wander::{WanderError, WanderValue};
 
 #[test]
