@@ -13,7 +13,6 @@ use interpreter::eval;
 use lexer::tokenize_and_filter;
 use parser::parse;
 use serde::{Deserialize, Serialize};
-use translation::translate;
 
 #[doc(hidden)]
 pub mod environment;
@@ -25,8 +24,6 @@ pub mod lexer;
 pub mod parser;
 #[doc(hidden)]
 pub mod preludes;
-#[doc(hidden)]
-pub mod translation;
 
 /// An error that occurs while running a Wander script.
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize, Clone)]
@@ -46,16 +43,17 @@ pub trait Command {
 /// A function call.
 #[derive(Debug, PartialEq, Eq, Clone, Deserialize, Serialize)]
 pub struct Call {
-    name: ligature::Element,
-    arguments: Vec<WanderValue>,
+    /// The name of the command being called.
+    pub name: ligature::Element,
+    /// The arguments to the command.
+    pub arguments: Vec<WanderValue>,
 }
 
-/// A function call.
+/// A quote of WanderValues.
 #[derive(Debug, PartialEq, Eq, Clone, Deserialize, Serialize)]
-pub struct Quote {
-    name: ligature::Element,
-    arguments: Vec<WanderValue>,
-}
+pub struct Quote (
+    /// The arguments to the quoted call.
+    pub Vec<WanderValue>);
 
 /// Values in Wander programs used for Wander's implementation and interfacing between
 /// Wander and the host application.
@@ -63,8 +61,6 @@ pub struct Quote {
 pub enum WanderValue {
     /// An Element.
     Element(ligature::Element),
-    /// A Call
-    Call(Call),
     /// A Quote
     Quote(Quote),
     /// A Network.
@@ -118,7 +114,6 @@ impl Display for WanderValue {
         match self {
             WanderValue::Element(value) => write!(f, "{}", value.0),
             WanderValue::Network(values) => write_network(values, f),
-            WanderValue::Call(_call) => todo!(),
             WanderValue::Quote(_quote) => todo!(),
         }
     }
@@ -130,11 +125,7 @@ pub fn run(script: &str, bindings: &mut Environment) -> Result<WanderValue, Wand
         Ok(v) => v,
         Err(err) => return Err(err),
     };
-    let values = match parse(tokens) {
-        Ok(v) => v,
-        Err(err) => return Err(err),
-    };
-    let calls = match translate(values) {
+    let calls = match parse(tokens) {
         Ok(v) => v,
         Err(err) => return Err(err),
     };

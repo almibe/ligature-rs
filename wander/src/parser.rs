@@ -4,7 +4,7 @@
 
 use std::collections::HashSet;
 
-use crate::{lexer::Token, WanderError, WanderValue};
+use crate::{lexer::Token, Call, Quote, WanderError, WanderValue};
 use gaze::Gaze;
 use ligature::{Element, Entry};
 
@@ -51,9 +51,9 @@ use ligature::{Element, Entry};
 // }
 
 /// Parse a sequence of Tokens into a sequence of ASTs.
-pub fn parse(tokens: Vec<Token>) -> Result<Vec<Vec<WanderValue>>, WanderError> {
+pub fn parse(tokens: Vec<Token>) -> Result<Vec<Call>, WanderError> {
     let mut gaze = Gaze::from_vec(tokens);
-    let mut results = vec![];
+    let mut calls: Vec<Call> = vec![];
     while !gaze.is_complete() {
         let mut current_result = vec![];
         let mut cont = true;
@@ -72,13 +72,31 @@ pub fn parse(tokens: Vec<Token>) -> Result<Vec<Vec<WanderValue>>, WanderError> {
                     }
                     _ => todo!(),
                 },
-                Some(_) => todo!(),
+                Some(Token::OpenParen) => match read_quote(&mut gaze) {
+                    Ok(res) => {
+                        current_result.push(res);
+                    }
+                    _ => todo!(),
+                },
+                Some(_) => return Err(WanderError(format!("Error parsing {:?}", gaze.peek()))),
                 None => return Err(WanderError(format!("Error parsing {:?}", gaze.peek()))),
             }
         }
-        results.push(current_result);
+        match &current_result[..] {
+            [WanderValue::Element(name)] => calls.push(Call {
+                name: name.clone(),
+                arguments: vec![],
+            }),
+            [WanderValue::Element(name), ref args @ ..] => {
+                calls.push(Call {
+                    name: name.clone(),
+                    arguments: args.to_vec(),
+                });
+            }
+            _ => todo!(),
+        }
     }
-    Ok(results)
+    Ok(calls)
 }
 
 fn read_network(gaze: &mut Gaze<Token>) -> Result<WanderValue, WanderError> {
@@ -125,4 +143,19 @@ fn read_network(gaze: &mut Gaze<Token>) -> Result<WanderValue, WanderError> {
         }
     }
     return Ok(WanderValue::Network(result));
+}
+
+fn read_quote(gaze: &mut Gaze<Token>) -> Result<WanderValue, WanderError> {
+    let mut cont = true;
+    let mut values: Vec<WanderValue> = vec![];
+    while cont {
+        match gaze.next() {
+            Some(Token::Element(element)) => {
+                values.push(WanderValue::Element(element));    
+            },
+            Some(Token::CloseParen) => cont = false,
+            _ => todo!(),
+        };
+    }
+    Ok(WanderValue::Quote(Quote(values)))
 }
