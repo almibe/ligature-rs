@@ -16,21 +16,23 @@ use std::collections::{BTreeMap, BTreeSet, HashMap};
 pub struct TripsError(String);
 
 /// An in-memory implementation of Trips.
-pub struct TripsMem<C: Clone, T: std::fmt::Debug + Ord> {
+#[derive(Debug, PartialEq, Eq)]
+
+pub struct TripsMem<C: Clone + Ord, T: std::fmt::Debug + Ord> {
     // index: usize,
     // id_to_value: HashMap<usize, T>,
     // value_to_id: HashMap<T, usize>,
     // collections: HashMap<C, BTreeSet<(usize, usize, usize)>>
-    collections: HashMap<C, BTreeSet<Trip<T>>>,
+    collections: BTreeMap<C, BTreeSet<Trip<T>>>,
 }
 
-impl<C: Clone, T: std::fmt::Debug + Ord> TripsMem<C, T> {
+impl<C: Clone + Ord, T: std::fmt::Debug + Ord> TripsMem<C, T> {
     /// Create an empty triple store.
     pub fn new() -> Self {
         Self {
             // index: 0,
             // values: HashMap::new(),
-            collections: HashMap::new(),
+            collections: BTreeMap::new(),
         }
     }
 
@@ -42,7 +44,7 @@ impl<C: Clone, T: std::fmt::Debug + Ord> TripsMem<C, T> {
     // }
 }
 
-impl<C: Clone + Eq + Hash, T: std::fmt::Debug + Eq + Ord + Clone + Hash> Trips<C, T, TripsError>
+impl<C: Clone + Eq + Hash + Ord, T: std::fmt::Debug + Eq + Ord + Clone + Hash> Trips<C, T, TripsError>
     for TripsMem<C, T>
 {
     fn collections(&self) -> Result<Vec<C>, TripsError> {

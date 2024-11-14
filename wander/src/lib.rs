@@ -17,6 +17,8 @@ use lexer::tokenize_and_filter;
 use ligature::{Element, Entry};
 use parser::parse;
 use serde::{Deserialize, Serialize};
+use trips::Trips;
+use trips::mem::TripsError;
 
 #[doc(hidden)]
 pub mod lexer;
@@ -36,7 +38,7 @@ pub trait Command {
     fn run(
         &self,
         arguments: &[WanderValue],
-        state: &HashMap<String, HashSet<Entry>>,
+        state: &mut dyn Trips<Element, Element, TripsError>,
     ) -> Result<WanderValue, WanderError>;
 }
 
@@ -124,7 +126,7 @@ impl Display for WanderValue {
 pub fn run(
     script: &str,
     commands: HashMap<String, Box<dyn Command>>,
-    state: HashMap<String, HashSet<Entry>>
+    state: &mut dyn Trips<Element, Element, TripsError>
 ) -> Result<WanderValue, WanderError> {
     let tokens = match tokenize_and_filter(script) {
         Ok(v) => v,
@@ -135,17 +137,16 @@ pub fn run(
         Err(err) => return Err(err),
     };
     let mut result = Ok(WanderValue::Network(HashSet::new()));
-    calls.iter().for_each(|call| {
+    for call in calls {
         match commands.get(&call.name.0) {
             Some(res) => {
-                match res.run(&call.arguments, &state) {
+                match res.run(&call.arguments, state) {
                     Ok(res) => result = Ok(res),
-                    _ => todo!()
+                    Err(err) => return Err(err)
                 }
             },
             _ => todo!()
         }
-    });
+    }
     result
-    //    eval(&calls, bindings)
 }

@@ -2,13 +2,15 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use ligature::Entry;
+use ligature::{Element, Entry};
 
 use crate::{Command, WanderError, WanderValue};
 use std::{
-    collections::{HashMap, HashSet},
+    collections::{BTreeSet, HashMap, HashSet},
     rc::Rc,
 };
+use trips::{Trip, Trips};
+use trips::mem::TripsError;
 
 // struct EqFunction {}
 // impl HostFunction for EqFunction {
@@ -36,23 +38,23 @@ use std::{
 //     }
 // }
 
-struct LogFunction {}
-impl Command for LogFunction {
-    fn run(
-        &self,
-        arguments: &[WanderValue],
-        state: &HashMap<String, HashSet<Entry>>,
-    ) -> Result<WanderValue, WanderError> {
-        if let [message] = arguments {
-            println!("{message}");
-            todo!();
-            // Ok(WanderValue::Nothing)
-        } else {
-            Err(WanderError(
-                "`log` function requires a message to print.".to_owned(),
-            ))
-        }
-    }
+// struct LogFunction {}
+// impl Command for LogFunction {
+//     fn run(
+//         &self,
+//         arguments: &[WanderValue],
+//         state: &mut HashMap<String, HashSet<Entry>>,
+//     ) -> Result<WanderValue, WanderError> {
+//         if let [message] = arguments {
+//             println!("{message}");
+//             todo!();
+//             // Ok(WanderValue::Nothing)
+//         } else {
+//             Err(WanderError(
+//                 "`log` function requires a message to print.".to_owned(),
+//             ))
+//         }
+//     }
 
     // fn binding(&self) -> HostFunctionBinding {
     //     HostFunctionBinding {
@@ -62,19 +64,18 @@ impl Command for LogFunction {
     //         doc_string: "Log a message.".to_owned(),
     //     }
     // }
-}
+//}
 
 struct AssertEqFunction {}
 impl Command for AssertEqFunction {
     fn run(
         &self,
         arguments: &[WanderValue],
-        state: &HashMap<String, HashSet<Entry>>,
+        state: &mut dyn Trips<Element, Element, TripsError>,
     ) -> Result<WanderValue, WanderError> {
         if let [left, right] = arguments {
             if left == right {
-                todo!();
-                // Ok(crate::WanderValue::Nothing)
+                Ok(crate::WanderValue::Network(HashSet::new()))
             } else {
                 Err(WanderError("Assertion failed!".to_owned()))
             }
@@ -100,11 +101,45 @@ impl Command for IgnoreFunction {
     fn run(
         &self,
         _arguments: &[WanderValue],
-        state: &HashMap<String, HashSet<Entry>>,
+        state: &mut dyn Trips<Element, Element, TripsError>,
     ) -> Result<WanderValue, WanderError> {
         Ok(WanderValue::Network(HashSet::new()))
     }
 }
+
+struct LetCommand {}
+impl Command for LetCommand {
+    fn run(
+        &self,
+        arguments: &[WanderValue],
+        state: &mut dyn Trips<Element, Element, TripsError>,
+    ) -> Result<WanderValue, WanderError> {
+        match arguments {
+            [WanderValue::Element(name), WanderValue::Network(network)] => {
+                //state.insert(name.0.clone(), network.clone());
+                state.add_collection(name.clone());
+                for entry in network.iter() {
+                    match entry {
+                        Entry::Role { first, second, role } => {
+                            state.add_triples(name.clone(), &mut BTreeSet::from([
+                                Trip(first.clone(), role.clone(), second.clone())
+                            ]));
+                        },
+                        Entry::Extends { element, concept } => {
+                            todo!()
+                        },
+                        Entry::NotExtends { element, concept } => {
+                            todo!()
+                        }
+                    }
+                }
+            },
+            _ => todo!("Error")
+        }
+        Ok(WanderValue::Network(HashSet::new()))
+    }
+}
+
 
 // struct AndFunction {}
 // impl HostFunction for AndFunction {
@@ -224,6 +259,8 @@ pub fn common() -> HashMap<String, Box<dyn Command>> {
     //    commands.bind_host_function(Rc::new(EqFunction {}));
     commands.insert("assert-eq".to_owned(), Box::new(AssertEqFunction {}));
     commands.insert("ignore".to_owned(), Box::new(IgnoreFunction {}));
+    commands.insert("let".to_owned(), Box::new(LetCommand {}));
+
     // commands.bind_host_function(Rc::new(AndFunction {}));
     // commands.bind_host_function(Rc::new(NotFunction {}));
     // commands.bind_host_function(Rc::new(EnvironmentFunction {}));
