@@ -4,111 +4,88 @@
 
 //! This module is an implementation of the an in-memory, non-transactional knowledge graph.
 
-use ligature::{Identifier, Statement, Value};
-use serde::{Deserialize, Serialize};
+use ligature::{Element, Entry, Ligature};
 use std::collections::BTreeSet;
+use trips::{Trip, Trips, Query, Slot};
+use hashbag::HashBag;
+use trips::mem::{TripsMem, TripsError};
 
-#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq, Deserialize, Serialize, Hash, Default)]
+#[derive()]
 /// An implementation of the Graph trait that stores all Data in a sorted set.
-pub struct Graph {
-    statements: BTreeSet<Statement>,
+pub struct LigatureGraph<E> {
+    store: Box<dyn Trips<Element, Element, E>>,
 }
 
-impl Graph {
-    pub fn new(statements: BTreeSet<Statement>) -> Self {
-        Self { statements }
+impl LigatureGraph<TripsError> {
+    pub fn new() -> Self {
+        Self { store: Box::new(TripsMem::<Element, Element>::new()) }
+    }
+}
+
+impl<E> Ligature<E> for LigatureGraph<E> {
+    fn collections(&self) -> Result<Vec<Element>, E> {
+        self.store.collections()
     }
 
-    pub fn add_all(&self, graph: Self) -> Self {
-        let mut res = self.statements.clone();
-        for statement in graph.statements {
-            res.insert(statement.clone());
-        }
-        Graph { statements: res }
+    fn add_collection(&mut self, collection: Element) -> Result<(), E> {
+        self.store.add_collection(collection)
     }
 
-    pub fn remove_all(&self, graph: Self) -> Self {
-        let mut res = self.statements.clone();
-        for statement in graph.statements {
-            res.remove(&statement);
-        }
-        Graph { statements: res }
+    fn remove_collection(&mut self, collection: Element) -> Result<(), E> {
+        self.store.remove_collection(collection)
     }
 
-    pub fn all_statements(&self) -> BTreeSet<Statement> {
-        self.statements.clone()
+    fn entries(&self, collection: Element) -> Result<BTreeSet<ligature::Entry>, E> {
+        self.store.triples(collection).map(|set| {
+            set.into_iter().map(|entry: Trip<Element>| {
+                if entry.1 == Element(":".to_owned()) {
+                    Entry::Extends { element: entry.0, concept: entry.2 }
+                } else if entry.1 == Element("¬:".to_owned()) {
+                    Entry::NotExtends { element: entry.0, concept: entry.2 }
+                } else {
+                    Entry::Role { first: entry.0, second: entry.2, role: entry.1 }
+                }
+            }).collect()
+        })
     }
 
-    pub fn find(
+    fn add_entries(&mut self, collection: Element, entries: &mut BTreeSet<ligature::Entry>) -> Result<(), E> {
+        let mut triples: BTreeSet<Trip<Element>> = BTreeSet::from_iter(entries.iter().map(|entry| {
+            match entry {
+                Entry::Extends { element, concept } => Trip(element.clone(), Element(":".to_owned()), concept.clone()),
+                Entry::Role { first, second, role } => Trip(first.clone(), role.clone(), second.clone()),
+                Entry::NotExtends { element, concept } => Trip(element.clone(), Element("¬:".to_owned()), concept.clone()),
+            }
+        }));
+        self.store.add_triples(collection, &mut triples)
+    }
+
+    fn remove_entries(&mut self, collection: Element, entries: &mut BTreeSet<ligature::Entry>) -> Result<(), E> {
+        let mut triples: BTreeSet<Trip<Element>> = BTreeSet::from_iter(entries.iter().map(|entry| {
+            match entry {
+                Entry::Extends { element, concept } => Trip(element.clone(), Element(":".to_owned()), concept.clone()),
+                Entry::Role { first, second, role } => Trip(first.clone(), role.clone(), second.clone()),
+                Entry::NotExtends { element, concept } => Trip(element.clone(), Element("¬:".to_owned()), concept.clone()),
+            }
+        }));
+        self.store.remove_triples(collection, &mut triples)
+    }
+
+    fn query(
         &self,
-        entity: Option<Identifier>,
-        attribute: Option<Identifier>,
-        value: Option<Value>,
-    ) -> BTreeSet<Statement> {
-        if entity.is_none() && attribute.is_none() && value.is_none() {
-            return self.all_statements();
-        }
-        let mut results: Option<BTreeSet<Statement>> = None;
-        if let Some(entity) = entity {
-            let t: BTreeSet<_> = self
-                .statements
-                .clone()
-                .into_iter()
-                .filter(|statement| statement.entity == entity)
-                .collect();
-            if t.is_empty() {
-                return BTreeSet::new();
+        collection: Element,
+        pattern: BTreeSet<ligature::Entry>,
+    ) -> Result<HashBag<std::collections::BTreeMap<String, Element>>, E> {
+        let query_pattern: BTreeSet<Query<Element>> = BTreeSet::from_iter(pattern.iter().map(|entry| {
+            match entry {
+                Entry::Extends { element, concept } => 
+                    Query(Slot::Value(element.clone()), Slot::Value(Element(":".to_owned())), Slot::Value(concept.clone())),
+                Entry::Role { first, second, role } => 
+                    Query(Slot::Value(first.clone()), Slot::Value(role.clone()), Slot::Value(second.clone())),
+                Entry::NotExtends { element, concept } => 
+                    Query(Slot::Value(element.clone()), Slot::Value(Element("¬:".to_owned())), Slot::Value(concept.clone())),
             }
-            results = Some(t);
-        }
-        if let Some(attribute) = attribute {
-            let t: BTreeSet<_> = self
-                .statements
-                .clone()
-                .into_iter()
-                .filter(|s| s.attribute == attribute)
-                .collect();
-            if t.is_empty() {
-                return BTreeSet::new();
-            }
-            match results {
-                Some(statements) => {
-                    let r: BTreeSet<Statement> = statements
-                        .clone()
-                        .intersection(&t)
-                        .map(|s| s.to_owned())
-                        .collect();
-                    results = Some(r);
-                }
-                None => results = Some(t),
-            }
-        }
-        if let Some(value) = value {
-            let t: BTreeSet<Statement> = self
-                .statements
-                .clone()
-                .into_iter()
-                .filter(|statement| statement.value == value)
-                .collect();
-            if t.is_empty() {
-                return BTreeSet::new();
-            }
-            match results {
-                Some(statements) => {
-                    results = Some(
-                        statements
-                            .clone()
-                            .intersection(&t)
-                            .map(|s| s.to_owned())
-                            .collect(),
-                    );
-                }
-                None => results = Some(t),
-            }
-        }
-        match results {
-            Some(statements) => statements,
-            None => self.all_statements(),
-        }
+        }));
+        self.store.query(collection, query_pattern)
     }
 }

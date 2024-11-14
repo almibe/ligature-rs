@@ -12,4 +12,6 @@ repository = "https://github.com/almibe/ligature-rs/"
 
 [dependencies]
 ligature = { path = "../ligature" }
+trips = { path = "../trips" }
 serde = { version = "1.0", features = ["derive"] }
+hashbag = "0.1.12"
