@@ -2,10 +2,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use ligature::{Element, Ligature};
+use hashbag::HashBag;
+use ligature::{Element, Entry, Ligature};
 use ligature_graph::LigatureGraph;
 use std::collections::BTreeSet;
-use hashbag::HashBag;
 
 #[test]
 fn empty_graph() {
@@ -15,79 +15,86 @@ fn empty_graph() {
 
 #[test]
 fn search_empty_graph() {
-    let g = LigatureGraph::new();
-    assert_eq!(g.query(Element("test".to_owned()) ,BTreeSet::new()).unwrap(), HashBag::new());
+    let mut g = LigatureGraph::new();
+    g.add_collection(Element("test".to_owned()));
+    assert_eq!(
+        g.query(Element("test".to_owned()), BTreeSet::new())
+            .unwrap(),
+        HashBag::new()
+    );
 }
 
-// fn statement() -> Role {
-//     Role {
-//         first: Identifier::new("a").unwrap(),
-//         second: Identifier::new("b").unwrap(),
-//         role: Value::Identifier(Identifier::new("c").unwrap()),
-//     }
-// }
+fn statement() -> Entry {
+    Entry::Role {
+        first: Element("a".to_owned()),
+        second: Element("b".to_owned()),
+        role: Element("c".to_owned()),
+    }
+}
 
-// fn statements() -> BTreeSet<Role> {
-//     let mut statements = BTreeSet::new();
-//     for statement in vec![
-//         Role {
-//             first: Identifier::new("a").unwrap(),
-//             second: Identifier::new("b").unwrap(),
-//             role: Value::Identifier(Identifier::new("c").unwrap()),
-//         },
-//         Role {
-//             first: Identifier::new("a").unwrap(),
-//             second: Identifier::new("b").unwrap(),
-//             role: Value::Identifier(Identifier::new("d").unwrap()),
-//         },
-//         Role {
-//             first: Identifier::new("a").unwrap(),
-//             second: Identifier::new("e").unwrap(),
-//             role: Value::Identifier(Identifier::new("f").unwrap()),
-//         },
-//     ] {
-//         statements.insert(statement);
-//     }
-//     statements
-// }
+fn statements() -> BTreeSet<Entry> {
+    let mut statements = BTreeSet::new();
+    for statement in vec![
+        Entry::Role {
+            first: Element("a".to_owned()),
+            second: Element("b".to_owned()),
+            role: Element("c".to_owned()),
+        },
+        Entry::Role {
+            first: Element("a".to_owned()),
+            second: Element("b".to_owned()),
+            role: Element("d".to_owned()),
+        },
+        Entry::Role {
+            first: Element("a".to_owned()),
+            second: Element("e".to_owned()),
+            role: Element("f".to_owned()),
+        },
+    ] {
+        statements.insert(statement);
+    }
+    statements
+}
 
-// fn statements_res() -> BTreeSet<Role> {
-//     let mut statements = BTreeSet::new();
-//     for statement in vec![
-//         Role {
-//             first: Identifier::new("a").unwrap(),
-//             second: Identifier::new("b").unwrap(),
-//             role: Value::Identifier(Identifier::new("c").unwrap()),
-//         },
-//         Role {
-//             first: Identifier::new("a").unwrap(),
-//             second: Identifier::new("b").unwrap(),
-//             role: Value::Identifier(Identifier::new("d").unwrap()),
-//         },
-//     ] {
-//         statements.insert(statement);
-//     }
-//     statements
-// }
+fn statements_res() -> BTreeSet<Entry> {
+    let mut statements = BTreeSet::new();
+    for statement in vec![
+        Entry::Role {
+            first: Element("a".to_owned()),
+            second: Element("b".to_owned()),
+            role: Element("c".to_owned()),
+        },
+        Entry::Role {
+            first: Element("a".to_owned()),
+            second: Element("b".to_owned()),
+            role: Element("d".to_owned()),
+        },
+    ] {
+        statements.insert(statement);
+    }
+    statements
+}
 
-// #[test]
-// fn single_element_graph() {
-//     let mut statements = BTreeSet::new();
-//     statements.insert(statement());
-//     let g = Graph::new(statements);
-//     let mut res1 = BTreeSet::new();
-//     res1.insert(statement());
-//     assert_eq!(g.all_statements(), res1);
-//     assert_eq!(g.find(None, None, None), res1);
-//     assert_eq!(
-//         g.find(Some(Identifier::new("a").unwrap()), None, None),
-//         res1
-//     );
-//     assert_eq!(
-//         g.find(Some(Identifier::new("b").unwrap()), None, None),
-//         BTreeSet::new()
-//     );
-// }
+#[test]
+fn single_element_graph() {
+    let mut entries: BTreeSet<Entry> = BTreeSet::new();
+    entries.insert(statement());
+    let mut g = LigatureGraph::new();
+    g.add_collection(Element("test".to_owned()));
+    g.add_entries(Element("test".to_owned()), &mut entries);
+    let mut res1 = BTreeSet::new();
+    res1.insert(statement());
+    assert_eq!(g.entries(Element("test".to_owned())).unwrap(), res1);
+    //assert_eq!(g.query(Element("test".to_owned()), BTreeSet::new()).unwrap(), res1);
+    // assert_eq!(
+    //     g.find(Some(Identifier::new("a").unwrap()), None, None),
+    //     res1
+    // );
+    // assert_eq!(
+    //     g.find(Some(Identifier::new("b").unwrap()), None, None),
+    //     BTreeSet::new()
+    // );
+}
 
 // #[test]
 // fn multi_statement_graph() {
