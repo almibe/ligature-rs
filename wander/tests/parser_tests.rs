@@ -2,7 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use std::collections::HashSet;
+use std::collections::{BTreeSet, HashSet};
 
 use ligature::{Element, Entry};
 use wander::{Call, Quote, WanderError, WanderValue};
@@ -78,7 +78,7 @@ fn parse_empty_network_as_() {
     let res = parse_str("test {}");
     let expected = Ok(vec![Call {
         name: Element("test".to_owned()),
-        arguments: vec![WanderValue::Network(HashSet::from([]))],
+        arguments: vec![WanderValue::Network(BTreeSet::from([]))],
     }]);
     assert_eq!(res, expected);
 }
@@ -88,7 +88,7 @@ fn parse_network_with_single_entry() {
     let res = parse_str("test {a b c}");
     let expected = Ok(vec![Call {
         name: Element("test".to_owned()),
-        arguments: vec![WanderValue::Network(HashSet::from([Entry::Role {
+        arguments: vec![WanderValue::Network(BTreeSet::from([Entry::Role {
             first: Element("a".to_owned()),
             second: Element("c".to_owned()),
             role: Element("b".to_owned()),
@@ -102,7 +102,7 @@ fn parse_network_with_single_entry_and_trailing_comma() {
     let res = parse_str("test {a b c,}");
     let expected = Ok(vec![Call {
         name: Element("test".to_owned()),
-        arguments: vec![WanderValue::Network(HashSet::from([Entry::Role {
+        arguments: vec![WanderValue::Network(BTreeSet::from([Entry::Role {
             first: Element("a".to_owned()),
             second: Element("c".to_owned()),
             role: Element("b".to_owned()),
@@ -117,7 +117,7 @@ fn parse_network_with_two_entries_and_trailing_comma() {
 
     let expected = Ok(vec![Call {
         name: Element("test".to_owned()),
-        arguments: vec![WanderValue::Network(HashSet::from([
+        arguments: vec![WanderValue::Network(BTreeSet::from([
             Entry::Role {
                 first: Element("a".to_owned()),
                 second: Element("c".to_owned()),

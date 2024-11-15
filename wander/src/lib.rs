@@ -7,18 +7,14 @@
 #![deny(missing_docs)]
 
 use std::{
-    cell::RefCell,
-    collections::{HashMap, HashSet},
+    collections::{BTreeSet, HashMap},
     fmt::Display,
-    rc::Rc,
 };
 
 use lexer::tokenize_and_filter;
-use ligature::{Element, Entry};
+use ligature::Ligature;
 use parser::parse;
 use serde::{Deserialize, Serialize};
-use trips::Trips;
-use trips::mem::TripsError;
 
 #[doc(hidden)]
 pub mod lexer;
@@ -33,12 +29,12 @@ pub struct WanderError(pub String);
 
 /// A trait representing a function exported from the hosting application that
 /// can be called from Wander.
-pub trait Command {
+pub trait Command<E> {
     /// The function called when the HostFunction is called from Wander.
     fn run(
         &self,
         arguments: &[WanderValue],
-        state: &mut dyn Trips<Element, Element, TripsError>,
+        state: &mut dyn Ligature<E>,
     ) -> Result<WanderValue, WanderError>;
 }
 
@@ -67,7 +63,7 @@ pub enum WanderValue {
     /// A Quote
     Quote(Quote),
     /// A Network.
-    Network(HashSet<ligature::Entry>),
+    Network(BTreeSet<ligature::Entry>),
 }
 
 impl core::hash::Hash for WanderValue {
@@ -96,11 +92,10 @@ pub fn write_string(string: &str) -> String {
 }
 
 fn write_network(
-    _contents: &HashSet<ligature::Entry>,
-    _f: &mut std::fmt::Formatter<'_>,
+    contents: &BTreeSet<ligature::Entry>,
+    f: &mut std::fmt::Formatter<'_>,
 ) -> std::fmt::Result {
-    todo!()
-    // write!(f, "{{").unwrap();
+    write!(f, "{{").unwrap();
     // let mut i = 0;
     // for (name, value) in contents {
     //     write!(f, "{name} = {value}").unwrap();
@@ -109,7 +104,7 @@ fn write_network(
     //         write!(f, " ").unwrap();
     //     }
     // }
-    // write!(f, "}}")
+    write!(f, "}}")
 }
 
 impl Display for WanderValue {
@@ -123,10 +118,10 @@ impl Display for WanderValue {
 }
 
 /// Run a Wander script with the given Bindings.
-pub fn run(
+pub fn run<E>(
     script: &str,
-    commands: HashMap<String, Box<dyn Command>>,
-    state: &mut dyn Trips<Element, Element, TripsError>
+    commands: HashMap<String, Box<dyn Command<E>>>,
+    state: &mut dyn Ligature<E>
 ) -> Result<WanderValue, WanderError> {
     let tokens = match tokenize_and_filter(script) {
         Ok(v) => v,
@@ -136,7 +131,7 @@ pub fn run(
         Ok(v) => v,
         Err(err) => return Err(err),
     };
-    let mut result = Ok(WanderValue::Network(HashSet::new()));
+    let mut result = Ok(WanderValue::Network(BTreeSet::new()));
     for call in calls {
         match commands.get(&call.name.0) {
             Some(res) => {

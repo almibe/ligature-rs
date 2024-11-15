@@ -2,7 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 
 use crate::{lexer::Token, Call, Quote, WanderError, WanderValue};
 use gaze::Gaze;
@@ -101,7 +101,7 @@ pub fn parse(tokens: Vec<Token>) -> Result<Vec<Call>, WanderError> {
 
 fn read_network(gaze: &mut Gaze<Token>) -> Result<WanderValue, WanderError> {
     let mut cont = true;
-    let mut result: HashSet<ligature::Entry> = HashSet::new();
+    let mut result: BTreeSet<ligature::Entry> = BTreeSet::new();
     while cont {
         let first = match gaze.next() {
             Some(Token::Element(first)) => first,

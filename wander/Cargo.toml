@@ -12,6 +12,7 @@ repository = "https://github.com/almibe/wander/"
 
 [dependencies]
 ligature = { path = "../ligature" }
+ligature-graph = { path = "../ligature-graph" }
 trips = { path = "../trips" }
 logos = "0.13"
 gaze = "0.5.0"
