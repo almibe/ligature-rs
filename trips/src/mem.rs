@@ -9,7 +9,7 @@
 use crate::{Query, Slot, Trip, Trips};
 use core::hash::Hash;
 use hashbag::HashBag;
-use std::collections::{BTreeMap, BTreeSet, HashMap};
+use std::collections::{BTreeMap, BTreeSet};
 
 /// A simple error type.
 #[derive(Debug)]

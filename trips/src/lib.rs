@@ -11,6 +11,8 @@ use hashbag::HashBag;
 use std::collections::{BTreeMap, BTreeSet};
 
 pub mod mem;
+#[cfg(feature = "redb")]
+pub mod redb;
 
 /// The data structure stored in this triple store.
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]

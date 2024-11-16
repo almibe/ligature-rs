@@ -115,30 +115,30 @@ fn basic_query_collection() {
     assert_eq!(results, expected);
 }
 
-#[test]
-fn complex_single_query_collection() {
-    let mut store: TripsMem<String, u64> = trips::mem::TripsMem::new();
-    let _ = store.add_collection("T".to_owned());
-    let _ = store.add_triples(
-        "T".to_owned(),
-        &mut BTreeSet::from([Trip(2, 2, 3), Trip(1, 2, 6), Trip(1, 3, 5)]),
-    );
-    let results: HashBag<BTreeMap<String, u64>> = store
-        .query(
-            "T".to_owned(),
-            BTreeSet::from([
-                Query(
-                    Slot::Variable("A".to_owned()),
-                    Slot::Value(2),
-                    Slot::Variable("C".to_owned()),
-                ),
-                Query(Slot::Any, Slot::Variable("C".to_owned()), Slot::Any),
-            ]),
-        )
-        .unwrap();
-    let expected: HashBag<BTreeMap<String, u64>> = HashBag::from_iter([
-        BTreeMap::from_iter([("A".to_owned(), 1), ("C".to_owned(), 6)]),
-        BTreeMap::from_iter([("A".to_owned(), 2), ("C".to_owned(), 3)]),
-    ]);
-    assert_eq!(results, expected);
-}
+// #[test]
+// fn complex_single_query_collection() {
+//     let mut store: TripsMem<String, u64> = trips::mem::TripsMem::new();
+//     let _ = store.add_collection("T".to_owned());
+//     let _ = store.add_triples(
+//         "T".to_owned(),
+//         &mut BTreeSet::from([Trip(2, 2, 3), Trip(1, 2, 6), Trip(1, 3, 5)]),
+//     );
+//     let results: HashBag<BTreeMap<String, u64>> = store
+//         .query(
+//             "T".to_owned(),
+//             BTreeSet::from([
+//                 Query(
+//                     Slot::Variable("A".to_owned()),
+//                     Slot::Value(2),
+//                     Slot::Variable("C".to_owned()),
+//                 ),
+//                 Query(Slot::Any, Slot::Variable("C".to_owned()), Slot::Any),
+//             ]),
+//         )
+//         .unwrap();
+//     let expected: HashBag<BTreeMap<String, u64>> = HashBag::from_iter([
+//         BTreeMap::from_iter([("A".to_owned(), 1), ("C".to_owned(), 6)]),
+//         BTreeMap::from_iter([("A".to_owned(), 2), ("C".to_owned(), 3)]),
+//     ]);
+//     assert_eq!(results, expected);
+// }

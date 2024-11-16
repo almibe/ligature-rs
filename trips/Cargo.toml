@@ -12,3 +12,7 @@ repository = "https://github.com/almibe/ligature-rs/"
 
 [dependencies]
 hashbag = "0.1.12"
+redb = { version = "2.2.0", optional = true }
+
+[features]
+redb = ["dep:redb"]
