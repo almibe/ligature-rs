@@ -44,8 +44,8 @@ impl<C: Clone + Ord, T: std::fmt::Debug + Ord> TripsMem<C, T> {
     // }
 }
 
-impl<C: Clone + Eq + Hash + Ord, T: std::fmt::Debug + Eq + Ord + Clone + Hash> Trips<C, T, TripsError>
-    for TripsMem<C, T>
+impl<C: Clone + Eq + Hash + Ord, T: std::fmt::Debug + Eq + Ord + Clone + Hash>
+    Trips<C, T, TripsError> for TripsMem<C, T>
 {
     fn collections(&self) -> Result<Vec<C>, TripsError> {
         let res: Vec<C> = self.collections.keys().cloned().collect();

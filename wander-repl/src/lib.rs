@@ -4,15 +4,15 @@
 
 //! This module is the library module for the ligature-repl project.
 
+use ligature_graph::LigatureGraph;
 use rustyline::error::ReadlineError;
 use rustyline::{DefaultEditor, Result};
 use tabled::{
     settings::{object::Rows, Modify, Width},
     Table, Tabled,
 };
-use ligature_graph::LigatureGraph;
-use wander::run;
 use trips::mem::TripsError;
+use wander::run;
 
 pub struct REPLState {
     pub state: LigatureGraph<TripsError>,
@@ -38,10 +38,14 @@ pub fn start_repl(state: &mut REPLState) -> Result<()> {
                         break;
                     }
                 } else {
-                    match run(line.as_str(), wander::preludes::common(), &mut LigatureGraph::new()) {
+                    match run(
+                        line.as_str(),
+                        wander::preludes::common(),
+                        &mut LigatureGraph::new(),
+                    ) {
                         Ok(result) => println!("{result}"),
                         Err(err) => println!("Error: {err:?}"),
-                    }    
+                    }
                 }
             }
             Err(ReadlineError::Interrupted) => {

@@ -4,11 +4,9 @@
 
 use ligature::Ligature;
 
+use crate::core_commands::{AssertEqCommand, EqCommand, IgnoreCommand, LetCommand};
 use crate::{Command, WanderError, WanderValue};
-use std::{
-    collections::{BTreeSet, HashMap},
-};
-use crate::core_commands::{EqCommand, AssertEqCommand, IgnoreCommand, LetCommand};
+use std::collections::{BTreeSet, HashMap};
 
 /// Creates a set of Bindings for Wander that consists of all of the common
 /// functionality, but doesn't interact with an instance of Ligature.

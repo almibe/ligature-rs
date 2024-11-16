@@ -154,12 +154,10 @@ fn read_quote(gaze: &mut Gaze<Token>) -> Result<WanderValue, WanderError> {
                 values.push(WanderValue::Element(element));
             }
             Some(Token::CloseParen) => cont = false,
-            Some(Token::OpenBrace) => {
-                match read_network(gaze) {
-                    Ok(res) => values.push(res),
-                    Err(err) => return Err(err)
-                }
-            }
+            Some(Token::OpenBrace) => match read_network(gaze) {
+                Ok(res) => values.push(res),
+                Err(err) => return Err(err),
+            },
             _ => todo!(),
         };
     }

@@ -17,13 +17,13 @@ use parser::parse;
 use serde::{Deserialize, Serialize};
 
 #[doc(hidden)]
+pub mod core_commands;
+#[doc(hidden)]
 pub mod lexer;
 #[doc(hidden)]
 pub mod parser;
 #[doc(hidden)]
 pub mod preludes;
-#[doc(hidden)]
-pub mod core_commands;
 
 /// An error that occurs while running a Wander script.
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize, Clone)]
@@ -126,7 +126,7 @@ impl Display for WanderValue {
 pub fn run<E>(
     script: &str,
     commands: HashMap<String, Box<dyn Command<E>>>,
-    state: &mut dyn Ligature<E>
+    state: &mut dyn Ligature<E>,
 ) -> Result<WanderValue, WanderError> {
     let tokens = match tokenize_and_filter(script) {
         Ok(v) => v,
@@ -139,13 +139,11 @@ pub fn run<E>(
     let mut result = Ok(WanderValue::Network(BTreeSet::new()));
     for call in calls {
         match commands.get(&call.name.0) {
-            Some(res) => {
-                match res.run(&call.arguments, state) {
-                    Ok(res) => result = Ok(res),
-                    Err(err) => return Err(err)
-                }
+            Some(res) => match res.run(&call.arguments, state) {
+                Ok(res) => result = Ok(res),
+                Err(err) => return Err(err),
             },
-            _ => todo!()
+            _ => todo!(),
         }
     }
     result

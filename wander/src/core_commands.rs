@@ -59,11 +59,7 @@ impl<E> Command<E> for AssertEqCommand {
 
 pub struct IgnoreCommand {}
 impl<E> Command<E> for IgnoreCommand {
-    fn run(
-        &self,
-        _: &[WanderValue],
-        _: &mut dyn Ligature<E>,
-    ) -> Result<WanderValue, WanderError> {
+    fn run(&self, _: &[WanderValue], _: &mut dyn Ligature<E>) -> Result<WanderValue, WanderError> {
         Ok(WanderValue::Network(BTreeSet::new()))
     }
 
@@ -83,8 +79,8 @@ impl<E> Command<E> for LetCommand {
             [WanderValue::Element(name), WanderValue::Network(network)] => {
                 state.add_collection(name.clone());
                 state.add_entries(name.clone(), &mut network.clone());
-            },
-            _ => todo!("Error")
+            }
+            _ => todo!("Error"),
         }
         Ok(WanderValue::Network(BTreeSet::new()))
     }

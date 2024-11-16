@@ -3,9 +3,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use eframe::egui;
+use ligature_graph::LigatureGraph;
 use wander::preludes::common;
 use wander::run;
-use ligature_graph::LigatureGraph;
 
 pub fn start_app() -> Result<(), eframe::Error> {
     let options = eframe::NativeOptions {
@@ -14,9 +14,7 @@ pub fn start_app() -> Result<(), eframe::Error> {
     eframe::run_native(
         "WanderPad",
         options,
-        Box::new(|_| {
-            Box::<WanderPad>::default()
-        }),
+        Box::new(|_| Box::<WanderPad>::default()),
     )
 }
 

@@ -4,11 +4,13 @@
 
 //! This module is the main module for the ligature-repl project.
 
+use ligature_graph::LigatureGraph;
 pub use rustyline::Result;
 use wander_repl::{start_repl, REPLState};
-use ligature_graph::LigatureGraph;
 
 fn main() -> Result<()> {
-    let mut state = REPLState { state: LigatureGraph::new() };
+    let mut state = REPLState {
+        state: LigatureGraph::new(),
+    };
     start_repl(&mut state)
 }

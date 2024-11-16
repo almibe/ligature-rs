@@ -6,8 +6,8 @@
 
 #![deny(missing_docs)]
 
-use std::collections::{BTreeMap, BTreeSet};
 use hashbag::HashBag;
+use std::collections::{BTreeMap, BTreeSet};
 
 use serde::{Deserialize, Serialize};
 
@@ -67,7 +67,11 @@ pub trait Ligature<E> {
     /// Remove Statements from a given Dataset.
     /// Returns Error if Dataset doesn't exist.
     /// Does nothing if Statement doesn't exist in Dataset.
-    fn remove_entries(&mut self, collection: Element, entries: &mut BTreeSet<Entry>) -> Result<(), E>;
+    fn remove_entries(
+        &mut self,
+        collection: Element,
+        entries: &mut BTreeSet<Entry>,
+    ) -> Result<(), E>;
     /// Run a query against the given Dataset.
     fn query(
         &self,

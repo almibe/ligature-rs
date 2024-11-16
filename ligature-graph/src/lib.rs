@@ -18,9 +18,7 @@ pub struct LigatureGraph<E> {
 
 impl<E> LigatureGraph<E> {
     pub fn from_trips(trips: Box<dyn Trips<Element, Element, E>>) -> Self {
-        Self {
-            store: trips
-        }
+        Self { store: trips }
     }
 }
 
