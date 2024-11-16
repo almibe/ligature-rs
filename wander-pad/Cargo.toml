@@ -11,5 +11,6 @@ repository = "https://github.com/almibe/wander/"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+ligature-graph = { path = "../ligature-graph" }
 wander = { path = "../wander" }
 eframe = "0.27.2"

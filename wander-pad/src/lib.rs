@@ -5,6 +5,7 @@
 use eframe::egui;
 use wander::preludes::common;
 use wander::run;
+use ligature_graph::LigatureGraph;
 
 pub fn start_app() -> Result<(), eframe::Error> {
     let options = eframe::NativeOptions {
@@ -38,7 +39,7 @@ impl eframe::App for WanderPad {
         egui::CentralPanel::default().show(ctx, |ui| {
             if ui.button("Run").clicked() {
                 let script = self.script.clone();
-                self.result = match run(&script, &mut common()) {
+                self.result = match run(&script, common(), &mut LigatureGraph::new()) {
                     Ok(value) => value.to_string(),
                     Err(err) => err.0,
                 }
