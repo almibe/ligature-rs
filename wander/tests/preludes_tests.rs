@@ -2,11 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use std::collections::{BTreeSet, HashSet};
-
-use ligature::{Element, Entry, Ligature};
-use trips::{Trip, Trips};
-use trips::mem::{TripsMem, TripsError};
+use std::collections::BTreeSet;
 use ligature_graph::LigatureGraph;
 use wander::{preludes::common, run, WanderValue};
 

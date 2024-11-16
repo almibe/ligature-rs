@@ -22,6 +22,8 @@ pub mod lexer;
 pub mod parser;
 #[doc(hidden)]
 pub mod preludes;
+#[doc(hidden)]
+pub mod core_commands;
 
 /// An error that occurs while running a Wander script.
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize, Clone)]
@@ -36,6 +38,9 @@ pub trait Command<E> {
         arguments: &[WanderValue],
         state: &mut dyn Ligature<E>,
     ) -> Result<WanderValue, WanderError>;
+
+    /// Documentation for the Command.
+    fn doc(&self) -> String;
 }
 
 /// A function call.

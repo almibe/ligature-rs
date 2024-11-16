@@ -17,7 +17,7 @@ pub mod mem;
 pub struct Trip<T: std::fmt::Debug + Eq + Ord>(pub T, pub T, pub T);
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
-/// Contains either a Variable or Value.
+/// Contains either a Variable or Value, used for Queries.
 pub enum Slot<T: std::fmt::Debug + Eq + Ord> {
     /// A Variable.
     Variable(String),
