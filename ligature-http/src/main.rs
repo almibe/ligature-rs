@@ -11,25 +11,25 @@ use axum::{
     Router,
 };
 //use lig::load_lig_from_str;
-use ligature::{Dataset, Ligature};
-use ligature_sqlite::LigatureSQLite;
+use ligature::{Ligature};
+//use ligature_sqlite::LigatureSQLite;
 use std::{net::SocketAddr, sync::Arc};
 use wander::{preludes::common, run, WanderValue};
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt::init();
-    let instance = Arc::new(LigatureSQLite::default());
-    let app = Router::new()
-        // .route("/wander", post(handler))
-        // .route("/lig/:dataset", post(lig_handler))
-        .with_state(instance);
-    let addr = SocketAddr::from(([127, 0, 0, 1], 4200));
-    println!("Ligature HTTP is listening on {addr}");
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
+    // tracing_subscriber::fmt::init();
+    // let instance = Arc::new(LigatureSQLite::default());
+    // let app = Router::new()
+    //     // .route("/wander", post(handler))
+    //     // .route("/lig/:dataset", post(lig_handler))
+    //     .with_state(instance);
+    // let addr = SocketAddr::from(([127, 0, 0, 1], 4200));
+    // println!("Ligature HTTP is listening on {addr}");
+    // axum::Server::bind(&addr)
+    //     .serve(app.into_make_service())
+    //     .await
+    //     .unwrap();
 }
 
 // async fn lig_handler(

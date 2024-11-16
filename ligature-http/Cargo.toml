@@ -12,10 +12,8 @@ repository = "https://github.com/almibe/ligature-rs/"
 
 [dependencies]
 ligature = { path = "../ligature" }
-lig = { path = "../lig" }
-wander = "0.5.0"
-ligature-wander = { path = "../ligature-wander" }
-ligature-sqlite = { path = "../ligature-sqlite" }
+ligature-graph = { path = "../ligature-graph" }
+wander = { path = "../wander" }
 axum = "0.6"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.68"
