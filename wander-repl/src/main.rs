@@ -5,13 +5,10 @@
 //! This module is the main module for the ligature-repl project.
 
 pub use rustyline::Result;
-use wander::preludes::common;
 use wander_repl::{start_repl, REPLState};
-use wander::preludes::add_print;
+use ligature_graph::LigatureGraph;
 
 fn main() -> Result<()> {
-    let mut environment = common();
-    add_print(&mut environment);
-    let mut state = REPLState { environment };
+    let mut state = REPLState { state: LigatureGraph::new() };
     start_repl(&mut state)
 }

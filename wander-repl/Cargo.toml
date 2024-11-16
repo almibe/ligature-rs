@@ -12,6 +12,8 @@ repository = "https://github.com/almibe/wander/"
 
 [dependencies]
 wander = { path = "../wander" }
+ligature-graph = { path = "../ligature-graph" }
+trips = { path = "../trips" }
 rustyline = "12.0.0"
 tabled = "0.14.0"
 anyhow = "1.0"

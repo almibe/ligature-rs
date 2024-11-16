@@ -10,11 +10,12 @@ use tabled::{
     settings::{object::Rows, Modify, Width},
     Table, Tabled,
 };
-use wander::environment::Environment;
-use wander::{introspect, run};
+use ligature_graph::LigatureGraph;
+use wander::run;
+use trips::mem::TripsError;
 
 pub struct REPLState {
-    pub environment: Environment,
+    pub state: LigatureGraph<TripsError>,
 }
 
 pub fn start_repl(state: &mut REPLState) -> Result<()> {
@@ -37,7 +38,7 @@ pub fn start_repl(state: &mut REPLState) -> Result<()> {
                         break;
                     }
                 } else {
-                    match run(line.as_str(), &mut state.environment) {
+                    match run(line.as_str(), wander::preludes::common(), &mut LigatureGraph::new()) {
                         Ok(result) => println!("{result}"),
                         Err(err) => println!("Error: {err:?}"),
                     }    
@@ -65,7 +66,6 @@ fn handle_command(input: &str, instance: &mut REPLState) -> bool {
     match parts.next().unwrap() {
         //":remote" => todo!(),
         //":local" => todo!(),
-        ":parse" | ":p" => parse(input, &instance.environment),
         ":status" | ":s" => status(),
         ":quit" | ":q" => quit(),
         //":bindings" | ":b" => bindings(&instance.environment),
@@ -77,22 +77,6 @@ fn handle_command(input: &str, instance: &mut REPLState) -> bool {
             true
         }
     }
-}
-
-fn parse(input: &str, instance: &Environment) -> bool {
-    let input = if input.starts_with(":parse") {
-        input.replacen(":parse", "", 1)
-    } else {
-        input.replacen(":p", "", 1)
-    };
-    let input = input.trim();
-    let introspection = introspect(&input, instance).unwrap();
-    println!("Tokens:\n{:?}\n", introspection.tokens_ws);
-    println!("Tokens Filtered:\n{:?}\n", introspection.tokens);
-    println!("Transformed:\n{:?}\n", introspection.tokens_transformed);
-    println!("Element:\n{:?}\n", introspection.element);
-    println!("Expression:\n{:?}\n", introspection.expression);
-    true
 }
 
 fn broadcast(_input: &str) -> bool {
