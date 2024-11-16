@@ -2,24 +2,27 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-//! This project exposes functionality from the Rust implementation of Ligature to WASM and JS runtimes thanks to wasm-bindgen and wasm-pack.
+//! This project exposes functionality from the Rust implementation of Wander to WASM and JS runtimes thanks to wasm-bindgen and wasm-pack.
 
 mod utils;
-
-use std::{sync::RwLock, rc::Rc};
-
-use ligature_wander::bind_instance;
-use ligature_in_memory::LigatureInMemory;
-use wander::{WanderError, WanderValue, NoHostType};
+use wander::{WanderError, WanderValue};
 use wasm_bindgen::prelude::*;
+use serde::Serialize;
+use ligature_graph::LigatureGraph;
 
 #[wasm_bindgen]
 pub fn run(script: String) -> JsValue {
-    let mut environment = wander::preludes::common::<NoHostType>();
-    let instance = LigatureInMemory::new();
-    bind_instance(Rc::new(RwLock::new(instance)), &mut environment);
-    match wander::run(&script, &mut environment) {
-        Ok(value) => serde_wasm_bindgen::to_value(&value).unwrap(),
-        Err(err) => serde_wasm_bindgen::to_value(&Err::<WanderValue<NoHostType>, WanderError>(err)).unwrap(),
-    }
+    let mut bindings = wander::preludes::common();
+    let res = wander::run(&script,  bindings, &mut LigatureGraph::new());
+    let res = RunResult {
+        object: res.clone(),
+        string: res.map(|res| format!("{}", res)),
+    };
+    serde_wasm_bindgen::to_value(&res).unwrap()
+}
+
+#[derive(Serialize)]
+pub struct RunResult {
+    object: Result<WanderValue, WanderError>,
+    string: Result<String, WanderError>,
 }
