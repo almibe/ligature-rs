@@ -2,13 +2,30 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+use trips::Trips;
+use trips::mem::TripsError;
+#[cfg(feature = "heed")]
+use trips::heed::TripsHeed;
+#[cfg(feature = "heed")]
+use heed::{Env, EnvOpenOptions};
+
+#[cfg(feature = "heed")]
+fn create_temp() -> Env {
+    let dir = tempfile::tempdir().unwrap();
+    let env = unsafe { EnvOpenOptions::new().max_dbs(24).open(dir.path()).unwrap() };
+    // let mut wtxn = env.write_txn()?;
+    // let db: Database<Str, U32<byteorder::NativeEndian>> = env.create_database(&mut wtxn, Some("test"))?;
+    env
+}
+
 #[test]
-#[cfg(feature = "redb")]
+#[cfg(feature = "heed")]
 fn store_should_start_empty() {
-    let store = trips::redb::TripsReDB::<String>::new();
-    // let collections: Vec<String> = store.collections().unwrap();
-    // let result: Vec<String> = vec![];
-    // assert_eq!(collections, result);
+    let env = create_temp();
+    let store = trips::heed::TripsHeed::new(env);
+    let collections: Vec<String> = <TripsHeed as Trips<String, String, trips::mem::TripsError>>::collections(&store).unwrap();
+    let result: Vec<String> = vec![];
+    assert_eq!(collections, result);
 }
 
 // #[test]

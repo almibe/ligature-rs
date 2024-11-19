@@ -2,4 +2,4 @@
 
 # *trips*
 
-trips is a simple generic triple store written in Rust.
+trips is a simple triple store written in Rust.

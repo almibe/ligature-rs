@@ -5,14 +5,17 @@ publish = false
 authors = ["Alex Michael Berry <alexmiberry@gmail.com>"]
 edition = "2021"
 license = "MPL-2.0"
-description = "trips is a simple generic triple store written in Rust."
+description = "trips is a simple triple store written in Rust."
 repository = "https://github.com/almibe/ligature-rs/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+byteorder = "1.5.0"
 hashbag = "0.1.12"
-redb = { version = "2.2.0", optional = true }
+heed = { version = "0.20.5", optional = true }
+heed-types = { version = "0.20.1", optional = true }
+tempfile = "3.14.0"
 
 [features]
-redb = ["dep:redb"]
+heed = ["dep:heed", "dep:heed-types"]

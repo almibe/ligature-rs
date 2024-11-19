@@ -7,43 +7,52 @@
 #![deny(missing_docs)]
 
 use crate::Trips;
+use crate::mem::TripsError;
 use core::hash::Hash;
 use hashbag::HashBag;
-use redb::backends::InMemoryBackend;
-use redb::{Database, Key, TableDefinition, Value};
 use std::collections::{BTreeMap, BTreeSet};
-
-/// A simple error type.
-#[derive(Debug)]
-pub struct TripsError(String);
+use heed::{Env, Database, BytesDecode};
+use heed_types::{Str, U64};
 
 /// An in-memory implementation of Trips.
-pub struct TripsReDB<'a, C: Key + Value + 'static> {
-    db: Database,
-    ids_tbl: TableDefinition<'a, String, u64>,
-    collection_to_id_tbl: TableDefinition<'a, C, u64>,
-    id_to_collection_tbl: TableDefinition<'a, u64, C>,
+pub struct TripsHeed {
+    env: Env,
 }
 
-impl<C: Value + Key + 'static> TripsReDB<'_, C> {
+const ids: Option<&str> = Some("ids");
+const collection_to_id: Option<&str> = Some("collection_to_id");
+const id_to_collection: Option<&str> = Some("id_to_collection");
+
+impl<C: BytesDecode + 'static> TripsHeed {
     /// Create an empty triple store.
-    pub fn new() -> Self {
+    pub fn new(env: Env) -> Self {
+        let mut tx = env.write_txn().unwrap();
+        env.create_database::<Str, U64<byteorder::BigEndian>>(&mut tx, ids);
+        env.create_database::<Str, Str>(&mut tx, collection_to_id);
+        env.create_database::<U64<byteorder::BigEndian>, Str>(&mut tx, id_to_collection);
+        tx.commit();
+
         Self {
-            db: Database::builder()
-                .create_with_backend(InMemoryBackend::new())
-                .unwrap(),
-            ids_tbl: TableDefinition::new("ids"),
-            collection_to_id_tbl: TableDefinition::new("collection_to_id"),
-            id_to_collection_tbl: TableDefinition::new("id_to_collection"),
+            env
         }
     }
 }
 
-impl<C: Clone + Eq + Hash + Ord + Key, T: std::fmt::Debug + Eq + Ord + Clone + Hash>
-    Trips<C, T, TripsError> for TripsReDB<'_, C>
+impl<C: Clone + Eq + Hash + Ord + BytesDecode, T: std::fmt::Debug + Eq + Ord + Clone + Hash>
+    Trips<C, T, TripsError> for TripsHeed
 {
     fn collections(&self) -> Result<Vec<C>, TripsError> {
-        todo!()
+        let results: Vec<C> = vec![];
+        let tx = self.env.read_txn().unwrap();
+        match self.env.open_database::<C, C>(&tx, collection_to_id).unwrap() {
+            Some(db) => {
+                for entry in db.iter(&tx).unwrap() {
+                    results.push(entry.unwrap().1);
+                }
+            },
+            None => todo!()
+        }
+        Ok(results)
     }
 
     fn add_collection(&mut self, _collection: C) -> Result<(), TripsError> {

@@ -18,15 +18,15 @@ pub struct TripsError(String);
 /// An in-memory implementation of Trips.
 #[derive(Debug, PartialEq, Eq)]
 
-pub struct TripsMem<C: Clone + Ord, T: std::fmt::Debug + Ord> {
+pub struct TripsMem {
     // index: usize,
     // id_to_value: HashMap<usize, T>,
     // value_to_id: HashMap<T, usize>,
     // collections: HashMap<C, BTreeSet<(usize, usize, usize)>>
-    collections: BTreeMap<C, BTreeSet<Trip<T>>>,
+    collections: BTreeMap<String, BTreeSet<Trip>>,
 }
 
-impl<C: Clone + Ord, T: std::fmt::Debug + Ord> TripsMem<C, T> {
+impl TripsMem {
     /// Create an empty triple store.
     pub fn new() -> Self {
         Self {
@@ -44,25 +44,23 @@ impl<C: Clone + Ord, T: std::fmt::Debug + Ord> TripsMem<C, T> {
     // }
 }
 
-impl<C: Clone + Eq + Hash + Ord, T: std::fmt::Debug + Eq + Ord + Clone + Hash>
-    Trips<C, T, TripsError> for TripsMem<C, T>
-{
-    fn collections(&self) -> Result<Vec<C>, TripsError> {
-        let res: Vec<C> = self.collections.keys().cloned().collect();
+impl Trips<TripsError> for TripsMem {
+    fn collections(&self) -> Result<Vec<String>, TripsError> {
+        let res: Vec<String> = self.collections.keys().cloned().collect();
         Ok(res)
     }
 
-    fn add_collection(&mut self, collection: C) -> Result<(), TripsError> {
+    fn add_collection(&mut self, collection: String) -> Result<(), TripsError> {
         self.collections.insert(collection, BTreeSet::new());
         Ok(())
     }
 
-    fn remove_collection(&mut self, collection: C) -> Result<(), TripsError> {
+    fn remove_collection(&mut self, collection: String) -> Result<(), TripsError> {
         self.collections.remove(&collection);
         Ok(())
     }
 
-    fn triples(&self, collection: C) -> Result<BTreeSet<crate::Trip<T>>, TripsError> {
+    fn triples(&self, collection: String) -> Result<BTreeSet<crate::Trip>, TripsError> {
         match self.collections.get(&collection) {
             Some(res) => Ok(res.clone()),
             None => todo!(),
@@ -71,8 +69,8 @@ impl<C: Clone + Eq + Hash + Ord, T: std::fmt::Debug + Eq + Ord + Clone + Hash>
 
     fn add_triples(
         &mut self,
-        collection: C,
-        trips: &mut BTreeSet<crate::Trip<T>>,
+        collection: String,
+        trips: &mut BTreeSet<crate::Trip>,
     ) -> Result<(), TripsError> {
         match self.collections.get_mut(&collection) {
             Some(res) => {
@@ -85,8 +83,8 @@ impl<C: Clone + Eq + Hash + Ord, T: std::fmt::Debug + Eq + Ord + Clone + Hash>
 
     fn remove_triples(
         &mut self,
-        collection: C,
-        trips: &mut BTreeSet<crate::Trip<T>>,
+        collection: String,
+        trips: &mut BTreeSet<crate::Trip>,
     ) -> Result<(), TripsError> {
         match self.collections.get_mut(&collection) {
             Some(res) => {
@@ -101,13 +99,13 @@ impl<C: Clone + Eq + Hash + Ord, T: std::fmt::Debug + Eq + Ord + Clone + Hash>
 
     fn query(
         &self,
-        collection: C,
-        pattern: BTreeSet<crate::Query<T>>,
-    ) -> Result<HashBag<BTreeMap<String, T>>, TripsError> {
+        collection: String,
+        pattern: BTreeSet<crate::Query>,
+    ) -> Result<HashBag<BTreeMap<String, String>>, TripsError> {
         match self.collections.get(&collection) {
             Some(collection) => {
-                let mut results: HashBag<BTreeMap<String, T>> = HashBag::new();
-                let terms: Vec<&Query<T>> = pattern.iter().collect();
+                let mut results: HashBag<BTreeMap<String, String>> = HashBag::new();
+                let terms: Vec<&Query> = pattern.iter().collect();
                 let mut index = 0;
                 while index < terms.len() {
                     match terms.get(index) {
@@ -137,10 +135,10 @@ impl<C: Clone + Eq + Hash + Ord, T: std::fmt::Debug + Eq + Ord + Clone + Hash>
     }
 }
 
-fn match_query<T: std::fmt::Debug + Ord>(
-    query: &Query<T>,
-    triples: BTreeSet<Trip<T>>,
-) -> Vec<BTreeMap<String, T>> {
+fn match_query(
+    query: &Query,
+    triples: BTreeSet<Trip>,
+) -> Vec<BTreeMap<String, String>> {
     let mut results = vec![];
     for trip in triples {
         match match_query_single(query, trip) {
@@ -151,10 +149,10 @@ fn match_query<T: std::fmt::Debug + Ord>(
     results
 }
 
-fn match_query_single<T: std::fmt::Debug + Ord>(
-    query: &Query<T>,
-    triple: Trip<T>,
-) -> Option<BTreeMap<String, T>> {
+fn match_query_single(
+    query: &Query,
+    triple: Trip,
+) -> Option<BTreeMap<String, String>> {
     let mut result = BTreeMap::new();
     match &query.0 {
         Slot::Variable(variable_name) => {
