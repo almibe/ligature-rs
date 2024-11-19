@@ -6,7 +6,6 @@
 
 #![deny(missing_docs)]
 
-use core::hash::Hash;
 use hashbag::HashBag;
 use std::collections::{BTreeMap, BTreeSet};
 
