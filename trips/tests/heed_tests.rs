@@ -23,19 +23,21 @@ fn create_temp() -> Env {
 fn store_should_start_empty() {
     let env = create_temp();
     let store = trips::heed::TripsHeed::new(env);
-    let collections: Vec<String> = <TripsHeed as Trips<String, String, trips::mem::TripsError>>::collections(&store).unwrap();
+    let collections: Vec<String> = <TripsHeed as Trips<trips::mem::TripsError>>::collections(&store).unwrap();
     let result: Vec<String> = vec![];
     assert_eq!(collections, result);
 }
 
-// #[test]
-// fn add_collection_to_store() {
-//     let mut store: TripsMem<String, String> = trips::mem::TripsMem::new();
-//     let _ = store.add_collection("T".to_owned());
-//     let collections: Vec<String> = store.collections().unwrap();
-//     let result: Vec<String> = vec!["T".to_owned()];
-//     assert_eq!(collections, result);
-// }
+#[test]
+#[cfg(feature = "heed")]
+fn add_collection_to_store() {
+    let env = create_temp();
+    let mut store = TripsHeed::new(env);
+    let _ = store.add_collection("T".to_owned());
+    let collections: Vec<String> = store.collections().unwrap();
+    let result: Vec<String> = vec!["T".to_owned()];
+    assert_eq!(collections, result);
+}
 
 // #[test]
 // fn remove_collection_from_store() {

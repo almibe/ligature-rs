@@ -23,7 +23,7 @@ const ids: Option<&str> = Some("ids");
 const collection_to_id: Option<&str> = Some("collection_to_id");
 const id_to_collection: Option<&str> = Some("id_to_collection");
 
-impl<C: BytesDecode + 'static> TripsHeed {
+impl TripsHeed {
     /// Create an empty triple store.
     pub fn new(env: Env) -> Self {
         let mut tx = env.write_txn().unwrap();
@@ -38,16 +38,15 @@ impl<C: BytesDecode + 'static> TripsHeed {
     }
 }
 
-impl<C: Clone + Eq + Hash + Ord + BytesDecode, T: std::fmt::Debug + Eq + Ord + Clone + Hash>
-    Trips<C, T, TripsError> for TripsHeed
+impl Trips<TripsError> for TripsHeed
 {
-    fn collections(&self) -> Result<Vec<C>, TripsError> {
-        let results: Vec<C> = vec![];
+    fn collections(&self) -> Result<Vec<String>, TripsError> {
+        let mut results: Vec<String> = vec![];
         let tx = self.env.read_txn().unwrap();
-        match self.env.open_database::<C, C>(&tx, collection_to_id).unwrap() {
+        match self.env.open_database::<Str, U64<byteorder::BigEndian>>(&tx, collection_to_id).unwrap() {
             Some(db) => {
                 for entry in db.iter(&tx).unwrap() {
-                    results.push(entry.unwrap().1);
+                    results.push(entry.unwrap().0.to_owned());
                 }
             },
             None => todo!()
@@ -55,39 +54,63 @@ impl<C: Clone + Eq + Hash + Ord + BytesDecode, T: std::fmt::Debug + Eq + Ord + C
         Ok(results)
     }
 
-    fn add_collection(&mut self, _collection: C) -> Result<(), TripsError> {
+    fn add_collection(&mut self, _collection: String) -> Result<(), TripsError> {
+        let mut tx = self.env.write_txn().unwrap();
+        let id = match self.env.open_database::<Str, U64<byteorder::BigEndian>>(&tx, ids).unwrap() {
+            Some(db) => {
+                match db.get(&tx, "id") {
+                    Ok(Some(value)) => {
+                        let next_id = value + 1;
+                        db.put(&mut tx, "id", &next_id);
+                        next_id
+                    },
+                    Ok(None) => {
+                        db.put(&mut tx, "id", &0);
+                        0
+                    },
+                    _ => todo!()
+                }
+            },
+            None => todo!()
+        };
+        // match self.env.open_database::<Str, U64<byteorder::BigEndian>>(&tx, collection_to_id).unwrap() {
+        //     Some(db) => {
+
+        //     },
+        //     None => todo!()
+        // }
+        Ok(())
+    }
+
+    fn remove_collection(&mut self, _collection: String) -> Result<(), TripsError> {
         todo!()
     }
 
-    fn remove_collection(&mut self, _collection: C) -> Result<(), TripsError> {
-        todo!()
-    }
-
-    fn triples(&self, _collection: C) -> Result<BTreeSet<crate::Trip<T>>, TripsError> {
+    fn triples(&self, _collection: String) -> Result<BTreeSet<crate::Trip>, TripsError> {
         todo!()
     }
 
     fn add_triples(
         &mut self,
-        _collection: C,
-        _trips: &mut BTreeSet<crate::Trip<T>>,
+        _collection: String,
+        _trips: &mut BTreeSet<crate::Trip>,
     ) -> Result<(), TripsError> {
         todo!()
     }
 
     fn remove_triples(
         &mut self,
-        _collection: C,
-        _trips: &mut BTreeSet<crate::Trip<T>>,
+        _collection: String,
+        _trips: &mut BTreeSet<crate::Trip>,
     ) -> Result<(), TripsError> {
         todo!()
     }
 
     fn query(
         &self,
-        _collection: C,
-        _pattern: BTreeSet<crate::Query<T>>,
-    ) -> Result<HashBag<BTreeMap<String, T>>, TripsError> {
+        _collection: String,
+        _pattern: BTreeSet<crate::Query>,
+    ) -> Result<HashBag<BTreeMap<String, String>>, TripsError> {
         todo!()
     }
 }
