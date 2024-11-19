@@ -135,10 +135,7 @@ impl Trips<TripsError> for TripsMem {
     }
 }
 
-fn match_query(
-    query: &Query,
-    triples: BTreeSet<Trip>,
-) -> Vec<BTreeMap<String, String>> {
+fn match_query(query: &Query, triples: BTreeSet<Trip>) -> Vec<BTreeMap<String, String>> {
     let mut results = vec![];
     for trip in triples {
         match match_query_single(query, trip) {
@@ -149,10 +146,7 @@ fn match_query(
     results
 }
 
-fn match_query_single(
-    query: &Query,
-    triple: Trip,
-) -> Option<BTreeMap<String, String>> {
+fn match_query_single(query: &Query, triple: Trip) -> Option<BTreeMap<String, String>> {
     let mut result = BTreeMap::new();
     match &query.0 {
         Slot::Variable(variable_name) => {

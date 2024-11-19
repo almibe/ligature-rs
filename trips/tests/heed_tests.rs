@@ -2,13 +2,13 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use std::collections::{BTreeMap, BTreeSet};
-use trips::{Trip, Trips};
-use trips::mem::TripsError;
-#[cfg(feature = "heed")]
-use trips::heed::TripsHeed;
 #[cfg(feature = "heed")]
 use heed::{Env, EnvOpenOptions};
+use std::collections::{BTreeMap, BTreeSet};
+#[cfg(feature = "heed")]
+use trips::heed::TripsHeed;
+use trips::mem::TripsError;
+use trips::{Trip, Trips};
 
 #[cfg(feature = "heed")]
 fn create_temp() -> Env {
@@ -24,7 +24,8 @@ fn create_temp() -> Env {
 fn store_should_start_empty() {
     let env = create_temp();
     let store = trips::heed::TripsHeed::new(env);
-    let collections: Vec<String> = <TripsHeed as Trips<trips::mem::TripsError>>::collections(&store).unwrap();
+    let collections: Vec<String> =
+        <TripsHeed as Trips<trips::mem::TripsError>>::collections(&store).unwrap();
     let result: Vec<String> = vec![];
     assert_eq!(collections, result);
 }
@@ -70,9 +71,13 @@ fn add_triples_to_collection() {
     let env = create_temp();
     let mut store: TripsHeed = TripsHeed::new(env);
     let _ = store.add_collection("T".to_owned());
-    let _ = store.add_triples("T".to_owned(), &mut BTreeSet::from([Trip("1".to_owned(), "2".to_owned(), "3".to_owned())]));
+    let _ = store.add_triples(
+        "T".to_owned(),
+        &mut BTreeSet::from([Trip("1".to_owned(), "2".to_owned(), "3".to_owned())]),
+    );
     let collections: BTreeSet<Trip> = store.triples("T".to_owned()).unwrap();
-    let result: BTreeSet<Trip> = BTreeSet::from([Trip("1".to_owned(), "2".to_owned(), "3".to_owned())]);
+    let result: BTreeSet<Trip> =
+        BTreeSet::from([Trip("1".to_owned(), "2".to_owned(), "3".to_owned())]);
     assert_eq!(collections, result);
 }
 

@@ -9,9 +9,9 @@
 use hashbag::HashBag;
 use std::collections::{BTreeMap, BTreeSet};
 
-pub mod mem;
 #[cfg(feature = "heed")]
 pub mod heed;
+pub mod mem;
 
 /// The data structure stored in this triple store.
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]

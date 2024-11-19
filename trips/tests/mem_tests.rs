@@ -48,9 +48,13 @@ fn triples_should_start_empty() {
 fn add_triples_to_collection() {
     let mut store: TripsMem = trips::mem::TripsMem::new();
     let _ = store.add_collection("T".to_owned());
-    let _ = store.add_triples("T".to_owned(), &mut BTreeSet::from([Trip("1".to_owned(), "2".to_owned(), "3".to_owned())]));
+    let _ = store.add_triples(
+        "T".to_owned(),
+        &mut BTreeSet::from([Trip("1".to_owned(), "2".to_owned(), "3".to_owned())]),
+    );
     let collections: BTreeSet<Trip> = store.triples("T".to_owned()).unwrap();
-    let result: BTreeSet<Trip> = BTreeSet::from([Trip("1".to_owned(), "2".to_owned(), "3".to_owned())]);
+    let result: BTreeSet<Trip> =
+        BTreeSet::from([Trip("1".to_owned(), "2".to_owned(), "3".to_owned())]);
     assert_eq!(collections, result);
 }
 
@@ -60,11 +64,21 @@ fn remove_triples_from_collection() {
     let _ = store.add_collection("T".to_owned());
     let _ = store.add_triples(
         "T".to_owned(),
-        &mut BTreeSet::from([Trip("1".to_owned(), "2".to_owned(), "3".to_owned()), Trip("1".to_owned(), "2".to_owned(), "6".to_owned()), Trip("1".to_owned(), "2".to_owned(), "5".to_owned())]),
+        &mut BTreeSet::from([
+            Trip("1".to_owned(), "2".to_owned(), "3".to_owned()),
+            Trip("1".to_owned(), "2".to_owned(), "6".to_owned()),
+            Trip("1".to_owned(), "2".to_owned(), "5".to_owned()),
+        ]),
     );
-    let _ = store.remove_triples("T".to_owned(), &mut BTreeSet::from([Trip("1".to_owned(), "2".to_owned(), "3".to_owned())]));
+    let _ = store.remove_triples(
+        "T".to_owned(),
+        &mut BTreeSet::from([Trip("1".to_owned(), "2".to_owned(), "3".to_owned())]),
+    );
     let collections: BTreeSet<Trip> = store.triples("T".to_owned()).unwrap();
-    let result: BTreeSet<Trip> = BTreeSet::from([Trip("1".to_owned(), "2".to_owned(), "5".to_owned()), Trip("1".to_owned(), "2".to_owned(), "6".to_owned())]);
+    let result: BTreeSet<Trip> = BTreeSet::from([
+        Trip("1".to_owned(), "2".to_owned(), "5".to_owned()),
+        Trip("1".to_owned(), "2".to_owned(), "6".to_owned()),
+    ]);
     assert_eq!(collections, result);
 }
 
@@ -74,7 +88,11 @@ fn match_all_query_collection() {
     let _ = store.add_collection("T".to_owned());
     let _ = store.add_triples(
         "T".to_owned(),
-        &mut BTreeSet::from([Trip("1".to_owned(), "2".to_owned(), "3".to_owned()), Trip("1".to_owned(), "2".to_owned(), "6".to_owned()), Trip("1".to_owned(), "2".to_owned(), "5".to_owned())]),
+        &mut BTreeSet::from([
+            Trip("1".to_owned(), "2".to_owned(), "3".to_owned()),
+            Trip("1".to_owned(), "2".to_owned(), "6".to_owned()),
+            Trip("1".to_owned(), "2".to_owned(), "5".to_owned()),
+        ]),
     );
     let results = store
         .query(
@@ -96,7 +114,11 @@ fn basic_query_collection() {
     let _ = store.add_collection("T".to_owned());
     let _ = store.add_triples(
         "T".to_owned(),
-        &mut BTreeSet::from([Trip("1".to_owned(), "2".to_owned(), "3".to_owned()), Trip("1".to_owned(), "2".to_owned(), "6".to_owned()), Trip("1".to_owned(), "2".to_owned(), "5".to_owned())]),
+        &mut BTreeSet::from([
+            Trip("1".to_owned(), "2".to_owned(), "3".to_owned()),
+            Trip("1".to_owned(), "2".to_owned(), "6".to_owned()),
+            Trip("1".to_owned(), "2".to_owned(), "5".to_owned()),
+        ]),
     );
     let results = store
         .query(
@@ -122,7 +144,11 @@ fn complex_single_query_collection() {
     let _ = store.add_collection("T".to_owned());
     let _ = store.add_triples(
         "T".to_owned(),
-        &mut BTreeSet::from([Trip("2".to_owned(), "2".to_owned(), "3".to_owned()), Trip("1".to_owned(), "2".to_owned(), "6".to_owned()), Trip("1".to_owned(), "3".to_owned(), "5".to_owned())]),
+        &mut BTreeSet::from([
+            Trip("2".to_owned(), "2".to_owned(), "3".to_owned()),
+            Trip("1".to_owned(), "2".to_owned(), "6".to_owned()),
+            Trip("1".to_owned(), "3".to_owned(), "5".to_owned()),
+        ]),
     );
     let results = store
         .query(
@@ -138,8 +164,14 @@ fn complex_single_query_collection() {
         )
         .unwrap();
     let expected = HashBag::from_iter([
-        BTreeMap::from_iter([("A".to_owned(), "1".to_owned()), ("C".to_owned(), "6".to_owned())]),
-        BTreeMap::from_iter([("A".to_owned(), "2".to_owned()), ("C".to_owned(), "3".to_owned())]),
+        BTreeMap::from_iter([
+            ("A".to_owned(), "1".to_owned()),
+            ("C".to_owned(), "6".to_owned()),
+        ]),
+        BTreeMap::from_iter([
+            ("A".to_owned(), "2".to_owned()),
+            ("C".to_owned(), "3".to_owned()),
+        ]),
     ]);
     assert_eq!(results, expected);
 }

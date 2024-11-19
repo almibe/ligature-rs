@@ -6,13 +6,13 @@
 
 #![deny(missing_docs)]
 
-use crate::Trips;
 use crate::mem::TripsError;
+use crate::Trips;
 use core::hash::Hash;
 use hashbag::HashBag;
+use heed::{BytesDecode, Database, Env};
+use heed_types::{Bytes, Str, Unit, U64};
 use std::collections::{BTreeMap, BTreeSet};
-use heed::{Env, Database, BytesDecode};
-use heed_types::{Str, U64, Bytes, Unit};
 
 /// An in-memory implementation of Trips.
 pub struct TripsHeed {
@@ -22,6 +22,8 @@ pub struct TripsHeed {
 const ids: Option<&str> = Some("ids");
 const collection_to_id: Option<&str> = Some("collection_to_id");
 const id_to_collection: Option<&str> = Some("id_to_collection");
+const value_to_id: Option<&str> = Some("value_to_id");
+const id_to_value: Option<&str> = Some("id_to_value");
 const cfst: Option<&str> = Some("cfst");
 const cfts: Option<&str> = Some("cfts");
 const csft: Option<&str> = Some("csft");
@@ -36,6 +38,8 @@ impl TripsHeed {
         env.create_database::<Str, U64<byteorder::BigEndian>>(&mut tx, ids);
         env.create_database::<Str, U64<byteorder::BigEndian>>(&mut tx, collection_to_id);
         env.create_database::<U64<byteorder::BigEndian>, Str>(&mut tx, id_to_collection);
+        env.create_database::<Str, U64<byteorder::BigEndian>>(&mut tx, value_to_id);
+        env.create_database::<U64<byteorder::BigEndian>, Str>(&mut tx, id_to_value);
         env.create_database::<Bytes, Unit>(&mut tx, cfst);
         env.create_database::<Bytes, Unit>(&mut tx, cfts);
         env.create_database::<Bytes, Unit>(&mut tx, csft);
@@ -43,69 +47,82 @@ impl TripsHeed {
         env.create_database::<Bytes, Unit>(&mut tx, ctfs);
         env.create_database::<Bytes, Unit>(&mut tx, ctsf);
         tx.commit();
-        Self {
-            env
-        }
+        Self { env }
     }
 }
 
-impl Trips<TripsError> for TripsHeed
-{
+impl Trips<TripsError> for TripsHeed {
     fn collections(&self) -> Result<Vec<String>, TripsError> {
         let mut results: Vec<String> = vec![];
         let tx = self.env.read_txn().unwrap();
-        match self.env.open_database::<Str, U64<byteorder::BigEndian>>(&tx, collection_to_id).unwrap() {
+        match self
+            .env
+            .open_database::<Str, U64<byteorder::BigEndian>>(&tx, collection_to_id)
+            .unwrap()
+        {
             Some(db) => {
                 for entry in db.iter(&tx).unwrap() {
                     results.push(entry.unwrap().0.to_owned());
                 }
-            },
-            None => todo!()
+            }
+            None => todo!(),
         }
         Ok(results)
     }
 
     fn add_collection(&mut self, collection: String) -> Result<(), TripsError> {
         let mut tx = self.env.write_txn().unwrap();
-        match self.env.open_database::<Str, U64<byteorder::BigEndian>>(&tx, collection_to_id).unwrap() {
-            Some(db) => {
-                match db.get(&tx, &collection) {
-                    Ok(Some(value)) => {
-                        return Ok(());
-                    },
-                    _ => ()
+        match self
+            .env
+            .open_database::<Str, U64<byteorder::BigEndian>>(&tx, collection_to_id)
+            .unwrap()
+        {
+            Some(db) => match db.get(&tx, &collection) {
+                Ok(Some(value)) => {
+                    return Ok(());
                 }
+                _ => (),
             },
-            None => todo!()
+            None => todo!(),
         }
-        let id = match self.env.open_database::<Str, U64<byteorder::BigEndian>>(&tx, ids).unwrap() {
-            Some(db) => {
-                match db.get(&tx, "id") {
-                    Ok(Some(value)) => {
-                        let next_id = value + 1;
-                        db.put(&mut tx, "id", &next_id);
-                        next_id
-                    },
-                    Ok(None) => {
-                        db.put(&mut tx, "id", &0);
-                        0
-                    },
-                    _ => todo!()
+        let id = match self
+            .env
+            .open_database::<Str, U64<byteorder::BigEndian>>(&tx, ids)
+            .unwrap()
+        {
+            Some(db) => match db.get(&tx, "id") {
+                Ok(Some(value)) => {
+                    let next_id = value + 1;
+                    db.put(&mut tx, "id", &next_id);
+                    next_id
                 }
+                Ok(None) => {
+                    db.put(&mut tx, "id", &0);
+                    0
+                }
+                _ => todo!(),
             },
-            None => todo!()
+            None => todo!(),
         };
-        match self.env.open_database::<Str, U64<byteorder::BigEndian>>(&tx, collection_to_id).unwrap() {
+        match self
+            .env
+            .open_database::<Str, U64<byteorder::BigEndian>>(&tx, collection_to_id)
+            .unwrap()
+        {
             Some(db) => {
                 db.put(&mut tx, &collection, &id);
-            },
-            None => todo!()
+            }
+            None => todo!(),
         }
-        match self.env.open_database::<U64<byteorder::BigEndian>, Str>(&tx, id_to_collection).unwrap() {
+        match self
+            .env
+            .open_database::<U64<byteorder::BigEndian>, Str>(&tx, id_to_collection)
+            .unwrap()
+        {
             Some(db) => {
                 db.put(&mut tx, &id, &collection);
-            },
-            None => todo!()
+            }
+            None => todo!(),
         }
         tx.commit();
         Ok(())
@@ -113,26 +130,36 @@ impl Trips<TripsError> for TripsHeed
 
     fn remove_collection(&mut self, collection: String) -> Result<(), TripsError> {
         let mut tx = self.env.write_txn().unwrap();
-        let id = match self.env.open_database::<Str, U64<byteorder::BigEndian>>(&tx, collection_to_id).unwrap() {
-            Some(db) => {
-                match db.get(&tx, &collection) {
-                    Ok(Some(id)) => id,
-                    _ => todo!()
-                }
+        let id = match self
+            .env
+            .open_database::<Str, U64<byteorder::BigEndian>>(&tx, collection_to_id)
+            .unwrap()
+        {
+            Some(db) => match db.get(&tx, &collection) {
+                Ok(Some(id)) => id,
+                _ => todo!(),
             },
-            None => todo!()
+            None => todo!(),
         };
-        match self.env.open_database::<Str, U64<byteorder::BigEndian>>(&tx, collection_to_id).unwrap() {
+        match self
+            .env
+            .open_database::<Str, U64<byteorder::BigEndian>>(&tx, collection_to_id)
+            .unwrap()
+        {
             Some(db) => {
                 db.delete(&mut tx, &collection);
-            },
-            None => todo!()
+            }
+            None => todo!(),
         }
-        match self.env.open_database::<U64<byteorder::BigEndian>, Str>(&tx, id_to_collection).unwrap() {
+        match self
+            .env
+            .open_database::<U64<byteorder::BigEndian>, Str>(&tx, id_to_collection)
+            .unwrap()
+        {
             Some(db) => {
                 db.delete(&mut tx, &id);
-            },
-            None => todo!()
+            }
+            None => todo!(),
         }
         tx.commit();
         Ok(())
@@ -151,58 +178,80 @@ impl Trips<TripsError> for TripsHeed
         trips: &mut BTreeSet<crate::Trip>,
     ) -> Result<(), TripsError> {
         let mut tx = self.env.write_txn().unwrap();
-        let id = match self.env.open_database::<Str, U64<byteorder::BigEndian>>(&tx, collection_to_id).unwrap() {
-            Some(db) => {
-                match db.get(&tx, &collection) {
-                    Ok(Some(id)) => id,
-                    _ => todo!()
-                }
+        let id = match self
+            .env
+            .open_database::<Str, U64<byteorder::BigEndian>>(&tx, collection_to_id)
+            .unwrap()
+        {
+            Some(db) => match db.get(&tx, &collection) {
+                Ok(Some(id)) => id,
+                _ => todo!(),
             },
-            None => todo!()
+            None => todo!(),
         };
-        for trip in trips {
-            let fid = 0; //TODO lookup / create id
-            let sid = 0; //TODO lookup / create id
-            let tid = 0; //TODO lookup / create id
+        for trip in trips.iter() {
+            let (fid, sid, tid) = match self
+                .env
+                .open_database::<Str, U64<byteorder::BigEndian>>(&tx, ids)
+                .unwrap()
+            {
+                Some(db) => {
+                    let fid = match db.get(&tx, &trip.0) {
+                        Ok(Some(id)) => id,
+                        _ => todo!(),
+                    };
+                    let sid = match db.get(&tx, &trip.1) {
+                        Ok(Some(id)) => id,
+                        _ => todo!(),
+                    };
+                    let tid = match db.get(&tx, &trip.2) {
+                        Ok(Some(id)) => id,
+                        _ => todo!(),
+                    };
+                    (fid, sid, tid)
+                }
+                None => todo!(),
+            };
 
-            match self.env.open_database::<Str, U64<byteorder::BigEndian>>(&tx, cfst).unwrap() {
+            match self.env.open_database::<Bytes, Unit>(&tx, cfst).unwrap() {
                 Some(db) => {
                     todo!()
-                },
-                None => todo!()
+                }
+                None => todo!(),
             }
-            match self.env.open_database::<Str, U64<byteorder::BigEndian>>(&tx, cfts).unwrap() {
+            match self.env.open_database::<Bytes, Unit>(&tx, cfts).unwrap() {
                 Some(db) => {
                     todo!()
-                },
-                None => todo!()
+                }
+                None => todo!(),
             }
-            match self.env.open_database::<Str, U64<byteorder::BigEndian>>(&tx, csft).unwrap() {
+            match self.env.open_database::<Bytes, Unit>(&tx, csft).unwrap() {
                 Some(db) => {
                     todo!()
-                },
-                None => todo!()
+                }
+                None => todo!(),
             }
-            match self.env.open_database::<Str, U64<byteorder::BigEndian>>(&tx, cstf).unwrap() {
+            match self.env.open_database::<Bytes, Unit>(&tx, cstf).unwrap() {
                 Some(db) => {
                     todo!()
-                },
-                None => todo!()
+                }
+                None => todo!(),
             }
-            match self.env.open_database::<Str, U64<byteorder::BigEndian>>(&tx, ctfs).unwrap() {
+            match self.env.open_database::<Bytes, Unit>(&tx, ctfs).unwrap() {
                 Some(db) => {
                     todo!()
-                },
-                None => todo!()
+                }
+                None => todo!(),
             }
-            match self.env.open_database::<Str, U64<byteorder::BigEndian>>(&tx, ctsf).unwrap() {
+            match self.env.open_database::<Bytes, Unit>(&tx, ctsf).unwrap() {
                 Some(db) => {
                     todo!()
-                },
-                None => todo!()
+                }
+                None => todo!(),
             }
         }
         tx.commit();
+        Ok(())
     }
 
     fn remove_triples(
