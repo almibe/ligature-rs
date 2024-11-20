@@ -165,11 +165,35 @@ impl Trips<TripsError> for TripsHeed {
         Ok(())
     }
 
-    fn triples(&self, _collection: String) -> Result<BTreeSet<crate::Trip>, TripsError> {
-        let _tx = self.env.read_txn().unwrap();
-        //look up collection id
+    fn triples(&self, collection: String) -> Result<BTreeSet<crate::Trip>, TripsError> {
+        let tx = self.env.read_txn().unwrap();
+        let mut results: BTreeSet<crate::Trip> = BTreeSet::new();
+        let collection_id = match self
+            .env
+            .open_database::<Str, U64<byteorder::BigEndian>>(&tx, collection_to_id)
+            .unwrap()
+        {
+            Some(db) => match db.get(&tx, &collection) {
+                Ok(Some(id)) => id,
+                _ => todo!(),
+            },
+            None => todo!(),
+        };
         //look up triples in cfst
-        Ok(BTreeSet::new())
+        match self.env.open_database::<Bytes, Unit>(&tx, cfst).unwrap() {
+            Some(cfst_db) => {
+                cfst_db.iter(&tx).unwrap().for_each(|entry| {
+                    let entry = &entry.unwrap().0;
+                    let collection_id = &entry[0..8];
+                    let first_id = &entry[8..16];
+                    let second_id = &entry[16..24];
+                    let third_id = &entry[24..32];
+                    todo!()
+                });
+            },
+            None => todo!(),
+        }
+        Ok(results)
     }
 
     fn add_triples(
@@ -219,8 +243,8 @@ impl Trips<TripsError> for TripsHeed {
                                     value_id = value_id + 1;
                                     value_to_id_db.put(&mut tx, &trip.0, &value_id);
                                     value_id
-                                },
-                                None => todo!()
+                                }
+                                None => todo!(),
                             }
                         }
                     };
@@ -236,10 +260,10 @@ impl Trips<TripsError> for TripsHeed {
                                     value_id = value_id + 1;
                                     value_to_id_db.put(&mut tx, &trip.1, &value_id);
                                     value_id
-                                },
-                                None => todo!()
+                                }
+                                None => todo!(),
                             }
-                        },
+                        }
                     };
                     let tid = match value_to_id_db.get(&tx, &trip.2) {
                         Ok(Some(id)) => id,
@@ -253,10 +277,10 @@ impl Trips<TripsError> for TripsHeed {
                                     value_id = value_id + 1;
                                     value_to_id_db.put(&mut tx, &trip.2, &value_id);
                                     value_id
-                                },
-                                None => todo!()
+                                }
+                                None => todo!(),
                             }
-                        },
+                        }
                     };
                     (fid, sid, tid)
                 }
@@ -276,30 +300,42 @@ impl Trips<TripsError> for TripsHeed {
             let ctsfbytes: [u8; 32] = merge_arrays(cbytes, tbytes, sbytes, fbytes);
 
             match self.env.open_database::<Bytes, Unit>(&tx, cfst).unwrap() {
-                Some(db) => {db.put(&mut tx, &cfstbytes, &());},
+                Some(db) => {
+                    db.put(&mut tx, &cfstbytes, &());
+                }
                 None => todo!(),
             }
             match self.env.open_database::<Bytes, Unit>(&tx, cfts).unwrap() {
-                Some(db) => {db.put(&mut tx, &cftsbytes, &());},
+                Some(db) => {
+                    db.put(&mut tx, &cftsbytes, &());
+                }
                 None => todo!(),
             }
             match self.env.open_database::<Bytes, Unit>(&tx, csft).unwrap() {
-                Some(db) => {db.put(&mut tx, &csftbytes, &());},
+                Some(db) => {
+                    db.put(&mut tx, &csftbytes, &());
+                }
                 None => todo!(),
             }
             match self.env.open_database::<Bytes, Unit>(&tx, cstf).unwrap() {
-                Some(db) => {db.put(&mut tx, &cstfbytes, &());},
+                Some(db) => {
+                    db.put(&mut tx, &cstfbytes, &());
+                }
                 None => todo!(),
             }
             match self.env.open_database::<Bytes, Unit>(&tx, ctfs).unwrap() {
-                Some(db) => {db.put(&mut tx, &ctfsbytes, &());},
+                Some(db) => {
+                    db.put(&mut tx, &ctfsbytes, &());
+                }
                 None => todo!(),
             }
             match self.env.open_database::<Bytes, Unit>(&tx, ctsf).unwrap() {
-                Some(db) => {db.put(&mut tx, &ctsfbytes, &());},
+                Some(db) => {
+                    db.put(&mut tx, &ctsfbytes, &());
+                }
                 None => todo!(),
             }
-        };
+        }
         tx.commit();
         Ok(())
     }
