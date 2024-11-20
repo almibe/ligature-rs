@@ -178,7 +178,7 @@ impl Trips<TripsError> for TripsHeed {
         trips: &mut BTreeSet<crate::Trip>,
     ) -> Result<(), TripsError> {
         let mut tx = self.env.write_txn().unwrap();
-        let id = match self
+        let collection_id = match self
             .env
             .open_database::<Str, U64<byteorder::BigEndian>>(&tx, collection_to_id)
             .unwrap()
@@ -189,67 +189,117 @@ impl Trips<TripsError> for TripsHeed {
             },
             None => todo!(),
         };
+        let mut value_id = match self
+            .env
+            .open_database::<Str, U64<byteorder::BigEndian>>(&tx, ids)
+            .unwrap()
+        {
+            Some(db) => match db.get(&tx, "id") {
+                Ok(Some(id)) => id,
+                _ => todo!(),
+            },
+            None => todo!(),
+        };
         for trip in trips.iter() {
             let (fid, sid, tid) = match self
                 .env
-                .open_database::<Str, U64<byteorder::BigEndian>>(&tx, ids)
+                .open_database::<Str, U64<byteorder::BigEndian>>(&tx, value_to_id)
                 .unwrap()
             {
-                Some(db) => {
-                    let fid = match db.get(&tx, &trip.0) {
+                Some(value_to_id_db) => {
+                    let fid = match value_to_id_db.get(&tx, &trip.0) {
                         Ok(Some(id)) => id,
-                        _ => todo!(),
+                        _ => {
+                            match self
+                                .env
+                                .open_database::<Str, U64<byteorder::BigEndian>>(&tx, id_to_value)
+                                .unwrap()
+                            {
+                                Some(id_to_value_db) => {
+                                    value_id = value_id + 1;
+                                    value_to_id_db.put(&mut tx, &trip.0, &value_id);
+                                    value_id
+                                },
+                                None => todo!()
+                            }
+                        }
                     };
-                    let sid = match db.get(&tx, &trip.1) {
+                    let sid = match value_to_id_db.get(&tx, &trip.1) {
                         Ok(Some(id)) => id,
-                        _ => todo!(),
+                        _ => {
+                            match self
+                                .env
+                                .open_database::<Str, U64<byteorder::BigEndian>>(&tx, id_to_value)
+                                .unwrap()
+                            {
+                                Some(id_to_value_db) => {
+                                    value_id = value_id + 1;
+                                    value_to_id_db.put(&mut tx, &trip.1, &value_id);
+                                    value_id
+                                },
+                                None => todo!()
+                            }
+                        },
                     };
-                    let tid = match db.get(&tx, &trip.2) {
+                    let tid = match value_to_id_db.get(&tx, &trip.2) {
                         Ok(Some(id)) => id,
-                        _ => todo!(),
+                        _ => {
+                            match self
+                                .env
+                                .open_database::<Str, U64<byteorder::BigEndian>>(&tx, id_to_value)
+                                .unwrap()
+                            {
+                                Some(id_to_value_db) => {
+                                    value_id = value_id + 1;
+                                    value_to_id_db.put(&mut tx, &trip.2, &value_id);
+                                    value_id
+                                },
+                                None => todo!()
+                            }
+                        },
                     };
                     (fid, sid, tid)
                 }
                 None => todo!(),
             };
 
+            let cbytes = collection_id.to_be_bytes();
+            let fbytes = fid.to_be_bytes();
+            let sbytes = sid.to_be_bytes();
+            let tbytes = tid.to_be_bytes();
+
+            let cfstbytes: [u8; 32] = merge_arrays(cbytes, fbytes, sbytes, tbytes);
+            let cftsbytes: [u8; 32] = merge_arrays(cbytes, fbytes, tbytes, sbytes);
+            let csftbytes: [u8; 32] = merge_arrays(cbytes, sbytes, fbytes, tbytes);
+            let cstfbytes: [u8; 32] = merge_arrays(cbytes, sbytes, tbytes, fbytes);
+            let ctfsbytes: [u8; 32] = merge_arrays(cbytes, tbytes, fbytes, sbytes);
+            let ctsfbytes: [u8; 32] = merge_arrays(cbytes, tbytes, sbytes, fbytes);
+
             match self.env.open_database::<Bytes, Unit>(&tx, cfst).unwrap() {
-                Some(db) => {
-                    todo!()
-                }
+                Some(db) => {db.put(&mut tx, &cfstbytes, &());},
                 None => todo!(),
             }
             match self.env.open_database::<Bytes, Unit>(&tx, cfts).unwrap() {
-                Some(db) => {
-                    todo!()
-                }
+                Some(db) => {db.put(&mut tx, &cftsbytes, &());},
                 None => todo!(),
             }
             match self.env.open_database::<Bytes, Unit>(&tx, csft).unwrap() {
-                Some(db) => {
-                    todo!()
-                }
+                Some(db) => {db.put(&mut tx, &csftbytes, &());},
                 None => todo!(),
             }
             match self.env.open_database::<Bytes, Unit>(&tx, cstf).unwrap() {
-                Some(db) => {
-                    todo!()
-                }
+                Some(db) => {db.put(&mut tx, &cstfbytes, &());},
                 None => todo!(),
             }
             match self.env.open_database::<Bytes, Unit>(&tx, ctfs).unwrap() {
-                Some(db) => {
-                    todo!()
-                }
+                Some(db) => {db.put(&mut tx, &ctfsbytes, &());},
                 None => todo!(),
             }
             match self.env.open_database::<Bytes, Unit>(&tx, ctsf).unwrap() {
-                Some(db) => {
-                    todo!()
-                }
+                Some(db) => {db.put(&mut tx, &ctsfbytes, &());},
                 None => todo!(),
             }
-        }
+        };
         tx.commit();
         Ok(())
     }
@@ -269,4 +319,26 @@ impl Trips<TripsError> for TripsHeed {
     ) -> Result<HashBag<BTreeMap<String, String>>, TripsError> {
         todo!()
     }
+}
+
+fn merge_arrays(a: [u8; 8], b: [u8; 8], c: [u8; 8], d: [u8; 8]) -> [u8; 32] {
+    let mut res: [u8; 32] = [0; 32];
+    let mut index = 0;
+    for val in a {
+        res[index] = val;
+        index = index + 1;
+    }
+    for val in b {
+        res[index] = val;
+        index = index + 1;
+    }
+    for val in c {
+        res[index] = val;
+        index = index + 1;
+    }
+    for val in d {
+        res[index] = val;
+        index = index + 1;
+    }
+    res
 }
