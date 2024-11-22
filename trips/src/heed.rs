@@ -413,18 +413,75 @@ impl Trips<TripsError> for TripsHeed {
             .open_database::<Str, U64<byteorder::BigEndian>>(&tx, value_to_id)
             .unwrap()
         {
-            Some(db) => {
+            Some(value_to_id_db) => {
                 for trip in trips.iter() {
-                    trip.0.clone();
+                    let fid = match value_to_id_db.get(&tx, &trip.0) {
+                        Ok(Some(fid)) => fid,
+                        _ => todo!(),
+                    };
+                    let sid = match value_to_id_db.get(&tx, &trip.1) {
+                        Ok(Some(fid)) => fid,
+                        _ => todo!(),
+                    };
+                    let tid = match value_to_id_db.get(&tx, &trip.2) {
+                        Ok(Some(fid)) => fid,
+                        _ => todo!(),
+                    };
+
+                    let cbytes = collection_id.to_be_bytes();
+                    let fbytes = fid.to_be_bytes();
+                    let sbytes = sid.to_be_bytes();
+                    let tbytes = tid.to_be_bytes();
+
+                    let cfstbytes: [u8; 32] = merge_arrays(cbytes, fbytes, sbytes, tbytes);
+                    let cftsbytes: [u8; 32] = merge_arrays(cbytes, fbytes, tbytes, sbytes);
+                    let csftbytes: [u8; 32] = merge_arrays(cbytes, sbytes, fbytes, tbytes);
+                    let cstfbytes: [u8; 32] = merge_arrays(cbytes, sbytes, tbytes, fbytes);
+                    let ctfsbytes: [u8; 32] = merge_arrays(cbytes, tbytes, fbytes, sbytes);
+                    let ctsfbytes: [u8; 32] = merge_arrays(cbytes, tbytes, sbytes, fbytes);
+
+                    match self.env.open_database::<Bytes, Unit>(&tx, cfst).unwrap() {
+                        Some(db) => {
+                            db.delete(&mut tx, &cfstbytes);
+                        }
+                        None => todo!(),
+                    }
+                    match self.env.open_database::<Bytes, Unit>(&tx, cfts).unwrap() {
+                        Some(db) => {
+                            db.delete(&mut tx, &cftsbytes);
+                        }
+                        None => todo!(),
+                    }
+                    match self.env.open_database::<Bytes, Unit>(&tx, csft).unwrap() {
+                        Some(db) => {
+                            db.delete(&mut tx, &csftbytes);
+                        }
+                        None => todo!(),
+                    }
+                    match self.env.open_database::<Bytes, Unit>(&tx, cstf).unwrap() {
+                        Some(db) => {
+                            db.delete(&mut tx, &cstfbytes);
+                        }
+                        None => todo!(),
+                    }
+                    match self.env.open_database::<Bytes, Unit>(&tx, ctfs).unwrap() {
+                        Some(db) => {
+                            db.delete(&mut tx, &ctfsbytes);
+                        }
+                        None => todo!(),
+                    }
+                    match self.env.open_database::<Bytes, Unit>(&tx, ctsf).unwrap() {
+                        Some(db) => {
+                            db.delete(&mut tx, &ctsfbytes);
+                        }
+                        None => todo!(),
+                    }
                 }
             }
             None => todo!(),
         }
-        //open value_to_id
-        //open cfst
-        //look up all values
         tx.commit();
-        todo!()
+        Ok(())
     }
 
     fn query(
