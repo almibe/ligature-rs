@@ -7,7 +7,6 @@
 #![deny(missing_docs)]
 
 use crate::{Query, Slot, Trip, Trips};
-use core::hash::Hash;
 use hashbag::HashBag;
 use std::collections::{BTreeMap, BTreeSet};
 

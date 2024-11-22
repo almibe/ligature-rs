@@ -183,14 +183,49 @@ impl Trips<TripsError> for TripsHeed {
         match self.env.open_database::<Bytes, Unit>(&tx, cfst).unwrap() {
             Some(cfst_db) => {
                 cfst_db.iter(&tx).unwrap().for_each(|entry| {
+                    //TODO use prefix iter
                     let entry = &entry.unwrap().0;
-                    let collection_id = &entry[0..8];
-                    let first_id = &entry[8..16];
-                    let second_id = &entry[16..24];
-                    let third_id = &entry[24..32];
-                    todo!()
+                    let cid = read_id(&entry[0..8]);
+                    let fid = read_id(&entry[8..16]);
+                    let sid = read_id(&entry[16..24]);
+                    let tid = read_id(&entry[24..32]);
+                    if collection_id == cid {
+                        //TODO use prefix iter instead of this
+                        match self
+                            .env
+                            .open_database::<U64<byteorder::BigEndian>, Str>(&tx, id_to_value)
+                        {
+                            Ok(Some(id_to_value_db)) => {
+                                let first_value = match id_to_value_db.get(&tx, &fid) {
+                                    Ok(Some(res)) => res,
+                                    Ok(None) => todo!(),
+                                    _ => todo!(),
+                                };
+                                let second_value = match id_to_value_db.get(&tx, &sid) {
+                                    Ok(Some(res)) => res,
+                                    Ok(None) => todo!(),
+                                    _ => todo!(),
+                                };
+                                let third_value = match id_to_value_db.get(&tx, &tid) {
+                                    Ok(Some(res)) => res,
+                                    Ok(None) => todo!(),
+                                    _ => todo!(),
+                                };
+                                println!(
+                                    "Adding - {} {} {}",
+                                    first_value, second_value, third_value
+                                );
+                                results.insert(crate::Trip(
+                                    first_value.to_owned(),
+                                    second_value.to_owned(),
+                                    third_value.to_owned(),
+                                ));
+                            }
+                            _ => todo!(),
+                        }
+                    }
                 });
-            },
+            }
             None => todo!(),
         }
         Ok(results)
@@ -236,12 +271,13 @@ impl Trips<TripsError> for TripsHeed {
                         _ => {
                             match self
                                 .env
-                                .open_database::<Str, U64<byteorder::BigEndian>>(&tx, id_to_value)
+                                .open_database::<U64<byteorder::BigEndian>, Str>(&tx, id_to_value)
                                 .unwrap()
                             {
                                 Some(id_to_value_db) => {
                                     value_id = value_id + 1;
                                     value_to_id_db.put(&mut tx, &trip.0, &value_id);
+                                    id_to_value_db.put(&mut tx, &value_id, &trip.0);
                                     value_id
                                 }
                                 None => todo!(),
@@ -253,12 +289,13 @@ impl Trips<TripsError> for TripsHeed {
                         _ => {
                             match self
                                 .env
-                                .open_database::<Str, U64<byteorder::BigEndian>>(&tx, id_to_value)
+                                .open_database::<U64<byteorder::BigEndian>, Str>(&tx, id_to_value)
                                 .unwrap()
                             {
                                 Some(id_to_value_db) => {
                                     value_id = value_id + 1;
                                     value_to_id_db.put(&mut tx, &trip.1, &value_id);
+                                    id_to_value_db.put(&mut tx, &value_id, &trip.1);
                                     value_id
                                 }
                                 None => todo!(),
@@ -270,12 +307,13 @@ impl Trips<TripsError> for TripsHeed {
                         _ => {
                             match self
                                 .env
-                                .open_database::<Str, U64<byteorder::BigEndian>>(&tx, id_to_value)
+                                .open_database::<U64<byteorder::BigEndian>, Str>(&tx, id_to_value)
                                 .unwrap()
                             {
                                 Some(id_to_value_db) => {
                                     value_id = value_id + 1;
                                     value_to_id_db.put(&mut tx, &trip.2, &value_id);
+                                    id_to_value_db.put(&mut tx, &value_id, &trip.2);
                                     value_id
                                 }
                                 None => todo!(),
@@ -286,6 +324,18 @@ impl Trips<TripsError> for TripsHeed {
                 }
                 None => todo!(),
             };
+
+            match self
+                .env
+                .open_database::<Str, U64<byteorder::BigEndian>>(&tx, ids)
+                .unwrap()
+            {
+                Some(db) => {
+                    db.put(&mut tx, &"id", &value_id);
+                    ()
+                }
+                None => todo!(),
+            }
 
             let cbytes = collection_id.to_be_bytes();
             let fbytes = fid.to_be_bytes();
@@ -342,9 +392,38 @@ impl Trips<TripsError> for TripsHeed {
 
     fn remove_triples(
         &mut self,
-        _collection: String,
-        _trips: &mut BTreeSet<crate::Trip>,
+        collection: String,
+        trips: &mut BTreeSet<crate::Trip>,
     ) -> Result<(), TripsError> {
+        let mut tx = self.env.write_txn().unwrap();
+        let mut values: Vec<Vec<u64>> = vec![];
+        let collection_id = match self
+            .env
+            .open_database::<Str, U64<byteorder::BigEndian>>(&tx, collection_to_id)
+            .unwrap()
+        {
+            Some(db) => match db.get(&tx, &collection) {
+                Ok(Some(value)) => value,
+                _ => todo!(),
+            },
+            None => todo!(),
+        };
+        match self
+            .env
+            .open_database::<Str, U64<byteorder::BigEndian>>(&tx, value_to_id)
+            .unwrap()
+        {
+            Some(db) => {
+                for trip in trips.iter() {
+                    trip.0.clone();
+                }
+            }
+            None => todo!(),
+        }
+        //open value_to_id
+        //open cfst
+        //look up all values
+        tx.commit();
         todo!()
     }
 
@@ -355,6 +434,16 @@ impl Trips<TripsError> for TripsHeed {
     ) -> Result<HashBag<BTreeMap<String, String>>, TripsError> {
         todo!()
     }
+}
+
+fn read_id(encoded: &[u8]) -> u64 {
+    let mut id: [u8; 8] = [0; 8];
+    let mut idx = 0;
+    for value in encoded {
+        id[idx] = *value;
+        idx = idx + 1;
+    }
+    u64::from_be_bytes(id)
 }
 
 fn merge_arrays(a: [u8; 8], b: [u8; 8], c: [u8; 8], d: [u8; 8]) -> [u8; 32] {

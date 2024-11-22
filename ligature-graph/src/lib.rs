@@ -13,11 +13,11 @@ use trips::{Query, Slot, Trip, Trips};
 #[derive()]
 /// An implementation of the Graph trait that stores all Data in a sorted set.
 pub struct LigatureGraph<E> {
-    store: Box<dyn Trips<Element, Element, E>>,
+    store: Box<dyn Trips<E>>,
 }
 
 impl<E> LigatureGraph<E> {
-    pub fn from_trips(trips: Box<dyn Trips<Element, Element, E>>) -> Self {
+    pub fn from_trips(trips: Box<dyn Trips<E>>) -> Self {
         Self { store: trips }
     }
 }
@@ -25,7 +25,7 @@ impl<E> LigatureGraph<E> {
 impl LigatureGraph<TripsError> {
     pub fn new() -> Self {
         Self {
-            store: Box::new(TripsMem::<Element, Element>::new()),
+            store: Box::new(TripsMem::new()),
         }
     }
 }
@@ -121,25 +121,25 @@ impl<E> Ligature<E> for LigatureGraph<E> {
         let query_pattern: BTreeSet<Query<Element>> =
             BTreeSet::from_iter(pattern.iter().map(|entry| match entry {
                 Entry::Extends { element, concept } => Query(
-                    Slot::Value(element.clone()),
-                    Slot::Value(Element(":".to_owned())),
-                    Slot::Value(concept.clone()),
+                    Slot::Value(element.clone().0),
+                    Slot::Value(":".to_owned()),
+                    Slot::Value(concept.clone().0),
                 ),
                 Entry::Role {
                     first,
                     second,
                     role,
                 } => Query(
-                    Slot::Value(first.clone()),
-                    Slot::Value(role.clone()),
-                    Slot::Value(second.clone()),
+                    Slot::Value(first.clone().0),
+                    Slot::Value(role.clone().0),
+                    Slot::Value(second.clone().0),
                 ),
                 Entry::NotExtends { element, concept } => Query(
-                    Slot::Value(element.clone()),
-                    Slot::Value(Element("¬:".to_owned())),
-                    Slot::Value(concept.clone()),
+                    Slot::Value(element.clone().0),
+                    Slot::Value("¬:".to_owned()),
+                    Slot::Value(concept.clone().0),
                 ),
             }));
-        self.store.query(collection, query_pattern)
+        self.store.query(collection.0, query_pattern)
     }
 }
