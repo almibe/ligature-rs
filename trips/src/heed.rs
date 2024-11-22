@@ -489,9 +489,15 @@ impl Trips<TripsError> for TripsHeed {
         _collection: String,
         _pattern: BTreeSet<crate::Query>,
     ) -> Result<HashBag<BTreeMap<String, String>>, TripsError> {
-        todo!()
+        let mut tx = self.env.read_txn().unwrap();
+        let mut result: HashBag<BTreeMap<String, String> = HashBag::new();
+        //look up collection
+        //look up value ids
+        Ok(result)
     }
 }
+
+
 
 fn read_id(encoded: &[u8]) -> u64 {
     let mut id: [u8; 8] = [0; 8];

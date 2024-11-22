@@ -32,36 +32,38 @@ impl LigatureGraph<TripsError> {
 
 impl<E> Ligature<E> for LigatureGraph<E> {
     fn collections(&self) -> Result<Vec<Element>, E> {
-        self.store.collections()
+        self.store
+            .collections()
+            .map(|r| r.into_iter().map(|e| Element(e)).collect())
     }
 
     fn add_collection(&mut self, collection: Element) -> Result<(), E> {
-        self.store.add_collection(collection)
+        self.store.add_collection(collection.0)
     }
 
     fn remove_collection(&mut self, collection: Element) -> Result<(), E> {
-        self.store.remove_collection(collection)
+        self.store.remove_collection(collection.0)
     }
 
     fn entries(&self, collection: Element) -> Result<BTreeSet<ligature::Entry>, E> {
-        self.store.triples(collection).map(|set| {
+        self.store.triples(collection.0).map(|set| {
             set.into_iter()
-                .map(|entry: Trip<Element>| {
-                    if entry.1 == Element(":".to_owned()) {
+                .map(|entry: Trip| {
+                    if entry.1 == ":".to_owned() {
                         Entry::Extends {
-                            element: entry.0,
-                            concept: entry.2,
+                            element: Element(entry.0),
+                            concept: Element(entry.2),
                         }
-                    } else if entry.1 == Element("¬:".to_owned()) {
+                    } else if entry.1 == "¬:".to_owned() {
                         Entry::NotExtends {
-                            element: entry.0,
-                            concept: entry.2,
+                            element: Element(entry.0),
+                            concept: Element(entry.2),
                         }
                     } else {
                         Entry::Role {
-                            first: entry.0,
-                            second: entry.2,
-                            role: entry.1,
+                            first: Element(entry.0),
+                            second: Element(entry.2),
+                            role: Element(entry.1),
                         }
                     }
                 })
@@ -74,21 +76,21 @@ impl<E> Ligature<E> for LigatureGraph<E> {
         collection: Element,
         entries: &mut BTreeSet<ligature::Entry>,
     ) -> Result<(), E> {
-        let mut triples: BTreeSet<Trip<Element>> =
+        let mut triples: BTreeSet<Trip> =
             BTreeSet::from_iter(entries.iter().map(|entry| match entry {
                 Entry::Extends { element, concept } => {
-                    Trip(element.clone(), Element(":".to_owned()), concept.clone())
+                    Trip(element.clone().0, ":".to_owned(), concept.clone().0)
                 }
                 Entry::Role {
                     first,
                     second,
                     role,
-                } => Trip(first.clone(), role.clone(), second.clone()),
+                } => Trip(first.clone().0, role.clone().0, second.clone().0),
                 Entry::NotExtends { element, concept } => {
-                    Trip(element.clone(), Element("¬:".to_owned()), concept.clone())
+                    Trip(element.clone().0, "¬:".to_owned(), concept.clone().0)
                 }
             }));
-        self.store.add_triples(collection, &mut triples)
+        self.store.add_triples(collection.0, &mut triples)
     }
 
     fn remove_entries(
@@ -96,29 +98,29 @@ impl<E> Ligature<E> for LigatureGraph<E> {
         collection: Element,
         entries: &mut BTreeSet<ligature::Entry>,
     ) -> Result<(), E> {
-        let mut triples: BTreeSet<Trip<Element>> =
+        let mut triples: BTreeSet<Trip> =
             BTreeSet::from_iter(entries.iter().map(|entry| match entry {
                 Entry::Extends { element, concept } => {
-                    Trip(element.clone(), Element(":".to_owned()), concept.clone())
+                    Trip(element.clone().0, ":".to_owned(), concept.clone().0)
                 }
                 Entry::Role {
                     first,
                     second,
                     role,
-                } => Trip(first.clone(), role.clone(), second.clone()),
+                } => Trip(first.clone().0, role.clone().0, second.clone().0),
                 Entry::NotExtends { element, concept } => {
-                    Trip(element.clone(), Element("¬:".to_owned()), concept.clone())
+                    Trip(element.clone().0, "¬:".to_owned(), concept.clone().0)
                 }
             }));
-        self.store.remove_triples(collection, &mut triples)
+        self.store.remove_triples(collection.0, &mut triples)
     }
 
     fn query(
         &self,
         collection: Element,
         pattern: BTreeSet<ligature::Entry>,
-    ) -> Result<HashBag<std::collections::BTreeMap<String, Element>>, E> {
-        let query_pattern: BTreeSet<Query<Element>> =
+    ) -> Result<HashBag<std::collections::BTreeMap<String, String>>, E> {
+        let query_pattern: BTreeSet<Query> =
             BTreeSet::from_iter(pattern.iter().map(|entry| match entry {
                 Entry::Extends { element, concept } => Query(
                     Slot::Value(element.clone().0),

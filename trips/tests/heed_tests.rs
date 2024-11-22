@@ -8,7 +8,8 @@ use std::collections::{BTreeMap, BTreeSet};
 #[cfg(feature = "heed")]
 use trips::heed::TripsHeed;
 use trips::mem::TripsError;
-use trips::{Trip, Trips};
+use trips::{Trip, Trips, Slot, Query};
+use hashbag::HashBag;
 
 #[cfg(feature = "heed")]
 fn create_temp() -> Env {
@@ -107,27 +108,33 @@ fn remove_triples_from_collection() {
     assert_eq!(collections, result);
 }
 
-// #[test]
-// fn match_all_query_collection() {
-//     let mut store: TripsMem<String, u64> = trips::mem::TripsMem::new();
-//     let _ = store.add_collection("T".to_owned());
-//     let _ = store.add_triples(
-//         "T".to_owned(),
-//         &mut BTreeSet::from([Trip(1, 2, 3), Trip(1, 2, 6), Trip(1, 2, 5)]),
-//     );
-//     let results = store
-//         .query(
-//             "T".to_owned(),
-//             BTreeSet::from([Query(Slot::Any, Slot::Any, Slot::Any)]),
-//         )
-//         .unwrap();
-//     let expected: HashBag<BTreeMap<String, u64>> = HashBag::from_iter([
-//         BTreeMap::from_iter([]),
-//         BTreeMap::from_iter([]),
-//         BTreeMap::from_iter([]),
-//     ]);
-//     assert_eq!(results, expected);
-// }
+#[test]
+#[cfg(feature = "heed")]
+fn match_all_query_collection() {
+    let env = create_temp();
+    let mut store = TripsHeed::new(env);
+    let _ = store.add_collection("T".to_owned());
+    let _ = store.add_triples(
+        "T".to_owned(),
+        &mut BTreeSet::from([
+            Trip("1".to_owned(), "2".to_owned(), "3".to_owned()),
+            Trip("1".to_owned(), "2".to_owned(), "6".to_owned()),
+            Trip("1".to_owned(), "2".to_owned(), "5".to_owned()),
+        ]),
+    );
+    let results = store
+        .query(
+            "T".to_owned(),
+            BTreeSet::from([Query(Slot::Any, Slot::Any, Slot::Any)]),
+        )
+        .unwrap();
+    let expected: HashBag<BTreeMap<String, String>> = HashBag::from_iter([
+        BTreeMap::from_iter([]),
+        BTreeMap::from_iter([]),
+        BTreeMap::from_iter([]),
+    ]);
+    assert_eq!(results, expected);
+}
 
 // #[test]
 // fn basic_query_collection() {

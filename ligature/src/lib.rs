@@ -77,5 +77,5 @@ pub trait Ligature<E> {
         &self,
         collection: Element,
         pattern: BTreeSet<Entry>,
-    ) -> Result<HashBag<BTreeMap<String, Element>>, E>;
+    ) -> Result<HashBag<BTreeMap<String, String>>, E>;
 }
