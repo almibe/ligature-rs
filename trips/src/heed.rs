@@ -486,18 +486,43 @@ impl Trips<TripsError> for TripsHeed {
 
     fn query(
         &self,
-        _collection: String,
-        _pattern: BTreeSet<crate::Query>,
+        collection: String,
+        pattern: BTreeSet<crate::Query>,
     ) -> Result<HashBag<BTreeMap<String, String>>, TripsError> {
         let mut tx = self.env.read_txn().unwrap();
-        let mut result: HashBag<BTreeMap<String, String> = HashBag::new();
-        //look up collection
+        let mut result: HashBag<BTreeMap<String, String>> = HashBag::new();
+        let collection_id = match self
+            .env
+            .open_database::<Str, U64<byteorder::BigEndian>>(&tx, collection_to_id)
+            .unwrap()
+        {
+            Some(db) => match db.get(&tx, &collection) {
+                Ok(Some(value)) => value,
+                _ => todo!(),
+            },
+            None => todo!(),
+        };
+
+        todo!();
         //look up value ids
         Ok(result)
     }
 }
 
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
+/// Contains either a Variable or Value, used for Queries.
+enum SlotId {
+    /// A Variable.
+    Variable(String),
+    /// An Id.
+    Id(u64),
+    /// Match any value.
+    Any,
+}
 
+/// The data structure used to represent queries.
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
+struct QueryId(pub SlotId, pub SlotId, pub SlotId);
 
 fn read_id(encoded: &[u8]) -> u64 {
     let mut id: [u8; 8] = [0; 8];

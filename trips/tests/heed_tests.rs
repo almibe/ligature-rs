@@ -2,14 +2,14 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+use hashbag::HashBag;
 #[cfg(feature = "heed")]
 use heed::{Env, EnvOpenOptions};
 use std::collections::{BTreeMap, BTreeSet};
 #[cfg(feature = "heed")]
 use trips::heed::TripsHeed;
 use trips::mem::TripsError;
-use trips::{Trip, Trips, Slot, Query};
-use hashbag::HashBag;
+use trips::{Query, Slot, Trip, Trips};
 
 #[cfg(feature = "heed")]
 fn create_temp() -> Env {

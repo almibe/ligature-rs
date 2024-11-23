@@ -29,18 +29,19 @@ pub mod preludes;
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize, Clone)]
 pub struct WanderError(pub String);
 
-/// A trait representing a function exported from the hosting application that
+/// A struct representing a function exported from the hosting application that
 /// can be called from Wander.
-pub trait Command<E> {
-    /// The function called when the HostFunction is called from Wander.
-    fn run(
-        &self,
-        arguments: &[WanderValue],
-        state: &mut dyn Ligature<E>,
-    ) -> Result<WanderValue, WanderError>;
-
+pub struct Command<E> {
     /// Documentation for the Command.
-    fn doc(&self) -> String;
+    doc: String,
+    /// The function called when the HostFunction is called from Wander.
+    fun: Box<dyn Fn(Vec<WanderValue>, &mut dyn Ligature<E>) -> Result<WanderValue, WanderError>>,
+    // fn run(
+    //     &self,
+    //     arguments: &[WanderValue],
+    //     state: &mut dyn Ligature<E>,
+    // ) -> Result<WanderValue, WanderError>;
+    //    fn doc(&self) -> String;
 }
 
 /// A function call.
@@ -125,7 +126,7 @@ impl Display for WanderValue {
 /// Run a Wander script with the given Bindings.
 pub fn run<E>(
     script: &str,
-    commands: HashMap<String, Box<dyn Command<E>>>,
+    commands: HashMap<String, Command<E>>,
     state: &mut dyn Ligature<E>,
 ) -> Result<WanderValue, WanderError> {
     let tokens = match tokenize_and_filter(script) {
@@ -139,11 +140,15 @@ pub fn run<E>(
     let mut result = Ok(WanderValue::Network(BTreeSet::new()));
     for call in calls {
         match commands.get(&call.name.0) {
-            Some(res) => match res.run(&call.arguments, state) {
-                Ok(res) => result = Ok(res),
-                Err(err) => return Err(err),
-            },
-            _ => todo!(),
+            Some(res) => todo!(), //match res.run(&call.arguments, state) {
+            //     Ok(res) => result = Ok(res),
+            //     Err(err) => return Err(err),
+            // },
+            _ => {
+                return Err(WanderError(
+                    "Could not find command: ".to_owned() + &call.name.0,
+                ))
+            }
         }
     }
     result

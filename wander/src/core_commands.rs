@@ -7,88 +7,110 @@ use ligature::{Element, Ligature};
 use crate::{Command, WanderError, WanderValue};
 use std::collections::BTreeSet;
 
-pub struct EqCommand {}
-impl<E> Command<E> for EqCommand {
-    fn run(
-        &self,
-        arguments: &[WanderValue],
-        _: &mut dyn Ligature<E>,
-    ) -> Result<WanderValue, WanderError> {
-        if let [left, right] = arguments {
-            if left == right {
-                Ok(crate::WanderValue::Element(Element("true".to_owned())))
-            } else {
-                Ok(crate::WanderValue::Element(Element("false".to_owned())))
-            }
-        } else {
-            Err(WanderError(
-                "`eq` function requires two parameters.".to_owned(),
-            ))
-        }
-    }
+// pub struct EqCommand {}
+// impl<E> Command<E> for EqCommand {
+//     fn run(
+//         &self,
+//         arguments: &[WanderValue],
+//         _: &mut dyn Ligature<E>,
+//     ) -> Result<WanderValue, WanderError> {
+//         if let [left, right] = arguments {
+//             if left == right {
+//                 Ok(crate::WanderValue::Element(Element("true".to_owned())))
+//             } else {
+//                 Ok(crate::WanderValue::Element(Element("false".to_owned())))
+//             }
+//         } else {
+//             Err(WanderError(
+//                 "`eq` function requires two parameters.".to_owned(),
+//             ))
+//         }
+//     }
 
-    fn doc(&self) -> String {
-        "".to_owned()
-    }
-}
+//     fn doc(&self) -> String {
+//         "".to_owned()
+//     }
+// }
 
-pub struct AssertEqCommand {}
-impl<E> Command<E> for AssertEqCommand {
-    fn run(
-        &self,
-        arguments: &[WanderValue],
-        _: &mut dyn Ligature<E>,
-    ) -> Result<WanderValue, WanderError> {
-        if let [left, right] = arguments {
-            if left == right {
-                Ok(crate::WanderValue::Network(BTreeSet::new()))
-            } else {
-                Err(WanderError("Assertion failed!".to_owned()))
-            }
-        } else {
-            Err(WanderError(
-                "`assertEq` function requires two parameters.".to_owned(),
-            ))
-        }
-    }
+// pub struct AssertEqCommand {}
+// impl<E> Command<E> for AssertEqCommand {
+//     fn run(
+//         &self,
+//         arguments: &[WanderValue],
+//         _: &mut dyn Ligature<E>,
+//     ) -> Result<WanderValue, WanderError> {
+//         if let [left, right] = arguments {
+//             if left == right {
+//                 Ok(crate::WanderValue::Network(BTreeSet::new()))
+//             } else {
+//                 Err(WanderError("Assertion failed!".to_owned()))
+//             }
+//         } else {
+//             Err(WanderError(
+//                 "`assertEq` function requires two parameters.".to_owned(),
+//             ))
+//         }
+//     }
 
-    fn doc(&self) -> String {
-        "".to_owned()
-    }
-}
+//     fn doc(&self) -> String {
+//         "".to_owned()
+//     }
+// }
 
-pub struct IgnoreCommand {}
-impl<E> Command<E> for IgnoreCommand {
-    fn run(&self, _: &[WanderValue], _: &mut dyn Ligature<E>) -> Result<WanderValue, WanderError> {
-        Ok(WanderValue::Network(BTreeSet::new()))
-    }
+// pub struct IgnoreCommand {}
+// impl<E> Command<E> for IgnoreCommand {
+//     fn run(&self, _: &[WanderValue], _: &mut dyn Ligature<E>) -> Result<WanderValue, WanderError> {
+//         Ok(WanderValue::Network(BTreeSet::new()))
+//     }
 
-    fn doc(&self) -> String {
-        "".to_owned()
-    }
-}
+//     fn doc(&self) -> String {
+//         "".to_owned()
+//     }
+// }
 
-pub struct LetCommand {}
-impl<E> Command<E> for LetCommand {
-    fn run(
-        &self,
-        arguments: &[WanderValue],
-        state: &mut dyn Ligature<E>,
-    ) -> Result<WanderValue, WanderError> {
-        match arguments {
-            [WanderValue::Element(name), WanderValue::Network(network)] => {
-                state.add_collection(name.clone());
-                state.add_entries(name.clone(), &mut network.clone());
-            }
-            _ => todo!("Error"),
-        }
-        Ok(WanderValue::Network(BTreeSet::new()))
-    }
+// pub struct LetCommand {}
+// impl<E> Command<E> for LetCommand {
+//     fn run(
+//         &self,
+//         arguments: &[WanderValue],
+//         state: &mut dyn Ligature<E>,
+//     ) -> Result<WanderValue, WanderError> {
+//         match arguments {
+//             [WanderValue::Element(name), WanderValue::Network(network)] => {
+//                 state.add_collection(name.clone());
+//                 state.add_entries(name.clone(), &mut network.clone());
+//             }
+//             _ => todo!("Error"),
+//         }
+//         Ok(WanderValue::Network(BTreeSet::new()))
+//     }
 
-    fn doc(&self) -> String {
-        "".to_owned()
-    }
-}
+//     fn doc(&self) -> String {
+//         "".to_owned()
+//     }
+// }
+
+// pub struct ReadCommand {}
+// impl<E> Command<E> for LetCommand {
+//     fn run(
+//         &self,
+//         arguments: &[WanderValue],
+//         state: &mut dyn Ligature<E>,
+//     ) -> Result<WanderValue, WanderError> {
+//         match arguments {
+//             [WanderValue::Element(name)] => {
+//                 match state.entries(name.clone()) {
+//                     _ => return Ok(WanderValue::Network(BTreeSet::new()))
+//                 }
+//             }
+//             _ => todo!("Error"),
+//         }
+//     }
+
+//     fn doc(&self) -> String {
+//         "".to_owned()
+//     }
+// }
 
 //TODO https://github.com/almibe/ligature-rs/issues/305
 // struct EnvironmentCommand {}

@@ -24,7 +24,7 @@ fn calling_ignore_with_args() {
 
 #[test]
 fn passing_assert_eq_call() {
-    let input = "assert-eq true true";
+    let input = "assert-equal true true";
     let res = run(input, common(), &mut LigatureGraph::new());
     let expected = Ok(WanderValue::Network(BTreeSet::new()));
     assert_eq!(res, expected);
@@ -32,7 +32,7 @@ fn passing_assert_eq_call() {
 
 #[test]
 fn failing_assert_eq_call() {
-    let input = "assert-eq true bug";
+    let input = "assert-equal true bug";
     let res = run(input, common(), &mut LigatureGraph::new());
     assert!(res.is_err());
 }
