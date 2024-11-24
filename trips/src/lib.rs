@@ -32,35 +32,39 @@ pub enum Slot {
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct Query(pub Slot, pub Slot, pub Slot);
 
+/// A simple error message.
+#[derive(Debug)]
+pub struct TripsError(pub String);
+
 /// A trait that defines all the actions a Ligature instance can perform.
 /// The API used for storing triples.
-pub trait Trips<E> {
+pub trait Trips {
     /// Get all Collections.
-    fn collections(&self) -> Result<Vec<String>, E>;
+    fn collections(&self) -> Result<Vec<String>, TripsError>;
 
     /// Add a new Dataset.
     /// Does nothing if Dataset already exists.
-    fn add_collection(&mut self, collection: String) -> Result<(), E>;
+    fn add_collection(&mut self, collection: String) -> Result<(), TripsError>;
 
     /// Remove a Dataset.
     /// Does nothing if Dataset doesn't exist.
-    fn remove_collection(&mut self, collection: String) -> Result<(), E>;
+    fn remove_collection(&mut self, collection: String) -> Result<(), TripsError>;
 
     /// Get all Statements in a given Dataset.
-    fn triples(&self, collection: String) -> Result<BTreeSet<Trip>, E>;
+    fn triples(&self, collection: String) -> Result<BTreeSet<Trip>, TripsError>;
 
     /// Add Statements to a given Dataset.
     /// Returns Error if Dataset doesn't exist.
     /// Does nothing if Statement already exists in Dataset.
-    fn add_triples(&mut self, collection: String, trips: &mut BTreeSet<Trip>) -> Result<(), E>;
+    fn add_triples(&mut self, collection: String, trips: &mut BTreeSet<Trip>) -> Result<(), TripsError>;
     /// Remove Statements from a given Dataset.
     /// Returns Error if Dataset doesn't exist.
     /// Does nothing if Statement doesn't exist in Dataset.
-    fn remove_triples(&mut self, collection: String, trips: &mut BTreeSet<Trip>) -> Result<(), E>;
+    fn remove_triples(&mut self, collection: String, trips: &mut BTreeSet<Trip>) -> Result<(), TripsError>;
     /// Run a query against the given Dataset.
     fn query(
         &self,
         collection: String,
         pattern: BTreeSet<Query>,
-    ) -> Result<HashBag<BTreeMap<String, String>>, E>;
+    ) -> Result<HashBag<BTreeMap<String, String>>, TripsError>;
 }

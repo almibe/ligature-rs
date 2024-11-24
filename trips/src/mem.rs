@@ -6,13 +6,9 @@
 
 #![deny(missing_docs)]
 
-use crate::{Query, Slot, Trip, Trips};
+use crate::{Query, Slot, Trip, Trips, TripsError};
 use hashbag::HashBag;
 use std::collections::{BTreeMap, BTreeSet};
-
-/// A simple error type.
-#[derive(Debug)]
-pub struct TripsError(String);
 
 /// An in-memory implementation of Trips.
 #[derive(Debug, PartialEq, Eq)]
@@ -43,7 +39,7 @@ impl TripsMem {
     // }
 }
 
-impl Trips<TripsError> for TripsMem {
+impl Trips for TripsMem {
     fn collections(&self) -> Result<Vec<String>, TripsError> {
         let res: Vec<String> = self.collections.keys().cloned().collect();
         Ok(res)

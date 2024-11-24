@@ -17,13 +17,11 @@ use parser::parse;
 use serde::{Deserialize, Serialize};
 
 #[doc(hidden)]
-pub mod core_commands;
-#[doc(hidden)]
 pub mod lexer;
 #[doc(hidden)]
 pub mod parser;
 #[doc(hidden)]
-pub mod preludes;
+pub mod prelude;
 
 /// An error that occurs while running a Wander script.
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize, Clone)]
@@ -31,11 +29,11 @@ pub struct WanderError(pub String);
 
 /// A struct representing a function exported from the hosting application that
 /// can be called from Wander.
-pub struct Command<E> {
+pub struct Command {
     /// Documentation for the Command.
     doc: String,
     /// The function called when the HostFunction is called from Wander.
-    fun: Box<dyn Fn(Vec<WanderValue>, &mut dyn Ligature<E>) -> Result<WanderValue, WanderError>>,
+    fun: fn(Vec<WanderValue>, &mut dyn Ligature) -> Result<WanderValue, WanderError>,
     // fn run(
     //     &self,
     //     arguments: &[WanderValue],
@@ -126,8 +124,8 @@ impl Display for WanderValue {
 /// Run a Wander script with the given Bindings.
 pub fn run<E>(
     script: &str,
-    commands: HashMap<String, Command<E>>,
-    state: &mut dyn Ligature<E>,
+    commands: HashMap<String, Command>,
+    state: &mut dyn Ligature,
 ) -> Result<WanderValue, WanderError> {
     let tokens = match tokenize_and_filter(script) {
         Ok(v) => v,

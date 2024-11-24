@@ -5,24 +5,24 @@
 //! This module is an implementation of the an in-memory, non-transactional knowledge graph.
 
 use hashbag::HashBag;
-use ligature::{Element, Entry, Ligature};
+use ligature::{Element, LigatureError, Entry, Ligature};
 use std::collections::BTreeSet;
-use trips::mem::{TripsError, TripsMem};
+use trips::mem::TripsMem;
 use trips::{Query, Slot, Trip, Trips};
 
 #[derive()]
 /// An implementation of the Graph trait that stores all Data in a sorted set.
-pub struct LigatureGraph<E> {
-    store: Box<dyn Trips<E>>,
+pub struct LigatureGraph {
+    store: Box<dyn Trips>,
 }
 
-impl<E> LigatureGraph<E> {
-    pub fn from_trips(trips: Box<dyn Trips<E>>) -> Self {
+impl LigatureGraph {
+    pub fn from_trips(trips: Box<dyn Trips>) -> Self {
         Self { store: trips }
     }
 }
 
-impl LigatureGraph<TripsError> {
+impl LigatureGraph {
     pub fn new() -> Self {
         Self {
             store: Box::new(TripsMem::new()),
@@ -30,22 +30,22 @@ impl LigatureGraph<TripsError> {
     }
 }
 
-impl<E> Ligature<E> for LigatureGraph<E> {
-    fn collections(&self) -> Result<Vec<Element>, E> {
+impl Ligature for LigatureGraph {
+    fn collections(&self) -> Result<Vec<Element>, LigatureError> {
         self.store
             .collections()
-            .map(|r| r.into_iter().map(|e| Element(e)).collect())
+            .map(|r| r.into_iter().map(|e| Element(e)).collect()).map_err(|e| todo!())
     }
 
-    fn add_collection(&mut self, collection: Element) -> Result<(), E> {
-        self.store.add_collection(collection.0)
+    fn add_collection(&mut self, collection: Element) -> Result<(), LigatureError> {
+        self.store.add_collection(collection.0).map_err(|e| todo!())
     }
 
-    fn remove_collection(&mut self, collection: Element) -> Result<(), E> {
-        self.store.remove_collection(collection.0)
+    fn remove_collection(&mut self, collection: Element) -> Result<(), LigatureError> {
+        self.store.remove_collection(collection.0).map_err(|e| todo!())
     }
 
-    fn entries(&self, collection: Element) -> Result<BTreeSet<ligature::Entry>, E> {
+    fn entries(&self, collection: Element) -> Result<BTreeSet<ligature::Entry>, LigatureError> {
         self.store.triples(collection.0).map(|set| {
             set.into_iter()
                 .map(|entry: Trip| {
@@ -68,14 +68,14 @@ impl<E> Ligature<E> for LigatureGraph<E> {
                     }
                 })
                 .collect()
-        })
+        }).map_err(|e| todo!())
     }
 
     fn add_entries(
         &mut self,
         collection: Element,
         entries: &mut BTreeSet<ligature::Entry>,
-    ) -> Result<(), E> {
+    ) -> Result<(), LigatureError> {
         let mut triples: BTreeSet<Trip> =
             BTreeSet::from_iter(entries.iter().map(|entry| match entry {
                 Entry::Extends { element, concept } => {
@@ -90,14 +90,14 @@ impl<E> Ligature<E> for LigatureGraph<E> {
                     Trip(element.clone().0, "¬:".to_owned(), concept.clone().0)
                 }
             }));
-        self.store.add_triples(collection.0, &mut triples)
+        self.store.add_triples(collection.0, &mut triples).map_err(|e| todo!())
     }
 
     fn remove_entries(
         &mut self,
         collection: Element,
         entries: &mut BTreeSet<ligature::Entry>,
-    ) -> Result<(), E> {
+    ) -> Result<(), LigatureError> {
         let mut triples: BTreeSet<Trip> =
             BTreeSet::from_iter(entries.iter().map(|entry| match entry {
                 Entry::Extends { element, concept } => {
@@ -112,14 +112,14 @@ impl<E> Ligature<E> for LigatureGraph<E> {
                     Trip(element.clone().0, "¬:".to_owned(), concept.clone().0)
                 }
             }));
-        self.store.remove_triples(collection.0, &mut triples)
+        self.store.remove_triples(collection.0, &mut triples).map_err(|e| todo!())
     }
 
     fn query(
         &self,
         collection: Element,
         pattern: BTreeSet<ligature::Entry>,
-    ) -> Result<HashBag<std::collections::BTreeMap<String, String>>, E> {
+    ) -> Result<HashBag<std::collections::BTreeMap<String, String>>, LigatureError> {
         let query_pattern: BTreeSet<Query> =
             BTreeSet::from_iter(pattern.iter().map(|entry| match entry {
                 Entry::Extends { element, concept } => Query(
@@ -142,6 +142,6 @@ impl<E> Ligature<E> for LigatureGraph<E> {
                     Slot::Value(concept.clone().0),
                 ),
             }));
-        self.store.query(collection.0, query_pattern)
+        self.store.query(collection.0, query_pattern).map_err(|e| todo!())
     }
 }

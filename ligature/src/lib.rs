@@ -8,7 +8,7 @@
 
 use hashbag::HashBag;
 use std::collections::{BTreeMap, BTreeSet};
-
+use std::error::Error;
 use serde::{Deserialize, Serialize};
 
 /// An Element that is identified by a unique String value.
@@ -43,27 +43,30 @@ pub enum Entry {
     },
 }
 
+/// A simple error message.
+pub struct LigatureError(pub String);
+
 /// A trait that defines all the actions a Ligature instance can perform.
 /// The API used for storing triples.
-pub trait Ligature<E> {
+pub trait Ligature {
     /// Get all Collections.
-    fn collections(&self) -> Result<Vec<Element>, E>;
+    fn collections(&self) -> Result<Vec<Element>, LigatureError>;
 
     /// Add a new Dataset.
     /// Does nothing if Dataset already exists.
-    fn add_collection(&mut self, collection: Element) -> Result<(), E>;
+    fn add_collection(&mut self, collection: Element) -> Result<(), LigatureError>;
 
     /// Remove a Dataset.
     /// Does nothing if Dataset doesn't exist.
-    fn remove_collection(&mut self, collection: Element) -> Result<(), E>;
+    fn remove_collection(&mut self, collection: Element) -> Result<(), LigatureError>;
 
     /// Get all Statements in a given Dataset.
-    fn entries(&self, collection: Element) -> Result<BTreeSet<Entry>, E>;
+    fn entries(&self, collection: Element) -> Result<BTreeSet<Entry>, LigatureError>;
 
     /// Add Statements to a given Dataset.
     /// Returns Error if Dataset doesn't exist.
     /// Does nothing if Statement already exists in Dataset.
-    fn add_entries(&mut self, collection: Element, entries: &mut BTreeSet<Entry>) -> Result<(), E>;
+    fn add_entries(&mut self, collection: Element, entries: &mut BTreeSet<Entry>) -> Result<(), LigatureError>;
     /// Remove Statements from a given Dataset.
     /// Returns Error if Dataset doesn't exist.
     /// Does nothing if Statement doesn't exist in Dataset.
@@ -71,11 +74,11 @@ pub trait Ligature<E> {
         &mut self,
         collection: Element,
         entries: &mut BTreeSet<Entry>,
-    ) -> Result<(), E>;
+    ) -> Result<(), LigatureError>;
     /// Run a query against the given Dataset.
     fn query(
         &self,
         collection: Element,
         pattern: BTreeSet<Entry>,
-    ) -> Result<HashBag<BTreeMap<String, String>>, E>;
+    ) -> Result<HashBag<BTreeMap<String, String>>, LigatureError>;
 }

@@ -502,9 +502,9 @@ impl Trips<TripsError> for TripsHeed {
             },
             None => todo!(),
         };
-
-        todo!();
         //look up value ids
+        
+        todo!();
         Ok(result)
     }
 }

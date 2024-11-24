@@ -3,9 +3,32 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use ligature::{Element, Ligature};
-
 use crate::{Command, WanderError, WanderValue};
-use std::collections::BTreeSet;
+use std::collections::{BTreeSet, HashMap};
+use lazy_static::lazy_static;
+
+lazy_static! {
+    static ref common: HashMap<String, Command> = {
+        let mut m = HashMap::new();
+        m
+    };
+}
+
+// Creates a set of Bindings for Wander that consists of all of the common
+// functionality, but doesn't interact with an instance of Ligature.
+// pub fn common<E>() -> HashMap<String, Command<E>> {
+//     let mut commands: HashMap<String, Command<E>> = HashMap::new();
+//     // commands.insert("eq".to_owned(), Box::new(EqCommand {}));
+//     // commands.insert("assert-equal".to_owned(), Box::new(AssertEqCommand {}));
+//     commands.insert("ignore".to_owned(), IgnoreCommand {}));
+//     // commands.insert("let".to_owned(), Box::new(LetCommand {}));
+//     // commands.insert("read".to_owned(), Box::new(ReadCommand {}));
+//     // // commands.bind_host_function(Rc::new(AndFunction {}));
+//     // // commands.bind_host_function(Rc::new(NotFunction {}));
+//     // // commands.bind_host_function(Rc::new(EnvironmentFunction {}));
+//     commands
+// }
+
 
 // pub struct EqCommand {}
 // impl<E> Command<E> for EqCommand {
