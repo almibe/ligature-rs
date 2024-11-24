@@ -18,5 +18,4 @@ gaze = "0.5.0"
 serde = { version = "1.0", features = ["derive"] }
 hex = "0.4"
 rpds = "1.0.1"
-lazy_static = "1.5.0"
 regex = "1"

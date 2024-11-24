@@ -2,33 +2,57 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use ligature::{Element, Ligature};
 use crate::{Command, WanderError, WanderValue};
+use ligature::{Element, Ligature};
 use std::collections::{BTreeSet, HashMap};
-use lazy_static::lazy_static;
 
-lazy_static! {
-    static ref common: HashMap<String, Command> = {
-        let mut m = HashMap::new();
-        m
-    };
+/// Creates a set of Bindings for Wander that consists of all of the common
+/// functionality, but doesn't interact with an instance of Ligature.
+pub fn common() -> HashMap<String, Command> {
+    let mut commands: HashMap<String, Command> = HashMap::new();
+    // commands.insert("eq".to_owned(), Box::new(EqCommand {}));
+    commands.insert(
+        "assert-equal".to_owned(),
+        Command {
+            doc: "Check if two arguments are equal and fail if they are not equal.".to_owned(),
+            fun: assert_equal_command,
+        },
+    );
+    commands.insert(
+        "ignore".to_owned(),
+        Command {
+            doc: "Ignore all arguments to this command and return an empty network.".to_owned(),
+            fun: ignore_command,
+        },
+    );
+    // commands.insert("let".to_owned(), Box::new(LetCommand {}));
+    // commands.insert("read".to_owned(), Box::new(ReadCommand {}));
+    // // commands.bind_host_function(Rc::new(AndFunction {}));
+    // // commands.bind_host_function(Rc::new(NotFunction {}));
+    // // commands.bind_host_function(Rc::new(EnvironmentFunction {}));
+    commands
 }
 
-// Creates a set of Bindings for Wander that consists of all of the common
-// functionality, but doesn't interact with an instance of Ligature.
-// pub fn common<E>() -> HashMap<String, Command<E>> {
-//     let mut commands: HashMap<String, Command<E>> = HashMap::new();
-//     // commands.insert("eq".to_owned(), Box::new(EqCommand {}));
-//     // commands.insert("assert-equal".to_owned(), Box::new(AssertEqCommand {}));
-//     commands.insert("ignore".to_owned(), IgnoreCommand {}));
-//     // commands.insert("let".to_owned(), Box::new(LetCommand {}));
-//     // commands.insert("read".to_owned(), Box::new(ReadCommand {}));
-//     // // commands.bind_host_function(Rc::new(AndFunction {}));
-//     // // commands.bind_host_function(Rc::new(NotFunction {}));
-//     // // commands.bind_host_function(Rc::new(EnvironmentFunction {}));
-//     commands
-// }
+fn ignore_command(_: Vec<WanderValue>, _: &mut dyn Ligature) -> Result<WanderValue, WanderError> {
+    Ok(WanderValue::Network(BTreeSet::new()))
+}
 
+fn assert_equal_command(
+    arguments: Vec<WanderValue>,
+    _: &mut dyn Ligature,
+) -> Result<WanderValue, WanderError> {
+    if let [left, right] = &arguments[..] {
+        if left == right {
+            Ok(crate::WanderValue::Network(BTreeSet::new()))
+        } else {
+            Err(WanderError("Assertion failed!".to_owned()))
+        }
+    } else {
+        Err(WanderError(
+            "`assertEq` function requires two parameters.".to_owned(),
+        ))
+    }
+}
 
 // pub struct EqCommand {}
 // impl<E> Command<E> for EqCommand {
@@ -48,42 +72,6 @@ lazy_static! {
 //                 "`eq` function requires two parameters.".to_owned(),
 //             ))
 //         }
-//     }
-
-//     fn doc(&self) -> String {
-//         "".to_owned()
-//     }
-// }
-
-// pub struct AssertEqCommand {}
-// impl<E> Command<E> for AssertEqCommand {
-//     fn run(
-//         &self,
-//         arguments: &[WanderValue],
-//         _: &mut dyn Ligature<E>,
-//     ) -> Result<WanderValue, WanderError> {
-//         if let [left, right] = arguments {
-//             if left == right {
-//                 Ok(crate::WanderValue::Network(BTreeSet::new()))
-//             } else {
-//                 Err(WanderError("Assertion failed!".to_owned()))
-//             }
-//         } else {
-//             Err(WanderError(
-//                 "`assertEq` function requires two parameters.".to_owned(),
-//             ))
-//         }
-//     }
-
-//     fn doc(&self) -> String {
-//         "".to_owned()
-//     }
-// }
-
-// pub struct IgnoreCommand {}
-// impl<E> Command<E> for IgnoreCommand {
-//     fn run(&self, _: &[WanderValue], _: &mut dyn Ligature<E>) -> Result<WanderValue, WanderError> {
-//         Ok(WanderValue::Network(BTreeSet::new()))
 //     }
 
 //     fn doc(&self) -> String {

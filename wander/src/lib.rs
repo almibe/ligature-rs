@@ -122,7 +122,7 @@ impl Display for WanderValue {
 }
 
 /// Run a Wander script with the given Bindings.
-pub fn run<E>(
+pub fn run(
     script: &str,
     commands: HashMap<String, Command>,
     state: &mut dyn Ligature,
@@ -138,10 +138,10 @@ pub fn run<E>(
     let mut result = Ok(WanderValue::Network(BTreeSet::new()));
     for call in calls {
         match commands.get(&call.name.0) {
-            Some(res) => todo!(), //match res.run(&call.arguments, state) {
-            //     Ok(res) => result = Ok(res),
-            //     Err(err) => return Err(err),
-            // },
+            Some(res) => match (res.fun)(call.arguments, state) {
+                Ok(res) => result = Ok(res),
+                Err(err) => return Err(err),
+            },
             _ => {
                 return Err(WanderError(
                     "Could not find command: ".to_owned() + &call.name.0,

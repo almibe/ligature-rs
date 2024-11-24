@@ -4,35 +4,36 @@
 
 use ligature_graph::LigatureGraph;
 use std::collections::BTreeSet;
+use wander::prelude::common;
 use wander::{run, WanderValue};
 
-// #[test]
-// fn calling_ignore() {
-//     let input = "ignore";
-//     let res = run(input, common(), &mut LigatureGraph::new());
-//     let expected = Ok(WanderValue::Network(BTreeSet::new()));
-//     assert_eq!(res, expected);
-// }
+#[test]
+fn calling_ignore() {
+    let input = "ignore";
+    let res = run(input, common(), &mut LigatureGraph::new());
+    let expected = Ok(WanderValue::Network(BTreeSet::new()));
+    assert_eq!(res, expected);
+}
 
-// #[test]
-// fn calling_ignore_with_args() {
-//     let input = "ignore test (test {test test test}) {test test test}";
-//     let res = run(input, common(), &mut LigatureGraph::new());
-//     let expected = Ok(WanderValue::Network(BTreeSet::new()));
-//     assert_eq!(res, expected);
-// }
+#[test]
+fn calling_ignore_with_args() {
+    let input = "ignore test (test {test test test}) {test test test}";
+    let res = run(input, common(), &mut LigatureGraph::new());
+    let expected = Ok(WanderValue::Network(BTreeSet::new()));
+    assert_eq!(res, expected);
+}
 
-// #[test]
-// fn passing_assert_eq_call() {
-//     let input = "assert-equal true true";
-//     let res = run(input, common(), &mut LigatureGraph::new());
-//     let expected = Ok(WanderValue::Network(BTreeSet::new()));
-//     assert_eq!(res, expected);
-// }
+#[test]
+fn passing_assert_eq_call() {
+    let input = "assert-equal true true";
+    let res = run(input, common(), &mut LigatureGraph::new());
+    let expected = Ok(WanderValue::Network(BTreeSet::new()));
+    assert_eq!(res, expected);
+}
 
-// #[test]
-// fn failing_assert_eq_call() {
-//     let input = "assert-equal true bug";
-//     let res = run(input, common(), &mut LigatureGraph::new());
-//     assert!(res.is_err());
-// }
+#[test]
+fn failing_assert_eq_call() {
+    let input = "assert-equal true bug";
+    let res = run(input, common(), &mut LigatureGraph::new());
+    assert!(res.is_err());
+}
