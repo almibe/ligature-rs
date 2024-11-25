@@ -26,11 +26,12 @@ pub fn common() -> HashMap<String, Command> {
         },
     );
     commands.insert(
-        "let".to_owned(), 
+        "let".to_owned(),
         Command {
             doc: "Set a named network.".to_owned(),
             fun: let_command,
-        });
+        },
+    );
     // commands.insert("read".to_owned(), Box::new(ReadCommand {}));
     // // commands.bind_host_function(Rc::new(AndFunction {}));
     // // commands.bind_host_function(Rc::new(NotFunction {}));
@@ -38,26 +39,33 @@ pub fn common() -> HashMap<String, Command> {
     commands
 }
 
-fn ignore_command(_: Vec<WanderValue>, _: &mut dyn Ligature, _: &HashMap<String, Command>) -> Result<WanderValue, WanderError> {
+fn ignore_command(
+    _: Vec<WanderValue>,
+    _: &mut dyn Ligature,
+    _: &HashMap<String, Command>,
+) -> Result<WanderValue, WanderError> {
     Ok(WanderValue::Network(BTreeSet::new()))
 }
 
 fn assert_equal_command(
     arguments: Vec<WanderValue>,
     state: &mut dyn Ligature,
-    commands: &HashMap<String, Command>
+    commands: &HashMap<String, Command>,
 ) -> Result<WanderValue, WanderError> {
     if let [left, right] = &arguments[..] {
         let left = if let WanderValue::Quote(quote) = left {
             match run_quote(quote, commands, state) {
                 Ok(value) => value,
-                _ => todo!()
+                Err(err) => return Err(err),
             }
         } else {
             left.clone()
         };
         let right = if let WanderValue::Quote(quote) = right {
-            todo!()
+            match run_quote(quote, commands, state) {
+                Ok(value) => value,
+                Err(err) => return Err(err),
+            }
         } else {
             right.clone()
         };
@@ -65,7 +73,10 @@ fn assert_equal_command(
         if left == right {
             Ok(crate::WanderValue::Network(BTreeSet::new()))
         } else {
-            Err(WanderError(format!("Assertion failed, {} != {}", left, right)))
+            Err(WanderError(format!(
+                "Assertion failed, {} != {}",
+                left, right
+            )))
         }
     } else {
         Err(WanderError(
@@ -77,7 +88,7 @@ fn assert_equal_command(
 fn let_command(
     arguments: Vec<WanderValue>,
     state: &mut dyn Ligature,
-    _: &HashMap<String, Command>
+    _: &HashMap<String, Command>,
 ) -> Result<WanderValue, WanderError> {
     match &arguments[..] {
         [WanderValue::Element(name), WanderValue::Network(network)] => {

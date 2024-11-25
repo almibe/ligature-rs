@@ -4,8 +4,8 @@
 
 //! This module is an implementation of the a test suite for Ligature implementations.
 
-use wander::WanderError;
 use colored::Colorize;
+use wander::WanderError;
 
 fn main() {
     let mut total = 0;
@@ -19,7 +19,11 @@ fn main() {
             total = total + 1;
             println!("🧪{}", path.file_name().into_string().unwrap().cyan());
             let script = std::fs::read_to_string(path.path()).unwrap();
-            match wander::run(&script, &wander::prelude::common(), &mut ligature_graph::LigatureGraph::new()) {
+            match wander::run(
+                &script,
+                &wander::prelude::common(),
+                &mut ligature_graph::LigatureGraph::new(),
+            ) {
                 Ok(_) => println!(" 😀 {}", "Success!".bright_magenta()),
                 Err(WanderError(err)) => {
                     failed = failed + 1;

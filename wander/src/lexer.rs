@@ -89,11 +89,12 @@ pub fn tokenize_and_filter(script: &str) -> Result<Vec<Token>, WanderError> {
     tokens.map(|mut tokens| {
         tokens
             .retain(|token| !matches!(token, Token::Comment(_)) && !matches!(token, Token::WS(_)));
-        tokens.iter().map(|token| {
-            match token {
+        tokens
+            .iter()
+            .map(|token| match token {
                 Token::String(value) => Token::Element(Element(value.to_owned())),
-                token => token.clone()
-            }
-        }).collect()
+                token => token.clone(),
+            })
+            .collect()
     })
 }

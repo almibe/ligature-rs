@@ -34,7 +34,11 @@ pub struct Command {
     pub doc: String,
     /// The function called when the HostFunction is called from Wander.
     /// Takes three arguments: the list of arguments to the command, the current state, and the set of commmands.
-    pub fun: fn(Vec<WanderValue>, &mut dyn Ligature, &HashMap<String, Command>) -> Result<WanderValue, WanderError>,
+    pub fun: fn(
+        Vec<WanderValue>,
+        &mut dyn Ligature,
+        &HashMap<String, Command>,
+    ) -> Result<WanderValue, WanderError>,
 }
 
 /// A function call.
@@ -98,36 +102,37 @@ fn write_network(
     let mut i = 0;
     for entry in contents {
         match entry {
-            Entry::Role { first, second, role } => {
+            Entry::Role {
+                first,
+                second,
+                role,
+            } => {
                 write!(f, "{first} {role} {second}").unwrap();
                 i += 1;
                 if i < contents.len() {
                     write!(f, ", ").unwrap();
                 }
-            },
+            }
             Entry::Extends { element, concept } => {
                 write!(f, "{element} : {concept}").unwrap();
                 i += 1;
                 if i < contents.len() {
                     write!(f, ", ").unwrap();
                 }
-            },
+            }
             Entry::NotExtends { element, concept } => {
                 write!(f, "{element} ¬: {concept}").unwrap();
                 i += 1;
                 if i < contents.len() {
                     write!(f, ", ").unwrap();
                 }
-            },
+            }
         }
     }
     write!(f, "}}")
 }
 
-fn write_quote(
-    quote: &Quote,
-    f: &mut std::fmt::Formatter<'_>,
-) -> std::fmt::Result {
+fn write_quote(quote: &Quote, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     let mut i = 0;
     write!(f, "(").unwrap();
     let values = quote.0.clone();
@@ -161,7 +166,18 @@ pub fn run_quote(
     if quote.0.is_empty() {
         Ok(WanderValue::Network(BTreeSet::new()))
     } else {
-        todo!()
+        match quote.0.first() {
+            Some(WanderValue::Element(name)) => {
+                let mut arguments = quote.0.clone();
+                arguments.remove(0);
+                let calls = vec![Call {
+                    name: name.clone(),
+                    arguments,
+                }];
+                run_calls(&calls, commands, state)
+            }
+            _ => todo!(),
+        }
     }
 }
 

@@ -6,10 +6,10 @@
 
 #![deny(missing_docs)]
 
-use hashbag::HashBag;
 use core::fmt;
-use std::collections::{BTreeMap, BTreeSet};
+use hashbag::HashBag;
 use serde::{Deserialize, Serialize};
+use std::collections::{BTreeMap, BTreeSet};
 
 /// An Element that is identified by a unique String value.
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq, Deserialize, Serialize, Hash)]
@@ -72,7 +72,11 @@ pub trait Ligature {
     /// Add Statements to a given Dataset.
     /// Returns Error if Dataset doesn't exist.
     /// Does nothing if Statement already exists in Dataset.
-    fn add_entries(&mut self, collection: Element, entries: &mut BTreeSet<Entry>) -> Result<(), LigatureError>;
+    fn add_entries(
+        &mut self,
+        collection: Element,
+        entries: &mut BTreeSet<Entry>,
+    ) -> Result<(), LigatureError>;
     /// Remove Statements from a given Dataset.
     /// Returns Error if Dataset doesn't exist.
     /// Does nothing if Statement doesn't exist in Dataset.
