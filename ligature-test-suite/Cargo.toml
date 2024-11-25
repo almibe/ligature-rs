@@ -14,3 +14,4 @@ repository = "https://github.com/almibe/ligature-rs/"
 ligature = { path = "../ligature" }
 ligature-graph = { path = "../ligature-graph" }
 wander = { path = "../wander" }
+colored = "2"

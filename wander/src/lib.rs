@@ -12,7 +12,7 @@ use std::{
 };
 
 use lexer::tokenize_and_filter;
-use ligature::Ligature;
+use ligature::{Entry, Ligature};
 use parser::parse;
 use serde::{Deserialize, Serialize};
 
@@ -31,15 +31,10 @@ pub struct WanderError(pub String);
 /// can be called from Wander.
 pub struct Command {
     /// Documentation for the Command.
-    doc: String,
+    pub doc: String,
     /// The function called when the HostFunction is called from Wander.
-    fun: fn(Vec<WanderValue>, &mut dyn Ligature) -> Result<WanderValue, WanderError>,
-    // fn run(
-    //     &self,
-    //     arguments: &[WanderValue],
-    //     state: &mut dyn Ligature<E>,
-    // ) -> Result<WanderValue, WanderError>;
-    //    fn doc(&self) -> String;
+    /// Takes three arguments: the list of arguments to the command, the current state, and the set of commmands.
+    pub fun: fn(Vec<WanderValue>, &mut dyn Ligature, &HashMap<String, Command>) -> Result<WanderValue, WanderError>,
 }
 
 /// A function call.
@@ -100,15 +95,51 @@ fn write_network(
     f: &mut std::fmt::Formatter<'_>,
 ) -> std::fmt::Result {
     write!(f, "{{").unwrap();
-    // let mut i = 0;
-    // for (name, value) in contents {
-    //     write!(f, "{name} = {value}").unwrap();
-    //     i += 1;
-    //     if i < contents.len() {
-    //         write!(f, " ").unwrap();
-    //     }
-    // }
+    let mut i = 0;
+    for entry in contents {
+        match entry {
+            Entry::Role { first, second, role } => {
+                write!(f, "{first} {role} {second}").unwrap();
+                i += 1;
+                if i < contents.len() {
+                    write!(f, ", ").unwrap();
+                }
+            },
+            Entry::Extends { element, concept } => {
+                write!(f, "{element} : {concept}").unwrap();
+                i += 1;
+                if i < contents.len() {
+                    write!(f, ", ").unwrap();
+                }
+            },
+            Entry::NotExtends { element, concept } => {
+                write!(f, "{element} ¬: {concept}").unwrap();
+                i += 1;
+                if i < contents.len() {
+                    write!(f, ", ").unwrap();
+                }
+            },
+        }
+    }
     write!(f, "}}")
+}
+
+fn write_quote(
+    quote: &Quote,
+    f: &mut std::fmt::Formatter<'_>,
+) -> std::fmt::Result {
+    let mut i = 0;
+    write!(f, "(").unwrap();
+    let values = quote.0.clone();
+    let length = values.len();
+    for value in values {
+        write!(f, "{value}").unwrap();
+        i += 1;
+        if i < length {
+            write!(f, " ").unwrap();
+        }
+    }
+    write!(f, ")")
 }
 
 impl Display for WanderValue {
@@ -116,29 +147,34 @@ impl Display for WanderValue {
         match self {
             WanderValue::Element(value) => write!(f, "{}", value.0),
             WanderValue::Network(values) => write_network(values, f),
-            WanderValue::Quote(_quote) => todo!(),
+            WanderValue::Quote(quote) => write_quote(quote, f),
         }
     }
 }
 
-/// Run a Wander script with the given Bindings.
-pub fn run(
-    script: &str,
-    commands: HashMap<String, Command>,
+/// Run a quote.
+pub fn run_quote(
+    quote: &Quote,
+    commands: &HashMap<String, Command>,
     state: &mut dyn Ligature,
 ) -> Result<WanderValue, WanderError> {
-    let tokens = match tokenize_and_filter(script) {
-        Ok(v) => v,
-        Err(err) => return Err(err),
-    };
-    let calls = match parse(tokens) {
-        Ok(v) => v,
-        Err(err) => return Err(err),
-    };
+    if quote.0.is_empty() {
+        Ok(WanderValue::Network(BTreeSet::new()))
+    } else {
+        todo!()
+    }
+}
+
+/// Run a vec of Calls
+pub fn run_calls(
+    calls: &Vec<Call>,
+    commands: &HashMap<String, Command>,
+    state: &mut dyn Ligature,
+) -> Result<WanderValue, WanderError> {
     let mut result = Ok(WanderValue::Network(BTreeSet::new()));
-    for call in calls {
+    for call in calls.clone() {
         match commands.get(&call.name.0) {
-            Some(res) => match (res.fun)(call.arguments, state) {
+            Some(res) => match (res.fun)(call.arguments, state, &commands) {
                 Ok(res) => result = Ok(res),
                 Err(err) => return Err(err),
             },
@@ -150,4 +186,21 @@ pub fn run(
         }
     }
     result
+}
+
+/// Run a Wander script with the given Bindings.
+pub fn run(
+    script: &str,
+    commands: &HashMap<String, Command>,
+    state: &mut dyn Ligature,
+) -> Result<WanderValue, WanderError> {
+    let tokens = match tokenize_and_filter(script) {
+        Ok(v) => v,
+        Err(err) => return Err(err),
+    };
+    let calls = match parse(tokens) {
+        Ok(v) => v,
+        Err(err) => return Err(err),
+    };
+    run_calls(&calls, commands, state)
 }

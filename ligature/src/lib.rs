@@ -7,12 +7,19 @@
 #![deny(missing_docs)]
 
 use hashbag::HashBag;
+use core::fmt;
 use std::collections::{BTreeMap, BTreeSet};
 use serde::{Deserialize, Serialize};
 
 /// An Element that is identified by a unique String value.
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq, Deserialize, Serialize, Hash)]
 pub struct Element(pub String);
+
+impl fmt::Display for Element {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
 
 /// A single entry in a Network.
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq, Deserialize, Serialize, Hash)]

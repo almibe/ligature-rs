@@ -2,8 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use crate::{Command, WanderError, WanderValue};
-use ligature::{Element, Ligature};
+use crate::{run_quote, Command, WanderError, WanderValue};
+use ligature::Ligature;
 use std::collections::{BTreeSet, HashMap};
 
 /// Creates a set of Bindings for Wander that consists of all of the common
@@ -14,7 +14,7 @@ pub fn common() -> HashMap<String, Command> {
     commands.insert(
         "assert-equal".to_owned(),
         Command {
-            doc: "Check if two arguments are equal and fail if they are not equal.".to_owned(),
+            doc: "Check if two arguments are equal (quotes are evaluated before comparing) and fail if they are not equal.".to_owned(),
             fun: assert_equal_command,
         },
     );
@@ -25,7 +25,12 @@ pub fn common() -> HashMap<String, Command> {
             fun: ignore_command,
         },
     );
-    // commands.insert("let".to_owned(), Box::new(LetCommand {}));
+    commands.insert(
+        "let".to_owned(), 
+        Command {
+            doc: "Set a named network.".to_owned(),
+            fun: let_command,
+        });
     // commands.insert("read".to_owned(), Box::new(ReadCommand {}));
     // // commands.bind_host_function(Rc::new(AndFunction {}));
     // // commands.bind_host_function(Rc::new(NotFunction {}));
@@ -33,25 +38,55 @@ pub fn common() -> HashMap<String, Command> {
     commands
 }
 
-fn ignore_command(_: Vec<WanderValue>, _: &mut dyn Ligature) -> Result<WanderValue, WanderError> {
+fn ignore_command(_: Vec<WanderValue>, _: &mut dyn Ligature, _: &HashMap<String, Command>) -> Result<WanderValue, WanderError> {
     Ok(WanderValue::Network(BTreeSet::new()))
 }
 
 fn assert_equal_command(
     arguments: Vec<WanderValue>,
-    _: &mut dyn Ligature,
+    state: &mut dyn Ligature,
+    commands: &HashMap<String, Command>
 ) -> Result<WanderValue, WanderError> {
     if let [left, right] = &arguments[..] {
+        let left = if let WanderValue::Quote(quote) = left {
+            match run_quote(quote, commands, state) {
+                Ok(value) => value,
+                _ => todo!()
+            }
+        } else {
+            left.clone()
+        };
+        let right = if let WanderValue::Quote(quote) = right {
+            todo!()
+        } else {
+            right.clone()
+        };
+
         if left == right {
             Ok(crate::WanderValue::Network(BTreeSet::new()))
         } else {
-            Err(WanderError("Assertion failed!".to_owned()))
+            Err(WanderError(format!("Assertion failed, {} != {}", left, right)))
         }
     } else {
         Err(WanderError(
             "`assertEq` function requires two parameters.".to_owned(),
         ))
     }
+}
+
+fn let_command(
+    arguments: Vec<WanderValue>,
+    state: &mut dyn Ligature,
+    _: &HashMap<String, Command>
+) -> Result<WanderValue, WanderError> {
+    match &arguments[..] {
+        [WanderValue::Element(name), WanderValue::Network(network)] => {
+            state.add_collection(name.clone());
+            state.add_entries(name.clone(), &mut network.clone());
+        }
+        _ => todo!("Error"),
+    }
+    Ok(WanderValue::Network(BTreeSet::new()))
 }
 
 // pub struct EqCommand {}
@@ -72,28 +107,6 @@ fn assert_equal_command(
 //                 "`eq` function requires two parameters.".to_owned(),
 //             ))
 //         }
-//     }
-
-//     fn doc(&self) -> String {
-//         "".to_owned()
-//     }
-// }
-
-// pub struct LetCommand {}
-// impl<E> Command<E> for LetCommand {
-//     fn run(
-//         &self,
-//         arguments: &[WanderValue],
-//         state: &mut dyn Ligature<E>,
-//     ) -> Result<WanderValue, WanderError> {
-//         match arguments {
-//             [WanderValue::Element(name), WanderValue::Network(network)] => {
-//                 state.add_collection(name.clone());
-//                 state.add_entries(name.clone(), &mut network.clone());
-//             }
-//             _ => todo!("Error"),
-//         }
-//         Ok(WanderValue::Network(BTreeSet::new()))
 //     }
 
 //     fn doc(&self) -> String {
