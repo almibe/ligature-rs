@@ -4,7 +4,7 @@
 
 use eframe::egui;
 use ligature_graph::LigatureGraph;
-use wander::preludes::common;
+use wander::prelude::common;
 use wander::run;
 
 pub fn start_app() -> Result<(), eframe::Error> {

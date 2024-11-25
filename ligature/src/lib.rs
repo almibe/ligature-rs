@@ -8,7 +8,6 @@
 
 use hashbag::HashBag;
 use std::collections::{BTreeMap, BTreeSet};
-use std::error::Error;
 use serde::{Deserialize, Serialize};
 
 /// An Element that is identified by a unique String value.
