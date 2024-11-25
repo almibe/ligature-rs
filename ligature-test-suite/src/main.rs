@@ -13,7 +13,7 @@ fn main() {
         if path.file_name().into_string().unwrap().ends_with(".wander") {
             println!(" - Starting {:?}...", path);
             let script = std::fs::read_to_string(path.path()).unwrap();
-            match wander::run(&script, HashMap::new(), &mut ligature_graph::LigatureGraph::new()) {
+            match wander::run(&script, wander::prelude::common(), &mut ligature_graph::LigatureGraph::new()) {
                 Ok(_) => println!(" - Success!"),
                 Err(err) => println!(" - FAILED! {:?}", err)
             }

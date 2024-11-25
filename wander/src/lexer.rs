@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+use ligature::Element;
 use logos::{Lexer, Logos};
 use serde::Serialize;
 
@@ -88,6 +89,11 @@ pub fn tokenize_and_filter(script: &str) -> Result<Vec<Token>, WanderError> {
     tokens.map(|mut tokens| {
         tokens
             .retain(|token| !matches!(token, Token::Comment(_)) && !matches!(token, Token::WS(_)));
-        tokens
+        tokens.iter().map(|token| {
+            match token {
+                Token::String(value) => Token::Element(Element(value.to_owned())),
+                token => token.clone()
+            }
+        }).collect()
     })
 }
