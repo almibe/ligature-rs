@@ -24,14 +24,16 @@ Each project contains its own README with additional information when needed.
 | lig                   | Serialization support for Ligature using the Lig format.                | lib    |
 | ligature              | Basic structs and traits used by Ligature implementations.              | lib    |
 | ligature-benchmark    | A simple benchmark for Ligature implementations.                        | app    |
+| ligature-graph        | A graph based implementation of Ligature using trips.                   | lib    |
 | ligature-http         | An HTTP server for working with Ligature and Wander.                    | app    |
-| ligature-in-memory    | An in-memory implementation of Ligature.                                | lib    |
-| ligature-redb         | An implementation of Ligature that uses redb for storage.               | lib    |
 | ligature-repl         | A REPL for using Ligature and Wander.                                   | app    |
-| ligature-sqlite       | An implementation of Ligature that uses sqlite3 for storage.            | lib    |
 | ligature-test-suite   | A test suite for Ligature implementations.                              | app    |
 | ligature-wasm         | Compile Ligature for Wasm, provides in memory store and Wander support. | wasm   |
+| tiny-dl               | A tiny description language for Ligature.                               | lib    |
+| trips                 | A simple triple store.                                                  | lib    |
 | wander                | A scripting language for working with Ligature's data model.            | lib    |
+| wander-pad            | A simple desktop application for running Wander.                        | app    |
+| wander-repl           | A REPL for using Ligature and Wander.                                   | app    |
 
 ## Running Integration Tests
 

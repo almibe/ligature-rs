@@ -15,6 +15,7 @@ members = [
 #    "ligature-sqlite",
     "ligature-test-suite",
     "ligature-wasm",
+    "tiny-dl",
     "trips",
     "wander",
     "wander-pad",

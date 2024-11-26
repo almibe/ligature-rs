@@ -1,0 +1,11 @@
+[package]
+name = "tiny-dl"
+description = "A description language for Ligature."
+version = "0.2.0"
+publish = false
+authors = ["Alex Michael Berry <alexmiberry@gmail.com>"]
+edition = "2021"
+license = "MPL-2.0"
+repository = "https://github.com/almibe/ligature-rs/"
+
+[dependencies]
