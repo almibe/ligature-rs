@@ -11,15 +11,13 @@ use tabled::{
     settings::{object::Rows, Modify, Width},
     Table, Tabled,
 };
-use trips::mem::TripsError;
 use wander::run;
 
 pub struct REPLState {
-    pub state: LigatureGraph<TripsError>,
+    pub state: LigatureGraph,
 }
 
 pub fn start_repl(state: &mut REPLState) -> Result<()> {
-    //TODO this should accept REPLState not create it
     println!("Welcome to Wander's REPL!");
     println!("Press Ctrl+C or Ctrl+D or enter `:q` to quit.");
     println!("Enter :help or :h for help.");
@@ -40,8 +38,8 @@ pub fn start_repl(state: &mut REPLState) -> Result<()> {
                 } else {
                     match run(
                         line.as_str(),
-                        wander::preludes::common(),
-                        &mut LigatureGraph::new(),
+                        &wander::prelude::common(),
+                        &mut state.state,
                     ) {
                         Ok(result) => println!("{result}"),
                         Err(err) => println!("Error: {err:?}"),

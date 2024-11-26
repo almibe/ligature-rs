@@ -64,7 +64,7 @@ fn tokenize_integers() {
 fn tokenize_strings() {
     let input = "\"Hello, world\"";
     let res = tokenize_and_filter(input).unwrap().first().unwrap().clone();
-    let expected = Token::String("Hello, world".to_owned());
+    let expected = Token::Element(Element("Hello, world".to_owned()));
     assert_eq!(res, expected);
 }
 
@@ -72,7 +72,7 @@ fn tokenize_strings() {
 fn tokenize_strings_with_quotes() {
     let input = "\"\\\"Hello, world\\\"\"";
     let res = tokenize_and_filter(input).unwrap().first().unwrap().clone();
-    let expected = Token::String(String::from("\\\"Hello, world\\\""));
+    let expected = Token::Element(Element(String::from("\\\"Hello, world\\\"")));
     assert_eq!(res, expected);
 }
 

@@ -68,7 +68,7 @@ impl Ligature for LigatureGraph {
                     }
                 })
                 .collect()
-        }).map_err(|e| todo!())
+        }).map_err(|e| LigatureError(e.0))
     }
 
     fn add_entries(
