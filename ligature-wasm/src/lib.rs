@@ -13,7 +13,7 @@ use ligature_graph::LigatureGraph;
 #[wasm_bindgen]
 pub fn run(script: String) -> JsValue {
     let mut bindings = wander::prelude::common();
-    let res = wander::run(&script,  bindings, &mut LigatureGraph::new());
+    let res = wander::run(&script,  &bindings, &mut LigatureGraph::new());
     let res = RunResult {
         object: res.clone(),
         string: res.map(|res| format!("{}", res)),
