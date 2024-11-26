@@ -37,7 +37,7 @@ impl eframe::App for WanderPad {
         egui::CentralPanel::default().show(ctx, |ui| {
             if ui.button("Run").clicked() {
                 let script = self.script.clone();
-                self.result = match run(&script, common(), &mut LigatureGraph::new()) {
+                self.result = match run(&script, &common(), &mut LigatureGraph::new()) {
                     Ok(value) => value.to_string(),
                     Err(err) => err.0,
                 }
