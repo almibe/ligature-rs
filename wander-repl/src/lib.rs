@@ -41,8 +41,17 @@ pub fn start_repl(state: &mut REPLState) -> Result<()> {
                         &wander::prelude::common(),
                         &mut state.state,
                     ) {
-                        Ok(result) => println!("{result}"),
-                        Err(err) => println!("Error: {err:?}"),
+                        Ok(result) => {
+                            match result {
+                                wander::WanderValue::Element(ligature::Element(element)) => println!("{}", element),
+                                wander::WanderValue::Quote(quote) => todo!(),//println!("{}", quote),
+                                wander::WanderValue::Network(btree_set) => {
+                                    
+                                    todo!()
+                                },
+                            }
+                        },
+                        Err(err) => println!("{err:?}"),
                     }
                 }
             }
@@ -61,6 +70,13 @@ pub fn start_repl(state: &mut REPLState) -> Result<()> {
         }
     }
     rl.save_history("history.txt")
+}
+
+#[derive(Tabled)]
+struct Triple {
+    first: String,
+    second: String,
+    third: String
 }
 
 fn handle_command(input: &str, instance: &mut REPLState) -> bool {
@@ -85,33 +101,6 @@ fn broadcast(_input: &str) -> bool {
     true
 }
 
-// fn bindings(bindings: &Environment) -> bool {
-//     bindings
-//         .bound_names()
-//         .iter()
-//         .for_each(|binding| println!("{binding}"));
-//     true
-// }
-
-// fn environment(bindings: &mut Environment) -> bool {
-//     let mut display: Vec<EnvironmentDisplay> = bindings
-//         .environment()
-//         .into_iter()
-//         .map(EnvironmentDisplay::from)
-//         .collect();
-//     display.sort();
-//     let mut table = Table::new(display);
-//     table
-//         .with(
-//             Modify::new(Rows::new(1..))
-//                 .with(Width::wrap(30).keep_words())
-//                 .with(Width::increase(20)),
-//         )
-//         .with(Width::increase(150));
-//     println!("{table}");
-//     true
-// }
-
 fn help() -> bool {
     true
 }
@@ -123,12 +112,4 @@ fn status() -> bool {
 
 fn quit() -> bool {
     false
-}
-
-#[derive(PartialEq, Eq, PartialOrd, Ord, Tabled)]
-pub struct EnvironmentDisplay {
-    pub name: String,
-    pub parameters: String,
-    pub result: String,
-    pub doc_string: String,
 }

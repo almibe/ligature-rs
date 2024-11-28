@@ -67,7 +67,7 @@ pub trait Ligature {
     fn remove_collection(&mut self, collection: Element) -> Result<(), LigatureError>;
 
     /// Get all Statements in a given Dataset.
-    fn entries(&self, collection: Element) -> Result<BTreeSet<Entry>, LigatureError>;
+    fn entries(&self, collection: &Element) -> Result<BTreeSet<Entry>, LigatureError>;
 
     /// Add Statements to a given Dataset.
     /// Returns Error if Dataset doesn't exist.

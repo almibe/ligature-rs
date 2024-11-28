@@ -14,7 +14,7 @@ use axum::{
 use ligature::{Ligature};
 //use ligature_sqlite::LigatureSQLite;
 use std::{net::SocketAddr, sync::Arc};
-use wander::{preludes::common, run, WanderValue};
+use wander::{prelude::common, run, WanderValue};
 
 #[tokio::main]
 async fn main() {

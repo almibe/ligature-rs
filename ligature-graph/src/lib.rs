@@ -45,8 +45,8 @@ impl Ligature for LigatureGraph {
         self.store.remove_collection(collection.0).map_err(|e| todo!())
     }
 
-    fn entries(&self, collection: Element) -> Result<BTreeSet<ligature::Entry>, LigatureError> {
-        self.store.triples(collection.0).map(|set| {
+    fn entries(&self, collection: &Element) -> Result<BTreeSet<ligature::Entry>, LigatureError> {
+        self.store.triples(collection.clone().0).map(|set| {
             set.into_iter()
                 .map(|entry: Trip| {
                     if entry.1 == ":".to_owned() {

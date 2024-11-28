@@ -60,10 +60,13 @@ pub fn common() -> HashMap<String, Command> {
             fun: docs_command
         }
     );
-    // commands.insert("read".to_owned(), Box::new(ReadCommand {}));
-    // // commands.bind_host_function(Rc::new(AndFunction {}));
-    // // commands.bind_host_function(Rc::new(NotFunction {}));
-    // // commands.bind_host_function(Rc::new(EnvironmentFunction {}));
+    commands.insert(
+        "union".to_owned(), 
+        Command {
+            doc: "Combine two networks.".to_owned(),
+            fun: union_command
+        }
+    );
     commands
 }
 
@@ -85,6 +88,30 @@ fn docs_command(
             Ok(WanderValue::Network(results))
         }
         _ => Err(WanderError("docs takes no arguments.".to_owned())),
+    }
+}
+
+fn union_command(
+    args: Vec<WanderValue>,
+    state: &mut dyn Ligature,
+    commands: &HashMap<String, Command>,
+) -> Result<WanderValue, WanderError> {
+    match &args[..] {
+        [left, right] => {
+            let mut left = if let WanderValue::Network(left) = left {
+                left.clone()
+            } else {
+                todo!()
+            };
+            let mut right = if let WanderValue::Network(right) = right {
+                right.clone()
+            } else {
+                todo!()
+            };
+            left.append(&mut right);
+            Ok(WanderValue::Network(left.clone()))
+        },
+        _ => Err(WanderError("union takes two arguments.".to_owned())),
     }
 }
 
@@ -192,7 +219,7 @@ fn read_command(
     _: &HashMap<String, Command>,
 ) -> Result<WanderValue, WanderError> {
     match &arguments[..] {
-        [WanderValue::Element(name)] => match state.entries(name.clone()) {
+        [WanderValue::Element(name)] => match state.entries(name) {
             Ok(entries) => return Ok(WanderValue::Network(entries)),
             Err(err) => Err(WanderError(format!("Error {}", err.0))),
         },

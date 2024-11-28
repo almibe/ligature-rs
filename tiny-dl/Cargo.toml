@@ -9,3 +9,5 @@ license = "MPL-2.0"
 repository = "https://github.com/almibe/ligature-rs/"
 
 [dependencies]
+ligature = { path = "../ligature" }
+wander = { path = "../wander" }
