@@ -11,6 +11,8 @@ use std::collections::{BTreeMap, BTreeSet};
 
 #[cfg(feature = "heed")]
 pub mod heed;
+#[cfg(feature = "duckdb")]
+pub mod duckdb;
 pub mod mem;
 
 /// The data structure stored in this triple store.

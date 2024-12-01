@@ -8,7 +8,7 @@ use heed::{Env, EnvOpenOptions};
 use std::collections::{BTreeMap, BTreeSet};
 #[cfg(feature = "heed")]
 use trips::heed::TripsHeed;
-use trips::mem::TripsError;
+use trips::TripsError;
 use trips::{Query, Slot, Trip, Trips};
 
 #[cfg(feature = "heed")]
@@ -26,7 +26,7 @@ fn store_should_start_empty() {
     let env = create_temp();
     let store = trips::heed::TripsHeed::new(env);
     let collections: Vec<String> =
-        <TripsHeed as Trips<trips::mem::TripsError>>::collections(&store).unwrap();
+        <TripsHeed as Trips>::collections(&store).unwrap();
     let result: Vec<String> = vec![];
     assert_eq!(collections, result);
 }

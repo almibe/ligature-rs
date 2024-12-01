@@ -6,7 +6,7 @@
 
 #![deny(missing_docs)]
 
-use crate::mem::TripsError;
+use crate::TripsError;
 use crate::Trips;
 use core::hash::Hash;
 use hashbag::HashBag;
@@ -51,7 +51,7 @@ impl TripsHeed {
     }
 }
 
-impl Trips<TripsError> for TripsHeed {
+impl Trips for TripsHeed {
     fn collections(&self) -> Result<Vec<String>, TripsError> {
         let mut results: Vec<String> = vec![];
         let tx = self.env.read_txn().unwrap();
