@@ -13,62 +13,57 @@ use trips::{Query, Slot, Trip, Trips};
 #[cfg(feature = "duckdb")]
 fn store_should_start_empty() {
     let store = TripsDuckDB::new();
-    let collections: Vec<String> =
-        <TripsDuckDB as Trips>::collections(&store).unwrap();
+    let collections: Vec<String> = <TripsDuckDB as Trips>::collections(&store).unwrap();
     let result: Vec<String> = vec![];
     assert_eq!(collections, result);
 }
 
-// #[test]
-// #[cfg(feature = "heed")]
-// fn add_collection_to_store() {
-//     let env = create_temp();
-//     let mut store = TripsHeed::new(env);
-//     let _ = store.add_collection("T".to_owned());
-//     let collections: Vec<String> = store.collections().unwrap();
-//     let result: Vec<String> = vec!["T".to_owned()];
-//     assert_eq!(collections, result);
-// }
+#[test]
+#[cfg(feature = "duckdb")]
+fn add_collection_to_store() {
+    let mut store = TripsDuckDB::new();
+    let _ = store.add_collection("T".to_owned());
+    let collections: Vec<String> = store.collections().unwrap();
+    let result: Vec<String> = vec!["T".to_owned()];
+    assert_eq!(collections, result);
+}
 
-// #[test]
-// #[cfg(feature = "heed")]
-// fn remove_collection_from_store() {
-//     let env = create_temp();
-//     let mut store = TripsHeed::new(env);
-//     let _ = store.add_collection("T".to_owned());
-//     let _ = store.add_collection("S".to_owned());
-//     let _ = store.remove_collection("T".to_owned());
-//     let collections: Vec<String> = store.collections().unwrap();
-//     let result: Vec<String> = vec!["S".to_owned()];
-//     assert_eq!(collections, result);
-// }
+#[test]
+#[cfg(feature = "duckdb")]
+fn remove_collection_from_store() {
+    let mut store = TripsDuckDB::new();
+    let _ = store.add_collection("T".to_owned());
+    let _ = store.add_collection("S".to_owned());
+    let _ = store.remove_collection("T".to_owned());
+    let collections: Vec<String> = store.collections().unwrap();
+    let result: Vec<String> = vec!["S".to_owned()];
+    assert_eq!(collections, result);
+}
 
-// #[test]
-// #[cfg(feature = "heed")]
-// fn triples_should_start_empty() {
-//     let env = create_temp();
-//     let mut store = TripsHeed::new(env);
-//     let _ = store.add_collection("T".to_owned());
-//     let collections = store.triples("T".to_owned()).unwrap();
-//     let result = BTreeSet::new();
-//     assert_eq!(collections, result);
-// }
+#[test]
+#[cfg(feature = "duckdb")]
+fn triples_should_start_empty() {
+    let mut store = TripsDuckDB::new();
+    let _ = store.add_collection("T".to_owned());
+    let collections = store.triples("T".to_owned()).unwrap();
+    let result = BTreeSet::new();
+    assert_eq!(collections, result);
+}
 
-// #[test]
-// #[cfg(feature = "heed")]
-// fn add_triples_to_collection() {
-//     let env = create_temp();
-//     let mut store: TripsHeed = TripsHeed::new(env);
-//     let _ = store.add_collection("T".to_owned());
-//     let _ = store.add_triples(
-//         "T".to_owned(),
-//         &mut BTreeSet::from([Trip("1".to_owned(), "2".to_owned(), "3".to_owned())]),
-//     );
-//     let collections: BTreeSet<Trip> = store.triples("T".to_owned()).unwrap();
-//     let result: BTreeSet<Trip> =
-//         BTreeSet::from([Trip("1".to_owned(), "2".to_owned(), "3".to_owned())]);
-//     assert_eq!(collections, result);
-// }
+#[test]
+#[cfg(feature = "duckdb")]
+fn add_triples_to_collection() {
+    let mut store = TripsDuckDB::new();
+    let _ = store.add_collection("T".to_owned());
+    let _ = store.add_triples(
+        "T".to_owned(),
+        &mut BTreeSet::from([Trip("1".to_owned(), "2".to_owned(), "3".to_owned())]),
+    );
+    let collections: BTreeSet<Trip> = store.triples("T".to_owned()).unwrap();
+    let result: BTreeSet<Trip> =
+        BTreeSet::from([Trip("1".to_owned(), "2".to_owned(), "3".to_owned())]);
+    assert_eq!(collections, result);
+}
 
 // #[test]
 // #[cfg(feature = "heed")]

@@ -11,7 +11,7 @@ use axum::{
     Router,
 };
 //use lig::load_lig_from_str;
-use ligature::{Ligature};
+use ligature::Ligature;
 //use ligature_sqlite::LigatureSQLite;
 use std::{net::SocketAddr, sync::Arc};
 use wander::{prelude::common, run, WanderValue};

@@ -5,7 +5,7 @@
 //! This module is an implementation of the an in-memory, non-transactional knowledge graph.
 
 use hashbag::HashBag;
-use ligature::{Element, LigatureError, Entry, Ligature};
+use ligature::{Element, Entry, Ligature, LigatureError};
 use std::collections::BTreeSet;
 use trips::mem::TripsMem;
 use trips::{Query, Slot, Trip, Trips};
@@ -34,7 +34,8 @@ impl Ligature for LigatureGraph {
     fn collections(&self) -> Result<Vec<Element>, LigatureError> {
         self.store
             .collections()
-            .map(|r| r.into_iter().map(|e| Element(e)).collect()).map_err(|e| todo!())
+            .map(|r| r.into_iter().map(|e| Element(e)).collect())
+            .map_err(|e| todo!())
     }
 
     fn add_collection(&mut self, collection: Element) -> Result<(), LigatureError> {
@@ -42,33 +43,38 @@ impl Ligature for LigatureGraph {
     }
 
     fn remove_collection(&mut self, collection: Element) -> Result<(), LigatureError> {
-        self.store.remove_collection(collection.0).map_err(|e| todo!())
+        self.store
+            .remove_collection(collection.0)
+            .map_err(|e| todo!())
     }
 
     fn entries(&self, collection: &Element) -> Result<BTreeSet<ligature::Entry>, LigatureError> {
-        self.store.triples(collection.clone().0).map(|set| {
-            set.into_iter()
-                .map(|entry: Trip| {
-                    if entry.1 == ":".to_owned() {
-                        Entry::Extends {
-                            element: Element(entry.0),
-                            concept: Element(entry.2),
+        self.store
+            .triples(collection.clone().0)
+            .map(|set| {
+                set.into_iter()
+                    .map(|entry: Trip| {
+                        if entry.1 == ":".to_owned() {
+                            Entry::Extends {
+                                element: Element(entry.0),
+                                concept: Element(entry.2),
+                            }
+                        } else if entry.1 == "¬:".to_owned() {
+                            Entry::NotExtends {
+                                element: Element(entry.0),
+                                concept: Element(entry.2),
+                            }
+                        } else {
+                            Entry::Role {
+                                first: Element(entry.0),
+                                second: Element(entry.2),
+                                role: Element(entry.1),
+                            }
                         }
-                    } else if entry.1 == "¬:".to_owned() {
-                        Entry::NotExtends {
-                            element: Element(entry.0),
-                            concept: Element(entry.2),
-                        }
-                    } else {
-                        Entry::Role {
-                            first: Element(entry.0),
-                            second: Element(entry.2),
-                            role: Element(entry.1),
-                        }
-                    }
-                })
-                .collect()
-        }).map_err(|e| LigatureError(e.0))
+                    })
+                    .collect()
+            })
+            .map_err(|e| LigatureError(e.0))
     }
 
     fn add_entries(
@@ -90,7 +96,9 @@ impl Ligature for LigatureGraph {
                     Trip(element.clone().0, "¬:".to_owned(), concept.clone().0)
                 }
             }));
-        self.store.add_triples(collection.0, &mut triples).map_err(|e| todo!())
+        self.store
+            .add_triples(collection.0, &mut triples)
+            .map_err(|e| todo!())
     }
 
     fn remove_entries(
@@ -112,7 +120,9 @@ impl Ligature for LigatureGraph {
                     Trip(element.clone().0, "¬:".to_owned(), concept.clone().0)
                 }
             }));
-        self.store.remove_triples(collection.0, &mut triples).map_err(|e| todo!())
+        self.store
+            .remove_triples(collection.0, &mut triples)
+            .map_err(|e| todo!())
     }
 
     fn query(
@@ -142,6 +152,8 @@ impl Ligature for LigatureGraph {
                     Slot::Value(concept.clone().0),
                 ),
             }));
-        self.store.query(collection.0, query_pattern).map_err(|e| todo!())
+        self.store
+            .query(collection.0, query_pattern)
+            .map_err(|e| todo!())
     }
 }

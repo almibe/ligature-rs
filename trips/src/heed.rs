@@ -6,8 +6,8 @@
 
 #![deny(missing_docs)]
 
-use crate::TripsError;
 use crate::Trips;
+use crate::TripsError;
 use core::hash::Hash;
 use hashbag::HashBag;
 use heed::{BytesDecode, Database, Env};
@@ -503,7 +503,7 @@ impl Trips for TripsHeed {
             None => todo!(),
         };
         //look up value ids
-        
+
         todo!();
         Ok(result)
     }

@@ -25,8 +25,7 @@ fn create_temp() -> Env {
 fn store_should_start_empty() {
     let env = create_temp();
     let store = trips::heed::TripsHeed::new(env);
-    let collections: Vec<String> =
-        <TripsHeed as Trips>::collections(&store).unwrap();
+    let collections: Vec<String> = <TripsHeed as Trips>::collections(&store).unwrap();
     let result: Vec<String> = vec![];
     assert_eq!(collections, result);
 }

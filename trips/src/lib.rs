@@ -9,10 +9,10 @@
 use hashbag::HashBag;
 use std::collections::{BTreeMap, BTreeSet};
 
-#[cfg(feature = "heed")]
-pub mod heed;
 #[cfg(feature = "duckdb")]
 pub mod duckdb;
+#[cfg(feature = "heed")]
+pub mod heed;
 pub mod mem;
 
 /// The data structure stored in this triple store.
@@ -58,11 +58,19 @@ pub trait Trips {
     /// Add Statements to a given Dataset.
     /// Returns Error if Dataset doesn't exist.
     /// Does nothing if Statement already exists in Dataset.
-    fn add_triples(&mut self, collection: String, trips: &mut BTreeSet<Trip>) -> Result<(), TripsError>;
+    fn add_triples(
+        &mut self,
+        collection: String,
+        trips: &mut BTreeSet<Trip>,
+    ) -> Result<(), TripsError>;
     /// Remove Statements from a given Dataset.
     /// Returns Error if Dataset doesn't exist.
     /// Does nothing if Statement doesn't exist in Dataset.
-    fn remove_triples(&mut self, collection: String, trips: &mut BTreeSet<Trip>) -> Result<(), TripsError>;
+    fn remove_triples(
+        &mut self,
+        collection: String,
+        trips: &mut BTreeSet<Trip>,
+    ) -> Result<(), TripsError>;
     /// Run a query against the given Dataset.
     fn query(
         &self,

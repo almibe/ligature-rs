@@ -58,7 +58,10 @@ impl Trips for TripsMem {
     fn triples(&self, collection: String) -> Result<BTreeSet<crate::Trip>, TripsError> {
         match self.collections.get(&collection) {
             Some(res) => Ok(res.clone()),
-            None => Err(TripsError(format!("Collection `{}` not found.", collection))),
+            None => Err(TripsError(format!(
+                "Collection `{}` not found.",
+                collection
+            ))),
         }
     }
 

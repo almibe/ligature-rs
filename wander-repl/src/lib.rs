@@ -36,21 +36,18 @@ pub fn start_repl(state: &mut REPLState) -> Result<()> {
                         break;
                     }
                 } else {
-                    match run(
-                        line.as_str(),
-                        &wander::prelude::common(),
-                        &mut state.state,
-                    ) {
+                    match run(line.as_str(), &wander::prelude::common(), &mut state.state) {
                         Ok(result) => {
                             match result {
-                                wander::WanderValue::Element(ligature::Element(element)) => println!("{}", element),
-                                wander::WanderValue::Quote(quote) => todo!(),//println!("{}", quote),
+                                wander::WanderValue::Element(ligature::Element(element)) => {
+                                    println!("{}", element)
+                                }
+                                wander::WanderValue::Quote(quote) => todo!(), //println!("{}", quote),
                                 wander::WanderValue::Network(btree_set) => {
-                                    
                                     todo!()
-                                },
+                                }
                             }
-                        },
+                        }
                         Err(err) => println!("{err:?}"),
                     }
                 }
@@ -76,7 +73,7 @@ pub fn start_repl(state: &mut REPLState) -> Result<()> {
 struct Triple {
     first: String,
     second: String,
-    third: String
+    third: String,
 }
 
 fn handle_command(input: &str, instance: &mut REPLState) -> bool {

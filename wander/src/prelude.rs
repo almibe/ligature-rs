@@ -54,18 +54,18 @@ pub fn common() -> HashMap<String, Command> {
         },
     );
     commands.insert(
-        "docs".to_owned(), 
+        "docs".to_owned(),
         Command {
             doc: "Get a list of commands and a description.".to_owned(),
-            fun: docs_command
-        }
+            fun: docs_command,
+        },
     );
     commands.insert(
-        "union".to_owned(), 
+        "union".to_owned(),
         Command {
             doc: "Combine two networks.".to_owned(),
-            fun: union_command
-        }
+            fun: union_command,
+        },
     );
     commands
 }
@@ -110,7 +110,7 @@ fn union_command(
             };
             left.append(&mut right);
             Ok(WanderValue::Network(left.clone()))
-        },
+        }
         _ => Err(WanderError("union takes two arguments.".to_owned())),
     }
 }
@@ -198,16 +198,16 @@ fn let_command(
         [WanderValue::Element(name), WanderValue::Network(network)] => {
             state.add_collection(name.clone());
             state.add_entries(name.clone(), &mut network.clone());
-        },
+        }
         [WanderValue::Element(name), WanderValue::Quote(quote)] => {
             match run_quote(quote, commands, state) {
                 Ok(WanderValue::Network(res)) => {
                     state.add_collection(name.clone());
-                    state.add_entries(name.clone(), &mut res.clone());        
+                    state.add_entries(name.clone(), &mut res.clone());
                 }
-                _ => todo!()
+                _ => todo!(),
             }
-        },
+        }
         _ => return Err(WanderError("Invalid call to let.".to_owned())),
     }
     Ok(WanderValue::Network(BTreeSet::new()))
