@@ -60,12 +60,22 @@ fn get_collection_id(tx: &Transaction, collection: &str) -> Result<u64, TripsErr
 }
 
 fn add_part(tx: &Transaction, part: &str) -> Result<(), TripsError> {
-    tx.execute("insert into part (part) values (?) ON CONFLICT DO NOTHING", params![part]); //TODO just ignoring errors for now
+    tx.execute(
+        "insert into part (part) values (?) ON CONFLICT DO NOTHING",
+        params![part],
+    ).unwrap();
     Ok(())
 }
 
 fn add_trip(tx: &Transaction, collection_id: u64, trip: &Trip) -> Result<(), TripsError> {
     tx.execute("insert into trip (collection, first, second, third) values (?, (select id from part where part = ?), (select id from part where part = ?), (select id from part where part = ?))",
+        params![collection_id, trip.0, trip.1, trip.2])
+        .unwrap();
+    Ok(())
+}
+
+fn remove_trip(tx: &Transaction, collection_id: u64, trip: &Trip) -> Result<(), TripsError> {
+    tx.execute("delete from trip where collection = ? and first = (select id from part where part = ?) and second = (select id from part where part = ?) and third = (select id from part where part = ?)",
         params![collection_id, trip.0, trip.1, trip.2])
         .unwrap();
     Ok(())
@@ -145,10 +155,16 @@ impl Trips for TripsDuckDB {
 
     fn remove_triples(
         &mut self,
-        _collection: String,
-        _trips: &mut BTreeSet<Trip>,
+        collection: String,
+        trips: &mut BTreeSet<Trip>,
     ) -> Result<(), TripsError> {
-        todo!()
+        let tx = self.conn.transaction().unwrap();
+        let id = get_collection_id(&tx, &collection)?;
+        for trip in trips.iter() {
+            remove_trip(&tx, id, trip);
+        }
+        tx.commit().unwrap();
+        Ok(())
     }
 
     fn query(
