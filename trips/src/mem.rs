@@ -136,8 +136,26 @@ impl Trips for TripsMem {
         match self.collections.get(&collection) {
             Some(collection) => {
                 let mut results: BTreeSet<Trip> = BTreeSet::new();
+                for trip in collection.iter() {
+                    match pattern.0 {
+                        Slot::Any => (),
+                        Slot::Value(value) => todo!(),
+                        Slot::Variable(name) => todo!()
+                    }
+                    match pattern.1 {
+                        Slot::Any => (),
+                        Slot::Value(value) => todo!(),
+                        Slot::Variable(name) => todo!()
+                    }
+                    match pattern.2 {
+                        Slot::Any => (),
+                        Slot::Value(value) => todo!(),
+                        Slot::Variable(name) => todo!()
+                    }
+                    results.insert(trip.clone());
+                }
                 Ok(results)
-            } //Ok(res.clone()),
+            }
             None => Err(TripsError("Collection not found.".to_owned())),
         }
     }

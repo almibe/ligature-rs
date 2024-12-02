@@ -67,6 +67,13 @@ pub fn common() -> HashMap<String, Command> {
             fun: union_command,
         },
     );
+    commands.insert(
+        "filter".to_owned(),
+        Command {
+            doc: "Filter a network.".to_owned(),
+            fun: filter_command,
+        },
+    );
     commands
 }
 
@@ -223,6 +230,33 @@ fn read_command(
             Ok(entries) => return Ok(WanderValue::Network(entries)),
             Err(err) => Err(WanderError(format!("Error {}", err.0))),
         },
+        _ => todo!("Error"),
+    }
+}
+
+fn filter_command(
+    arguments: Vec<WanderValue>,
+    state: &mut dyn Ligature,
+    _: &HashMap<String, Command>,
+) -> Result<WanderValue, WanderError> {
+    match &arguments[..] {
+        [WanderValue::Element(collection), WanderValue::Element(first), WanderValue::Element(second), WanderValue::Element(third)] => {
+            match state.filter(
+                collection.clone(),
+                ligature::Entry::Role {
+                    first: first.clone(),
+                    second: third.clone(),
+                    role: second.clone(),
+                },
+            ) {
+                Ok(entries) => return Ok(WanderValue::Network(entries)),
+                _ => todo!(),
+            }
+        }
+        // match state.entries(name) {
+        //     Ok(entries) => return Ok(WanderValue::Network(entries)),
+        //     Err(err) => Err(WanderError(format!("Error {}", err.0))),
+        // },
         _ => todo!("Error"),
     }
 }

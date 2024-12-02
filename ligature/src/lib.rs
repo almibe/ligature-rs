@@ -85,10 +85,16 @@ pub trait Ligature {
         collection: Element,
         entries: &mut BTreeSet<Entry>,
     ) -> Result<(), LigatureError>;
-    /// Run a query against the given Dataset.
-    fn query(
+    /// Filter a given Dataset.
+    fn filter(
         &self,
         collection: Element,
-        pattern: BTreeSet<Entry>,
-    ) -> Result<HashBag<BTreeMap<String, String>>, LigatureError>;
+        pattern: Entry,
+    ) -> Result<BTreeSet<Entry>, LigatureError>;
+    // /// Run a query against the given Dataset.
+    // fn query(
+    //     &self,
+    //     collection: Element,
+    //     pattern: BTreeSet<Entry>,
+    // ) -> Result<HashBag<BTreeMap<String, String>>, LigatureError>;
 }

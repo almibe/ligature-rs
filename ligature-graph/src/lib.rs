@@ -4,7 +4,6 @@
 
 //! This module is an implementation of the an in-memory, non-transactional knowledge graph.
 
-use hashbag::HashBag;
 use ligature::{Element, Entry, Ligature, LigatureError};
 use std::collections::BTreeSet;
 use trips::mem::TripsMem;
@@ -125,35 +124,88 @@ impl Ligature for LigatureGraph {
             .map_err(|e| todo!())
     }
 
-    fn query(
+    fn filter(
         &self,
         collection: Element,
-        pattern: BTreeSet<ligature::Entry>,
-    ) -> Result<HashBag<std::collections::BTreeMap<String, String>>, LigatureError> {
-        let query_pattern: BTreeSet<Query> =
-            BTreeSet::from_iter(pattern.iter().map(|entry| match entry {
+        pattern: Entry,
+    ) -> Result<BTreeSet<Entry>, LigatureError> {
+        let query_pattern: Query =
+            match pattern {
                 Entry::Extends { element, concept } => Query(
-                    Slot::Value(element.clone().0),
+                    check_value(element.clone().0),
                     Slot::Value(":".to_owned()),
-                    Slot::Value(concept.clone().0),
+                    check_value(concept.clone().0),
                 ),
                 Entry::Role {
                     first,
                     second,
                     role,
                 } => Query(
-                    Slot::Value(first.clone().0),
-                    Slot::Value(role.clone().0),
-                    Slot::Value(second.clone().0),
+                    check_value(first.clone().0),
+                    check_value(role.clone().0),
+                    check_value(second.clone().0),
                 ),
                 Entry::NotExtends { element, concept } => Query(
-                    Slot::Value(element.clone().0),
+                    check_value(element.clone().0),
                     Slot::Value("¬:".to_owned()),
-                    Slot::Value(concept.clone().0),
+                    check_value(concept.clone().0),
                 ),
-            }));
+            };
         self.store
-            .query(collection.0, query_pattern)
+            .filter(collection.0, query_pattern)
+            .map(|trips| {
+                trips.iter().map(|trip| {
+                    match trip.1.as_str() {
+                        ":" => Entry::Extends { element: Element(trip.0.clone()), concept: Element(trip.2.clone()) },
+                        "¬:" => Entry::NotExtends { element: Element(trip.0.clone()), concept: Element(trip.2.clone()) },
+                        _ => Entry::Role { first: Element(trip.0.clone()), second: Element(trip.2.clone()), role: Element(trip.1.clone()) }
+                    }
+                }).collect()
+            })
             .map_err(|e| todo!())
+    }
+    
+    // fn query(
+    //     &self,
+    //     collection: Element,
+    //     pattern: BTreeSet<ligature::Entry>,
+    // ) -> Result<HashBag<std::collections::BTreeMap<String, String>>, LigatureError> {
+    //     let query_pattern: BTreeSet<Query> =
+    //         BTreeSet::from_iter(pattern.iter().map(|entry| match entry {
+    //             Entry::Extends { element, concept } => Query(
+    //                 Slot::Value(element.clone().0),
+    //                 Slot::Value(":".to_owned()),
+    //                 Slot::Value(concept.clone().0),
+    //             ),
+    //             Entry::Role {
+    //                 first,
+    //                 second,
+    //                 role,
+    //             } => Query(
+    //                 Slot::Value(first.clone().0),
+    //                 Slot::Value(role.clone().0),
+    //                 Slot::Value(second.clone().0),
+    //             ),
+    //             Entry::NotExtends { element, concept } => Query(
+    //                 Slot::Value(element.clone().0),
+    //                 Slot::Value("¬:".to_owned()),
+    //                 Slot::Value(concept.clone().0),
+    //             ),
+    //         }));
+    //     self.store
+    //         .query(collection.0, query_pattern)
+    //         .map_err(|e| todo!())
+    // }
+}
+
+fn check_value(value: String) -> Slot {
+    if value == "?" {
+        Slot::Any
+    } else if value.starts_with("?") {
+        let mut chars = value.chars();
+        chars.next();
+        Slot::Variable(chars.as_str().to_owned())
+    } else {
+        Slot::Value(value.to_owned())
     }
 }
