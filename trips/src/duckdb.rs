@@ -23,20 +23,20 @@ impl TripsDuckDB {
 
         conn.execute_batch(
             r"CREATE SEQUENCE seq;
-              CREATE TABLE element (
+              CREATE TABLE part (
                       id              UBIGINT PRIMARY KEY DEFAULT NEXTVAL('seq'),
-                      element         TEXT NOT NULL UNIQUE,
+                      part            TEXT NOT NULL UNIQUE,
                       );
-              CREATE TABLE network (
+              CREATE TABLE collection (
                       id              UBIGINT PRIMARY KEY DEFAULT NEXTVAL('seq'),
                       name            TEXT NOT NULL UNIQUE,
                       );
-              CREATE TABLE entry (
+              CREATE TABLE trip (
                       id              UBIGINT PRIMARY KEY DEFAULT NEXTVAL('seq'),
-                      network         UBIGINT REFERENCES network(id),
-                      first           UBIGINT REFERENCES element(id),
-                      second          UBIGINT REFERENCES element(id),
-                      third           UBIGINT REFERENCES element(id),
+                      collection      UBIGINT REFERENCES collection(id),
+                      first           UBIGINT REFERENCES part(id),
+                      second          UBIGINT REFERENCES part(id),
+                      third           UBIGINT REFERENCES part(id),
                       );
             ",
         )
@@ -46,14 +46,33 @@ impl TripsDuckDB {
     }
 }
 
-fn get_collection_id(tx: Transaction, collection: &str) -> Result<u64> {
+fn get_collection_id(tx: &Transaction, collection: &str) -> Result<u64, TripsError> {
+    let mut stmt = tx
+        .prepare("SELECT id from collection where name = ?;")
+        .unwrap();
+    let mut itr = stmt
+        .query_map([collection], |row| Ok(row.get(0).unwrap()))
+        .unwrap();
+    for id in itr {
+        return Ok(id.unwrap());
+    }
+    Err(TripsError(format!("Collection {} not found.", collection)))
+}
+
+fn add_part(tx: &Transaction, part: &str) -> Result<(), TripsError> {
+    tx.execute("insert into part (part) values (?)", params![part])
+        .unwrap();
+    Ok(())
+}
+
+fn add_trip(tx: &Transaction, trip: &Trip) -> Result<(), TripsError> {
     todo!()
 }
 
 impl Trips for TripsDuckDB {
     fn collections(&self) -> Result<Vec<String>, TripsError> {
         let mut names: Vec<String> = vec![];
-        let mut stmt = self.conn.prepare("SELECT name from network;").unwrap();
+        let mut stmt = self.conn.prepare("SELECT name from collection;").unwrap();
         let mut itr = stmt.query_map([], |row| Ok(row.get(0).unwrap())).unwrap();
         for name in itr {
             names.push(name.unwrap());
@@ -63,14 +82,17 @@ impl Trips for TripsDuckDB {
 
     fn add_collection(&mut self, collection: String) -> Result<(), TripsError> {
         self.conn
-            .execute("insert into network (name) values (?)", params![collection])
+            .execute(
+                "insert into collection (name) values (?)",
+                params![collection],
+            )
             .unwrap();
         Ok(())
     }
 
     fn remove_collection(&mut self, collection: String) -> Result<(), TripsError> {
         self.conn
-            .execute("delete from network where name = ?", params![collection])
+            .execute("delete from collection where name = ?", params![collection])
             .unwrap();
         Ok(())
     }
@@ -80,11 +102,11 @@ impl Trips for TripsDuckDB {
         let mut stmt = self
             .conn
             .prepare(
-                r"SELECT (e1.element, e2.element, e3.element) from entry
-            left join network n on n.id = entry.network
-            left join element e1 on e1.id = entry.first
-            left join element e2 on e2.id = entry.second
-            left join element e3 on e3.id = entry.third;",
+                r"SELECT (p1.part, p2.part, p3.part) from trip
+            left join collection c on c.id = trip.collection
+            left join part p1 on p1.id = trip.first
+            left join part p2 on p2.id = trip.second
+            left join part p3 on p3.id = trip.third;",
             )
             .unwrap();
         let mut itr = stmt
@@ -108,10 +130,13 @@ impl Trips for TripsDuckDB {
         trips: &mut BTreeSet<Trip>,
     ) -> Result<(), TripsError> {
         let tx = self.conn.transaction().unwrap();
-        //get collection id
-
-        tx.execute("insert into network (name) values (?)", params![collection])
-            .unwrap();
+        let id = get_collection_id(&tx, &collection)?;
+        for trip in trips.iter() {
+            add_part(&tx, &trip.0)?;
+            add_part(&tx, &trip.1)?;
+            add_part(&tx, &trip.2)?;
+            add_trip(&tx, trip);
+        }
         tx.commit().unwrap();
         Ok(())
     }
