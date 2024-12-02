@@ -4,6 +4,7 @@
 
 //! This module is the library module for the ligature-repl project.
 
+use ligature::Entry;
 use ligature_graph::LigatureGraph;
 use rustyline::error::ReadlineError;
 use rustyline::{DefaultEditor, Result};
@@ -44,7 +45,25 @@ pub fn start_repl(state: &mut REPLState) -> Result<()> {
                                 }
                                 wander::WanderValue::Quote(quote) => todo!(), //println!("{}", quote),
                                 wander::WanderValue::Network(btree_set) => {
-                                    todo!()
+                                    if btree_set.is_empty() {
+                                        println!("{{}}");
+                                    } else {
+                                        println!("{{");
+                                        for entry in btree_set.iter() {
+                                            match entry {
+                                                Entry::Extends { element, concept } => {
+                                                    println!("  {} : {}", element, concept);
+                                                },
+                                                Entry::Role { first, second, role } => {
+                                                    println!("  {} {} {}", first, role, second);
+                                                },
+                                                Entry::NotExtends { element, concept } => {
+                                                    println!("  {} ¬: {}", element, concept);
+                                                },
+                                            }
+                                        }
+                                        println!("}}");    
+                                    }
                                 }
                             }
                         }

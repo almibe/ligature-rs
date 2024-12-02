@@ -139,18 +139,36 @@ impl Trips for TripsMem {
                 for trip in collection.iter() {
                     match pattern.0 {
                         Slot::Any => (),
-                        Slot::Value(value) => todo!(),
-                        Slot::Variable(name) => todo!()
+                        Slot::Value(ref value) => {
+                            if *value == trip.0 {
+                                ()
+                            } else {
+                                continue;
+                            }
+                        }
+                        Slot::Variable(name) => todo!(),
                     }
                     match pattern.1 {
                         Slot::Any => (),
-                        Slot::Value(value) => todo!(),
-                        Slot::Variable(name) => todo!()
+                        Slot::Value(ref value) => {
+                            if *value == trip.1 {
+                                ()
+                            } else {
+                                continue;
+                            }
+                        }
+                        Slot::Variable(name) => todo!(),
                     }
                     match pattern.2 {
                         Slot::Any => (),
-                        Slot::Value(value) => todo!(),
-                        Slot::Variable(name) => todo!()
+                        Slot::Value(ref value) => {
+                            if *value == trip.2 {
+                                ()
+                            } else {
+                                continue;
+                            }
+                        }
+                        Slot::Variable(name) => todo!(),
                     }
                     results.insert(trip.clone());
                 }
