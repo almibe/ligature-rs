@@ -63,7 +63,8 @@ fn add_part(tx: &Transaction, part: &str) -> Result<(), TripsError> {
     tx.execute(
         "insert into part (part) values (?) ON CONFLICT DO NOTHING",
         params![part],
-    ).unwrap();
+    )
+    .unwrap();
     Ok(())
 }
 
@@ -118,11 +119,12 @@ impl Trips for TripsDuckDB {
             left join collection c on c.id = trip.collection
             left join part p1 on p1.id = trip.first
             left join part p2 on p2.id = trip.second
-            left join part p3 on p3.id = trip.third;",
+            left join part p3 on p3.id = trip.third
+            where c.name = ?;",
             )
             .unwrap();
         let mut itr = stmt
-            .query_map([], |row| {
+            .query_map([collection], |row| {
                 Ok(Trip(
                     row.get(0).unwrap(),
                     row.get(1).unwrap(),
@@ -169,9 +171,40 @@ impl Trips for TripsDuckDB {
 
     fn query(
         &self,
-        _collection: String,
-        _pattern: BTreeSet<Query>,
+        collection: String,
+        pattern: BTreeSet<Query>,
     ) -> Result<HashBag<BTreeMap<String, String>>, TripsError> {
-        todo!()
+        let mut result = HashBag::new();
+
+        let select_pattern = extract_select_pattern(&pattern);
+
+        let mut stmt = self
+            .conn
+            .prepare(&format!(
+                r"SELECT {} from trip
+            left join collection c on c.id = trip.collection
+            left join part p1 on p1.id = trip.first
+            left join part p2 on p2.id = trip.second
+            left join part p3 on p3.id = trip.third
+            where c.name = ?;",
+                select_pattern
+            ))
+            .unwrap();
+        let mut itr = stmt
+            .query_map([collection], |row| Ok(BTreeMap::new()))
+            .unwrap();
+        for trip in itr {
+            result.insert(trip.unwrap());
+        }
+        Ok(result)
+    }
+}
+
+fn extract_select_pattern(pattern: &BTreeSet<Query>) -> String {
+    let mut res = "";
+
+    match res {
+        "" => return "*".to_owned(),
+        _ => todo!(),
     }
 }

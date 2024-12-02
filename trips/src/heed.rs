@@ -6,13 +6,12 @@
 
 #![deny(missing_docs)]
 
-use crate::Trips;
-use crate::TripsError;
+use crate::{Slot, Trips, TripsError};
 use core::hash::Hash;
 use hashbag::HashBag;
 use heed::{BytesDecode, Database, Env};
 use heed_types::{Bytes, Str, Unit, U64};
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 /// An in-memory implementation of Trips.
 pub struct TripsHeed {
@@ -502,9 +501,45 @@ impl Trips for TripsHeed {
             },
             None => todo!(),
         };
-        //look up value ids
-
-        todo!();
+        let mut value_ids: HashMap<String, u64> = match self
+            .env
+            .open_database::<Str, U64<byteorder::BigEndian>>(&tx, value_to_id)
+        {
+            Ok(Some(db)) => {
+                let mut value_ids = HashMap::new();
+                for q in pattern.iter() {
+                    if let Slot::Value(value) = &q.0 {
+                        match db.get(&tx, &value) {
+                            Ok(Some(id)) => {
+                                value_ids.insert(value.to_owned(), id);
+                            }
+                            _ => todo!(),
+                        }
+                    }
+                    if let Slot::Value(value) = &q.1 {
+                        match db.get(&tx, &value) {
+                            Ok(Some(id)) => {
+                                value_ids.insert(value.to_owned(), id);
+                            }
+                            _ => todo!(),
+                        }
+                    }
+                    if let Slot::Value(value) = &q.2 {
+                        match db.get(&tx, &value) {
+                            Ok(Some(id)) => {
+                                value_ids.insert(value.to_owned(), id);
+                            }
+                            _ => todo!(),
+                        }
+                    }
+                }
+                value_ids
+            }
+            _ => todo!(),
+        };
+        for q in pattern.iter() {
+            todo!();
+        }
         Ok(result)
     }
 }

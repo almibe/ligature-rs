@@ -117,55 +117,72 @@ fn match_all_query_collection() {
     assert_eq!(results, expected);
 }
 
-// #[test]
-// fn basic_query_collection() {
-//     let mut store: TripsMem<String, u64> = trips::mem::TripsMem::new();
-//     let _ = store.add_collection("T".to_owned());
-//     let _ = store.add_triples(
-//         "T".to_owned(),
-//         &mut BTreeSet::from([Trip(1, 2, 3), Trip(1, 2, 6), Trip(1, 3, 5)]),
-//     );
-//     let results: HashBag<BTreeMap<String, u64>> = store
-//         .query(
-//             "T".to_owned(),
-//             BTreeSet::from([Query(
-//                 Slot::Variable("A".to_owned()),
-//                 Slot::Value(2),
-//                 Slot::Any,
-//             )]),
-//         )
-//         .unwrap();
-//     let expected: HashBag<BTreeMap<String, u64>> = HashBag::from_iter([
-//         BTreeMap::from_iter([("A".to_owned(), 1)]),
-//         BTreeMap::from_iter([("A".to_owned(), 1)]),
-//     ]);
-//     assert_eq!(results, expected);
-// }
+#[test]
+#[cfg(feature = "duckdb")]
+fn basic_query_collection() {
+    let mut store = TripsDuckDB::new();
+    let _ = store.add_collection("T".to_owned());
+    let _ = store.add_triples(
+        "T".to_owned(),
+        &mut BTreeSet::from([
+            Trip("1".to_owned(), "2".to_owned(), "3".to_owned()),
+            Trip("1".to_owned(), "2".to_owned(), "6".to_owned()),
+            Trip("1".to_owned(), "2".to_owned(), "5".to_owned()),
+        ]),
+    );
+    let results = store
+        .query(
+            "T".to_owned(),
+            BTreeSet::from([Query(
+                Slot::Variable("A".to_owned()),
+                Slot::Value("2".to_owned()),
+                Slot::Any,
+            )]),
+        )
+        .unwrap();
+    let expected = HashBag::from_iter([
+        BTreeMap::from_iter([("A".to_owned(), "1".to_owned())]),
+        BTreeMap::from_iter([("A".to_owned(), "1".to_owned())]),
+        BTreeMap::from_iter([("A".to_owned(), "1".to_owned())]),
+    ]);
+    assert_eq!(results, expected);
+}
 
 // #[test]
+// #[cfg(feature = "duckdb")]
 // fn complex_single_query_collection() {
-//     let mut store: TripsMem<String, u64> = trips::mem::TripsMem::new();
+//     let mut store: TripsMem = trips::mem::TripsMem::new();
 //     let _ = store.add_collection("T".to_owned());
 //     let _ = store.add_triples(
 //         "T".to_owned(),
-//         &mut BTreeSet::from([Trip(2, 2, 3), Trip(1, 2, 6), Trip(1, 3, 5)]),
+//         &mut BTreeSet::from([
+//             Trip("2".to_owned(), "2".to_owned(), "3".to_owned()),
+//             Trip("1".to_owned(), "2".to_owned(), "6".to_owned()),
+//             Trip("1".to_owned(), "3".to_owned(), "5".to_owned()),
+//         ]),
 //     );
-//     let results: HashBag<BTreeMap<String, u64>> = store
+//     let results = store
 //         .query(
 //             "T".to_owned(),
 //             BTreeSet::from([
 //                 Query(
 //                     Slot::Variable("A".to_owned()),
-//                     Slot::Value(2),
+//                     Slot::Value("2".to_owned()),
 //                     Slot::Variable("C".to_owned()),
 //                 ),
 //                 Query(Slot::Any, Slot::Variable("C".to_owned()), Slot::Any),
 //             ]),
 //         )
 //         .unwrap();
-//     let expected: HashBag<BTreeMap<String, u64>> = HashBag::from_iter([
-//         BTreeMap::from_iter([("A".to_owned(), 1), ("C".to_owned(), 6)]),
-//         BTreeMap::from_iter([("A".to_owned(), 2), ("C".to_owned(), 3)]),
+//     let expected = HashBag::from_iter([
+//         BTreeMap::from_iter([
+//             ("A".to_owned(), "1".to_owned()),
+//             ("C".to_owned(), "6".to_owned()),
+//         ]),
+//         BTreeMap::from_iter([
+//             ("A".to_owned(), "2".to_owned()),
+//             ("C".to_owned(), "3".to_owned()),
+//         ]),
 //     ]);
 //     assert_eq!(results, expected);
 // }
