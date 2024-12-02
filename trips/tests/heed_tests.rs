@@ -107,33 +107,33 @@ fn remove_triples_from_collection() {
     assert_eq!(collections, result);
 }
 
-#[test]
-#[cfg(feature = "heed")]
-fn match_all_query_collection() {
-    let env = create_temp();
-    let mut store = TripsHeed::new(env);
-    let _ = store.add_collection("T".to_owned());
-    let _ = store.add_triples(
-        "T".to_owned(),
-        &mut BTreeSet::from([
-            Trip("1".to_owned(), "2".to_owned(), "3".to_owned()),
-            Trip("1".to_owned(), "2".to_owned(), "6".to_owned()),
-            Trip("1".to_owned(), "2".to_owned(), "5".to_owned()),
-        ]),
-    );
-    let results = store
-        .query(
-            "T".to_owned(),
-            BTreeSet::from([Query(Slot::Any, Slot::Any, Slot::Any)]),
-        )
-        .unwrap();
-    let expected: HashBag<BTreeMap<String, String>> = HashBag::from_iter([
-        BTreeMap::from_iter([]),
-        BTreeMap::from_iter([]),
-        BTreeMap::from_iter([]),
-    ]);
-    assert_eq!(results, expected);
-}
+// #[test]
+// #[cfg(feature = "heed")]
+// fn match_all_query_collection() {
+//     let env = create_temp();
+//     let mut store = TripsHeed::new(env);
+//     let _ = store.add_collection("T".to_owned());
+//     let _ = store.add_triples(
+//         "T".to_owned(),
+//         &mut BTreeSet::from([
+//             Trip("1".to_owned(), "2".to_owned(), "3".to_owned()),
+//             Trip("1".to_owned(), "2".to_owned(), "6".to_owned()),
+//             Trip("1".to_owned(), "2".to_owned(), "5".to_owned()),
+//         ]),
+//     );
+//     let results = store
+//         .query(
+//             "T".to_owned(),
+//             BTreeSet::from([Query(Slot::Any, Slot::Any, Slot::Any)]),
+//         )
+//         .unwrap();
+//     let expected: HashBag<BTreeMap<String, String>> = HashBag::from_iter([
+//         BTreeMap::from_iter([]),
+//         BTreeMap::from_iter([]),
+//         BTreeMap::from_iter([]),
+//     ]);
+//     assert_eq!(results, expected);
+// }
 
 // #[test]
 // fn basic_query_collection() {

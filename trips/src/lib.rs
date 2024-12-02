@@ -71,10 +71,14 @@ pub trait Trips {
         collection: String,
         trips: &mut BTreeSet<Trip>,
     ) -> Result<(), TripsError>;
-    /// Run a query against the given Dataset.
-    fn query(
-        &self,
-        collection: String,
-        pattern: BTreeSet<Query>,
-    ) -> Result<HashBag<BTreeMap<String, String>>, TripsError>;
+
+    /// Lookup a given pattern against the given Dataset.
+    fn filter(&self, collection: String, pattern: Query) -> Result<BTreeSet<Trip>, TripsError>;
+
+    // /// Run a query against the given Dataset.
+    // fn query(
+    //     &self,
+    //     collection: String,
+    //     pattern: BTreeSet<Query>,
+    // ) -> Result<HashBag<BTreeMap<String, String>>, TripsError>;
 }

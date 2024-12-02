@@ -6,7 +6,7 @@
 
 #![deny(missing_docs)]
 
-use crate::{Slot, Trips, TripsError};
+use crate::{Query, Slot, Trip, Trips, TripsError};
 use core::hash::Hash;
 use hashbag::HashBag;
 use heed::{BytesDecode, Database, Env};
@@ -164,9 +164,9 @@ impl Trips for TripsHeed {
         Ok(())
     }
 
-    fn triples(&self, collection: String) -> Result<BTreeSet<crate::Trip>, TripsError> {
+    fn triples(&self, collection: String) -> Result<BTreeSet<Trip>, TripsError> {
         let tx = self.env.read_txn().unwrap();
-        let mut results: BTreeSet<crate::Trip> = BTreeSet::new();
+        let mut results: BTreeSet<Trip> = BTreeSet::new();
         let collection_id = match self
             .env
             .open_database::<Str, U64<byteorder::BigEndian>>(&tx, collection_to_id)
@@ -214,7 +214,7 @@ impl Trips for TripsHeed {
                                     "Adding - {} {} {}",
                                     first_value, second_value, third_value
                                 );
-                                results.insert(crate::Trip(
+                                results.insert(Trip(
                                     first_value.to_owned(),
                                     second_value.to_owned(),
                                     third_value.to_owned(),
@@ -233,7 +233,7 @@ impl Trips for TripsHeed {
     fn add_triples(
         &mut self,
         collection: String,
-        trips: &mut BTreeSet<crate::Trip>,
+        trips: &mut BTreeSet<Trip>,
     ) -> Result<(), TripsError> {
         let mut tx = self.env.write_txn().unwrap();
         let collection_id = match self
@@ -392,7 +392,7 @@ impl Trips for TripsHeed {
     fn remove_triples(
         &mut self,
         collection: String,
-        trips: &mut BTreeSet<crate::Trip>,
+        trips: &mut BTreeSet<Trip>,
     ) -> Result<(), TripsError> {
         let mut tx = self.env.write_txn().unwrap();
         let mut values: Vec<Vec<u64>> = vec![];
@@ -483,65 +483,124 @@ impl Trips for TripsHeed {
         Ok(())
     }
 
-    fn query(
-        &self,
-        collection: String,
-        pattern: BTreeSet<crate::Query>,
-    ) -> Result<HashBag<BTreeMap<String, String>>, TripsError> {
-        let mut tx = self.env.read_txn().unwrap();
-        let mut result: HashBag<BTreeMap<String, String>> = HashBag::new();
-        let collection_id = match self
-            .env
-            .open_database::<Str, U64<byteorder::BigEndian>>(&tx, collection_to_id)
-            .unwrap()
-        {
-            Some(db) => match db.get(&tx, &collection) {
-                Ok(Some(value)) => value,
-                _ => todo!(),
-            },
-            None => todo!(),
-        };
-        let mut value_ids: HashMap<String, u64> = match self
-            .env
-            .open_database::<Str, U64<byteorder::BigEndian>>(&tx, value_to_id)
-        {
-            Ok(Some(db)) => {
-                let mut value_ids = HashMap::new();
-                for q in pattern.iter() {
-                    if let Slot::Value(value) = &q.0 {
-                        match db.get(&tx, &value) {
-                            Ok(Some(id)) => {
-                                value_ids.insert(value.to_owned(), id);
-                            }
-                            _ => todo!(),
-                        }
-                    }
-                    if let Slot::Value(value) = &q.1 {
-                        match db.get(&tx, &value) {
-                            Ok(Some(id)) => {
-                                value_ids.insert(value.to_owned(), id);
-                            }
-                            _ => todo!(),
-                        }
-                    }
-                    if let Slot::Value(value) = &q.2 {
-                        match db.get(&tx, &value) {
-                            Ok(Some(id)) => {
-                                value_ids.insert(value.to_owned(), id);
-                            }
-                            _ => todo!(),
-                        }
-                    }
-                }
-                value_ids
-            }
-            _ => todo!(),
-        };
-        for q in pattern.iter() {
-            todo!();
-        }
-        Ok(result)
+    fn filter(&self, collection: String, pattern: Query) -> Result<BTreeSet<Trip>, TripsError> {
+        todo!()
+        // let mut tx = self.env.read_txn().unwrap();
+        // let mut result: HashBag<BTreeMap<String, String>> = HashBag::new();
+        // let collection_id = match self
+        //     .env
+        //     .open_database::<Str, U64<byteorder::BigEndian>>(&tx, collection_to_id)
+        //     .unwrap()
+        // {
+        //     Some(db) => match db.get(&tx, &collection) {
+        //         Ok(Some(value)) => value,
+        //         _ => todo!(),
+        //     },
+        //     None => todo!(),
+        // };
+        // let mut value_ids: HashMap<String, u64> = match self
+        //     .env
+        //     .open_database::<Str, U64<byteorder::BigEndian>>(&tx, value_to_id)
+        // {
+        //     Ok(Some(db)) => {
+        //         let mut value_ids = HashMap::new();
+        //         for q in pattern.iter() {
+        //             if let Slot::Value(value) = &q.0 {
+        //                 match db.get(&tx, &value) {
+        //                     Ok(Some(id)) => {
+        //                         value_ids.insert(value.to_owned(), id);
+        //                     }
+        //                     _ => todo!(),
+        //                 }
+        //             }
+        //             if let Slot::Value(value) = &q.1 {
+        //                 match db.get(&tx, &value) {
+        //                     Ok(Some(id)) => {
+        //                         value_ids.insert(value.to_owned(), id);
+        //                     }
+        //                     _ => todo!(),
+        //                 }
+        //             }
+        //             if let Slot::Value(value) = &q.2 {
+        //                 match db.get(&tx, &value) {
+        //                     Ok(Some(id)) => {
+        //                         value_ids.insert(value.to_owned(), id);
+        //                     }
+        //                     _ => todo!(),
+        //                 }
+        //             }
+        //         }
+        //         value_ids
+        //     }
+        //     _ => todo!(),
+        // };
+        // for q in pattern.iter() {
+
+        //     todo!();
+        // }
+        // Ok(result)
     }
+
+    // fn query(
+    //     &self,
+    //     collection: String,
+    //     pattern: BTreeSet<Query>,
+    // ) -> Result<HashBag<BTreeMap<String, String>>, TripsError> {
+    //     let mut tx = self.env.read_txn().unwrap();
+    //     let mut result: HashBag<BTreeMap<String, String>> = HashBag::new();
+    //     let collection_id = match self
+    //         .env
+    //         .open_database::<Str, U64<byteorder::BigEndian>>(&tx, collection_to_id)
+    //         .unwrap()
+    //     {
+    //         Some(db) => match db.get(&tx, &collection) {
+    //             Ok(Some(value)) => value,
+    //             _ => todo!(),
+    //         },
+    //         None => todo!(),
+    //     };
+    //     let mut value_ids: HashMap<String, u64> = match self
+    //         .env
+    //         .open_database::<Str, U64<byteorder::BigEndian>>(&tx, value_to_id)
+    //     {
+    //         Ok(Some(db)) => {
+    //             let mut value_ids = HashMap::new();
+    //             for q in pattern.iter() {
+    //                 if let Slot::Value(value) = &q.0 {
+    //                     match db.get(&tx, &value) {
+    //                         Ok(Some(id)) => {
+    //                             value_ids.insert(value.to_owned(), id);
+    //                         }
+    //                         _ => todo!(),
+    //                     }
+    //                 }
+    //                 if let Slot::Value(value) = &q.1 {
+    //                     match db.get(&tx, &value) {
+    //                         Ok(Some(id)) => {
+    //                             value_ids.insert(value.to_owned(), id);
+    //                         }
+    //                         _ => todo!(),
+    //                     }
+    //                 }
+    //                 if let Slot::Value(value) = &q.2 {
+    //                     match db.get(&tx, &value) {
+    //                         Ok(Some(id)) => {
+    //                             value_ids.insert(value.to_owned(), id);
+    //                         }
+    //                         _ => todo!(),
+    //                     }
+    //                 }
+    //             }
+    //             value_ids
+    //         }
+    //         _ => todo!(),
+    //     };
+    //     for q in pattern.iter() {
+
+    //         todo!();
+    //     }
+    //     Ok(result)
+    // }
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]

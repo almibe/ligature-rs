@@ -95,37 +95,47 @@ impl Trips for TripsMem {
         }
     }
 
-    fn query(
-        &self,
-        collection: String,
-        pattern: BTreeSet<crate::Query>,
-    ) -> Result<HashBag<BTreeMap<String, String>>, TripsError> {
+    // fn query(
+    //     &self,
+    //     collection: String,
+    //     pattern: BTreeSet<crate::Query>,
+    // ) -> Result<HashBag<BTreeMap<String, String>>, TripsError> {
+    //     match self.collections.get(&collection) {
+    //         Some(collection) => {
+    //             let mut results: HashBag<BTreeMap<String, String>> = HashBag::new();
+    //             let terms: Vec<&Query> = pattern.iter().collect();
+    //             let mut index = 0;
+    //             while index < terms.len() {
+    //                 match terms.get(index) {
+    //                     Some(query) => {
+    //                         let matches = match_query(query, collection.clone());
+    //                         if matches.is_empty() {
+    //                             return Ok(HashBag::new());
+    //                         } else {
+    //                             if index == 0 {
+    //                                 matches.iter().for_each(|m| {
+    //                                     results.insert(m.clone());
+    //                                     ()
+    //                                 });
+    //                             } else {
+    //                                 () //TODO  double check this
+    //                             }
+    //                         }
+    //                     }
+    //                     None => panic!("Should never reach."),
+    //                 }
+    //                 index = index + 1;
+    //             }
+    //             Ok(results)
+    //         } //Ok(res.clone()),
+    //         None => Err(TripsError("Collection not found.".to_owned())),
+    //     }
+    // }
+
+    fn filter(&self, collection: String, pattern: Query) -> Result<BTreeSet<Trip>, TripsError> {
         match self.collections.get(&collection) {
             Some(collection) => {
-                let mut results: HashBag<BTreeMap<String, String>> = HashBag::new();
-                let terms: Vec<&Query> = pattern.iter().collect();
-                let mut index = 0;
-                while index < terms.len() {
-                    match terms.get(index) {
-                        Some(query) => {
-                            let matches = match_query(query, collection.clone());
-                            if matches.is_empty() {
-                                return Ok(HashBag::new());
-                            } else {
-                                if index == 0 {
-                                    matches.iter().for_each(|m| {
-                                        results.insert(m.clone());
-                                        ()
-                                    });
-                                } else {
-                                    () //TODO  double check this
-                                }
-                            }
-                        }
-                        None => panic!("Should never reach."),
-                    }
-                    index = index + 1;
-                }
+                let mut results: BTreeSet<Trip> = BTreeSet::new();
                 Ok(results)
             } //Ok(res.clone()),
             None => Err(TripsError("Collection not found.".to_owned())),

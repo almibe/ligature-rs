@@ -169,35 +169,39 @@ impl Trips for TripsDuckDB {
         Ok(())
     }
 
-    fn query(
-        &self,
-        collection: String,
-        pattern: BTreeSet<Query>,
-    ) -> Result<HashBag<BTreeMap<String, String>>, TripsError> {
-        let mut result = HashBag::new();
-
-        let select_pattern = extract_select_pattern(&pattern);
-
-        let mut stmt = self
-            .conn
-            .prepare(&format!(
-                r"SELECT {} from trip
-            left join collection c on c.id = trip.collection
-            left join part p1 on p1.id = trip.first
-            left join part p2 on p2.id = trip.second
-            left join part p3 on p3.id = trip.third
-            where c.name = ?;",
-                select_pattern
-            ))
-            .unwrap();
-        let mut itr = stmt
-            .query_map([collection], |row| Ok(BTreeMap::new()))
-            .unwrap();
-        for trip in itr {
-            result.insert(trip.unwrap());
-        }
-        Ok(result)
+    fn filter(&self, collection: String, pattern: Query) -> Result<BTreeSet<Trip>, TripsError> {
+        todo!()
     }
+
+    // fn query(
+    //     &self,
+    //     collection: String,
+    //     pattern: BTreeSet<Query>,
+    // ) -> Result<HashBag<BTreeMap<String, String>>, TripsError> {
+    //     let mut result = HashBag::new();
+
+    //     let select_pattern = extract_select_pattern(&pattern);
+
+    //     let mut stmt = self
+    //         .conn
+    //         .prepare(&format!(
+    //             r"SELECT {} from trip
+    //         left join collection c on c.id = trip.collection
+    //         left join part p1 on p1.id = trip.first
+    //         left join part p2 on p2.id = trip.second
+    //         left join part p3 on p3.id = trip.third
+    //         where c.name = ?;",
+    //             select_pattern
+    //         ))
+    //         .unwrap();
+    //     let mut itr = stmt
+    //         .query_map([collection], |row| Ok(BTreeMap::new()))
+    //         .unwrap();
+    //     for trip in itr {
+    //         result.insert(trip.unwrap());
+    //     }
+    //     Ok(result)
+    // }
 }
 
 fn extract_select_pattern(pattern: &BTreeSet<Query>) -> String {
