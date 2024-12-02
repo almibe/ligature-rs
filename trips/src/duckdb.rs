@@ -60,13 +60,15 @@ fn get_collection_id(tx: &Transaction, collection: &str) -> Result<u64, TripsErr
 }
 
 fn add_part(tx: &Transaction, part: &str) -> Result<(), TripsError> {
-    tx.execute("insert into part (part) values (?)", params![part])
-        .unwrap();
+    tx.execute("insert into part (part) values (?) ON CONFLICT DO NOTHING", params![part]); //TODO just ignoring errors for now
     Ok(())
 }
 
-fn add_trip(tx: &Transaction, trip: &Trip) -> Result<(), TripsError> {
-    todo!()
+fn add_trip(tx: &Transaction, collection_id: u64, trip: &Trip) -> Result<(), TripsError> {
+    tx.execute("insert into trip (collection, first, second, third) values (?, (select id from part where part = ?), (select id from part where part = ?), (select id from part where part = ?))",
+        params![collection_id, trip.0, trip.1, trip.2])
+        .unwrap();
+    Ok(())
 }
 
 impl Trips for TripsDuckDB {
@@ -102,7 +104,7 @@ impl Trips for TripsDuckDB {
         let mut stmt = self
             .conn
             .prepare(
-                r"SELECT (p1.part, p2.part, p3.part) from trip
+                r"SELECT p1.part, p2.part, p3.part from trip
             left join collection c on c.id = trip.collection
             left join part p1 on p1.id = trip.first
             left join part p2 on p2.id = trip.second
@@ -135,7 +137,7 @@ impl Trips for TripsDuckDB {
             add_part(&tx, &trip.0)?;
             add_part(&tx, &trip.1)?;
             add_part(&tx, &trip.2)?;
-            add_trip(&tx, trip);
+            add_trip(&tx, id, trip);
         }
         tx.commit().unwrap();
         Ok(())

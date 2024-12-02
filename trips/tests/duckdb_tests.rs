@@ -65,31 +65,30 @@ fn add_triples_to_collection() {
     assert_eq!(collections, result);
 }
 
-// #[test]
-// #[cfg(feature = "heed")]
-// fn remove_triples_from_collection() {
-//     let env = create_temp();
-//     let mut store = TripsHeed::new(env);
-//     let _ = store.add_collection("T".to_owned());
-//     let _ = store.add_triples(
-//         "T".to_owned(),
-//         &mut BTreeSet::from([
-//             Trip("1".to_owned(), "2".to_owned(), "3".to_owned()),
-//             Trip("1".to_owned(), "2".to_owned(), "6".to_owned()),
-//             Trip("1".to_owned(), "2".to_owned(), "5".to_owned()),
-//         ]),
-//     );
-//     let _ = store.remove_triples(
-//         "T".to_owned(),
-//         &mut BTreeSet::from([Trip("1".to_owned(), "2".to_owned(), "3".to_owned())]),
-//     );
-//     let collections: BTreeSet<Trip> = store.triples("T".to_owned()).unwrap();
-//     let result: BTreeSet<Trip> = BTreeSet::from([
-//         Trip("1".to_owned(), "2".to_owned(), "5".to_owned()),
-//         Trip("1".to_owned(), "2".to_owned(), "6".to_owned()),
-//     ]);
-//     assert_eq!(collections, result);
-// }
+#[test]
+#[cfg(feature = "duckdb")]
+fn remove_triples_from_collection() {
+    let mut store = TripsDuckDB::new();
+    let _ = store.add_collection("T".to_owned());
+    let _ = store.add_triples(
+        "T".to_owned(),
+        &mut BTreeSet::from([
+            Trip("1".to_owned(), "2".to_owned(), "3".to_owned()),
+            Trip("1".to_owned(), "2".to_owned(), "6".to_owned()),
+            Trip("1".to_owned(), "2".to_owned(), "5".to_owned()),
+        ]),
+    );
+    let _ = store.remove_triples(
+        "T".to_owned(),
+        &mut BTreeSet::from([Trip("1".to_owned(), "2".to_owned(), "3".to_owned())]),
+    );
+    let collections: BTreeSet<Trip> = store.triples("T".to_owned()).unwrap();
+    let result: BTreeSet<Trip> = BTreeSet::from([
+        Trip("1".to_owned(), "2".to_owned(), "5".to_owned()),
+        Trip("1".to_owned(), "2".to_owned(), "6".to_owned()),
+    ]);
+    assert_eq!(collections, result);
+}
 
 // #[test]
 // #[cfg(feature = "heed")]
