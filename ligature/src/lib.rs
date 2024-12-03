@@ -9,6 +9,7 @@
 use core::fmt;
 use hashbag::HashBag;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use std::collections::{BTreeMap, BTreeSet};
 
 /// An Element that is identified by a unique String value.
@@ -17,7 +18,7 @@ pub struct Element(pub String);
 
 impl fmt::Display for Element {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.0)
+        write!(f, "{}", json!(self.0))
     }
 }
 

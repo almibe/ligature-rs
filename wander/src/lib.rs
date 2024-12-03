@@ -15,6 +15,7 @@ use lexer::tokenize_and_filter;
 use ligature::{Entry, Ligature};
 use parser::parse;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 
 #[doc(hidden)]
 pub mod lexer;
@@ -150,7 +151,9 @@ fn write_quote(quote: &Quote, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Resu
 impl Display for WanderValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            WanderValue::Element(value) => write!(f, "{}", value.0),
+            WanderValue::Element(value) => {
+                write!(f, "{}", json!(value.0))
+            },
             WanderValue::Network(values) => write_network(values, f),
             WanderValue::Quote(quote) => write_quote(quote, f),
         }

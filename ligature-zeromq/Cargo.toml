@@ -1,22 +1,17 @@
 [package]
-name = "ligature-http"
+name = "ligature-zeromq"
 version = "0.1.0"
 publish = false
 authors = ["Alex Michael Berry <alexmiberry@gmail.com>"]
 edition = "2021"
 license = "MPL-2.0"
-description = "An HTTP server for Ligature."
+description = "A server for Ligature using ZeroMQ."
 repository = "https://github.com/almibe/ligature-rs/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 ligature = { path = "../ligature" }
-ligature-graph = { path = "../ligature-graph" }
 wander = { path = "../wander" }
-axum = "0.6"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0.68"
-tokio = { version = "1.0", features = ["full"] }
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+ligature-graph = { path = "../ligature-graph" }
+zmq = "0.10.0"
