@@ -14,13 +14,15 @@ fn main() {
     let responder = ctx.socket(REP).unwrap();
     responder.bind("tcp://127.0.0.1:4200").unwrap();
     let mut msg = Message::new();
+    let commands = wander::prelude::common();
+    let mut state = ligature_graph::LigatureGraph::new();
     loop {
         responder.recv(&mut msg, 0).unwrap();
         let query = msg.as_str().unwrap();
         println!("Received {}", query);
-        match run(query, &wander::prelude::common(), &mut ligature_graph::LigatureGraph::new()) {
+        match run(query, &commands, &mut state) {
             Ok(res) => responder.send(&res.to_string(), 0).unwrap(),
-            Err(_) => todo!()
+            Err(err) => responder.send(&err.0, 0).unwrap(),
         }
     }
 }

@@ -108,6 +108,28 @@ fn remove_triples_from_collection() {
     assert_eq!(collections, result);
 }
 
+#[test]
+fn basic_filter() {
+    let mut store = initialize();
+    let _ = store.add_collection("T".to_owned());
+    let _ = store.add_triples(
+        "T".to_owned(),
+        &mut BTreeSet::from([
+            Trip("1".to_owned(), "2".to_owned(), "3".to_owned()),
+            Trip("1".to_owned(), "2".to_owned(), "6".to_owned()),
+            Trip("1".to_owned(), "2".to_owned(), "5".to_owned()),
+        ]),
+    );
+    let _ = store.filter("T".to_owned(), Query(Slot::Any, Slot::Any, Slot::Any));
+    let collections: BTreeSet<Trip> = store.triples("T".to_owned()).unwrap();
+    let result: BTreeSet<Trip> = BTreeSet::from([
+        Trip("1".to_owned(), "2".to_owned(), "3".to_owned()),
+        Trip("1".to_owned(), "2".to_owned(), "5".to_owned()),
+        Trip("1".to_owned(), "2".to_owned(), "6".to_owned()),
+    ]);
+    assert_eq!(collections, result);
+}
+
 // #[test]
 // fn match_all_query_collection() {
 //     let mut store: TripsMem = trips::mem::TripsMem::new();

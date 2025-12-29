@@ -11,7 +11,7 @@ fn main() {
     let mut total = 0;
     let mut failed = 0;
     println!("👟 Running Ligature Test Suite!");
-    let location = std::env::var("LIGATURE_TEST_SUITE").unwrap();
+    let location = std::env::var("LIGATURE_TEST_SUITE").unwrap() + "/core";
     println!("📁 Running tests in {}.", location);
     for path in std::fs::read_dir(location).unwrap() {
         let path = path.unwrap();

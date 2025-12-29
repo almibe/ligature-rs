@@ -14,7 +14,15 @@ use std::collections::{BTreeMap, BTreeSet};
 
 /// An Element that is identified by a unique String value.
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq, Deserialize, Serialize, Hash)]
-pub struct Element(pub String);
+pub struct LangTag(pub String);
+
+/// An Element that is identified by a unique String value.
+#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq, Deserialize, Serialize, Hash)]
+pub struct Namespace(pub String);
+
+/// An Element that is identified by a unique String value.
+#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq, Deserialize, Serialize, Hash)]
+pub struct Element(pub String, pub Option<Namespace>, pub Option<LangTag>);
 
 impl fmt::Display for Element {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
