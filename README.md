@@ -1,3 +1,7 @@
+# Moved
+
+See https://codeberg.org/almibe/ligature-rs
+
 # ligature-rs
 
 This project is a set of libraries and applications for working with Ligature knowledge graphs written in Rust.
